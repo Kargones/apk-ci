@@ -26,28 +26,28 @@ type APIInterface interface {
 	// Project Management methods
 	// CreateProject creates a new project in SonarQube with the specified owner, repo, and branch.
 	// Returns the created Project or an error if the operation fails.
-	CreateProject(owner, repo, branch string) (*Project, error)
+	CreateProject(ctx context.Context, owner, repo, branch string) (*Project, error)
 
 	// GetProject retrieves a project from SonarQube by its project key.
 	// Returns the Project or an error if the project is not found or an error occurs.
-	GetProject(projectKey string) (*Project, error)
+	GetProject(ctx context.Context, projectKey string) (*Project, error)
 
 	// UpdateProject updates an existing project in SonarQube with the provided updates.
 	// Returns an error if the operation fails.
-	UpdateProject(projectKey string, updates *ProjectUpdate) error
+	UpdateProject(ctx context.Context, projectKey string, updates *ProjectUpdate) error
 
 	// DeleteProject deletes a project from SonarQube by its project key.
 	// Returns an error if the operation fails.
-	DeleteProject(projectKey string) error
+	DeleteProject(ctx context.Context, projectKey string) error
 
 	// ListProjects lists all projects in SonarQube that match the specified owner and repo.
 	// Returns a slice of Projects or an error if the operation fails.
-	ListProjects(owner, repo string) ([]Project, error)
+	ListProjects(ctx context.Context, owner, repo string) ([]Project, error)
 
 	// SetProjectTags sets tags on a project in SonarQube.
 	// Requires 'Administer' rights on the specified project.
 	// Returns an error if the operation fails.
-	SetProjectTags(projectKey string, tags []string) error
+	SetProjectTags(ctx context.Context, projectKey string, tags []string) error
 
 	// Authentication methods
 	// Authenticate authenticates with SonarQube using the provided token.
@@ -56,44 +56,44 @@ type APIInterface interface {
 
 	// ValidateToken validates the currently configured authentication token.
 	// Returns an error if the token is invalid or expired.
-	ValidateToken() error
+	ValidateToken(ctx context.Context) error
 
 	// Analysis Management methods
 	// GetAnalyses retrieves analyses for a project from SonarQube.
 	// Returns a slice of Analysis or an error if the operation fails.
-	GetAnalyses(projectKey string) ([]Analysis, error)
+	GetAnalyses(ctx context.Context, projectKey string) ([]Analysis, error)
 
 	// GetAnalysisStatus retrieves the status of an analysis by its ID.
 	// Returns the AnalysisStatus or an error if the operation fails.
-	GetAnalysisStatus(analysisID string) (*AnalysisStatus, error)
+	GetAnalysisStatus(ctx context.Context, analysisID string) (*AnalysisStatus, error)
 
 	// Issues and Quality Gates methods
 	// GetIssues retrieves issues for a project from SonarQube based on the provided parameters.
 	// Returns a slice of Issue or an error if the operation fails.
-	GetIssues(projectKey string, params *IssueParams) ([]Issue, error)
+	GetIssues(ctx context.Context, projectKey string, params *IssueParams) ([]Issue, error)
 
 	// GetQualityGateStatus retrieves the quality gate status for a project.
 	// Returns the QualityGateStatus or an error if the operation fails.
-	GetQualityGateStatus(projectKey string) (*QualityGateStatus, error)
+	GetQualityGateStatus(ctx context.Context, projectKey string) (*QualityGateStatus, error)
 
 	// Metrics methods
 	// GetMetrics retrieves metrics for a project based on the specified metric keys.
 	// Returns the Metrics or an error if the operation fails.
-	GetMetrics(projectKey string, metricKeys []string) (*Metrics, error)
+	GetMetrics(ctx context.Context, projectKey string, metricKeys []string) (*Metrics, error)
 
 	// Quality Profiles and Gates methods
 	// GetQualityProfiles retrieves quality profiles for a project.
 	// Returns a slice of QualityProfile or an error if the operation fails.
-	GetQualityProfiles(projectKey string) ([]QualityProfile, error)
+	GetQualityProfiles(ctx context.Context, projectKey string) ([]QualityProfile, error)
 
 	// GetQualityGates retrieves quality gates from SonarQube.
 	// Returns a slice of QualityGate or an error if the operation fails.
-	GetQualityGates() ([]QualityGate, error)
+	GetQualityGates(ctx context.Context) ([]QualityGate, error)
 
 	// Rules methods
 	// GetRules retrieves rules from SonarQube based on the provided parameters.
 	// Returns a slice of Rule or an error if the operation fails.
-	GetRules(params *RuleParams) ([]Rule, error)
+	GetRules(ctx context.Context, params *RuleParams) ([]Rule, error)
 }
 
 // SonarScannerInterface defines methods for managing sonar-scanner executable.

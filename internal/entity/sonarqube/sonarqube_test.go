@@ -2,6 +2,7 @@
 package sonarqube
 
 import (
+	"context"
 	"encoding/json"
 	"log/slog"
 	"net/http"
@@ -148,7 +149,7 @@ func TestSonarQubeEntity_ValidateToken(t *testing.T) {
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	entity := NewEntity(cfg, logger)
 
-	err := entity.ValidateToken()
+	err := entity.ValidateToken(context.Background())
 	assert.NoError(t, err)
 }
 
@@ -239,7 +240,7 @@ func TestSonarQubeEntity_CreateProject(t *testing.T) {
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	entity := NewEntity(cfg, logger)
 
-	project, err := entity.CreateProject("owner", "repo", "branch")
+	project, err := entity.CreateProject(context.Background(), "owner", "repo", "branch")
 	assert.NoError(t, err)
 	assert.NotNil(t, project)
 	assert.Equal(t, "owner_repo_branch", project.Key)
@@ -321,7 +322,7 @@ func TestSonarQubeEntity_GetProject(t *testing.T) {
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	entity := NewEntity(cfg, logger)
 
-	project, err := entity.GetProject("test-project")
+	project, err := entity.GetProject(context.Background(), "test-project")
 	assert.NoError(t, err)
 	assert.NotNil(t, project)
 	assert.Equal(t, "test-project", project.Key)
@@ -354,7 +355,7 @@ func TestSonarQubeEntity_GetProject_NotFound(t *testing.T) {
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	entity := NewEntity(cfg, logger)
 
-	project, err := entity.GetProject("non-existent-project")
+	project, err := entity.GetProject(context.Background(), "non-existent-project")
 	assert.Error(t, err)
 	assert.Nil(t, project)
 	assert.IsType(t, &Error{}, err)
@@ -385,7 +386,7 @@ func TestSonarQubeEntity_GetProject_RequestError(t *testing.T) {
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	entity := NewEntity(cfg, logger)
 
-	project, err := entity.GetProject("test-project")
+	project, err := entity.GetProject(context.Background(), "test-project")
 	assert.Error(t, err)
 	assert.Nil(t, project)
 	assert.Contains(t, err.Error(), "failed to get project")
@@ -411,7 +412,7 @@ func TestSonarQubeEntity_GetProject_InvalidJSON(t *testing.T) {
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	entity := NewEntity(cfg, logger)
 
-	project, err := entity.GetProject("test-project")
+	project, err := entity.GetProject(context.Background(), "test-project")
 	assert.Error(t, err)
 	assert.Nil(t, project)
 	assert.Contains(t, err.Error(), "failed to parse project retrieval response")
@@ -486,7 +487,7 @@ func TestSonarQubeEntity_UpdateProject(t *testing.T) {
 		Visibility:  "private",
 	}
 
-	err := entity.UpdateProject("test-project", updates)
+	err := entity.UpdateProject(context.Background(), "test-project", updates)
 	assert.NoError(t, err)
 }
 
@@ -505,7 +506,7 @@ func TestSonarQubeEntity_DeleteProject(t *testing.T) {
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	entity := NewEntity(cfg, logger)
 
-	err := entity.DeleteProject("test-project")
+	err := entity.DeleteProject(context.Background(), "test-project")
 	assert.NoError(t, err)
 }
 
@@ -585,7 +586,7 @@ func TestSonarQubeEntity_ListProjects(t *testing.T) {
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	entity := NewEntity(cfg, logger)
 
-	projects, err := entity.ListProjects("owner", "repo")
+	projects, err := entity.ListProjects(context.Background(), "owner", "repo")
 	assert.NoError(t, err)
 	assert.Len(t, projects, 2)
 
@@ -674,7 +675,7 @@ func TestSonarQubeEntity_GetAnalyses(t *testing.T) {
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	entity := NewEntity(cfg, logger)
 
-	analyses, err := entity.GetAnalyses("test-project")
+	analyses, err := entity.GetAnalyses(context.Background(), "test-project")
 	assert.NoError(t, err)
 	assert.Len(t, analyses, 2)
 
@@ -752,7 +753,7 @@ func TestSonarQubeEntity_GetAnalysisStatus(t *testing.T) {
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	entity := NewEntity(cfg, logger)
 
-	status, err := entity.GetAnalysisStatus("analysis-123")
+	status, err := entity.GetAnalysisStatus(context.Background(), "analysis-123")
 	assert.NoError(t, err)
 	assert.NotNil(t, status)
 	assert.Equal(t, "SUCCESS", status.Status)
@@ -837,7 +838,7 @@ func TestSonarQubeEntity_GetIssues(t *testing.T) {
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	entity := NewEntity(cfg, logger)
 
-	issues, err := entity.GetIssues("test-project", nil)
+	issues, err := entity.GetIssues(context.Background(), "test-project", nil)
 	assert.NoError(t, err)
 	assert.Len(t, issues, 2)
 
@@ -875,7 +876,7 @@ func TestSonarQubeEntity_GetQualityGateStatus(t *testing.T) {
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	entity := NewEntity(cfg, logger)
 
-	status, err := entity.GetQualityGateStatus("test-project")
+	status, err := entity.GetQualityGateStatus(context.Background(), "test-project")
 	assert.NoError(t, err)
 	assert.NotNil(t, status)
 	assert.Equal(t, "OK", status.Status)
@@ -960,7 +961,7 @@ func TestSonarQubeEntity_GetMetrics(t *testing.T) {
 	entity := NewEntity(cfg, logger)
 
 	metricKeys := []string{"coverage", "bugs", "code_smells"}
-	metrics, err := entity.GetMetrics("test-project", metricKeys)
+	metrics, err := entity.GetMetrics(context.Background(), "test-project", metricKeys)
 	assert.NoError(t, err)
 	assert.NotNil(t, metrics)
 	assert.Len(t, metrics.Metrics, 3)
@@ -1040,7 +1041,7 @@ func TestSonarQubeEntity_GetQualityProfiles(t *testing.T) {
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	entity := NewEntity(cfg, logger)
 
-	profiles, err := entity.GetQualityProfiles("test-project")
+	profiles, err := entity.GetQualityProfiles(context.Background(), "test-project")
 	assert.NoError(t, err)
 	assert.Len(t, profiles, 2)
 
@@ -1116,7 +1117,7 @@ func TestSonarQubeEntity_GetQualityGates(t *testing.T) {
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	entity := NewEntity(cfg, logger)
 
-	gates, err := entity.GetQualityGates()
+	gates, err := entity.GetQualityGates(context.Background())
 	assert.NoError(t, err)
 	assert.Len(t, gates, 2)
 
@@ -1176,7 +1177,7 @@ func TestSonarQubeEntity_GetProject_Integration(t *testing.T) {
 
 	// Test authentication first
 	t.Log("Testing authentication...")
-	err := entity.ValidateToken()
+	err := entity.ValidateToken(context.Background())
 	if err != nil {
 		t.Fatalf("Authentication failed: %v", err)
 	}
@@ -1184,7 +1185,7 @@ func TestSonarQubeEntity_GetProject_Integration(t *testing.T) {
 
 	// Test GetProject
 	t.Logf("Getting project with key: %s", projectKey)
-	project, err := entity.GetProject(projectKey)
+	project, err := entity.GetProject(context.Background(), projectKey)
 
 	// Check results
 	if err != nil {
@@ -1287,7 +1288,7 @@ func TestSonarQubeEntity_GetRules(t *testing.T) {
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	entity := NewEntity(cfg, logger)
 
-	rules, err := entity.GetRules(nil)
+	rules, err := entity.GetRules(context.Background(), nil)
 	assert.NoError(t, err)
 	assert.Len(t, rules, 2)
 
@@ -1345,7 +1346,7 @@ func TestSonarQubeEntity_SetProjectTags(t *testing.T) {
 
 	// Test SetProjectTags
 	tags := []string{"finance", "offshore"}
-	err := entity.SetProjectTags("test-project", tags)
+	err := entity.SetProjectTags(context.Background(), "test-project", tags)
 
 	// Verify result
 	assert.NoError(t, err)
