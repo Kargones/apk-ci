@@ -1,10 +1,10 @@
-# Makefile для проекта benadis-runner
+# Makefile для проекта apk-ci
 # Упрощает сборку, тестирование и развертывание
 
 # Переменные
-APP_NAME := benadis-runner
-CMD_DIR := ./cmd/benadis-runner
-BUILD_DIR := ./bin/benadis-runner-bin
+APP_NAME := apk-ci
+CMD_DIR := ./cmd/apk-ci
+BUILD_DIR := ./bin/apk-ci-bin
 DOCS_DIR := ./docs
 EXAMPLES_DIR := ./examples
 
