@@ -234,16 +234,16 @@ func TestScanLegacySwitchCases(t *testing.T) {
 func run() int {
 	switch cfg.Command {
 	case constants.ActStore2db:
-		err = app.Store2DbWithConfig(&ctx, l, cfg)
+		err = app.Store2DbWithConfig(ctx, l, cfg)
 	case constants.ActConvert:
-		err = app.Convert(&ctx, l, cfg)
+		err = app.Convert(ctx, l, cfg)
 	// NOTE: Кастомная обработка extension-publish
 	case "extension-publish":
-		err = app.ExtPublish(&ctx, l, cfg)
+		err = app.ExtPublish(ctx, l, cfg)
 	case constants.ActDbrestore:
-		err = app.DbRestoreWithConfig(&ctx, l, cfg, cfg.InfobaseName)
+		err = app.DbRestoreWithConfig(ctx, l, cfg, cfg.InfobaseName)
 	case constants.ActTestMerge:
-		err = app.TestMerge(&ctx, l, cfg)
+		err = app.TestMerge(ctx, l, cfg)
 	default:
 		return 2
 	}

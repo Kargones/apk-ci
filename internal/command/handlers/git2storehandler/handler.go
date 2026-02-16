@@ -170,7 +170,7 @@ func (d *Git2StoreData) writeText(w io.Writer) error {
 // GitOperator — интерфейс для Git операций (для тестируемости).
 type GitOperator interface {
 	// Clone клонирует репозиторий
-	Clone(ctx *context.Context, l *slog.Logger) error
+	Clone(ctx context.Context, l *slog.Logger) error
 	// Switch переключается на ветку
 	Switch(ctx context.Context, l *slog.Logger) error
 	// SetBranch устанавливает ветку
@@ -180,25 +180,25 @@ type GitOperator interface {
 // ConvertConfigOperator — интерфейс для операций convert.Config (для тестируемости).
 type ConvertConfigOperator interface {
 	// Load загружает конфигурацию конвертации
-	Load(ctx *context.Context, l *slog.Logger, cfg *config.Config, infobaseName string) error
+	Load(ctx context.Context, l *slog.Logger, cfg *config.Config, infobaseName string) error
 	// InitDb инициализирует базу данных
-	InitDb(ctx *context.Context, l *slog.Logger, cfg *config.Config) error
+	InitDb(ctx context.Context, l *slog.Logger, cfg *config.Config) error
 	// StoreUnBind отвязывает от хранилища
-	StoreUnBind(ctx *context.Context, l *slog.Logger, cfg *config.Config) error
+	StoreUnBind(ctx context.Context, l *slog.Logger, cfg *config.Config) error
 	// LoadDb загружает конфигурацию в БД
-	LoadDb(ctx *context.Context, l *slog.Logger, cfg *config.Config) error
+	LoadDb(ctx context.Context, l *slog.Logger, cfg *config.Config) error
 	// DbUpdate обновляет БД
-	DbUpdate(ctx *context.Context, l *slog.Logger, cfg *config.Config) error
+	DbUpdate(ctx context.Context, l *slog.Logger, cfg *config.Config) error
 	// DumpDb выгружает БД
-	DumpDb(ctx *context.Context, l *slog.Logger, cfg *config.Config) error
+	DumpDb(ctx context.Context, l *slog.Logger, cfg *config.Config) error
 	// StoreBind привязывает к хранилищу
-	StoreBind(ctx *context.Context, l *slog.Logger, cfg *config.Config) error
+	StoreBind(ctx context.Context, l *slog.Logger, cfg *config.Config) error
 	// StoreLock блокирует объекты в хранилище
-	StoreLock(ctx *context.Context, l *slog.Logger, cfg *config.Config) error
+	StoreLock(ctx context.Context, l *slog.Logger, cfg *config.Config) error
 	// Merge выполняет слияние
-	Merge(ctx *context.Context, l *slog.Logger, cfg *config.Config) error
+	Merge(ctx context.Context, l *slog.Logger, cfg *config.Config) error
 	// StoreCommit фиксирует изменения в хранилище
-	StoreCommit(ctx *context.Context, l *slog.Logger, cfg *config.Config) error
+	StoreCommit(ctx context.Context, l *slog.Logger, cfg *config.Config) error
 	// SetOneDB устанавливает параметры временной БД
 	SetOneDB(dbConnectString, user, pass string)
 }
@@ -212,7 +212,7 @@ type BackupCreator interface {
 // TempDbCreator — интерфейс для создания временной БД (для тестируемости).
 type TempDbCreator interface {
 	// CreateTempDb создаёт временную базу данных и возвращает строку подключения
-	CreateTempDb(ctx *context.Context, l *slog.Logger, cfg *config.Config) (string, error)
+	CreateTempDb(ctx context.Context, l *slog.Logger, cfg *config.Config) (string, error)
 }
 
 // GitFactory — интерфейс для создания GitOperator (для тестируемости).
@@ -339,7 +339,7 @@ func (h *Git2StoreHandler) Execute(ctx context.Context, cfg *config.Config) erro
 	data.BackupPath = backupPath
 
 	// Stage: cloning (AC-2)
-	gitOp, err := h.executeStageCloning(&ctx, cfg, log, data)
+	gitOp, err := h.executeStageCloning(ctx, cfg, log, data)
 	if err != nil {
 		return h.writeStageError(format, traceID, start, data, err)
 	}
@@ -367,7 +367,7 @@ func (h *Git2StoreHandler) Execute(ctx context.Context, cfg *config.Config) erro
 	// H-1 fix: Проверка cfg.ProjectConfig на nil перед доступом к StoreDb
 	if cfg.ProjectConfig != nil && cfg.ProjectConfig.StoreDb == constants.LocalBase {
 		var tempErr error
-		tempDbPath, tempErr = h.executeStageCreatingTempDb(&ctx, cfg, log, data, ccOp)
+		tempDbPath, tempErr = h.executeStageCreatingTempDb(ctx, cfg, log, data, ccOp)
 		if tempErr != nil {
 			return h.writeStageError(format, traceID, start, data, tempErr)
 		}
@@ -386,7 +386,7 @@ func (h *Git2StoreHandler) Execute(ctx context.Context, cfg *config.Config) erro
 	}
 
 	// Stage: loading_config (AC-2)
-	if err := h.executeStageLoadingConfig(&ctx, cfg, log, data, ccOp); err != nil {
+	if err := h.executeStageLoadingConfig(ctx, cfg, log, data, ccOp); err != nil {
 		return h.writeStageError(format, traceID, start, data, err)
 	}
 
@@ -396,57 +396,57 @@ func (h *Git2StoreHandler) Execute(ctx context.Context, cfg *config.Config) erro
 	}
 
 	// Stage: init_db (AC-2)
-	if err := h.executeStageInitDb(&ctx, cfg, log, data, ccOp); err != nil {
+	if err := h.executeStageInitDb(ctx, cfg, log, data, ccOp); err != nil {
 		return h.writeStageError(format, traceID, start, data, err)
 	}
 
 	// Stage: unbinding (AC-2)
-	if err := h.executeStageUnbinding(&ctx, cfg, log, data, ccOp); err != nil {
+	if err := h.executeStageUnbinding(ctx, cfg, log, data, ccOp); err != nil {
 		return h.writeStageError(format, traceID, start, data, err)
 	}
 
 	// Stage: loading_db (AC-2)
-	if err := h.executeStageLoadingDb(&ctx, cfg, log, data, ccOp); err != nil {
+	if err := h.executeStageLoadingDb(ctx, cfg, log, data, ccOp); err != nil {
 		return h.writeStageError(format, traceID, start, data, err)
 	}
 
 	// Stage: updating_db_1 (AC-2)
-	if err := h.executeStageUpdatingDb(&ctx, cfg, log, data, ccOp, StageUpdatingDb1); err != nil {
+	if err := h.executeStageUpdatingDb(ctx, cfg, log, data, ccOp, StageUpdatingDb1); err != nil {
 		return h.writeStageError(format, traceID, start, data, err)
 	}
 
 	// Stage: dumping_db (AC-2)
-	if err := h.executeStageDumpingDb(&ctx, cfg, log, data, ccOp); err != nil {
+	if err := h.executeStageDumpingDb(ctx, cfg, log, data, ccOp); err != nil {
 		return h.writeStageError(format, traceID, start, data, err)
 	}
 
 	// Stage: binding (AC-2)
-	if err := h.executeStageBinding(&ctx, cfg, log, data, ccOp); err != nil {
+	if err := h.executeStageBinding(ctx, cfg, log, data, ccOp); err != nil {
 		return h.writeStageError(format, traceID, start, data, err)
 	}
 
 	// Stage: updating_db_2 (AC-2)
-	if err := h.executeStageUpdatingDb(&ctx, cfg, log, data, ccOp, StageUpdatingDb2); err != nil {
+	if err := h.executeStageUpdatingDb(ctx, cfg, log, data, ccOp, StageUpdatingDb2); err != nil {
 		return h.writeStageError(format, traceID, start, data, err)
 	}
 
 	// Stage: locking (AC-2)
-	if err := h.executeStageLocking(&ctx, cfg, log, data, ccOp); err != nil {
+	if err := h.executeStageLocking(ctx, cfg, log, data, ccOp); err != nil {
 		return h.writeStageError(format, traceID, start, data, err)
 	}
 
 	// Stage: merging (AC-2)
-	if err := h.executeStageMerging(&ctx, cfg, log, data, ccOp); err != nil {
+	if err := h.executeStageMerging(ctx, cfg, log, data, ccOp); err != nil {
 		return h.writeStageError(format, traceID, start, data, err)
 	}
 
 	// Stage: updating_db_3 (AC-2, AC-13 для расширений)
-	if err := h.executeStageUpdatingDb(&ctx, cfg, log, data, ccOp, StageUpdatingDb3); err != nil {
+	if err := h.executeStageUpdatingDb(ctx, cfg, log, data, ccOp, StageUpdatingDb3); err != nil {
 		return h.writeStageError(format, traceID, start, data, err)
 	}
 
 	// Stage: committing (AC-2)
-	if err := h.executeStageCommitting(&ctx, cfg, log, data, ccOp); err != nil {
+	if err := h.executeStageCommitting(ctx, cfg, log, data, ccOp); err != nil {
 		return h.writeStageError(format, traceID, start, data, err)
 	}
 
@@ -692,7 +692,7 @@ func (h *Git2StoreHandler) executeStageCreatingBackup(cfg *config.Config, log *s
 }
 
 // executeStageCloning клонирует репозиторий (AC-2).
-func (h *Git2StoreHandler) executeStageCloning(ctx *context.Context, cfg *config.Config, log *slog.Logger, data *Git2StoreData) (GitOperator, error) {
+func (h *Git2StoreHandler) executeStageCloning(ctx context.Context, cfg *config.Config, log *slog.Logger, data *Git2StoreData) (GitOperator, error) {
 	stageStart := time.Now()
 	stageName := StageCloning
 	log.Info(stageName + ": клонирование репозитория")
@@ -744,7 +744,7 @@ func (h *Git2StoreHandler) executeStageCheckoutEdt(ctx context.Context, cfg *con
 
 // executeStageCreatingTempDb создаёт временную БД (AC-2).
 // Возвращает путь к созданной БД для последующей очистки (H-1).
-func (h *Git2StoreHandler) executeStageCreatingTempDb(ctx *context.Context, cfg *config.Config, log *slog.Logger, data *Git2StoreData, ccOp ConvertConfigOperator) (string, error) {
+func (h *Git2StoreHandler) executeStageCreatingTempDb(ctx context.Context, cfg *config.Config, log *slog.Logger, data *Git2StoreData, ccOp ConvertConfigOperator) (string, error) {
 	stageStart := time.Now()
 	stageName := StageCreatingTempDb
 	log.Info(stageName + ": создание временной базы данных")
@@ -780,7 +780,7 @@ func (h *Git2StoreHandler) executeStageCreatingTempDb(ctx *context.Context, cfg 
 }
 
 // executeStageLoadingConfig загружает конфигурацию конвертации (AC-2).
-func (h *Git2StoreHandler) executeStageLoadingConfig(ctx *context.Context, cfg *config.Config, log *slog.Logger, data *Git2StoreData, ccOp ConvertConfigOperator) error {
+func (h *Git2StoreHandler) executeStageLoadingConfig(ctx context.Context, cfg *config.Config, log *slog.Logger, data *Git2StoreData, ccOp ConvertConfigOperator) error {
 	stageStart := time.Now()
 	stageName := StageLoadingConfig
 	log.Info(stageName + ": загрузка конфигурации конвертации")
@@ -815,7 +815,7 @@ func (h *Git2StoreHandler) executeStageCheckoutXml(ctx context.Context, cfg *con
 }
 
 // executeStageInitDb инициализирует базу данных (AC-2).
-func (h *Git2StoreHandler) executeStageInitDb(ctx *context.Context, cfg *config.Config, log *slog.Logger, data *Git2StoreData, ccOp ConvertConfigOperator) error {
+func (h *Git2StoreHandler) executeStageInitDb(ctx context.Context, cfg *config.Config, log *slog.Logger, data *Git2StoreData, ccOp ConvertConfigOperator) error {
 	stageStart := time.Now()
 	stageName := StageInitDb
 	log.Info(stageName + ": инициализация базы данных")
@@ -832,7 +832,7 @@ func (h *Git2StoreHandler) executeStageInitDb(ctx *context.Context, cfg *config.
 }
 
 // executeStageUnbinding отключает от хранилища (AC-2).
-func (h *Git2StoreHandler) executeStageUnbinding(ctx *context.Context, cfg *config.Config, log *slog.Logger, data *Git2StoreData, ccOp ConvertConfigOperator) error {
+func (h *Git2StoreHandler) executeStageUnbinding(ctx context.Context, cfg *config.Config, log *slog.Logger, data *Git2StoreData, ccOp ConvertConfigOperator) error {
 	stageStart := time.Now()
 	stageName := StageUnbinding
 	log.Info(stageName + ": отключение от хранилища")
@@ -849,7 +849,7 @@ func (h *Git2StoreHandler) executeStageUnbinding(ctx *context.Context, cfg *conf
 }
 
 // executeStageLoadingDb загружает конфигурацию в БД (AC-2).
-func (h *Git2StoreHandler) executeStageLoadingDb(ctx *context.Context, cfg *config.Config, log *slog.Logger, data *Git2StoreData, ccOp ConvertConfigOperator) error {
+func (h *Git2StoreHandler) executeStageLoadingDb(ctx context.Context, cfg *config.Config, log *slog.Logger, data *Git2StoreData, ccOp ConvertConfigOperator) error {
 	stageStart := time.Now()
 	stageName := StageLoadingDb
 	log.Info(stageName + ": загрузка конфигурации в базу данных")
@@ -866,7 +866,7 @@ func (h *Git2StoreHandler) executeStageLoadingDb(ctx *context.Context, cfg *conf
 }
 
 // executeStageUpdatingDb обновляет БД (AC-2).
-func (h *Git2StoreHandler) executeStageUpdatingDb(ctx *context.Context, cfg *config.Config, log *slog.Logger, data *Git2StoreData, ccOp ConvertConfigOperator, stageName string) error {
+func (h *Git2StoreHandler) executeStageUpdatingDb(ctx context.Context, cfg *config.Config, log *slog.Logger, data *Git2StoreData, ccOp ConvertConfigOperator, stageName string) error {
 	stageStart := time.Now()
 	log.Info(stageName + ": обновление базы данных")
 	data.StageCurrent = stageName
@@ -882,7 +882,7 @@ func (h *Git2StoreHandler) executeStageUpdatingDb(ctx *context.Context, cfg *con
 }
 
 // executeStageDumpingDb выгружает БД (AC-2).
-func (h *Git2StoreHandler) executeStageDumpingDb(ctx *context.Context, cfg *config.Config, log *slog.Logger, data *Git2StoreData, ccOp ConvertConfigOperator) error {
+func (h *Git2StoreHandler) executeStageDumpingDb(ctx context.Context, cfg *config.Config, log *slog.Logger, data *Git2StoreData, ccOp ConvertConfigOperator) error {
 	stageStart := time.Now()
 	stageName := StageDumpingDb
 	log.Info(stageName + ": выгрузка базы данных")
@@ -899,7 +899,7 @@ func (h *Git2StoreHandler) executeStageDumpingDb(ctx *context.Context, cfg *conf
 }
 
 // executeStageBinding привязывает к хранилищу (AC-2).
-func (h *Git2StoreHandler) executeStageBinding(ctx *context.Context, cfg *config.Config, log *slog.Logger, data *Git2StoreData, ccOp ConvertConfigOperator) error {
+func (h *Git2StoreHandler) executeStageBinding(ctx context.Context, cfg *config.Config, log *slog.Logger, data *Git2StoreData, ccOp ConvertConfigOperator) error {
 	stageStart := time.Now()
 	stageName := StageBinding
 	log.Info(stageName + ": привязка к хранилищу")
@@ -916,7 +916,7 @@ func (h *Git2StoreHandler) executeStageBinding(ctx *context.Context, cfg *config
 }
 
 // executeStageLocking блокирует объекты в хранилище (AC-2).
-func (h *Git2StoreHandler) executeStageLocking(ctx *context.Context, cfg *config.Config, log *slog.Logger, data *Git2StoreData, ccOp ConvertConfigOperator) error {
+func (h *Git2StoreHandler) executeStageLocking(ctx context.Context, cfg *config.Config, log *slog.Logger, data *Git2StoreData, ccOp ConvertConfigOperator) error {
 	stageStart := time.Now()
 	stageName := StageLocking
 	log.Info(stageName + ": блокировка объектов в хранилище")
@@ -933,7 +933,7 @@ func (h *Git2StoreHandler) executeStageLocking(ctx *context.Context, cfg *config
 }
 
 // executeStageMerging выполняет слияние (AC-2).
-func (h *Git2StoreHandler) executeStageMerging(ctx *context.Context, cfg *config.Config, log *slog.Logger, data *Git2StoreData, ccOp ConvertConfigOperator) error {
+func (h *Git2StoreHandler) executeStageMerging(ctx context.Context, cfg *config.Config, log *slog.Logger, data *Git2StoreData, ccOp ConvertConfigOperator) error {
 	stageStart := time.Now()
 	stageName := StageMerging
 	log.Info(stageName + ": слияние конфигураций")
@@ -950,7 +950,7 @@ func (h *Git2StoreHandler) executeStageMerging(ctx *context.Context, cfg *config
 }
 
 // executeStageCommitting фиксирует изменения в хранилище (AC-2).
-func (h *Git2StoreHandler) executeStageCommitting(ctx *context.Context, cfg *config.Config, log *slog.Logger, data *Git2StoreData, ccOp ConvertConfigOperator) error {
+func (h *Git2StoreHandler) executeStageCommitting(ctx context.Context, cfg *config.Config, log *slog.Logger, data *Git2StoreData, ccOp ConvertConfigOperator) error {
 	stageStart := time.Now()
 	stageName := StageCommitting
 	log.Info(stageName + ": фиксация изменений в хранилище")
@@ -1011,7 +1011,7 @@ func (h *Git2StoreHandler) createBackup(cfg *config.Config, storeRoot string) (s
 }
 
 // createTempDb создаёт временную БД через интерфейс или production реализацию.
-func (h *Git2StoreHandler) createTempDb(ctx *context.Context, l *slog.Logger, cfg *config.Config) (string, error) {
+func (h *Git2StoreHandler) createTempDb(ctx context.Context, l *slog.Logger, cfg *config.Config) (string, error) {
 	if h.tempDbCreator != nil {
 		return h.tempDbCreator.CreateTempDb(ctx, l, cfg)
 	}

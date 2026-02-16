@@ -116,7 +116,7 @@ type StoreCreator interface {
 // TempDbCreator — интерфейс для создания временной БД (AC-7: тестируемость).
 type TempDbCreator interface {
 	// CreateTempDb создаёт временную базу данных и возвращает строку подключения
-	CreateTempDb(ctx *context.Context, l *slog.Logger, cfg *config.Config) (string, error)
+	CreateTempDb(ctx context.Context, l *slog.Logger, cfg *config.Config) (string, error)
 }
 
 // CreateStoresHandler обрабатывает команду nr-create-stores.
@@ -203,7 +203,7 @@ func (h *CreateStoresHandler) Execute(ctx context.Context, cfg *config.Config) e
 	log.Info("creating_temp_db: создание временной базы данных")
 
 	// Создание временной БД
-	ctxPtr := &ctx
+	ctxPtr := ctx
 	dbConnectString, err := h.createTempDb(ctxPtr, log, cfg)
 	if err != nil {
 		log.Error("Ошибка создания временной БД", slog.String("error", err.Error()))
@@ -303,7 +303,7 @@ func (h *CreateStoresHandler) Execute(ctx context.Context, cfg *config.Config) e
 }
 
 // createTempDb создаёт временную БД через интерфейс или production реализацию.
-func (h *CreateStoresHandler) createTempDb(ctx *context.Context, l *slog.Logger, cfg *config.Config) (string, error) {
+func (h *CreateStoresHandler) createTempDb(ctx context.Context, l *slog.Logger, cfg *config.Config) (string, error) {
 	if h.tempDbCreator != nil {
 		return h.tempDbCreator.CreateTempDb(ctx, l, cfg)
 	}

@@ -63,7 +63,7 @@ func TestLoadFromConfig(t *testing.T) {
 	}
 
 	// Тестируем функцию LoadFromConfig
-	convertConfig, err := LoadFromConfig(&ctx, l, cfg)
+	convertConfig, err := LoadFromConfig(ctx, l, cfg)
 	if err != nil {
 		t.Fatalf("LoadFromConfig() error = %v", err)
 	}
@@ -155,7 +155,7 @@ func TestLoadFromConfig_DatabaseNotFound(t *testing.T) {
 	}
 
 	// Тестируем функцию LoadFromConfig
-	_, err := LoadFromConfig(&ctx, l, cfg)
+	_, err := LoadFromConfig(ctx, l, cfg)
 	if err == nil {
 		t.Fatalf("LoadFromConfig() expected error for nonexistent database, but got nil")
 	}
@@ -175,7 +175,7 @@ func TestLoadFromConfig_DatabaseNotFound(t *testing.T) {
 		l := getSlog(programLevel)
 
 		type args struct {
-			ctx        *context.Context
+			ctx        context.Context
 			l          *slog.Logger
 			cfg        *config.Config
 			configPath string
@@ -185,7 +185,7 @@ func TestLoadFromConfig_DatabaseNotFound(t *testing.T) {
 		cc := &Config{"", "", []Pair{cp, cp}, odb}
 		cfg := config.MustLoad()
 		cfg.TmpDir = "c:\\tmp\\4del"
-		arg := args{&ctx, l, cfg}
+		arg := args{ctx, l, cfg}
 		tests := []struct {
 			name    string
 			cc      *ConvertConfig
@@ -216,7 +216,7 @@ func TestLoadFromConfig_DatabaseNotFound(t *testing.T) {
 // 	l := getSlog(programLevel)
 
 // 	type args struct {
-// 		ctx        *context.Context
+// 		ctx        context.Context
 // 		l          *slog.Logger
 // 		cfg        *config.Config
 // 		configPath string
@@ -226,7 +226,7 @@ func TestLoadFromConfig_DatabaseNotFound(t *testing.T) {
 // 	cc := &Config{"", "", []Pair{cp, cp}, odb}
 // 	cfg := config.MustLoad()
 // 	cfg.TmpDir = "c:\\tmp\\4del"
-// 	arg := args{&ctx, l, cfg, "c:\\tmp\\cc.json"}
+// 	arg := args{ctx, l, cfg, "c:\\tmp\\cc.json"}
 // 	tests := []struct {
 // 		name    string
 // 		cc      *ConvertConfig
@@ -284,7 +284,7 @@ func TestLoadConfigFromData(t *testing.T) {
 	}`)
 
 	cfg := &config.Config{}
-	convertConfig, err := LoadConfigFromData(&ctx, l, cfg, configData)
+	convertConfig, err := LoadConfigFromData(ctx, l, cfg, configData)
 	if err != nil {
 		t.Fatalf("LoadConfigFromData() error = %v", err)
 	}
@@ -314,7 +314,7 @@ func TestLoadConfigFromData_InvalidJSON(t *testing.T) {
 	configData := []byte(`{invalid json}`)
 
 	cfg := &config.Config{}
-	_, err := LoadConfigFromData(&ctx, l, cfg, configData)
+	_, err := LoadConfigFromData(ctx, l, cfg, configData)
 	if err == nil {
 		t.Fatalf("LoadConfigFromData() expected error for invalid JSON, but got nil")
 	}
@@ -353,7 +353,7 @@ func TestConfig_Save(t *testing.T) {
 	}
 
 	cfg := &config.Config{}
-	err := convertConfig.Save(&ctx, l, cfg, tmpFile)
+	err := convertConfig.Save(ctx, l, cfg, tmpFile)
 	if err != nil {
 		t.Fatalf("Save() error = %v", err)
 	}
@@ -563,7 +563,7 @@ func TestConfig_Load(t *testing.T) {
 	}
 
 	convertConfig := &Config{}
-	err := convertConfig.Load(&ctx, l, cfg, "")
+	err := convertConfig.Load(ctx, l, cfg, "")
 	if err != nil {
 		t.Fatalf("Load() error = %v", err)
 	}
@@ -616,7 +616,7 @@ func TestConfig_Load_LocalBase(t *testing.T) {
 	}
 
 	convertConfig := &Config{}
-	err := convertConfig.Load(&ctx, l, cfg, "")
+	err := convertConfig.Load(ctx, l, cfg, "")
 	if err != nil {
 		t.Fatalf("Load() error = %v", err)
 	}
@@ -666,7 +666,7 @@ func TestConfig_Load_DatabaseNotFound(t *testing.T) {
 	}
 
 	convertConfig := &Config{}
-	err := convertConfig.Load(&ctx, l, cfg, "")
+	err := convertConfig.Load(ctx, l, cfg, "")
 	if err == nil {
 		t.Fatalf("Load() expected error for nonexistent database")
 	}
@@ -692,7 +692,7 @@ func TestConfig_InitDb(t *testing.T) {
 			DbExist: true,
 		},
 	}
-	err := convertConfig.InitDb(&ctx, l, cfg)
+	err := convertConfig.InitDb(ctx, l, cfg)
 	if err != nil {
 		t.Errorf("InitDb() with DbExist=true should not error, got %v", err)
 	}
@@ -704,7 +704,7 @@ func TestConfig_InitDb(t *testing.T) {
 			ServerDb: true,
 		},
 	}
-	err = convertConfig.InitDb(&ctx, l, cfg)
+	err = convertConfig.InitDb(ctx, l, cfg)
 	if err != nil {
 		t.Errorf("InitDb() with ServerDb=true should not error, got %v", err)
 	}

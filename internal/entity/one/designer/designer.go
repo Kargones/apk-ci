@@ -36,7 +36,7 @@ type OneDb struct {
 //
 // Возвращает:
 //   - error: ошибка создания базы данных, nil при успехе
-func (odb *OneDb) Create(ctx *context.Context, l *slog.Logger, cfg *config.Config) error {
+func (odb *OneDb) Create(ctx context.Context, l *slog.Logger, cfg *config.Config) error {
 	dbPath, err := GetDbName(ctx, l, cfg)
 	if err != nil {
 		return err
@@ -49,7 +49,7 @@ func (odb *OneDb) Create(ctx *context.Context, l *slog.Logger, cfg *config.Confi
 	r.Params = append(r.Params, "create")
 	r.Params = append(r.Params, "--create-database")
 	r.Params = append(r.Params, "--db-path="+dbPath)
-	_, err = r.RunCommand(*ctx, l)
+	_, err = r.RunCommand(ctx, l)
 	if err != nil {
 		l.Error("Ошибка создания базы данных",
 			slog.String("Путь", dbPath),
@@ -208,8 +208,8 @@ func (odb *OneDb) Load(ctx context.Context, l *slog.Logger, cfg *config.Config, 
 //
 // Возвращает:
 //   - error: ошибка загрузки расширения, nil при успехе
-func (odb *OneDb) LoadAdd(ctx *context.Context, l *slog.Logger, cfg *config.Config, sourcePath string, name string) error {
-	return odb.Load(*ctx, l, cfg, sourcePath, name)
+func (odb *OneDb) LoadAdd(ctx context.Context, l *slog.Logger, cfg *config.Config, sourcePath string, name string) error {
+	return odb.Load(ctx, l, cfg, sourcePath, name)
 }
 
 // UpdateCfg обновляет конфигурацию информационной базы.
@@ -223,7 +223,7 @@ func (odb *OneDb) LoadAdd(ctx *context.Context, l *slog.Logger, cfg *config.Conf
 //
 // Возвращает:
 //   - error: ошибка обновления конфигурации, nil при успехе
-func (odb *OneDb) UpdateCfg(ctx *context.Context, l *slog.Logger, cfg *config.Config, _ string, extensionName ...string) error {
+func (odb *OneDb) UpdateCfg(ctx context.Context, l *slog.Logger, cfg *config.Config, _ string, extensionName ...string) error {
 	r := runner.Runner{}
 	r.TmpDir = cfg.WorkDir
 	r.RunString = cfg.AppConfig.Paths.Bin1cv8
@@ -249,7 +249,7 @@ func (odb *OneDb) UpdateCfg(ctx *context.Context, l *slog.Logger, cfg *config.Co
 		r.Params = append(r.Params, "/c Обновление основной конфигурации")
 	}
 
-	_, err := r.RunCommand(*ctx, l)
+	_, err := r.RunCommand(ctx, l)
 	if err != nil {
 		l.Error("Ошибка обновления конфигурации расширения",
 			slog.String("Путь", odb.DbConnectString),
@@ -278,7 +278,7 @@ func (odb *OneDb) UpdateCfg(ctx *context.Context, l *slog.Logger, cfg *config.Co
 //
 // Возвращает:
 //   - error: ошибка выполнения операции или nil при успехе
-func (odb *OneDb) UpdateAdd(ctx *context.Context, l *slog.Logger, cfg *config.Config, sourcePath string, name string) error {
+func (odb *OneDb) UpdateAdd(ctx context.Context, l *slog.Logger, cfg *config.Config, sourcePath string, name string) error {
 	return odb.UpdateCfg(ctx, l, cfg, sourcePath, name)
 }
 
@@ -293,7 +293,7 @@ func (odb *OneDb) UpdateAdd(ctx *context.Context, l *slog.Logger, cfg *config.Co
 //
 // Возвращает:
 //   - error: ошибка выполнения операции или nil при успехе
-func (odb *OneDb) Dump(ctx *context.Context, l *slog.Logger, cfg *config.Config, extensionName ...string) error {
+func (odb *OneDb) Dump(ctx context.Context, l *slog.Logger, cfg *config.Config, extensionName ...string) error {
 	var fileName string
 	r := runner.Runner{}
 	r.TmpDir = cfg.WorkDir
@@ -325,7 +325,7 @@ func (odb *OneDb) Dump(ctx *context.Context, l *slog.Logger, cfg *config.Config,
 		r.Params = append(r.Params, "/c Выгрузка основной конфигурации")
 	}
 
-	_, err := r.RunCommand(*ctx, l)
+	_, err := r.RunCommand(ctx, l)
 	if err != nil {
 		if len(extensionName) > 0 && extensionName[0] != "" {
 			l.Error("Ошибка выгрузки расширения",
@@ -372,7 +372,7 @@ func (odb *OneDb) Dump(ctx *context.Context, l *slog.Logger, cfg *config.Config,
 //
 // Возвращает:
 //   - error: ошибка выполнения операции или nil при успехе
-func (odb *OneDb) DumpAdd(ctx *context.Context, l *slog.Logger, cfg *config.Config, name string) error {
+func (odb *OneDb) DumpAdd(ctx context.Context, l *slog.Logger, cfg *config.Config, name string) error {
 	return odb.Dump(ctx, l, cfg, name)
 }
 
@@ -386,7 +386,7 @@ func (odb *OneDb) DumpAdd(ctx *context.Context, l *slog.Logger, cfg *config.Conf
 // Возвращает:
 //   - string: путь к созданной временной базе данных
 //   - error: ошибка создания каталога или nil при успехе
-func GetDbName(_ *context.Context, l *slog.Logger, cfg *config.Config) (string, error) {
+func GetDbName(_ context.Context, l *slog.Logger, cfg *config.Config) (string, error) {
 	if cfg.Connect != "" {
 		dbPath := path.Join(cfg.TmpDir, cfg.Connect)
 		err := os.Mkdir(dbPath, 0750)

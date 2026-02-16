@@ -55,7 +55,7 @@ func convertProduction(ctx context.Context, l *slog.Logger, cfg *config.Config, 
 	}
 
 	// Выполняем конвертацию
-	cli.Convert(&ctx, l, cfg)
+	cli.Convert(ctx, l, cfg)
 
 	// Проверяем результат
 	if cli.LastErr != nil {

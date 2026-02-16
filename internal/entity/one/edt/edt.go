@@ -133,7 +133,7 @@ func cleanDirectoryPreservingHidden(targetDir string, l *slog.Logger) error {
 }
 
 // Convert выполняет конвертацию между форматами EDT и XML
-func (c *Convert) Convert(ctx *context.Context, l *slog.Logger, cfg *config.Config) error {
+func (c *Convert) Convert(ctx context.Context, l *slog.Logger, cfg *config.Config) error {
 	r := Cli{}
 	r.Init(cfg)
 	var ok bool
@@ -247,7 +247,7 @@ func (c *Convert) Convert(ctx *context.Context, l *slog.Logger, cfg *config.Conf
 	}
 	g.RepPath = repSourcePath
 	g.Branch = c.Distination.Branch
-	if err := g.Switch(*ctx, l); err != nil {
+	if err := g.Switch(ctx, l); err != nil {
 		l.Error("Ошибка переключения на целевую ветку",
 			slog.String("Описание ошибки", err.Error()),
 			slog.String("Ветка", c.Distination.Branch),
@@ -261,7 +261,7 @@ func (c *Convert) Convert(ctx *context.Context, l *slog.Logger, cfg *config.Conf
 			slog.String("error", err.Error()),
 		)
 	}
-	if err := g.Config(*ctx, l); err != nil {
+	if err := g.Config(ctx, l); err != nil {
 		l.Warn("Failed to configure git",
 			slog.String("error", err.Error()),
 		)
@@ -278,22 +278,22 @@ func (c *Convert) Convert(ctx *context.Context, l *slog.Logger, cfg *config.Conf
 		)
 		return fmt.Errorf("ошибка копирования из %s в %s: %w", repDistinationPath, repSourcePath, err)
 	}
-	if err := g.Add(*ctx, l); err != nil {
+	if err := g.Add(ctx, l); err != nil {
 		l.Warn("Failed to add files to git",
 			slog.String("error", err.Error()),
 		)
 	}
-	if err := g.SetUser(*ctx, l, "gitops", "gitops@apkholding.ru"); err != nil {
+	if err := g.SetUser(ctx, l, "gitops", "gitops@apkholding.ru"); err != nil {
 		l.Warn("Failed to set git user",
 			slog.String("error", err.Error()),
 		)
 	}
-	if err := g.Commit(*ctx, l, GetComment(c)); err != nil {
+	if err := g.Commit(ctx, l, GetComment(c)); err != nil {
 		l.Warn("Failed to commit changes",
 			slog.String("error", err.Error()),
 		)
 	}
-	if err := g.PushForce(*ctx, l); err != nil {
+	if err := g.PushForce(ctx, l); err != nil {
 		l.Warn("Failed to push changes",
 			slog.String("error", err.Error()),
 		)
@@ -386,7 +386,7 @@ func (e *Cli) Init(cfg *config.Config) {
 }
 
 // Convert выполняет конвертацию с использованием EDT CLI
-func (e *Cli) Convert(ctx *context.Context, l *slog.Logger, cfg *config.Config) {
+func (e *Cli) Convert(ctx context.Context, l *slog.Logger, cfg *config.Config) {
 	if e.WorkSpace == "" {
 		tDir, err := os.MkdirTemp(cfg.TmpDir, "ws")
 		if err != nil {
@@ -453,7 +453,7 @@ func (e *Cli) Convert(ctx *context.Context, l *slog.Logger, cfg *config.Config) 
 	)
 
 	l.Debug("Запуск команды EDT", slog.String("Операция", e.Operation))
-	_, e.LastErr = r.RunCommand(*ctx, l)
+	_, e.LastErr = r.RunCommand(ctx, l)
 	if e.LastErr != nil {
 		// Проверяем, не был ли превышен таймаут
 		if errors.Is(e.LastErr, context.DeadlineExceeded) {

@@ -236,7 +236,7 @@ func (s *Store) CreateAdd(ctx context.Context, l *slog.Logger, cfg *config.Confi
 //
 // Возвращает:
 //   - error: ошибку, если операция не удалась
-func (s *Store) Check(ctx *context.Context, l *slog.Logger, cfg *config.Config, dbConnectString string, isMain bool) error {
+func (s *Store) Check(ctx context.Context, l *slog.Logger, cfg *config.Config, dbConnectString string, isMain bool) error {
 	// ToDo: заменить проверку на получение списка пользователей
 	// ToDo: Добавить проверку существования хранилища конфигурации для tcp://
 	storeExists := false
@@ -306,7 +306,7 @@ func (s *Store) CheckAdd(ctx context.Context, l *slog.Logger, cfg *config.Config
 //
 // Возвращает:
 //   - error: ошибку, если операция не удалась
-func (s *Store) Bind(ctx *context.Context, l *slog.Logger, cfg *config.Config, dbConnectString string, storeRoot string, isMain bool) error {
+func (s *Store) Bind(ctx context.Context, l *slog.Logger, cfg *config.Config, dbConnectString string, storeRoot string, isMain bool) error {
 	var tPath string
 	s.Name = s.Path
 	tPath, s.Path = fullPathStore(storeRoot, s.Path)
@@ -328,7 +328,7 @@ func (s *Store) Bind(ctx *context.Context, l *slog.Logger, cfg *config.Config, d
 	r.Params = append(r.Params, "-forceReplaceCfg")
 	r.Params = append(r.Params, "/Out")
 	r.Params = append(r.Params, "/c Подключение основной конфигурации к хранилищу")
-	_, err = r.RunCommand(*ctx, l)
+	_, err = r.RunCommand(ctx, l)
 	if err != nil {
 		l.Error("Ошибка подключения основной конфигурации к хранилищу",
 			slog.String("Путь", s.Path),
@@ -351,7 +351,7 @@ func (s *Store) Bind(ctx *context.Context, l *slog.Logger, cfg *config.Config, d
 	r.Params = append(r.Params, "-force")
 	r.Params = append(r.Params, "/Out")
 	r.Params = append(r.Params, "/c Обновление конфигурации из хранилища")
-	_, err = r.RunCommand(*ctx, l)
+	_, err = r.RunCommand(ctx, l)
 	if err != nil {
 		l.Error("Ошибка обновления конфигурации из хранилища",
 			slog.String("Путь", s.Path),
@@ -383,7 +383,7 @@ func (s *Store) Bind(ctx *context.Context, l *slog.Logger, cfg *config.Config, d
 //
 // Возвращает:
 //   - error: ошибку, если операция не удалась
-func (s *Store) BindAdd(ctx *context.Context, l *slog.Logger, cfg *config.Config, dbConnectString string, storeRoot string, addName string) error {
+func (s *Store) BindAdd(ctx context.Context, l *slog.Logger, cfg *config.Config, dbConnectString string, storeRoot string, addName string) error {
 	var tPath string
 	tPath, s.Path = fullPathStore(storeRoot, s.Path)
 	defer func() {
@@ -407,7 +407,7 @@ func (s *Store) BindAdd(ctx *context.Context, l *slog.Logger, cfg *config.Config
 	r.Params = append(r.Params, "-forceReplaceCfg")
 	r.Params = append(r.Params, "/Out")
 	r.Params = append(r.Params, "/c Подключение расширения к хранилищу")
-	_, err = r.RunCommand(*ctx, l)
+	_, err = r.RunCommand(ctx, l)
 	if err != nil {
 		l.Error("Ошибка подключения расширения к хранилищу",
 			slog.String("Путь", s.Path),
@@ -432,7 +432,7 @@ func (s *Store) BindAdd(ctx *context.Context, l *slog.Logger, cfg *config.Config
 	r.Params = append(r.Params, "-force")
 	r.Params = append(r.Params, "/Out")
 	r.Params = append(r.Params, "/c Обновление расширения из хранилища")
-	_, err = r.RunCommand(*ctx, l)
+	_, err = r.RunCommand(ctx, l)
 	if err != nil {
 		l.Error("Ошибка обновления расширения из хранилища",
 			slog.String("Путь", s.Path),
@@ -764,8 +764,8 @@ func (s *Store) StoreCommit(_ context.Context, l *slog.Logger, cfg *config.Confi
 //
 // Возвращает:
 //   - error: ошибку, если операция не удалась
-func (s *Store) StoreCommitAdd(ctx *context.Context, l *slog.Logger, cfg *config.Config, dbConnectString string, storeRoot string, comment string, addName string) error {
-	return s.StoreCommit(*ctx, l, cfg, dbConnectString, storeRoot, comment, addName)
+func (s *Store) StoreCommitAdd(ctx context.Context, l *slog.Logger, cfg *config.Config, dbConnectString string, storeRoot string, comment string, addName string) error {
+	return s.StoreCommit(ctx, l, cfg, dbConnectString, storeRoot, comment, addName)
 }
 
 // ParseReport парсит отчет хранилища конфигурации из файла.

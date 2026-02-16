@@ -130,7 +130,7 @@ func TestCli_Convert(t *testing.T) {
 		Operation: "convert",
 	}
 
-	cli.Convert(&ctx, logger, cfg)
+	cli.Convert(ctx, logger, cfg)
 	// При использовании echo команда выполнится успешно
 	if cli.LastErr != nil {
 		t.Logf("Convert returned error (may be expected): %v", cli.LastErr)

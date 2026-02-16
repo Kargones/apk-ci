@@ -16,10 +16,10 @@ import (
 )
 
 // createTempDbProduction — production реализация создания временной БД.
-func createTempDbProduction(ctx *context.Context, l *slog.Logger, cfg *config.Config) (string, error) {
+func createTempDbProduction(ctx context.Context, l *slog.Logger, cfg *config.Config) (string, error) {
 	l.Debug("Запуск создания временной базы данных")
 	dbPath := filepath.Join(cfg.TmpDir, "temp_db_"+time.Now().Format("20060102_150405"))
-	oneDb, err := designer.CreateTempDb(*ctx, l, cfg, dbPath, cfg.AddArray)
+	oneDb, err := designer.CreateTempDb(ctx, l, cfg, dbPath, cfg.AddArray)
 	if err != nil {
 		l.Error("Ошибка создания временной базы данных", slog.String("Описание ошибки", err.Error()))
 		return "", err

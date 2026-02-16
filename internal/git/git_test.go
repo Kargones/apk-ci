@@ -216,7 +216,7 @@ func TestCloneWithDifferentURLs(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := tt.git.Clone(&ctx, logger)
+			err := tt.git.Clone(ctx, logger)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Clone() error = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -475,7 +475,7 @@ func TestGitClone(t *testing.T) {
 	}
 
 	// Тестируем клонирование несуществующего репозитория
-	err = git.Clone(&ctx, logger)
+	err = git.Clone(ctx, logger)
 	if err == nil {
 		t.Error("Ожидалась ошибка для несуществующего репозитория")
 	}
@@ -912,7 +912,7 @@ func TestGitMethodsErrorHandling(t *testing.T) {
 	})
 
 	t.Run("Clone с недоступным репозиторием", func(t *testing.T) {
-		err := git.Clone(&ctx, logger)
+		err := git.Clone(ctx, logger)
 		if err == nil {
 			t.Error("Ожидалась ошибка для недоступного репозитория")
 		}
@@ -1086,7 +1086,7 @@ func TestGitCloneWithTokenError(t *testing.T) {
 	}
 
 	// Тестируем клонирование с недействительным URL
-	err = git.Clone(&ctx, logger)
+	err = git.Clone(ctx, logger)
 	if err == nil {
 		t.Error("Ожидалась ошибка для недействительного URL")
 	}

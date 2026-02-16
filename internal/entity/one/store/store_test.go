@@ -183,7 +183,7 @@ func TestStore_Check(t *testing.T) {
 	}
 
 	dbConnectString := "File=" + tmpDir + ";Usr=user;Pwd=pass;"
-	err = s.Check(&ctx, logger, cfg, dbConnectString, true)
+	err = s.Check(ctx, logger, cfg, dbConnectString, true)
 	// При использовании echo команда выполнится успешно
 	if err != nil {
 		t.Logf("Check returned error (may be expected): %v", err)
@@ -488,7 +488,7 @@ func TestStore_Bind(t *testing.T) {
 
 	storeRoot := tmpDir
 	dbConnectString := "File=" + tmpDir + ";Usr=user;Pwd=pass;"
-	err = s.Bind(&ctx, logger, cfg, dbConnectString, storeRoot, true)
+	err = s.Bind(ctx, logger, cfg, dbConnectString, storeRoot, true)
 	if err != nil {
 		t.Logf("Bind returned error (may be expected): %v", err)
 	} else {
@@ -531,7 +531,7 @@ func TestStore_BindAdd(t *testing.T) {
 
 	storeRoot := tmpDir
 	dbConnectString := "File=" + tmpDir + ";Usr=user;Pwd=pass;"
-	err = s.BindAdd(&ctx, logger, cfg, dbConnectString, storeRoot, "TestAdd")
+	err = s.BindAdd(ctx, logger, cfg, dbConnectString, storeRoot, "TestAdd")
 	if err != nil {
 		t.Logf("BindAdd returned error (may be expected): %v", err)
 	} else {
@@ -799,7 +799,7 @@ func TestStore_StoreCommitAdd(t *testing.T) {
 	dbConnectString := "File=" + tmpDir + ";Usr=user;Pwd=pass;"
 	comment := "Test commit"
 	
-	err = s.StoreCommitAdd(&ctx, logger, cfg, dbConnectString, storeRoot, comment, "TestAdd")
+	err = s.StoreCommitAdd(ctx, logger, cfg, dbConnectString, storeRoot, comment, "TestAdd")
 	if err != nil {
 		t.Logf("StoreCommitAdd returned error (may be expected): %v", err)
 	} else {

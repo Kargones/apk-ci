@@ -21,7 +21,7 @@ type gitWrapper struct {
 }
 
 // Clone клонирует репозиторий.
-func (g *gitWrapper) Clone(ctx *context.Context, l *slog.Logger) error {
+func (g *gitWrapper) Clone(ctx context.Context, l *slog.Logger) error {
 	return g.git.Clone(ctx, l)
 }
 
@@ -73,52 +73,52 @@ type convertConfigWrapper struct {
 }
 
 // Load загружает конфигурацию конвертации.
-func (c *convertConfigWrapper) Load(ctx *context.Context, l *slog.Logger, cfg *config.Config, infobaseName string) error {
+func (c *convertConfigWrapper) Load(ctx context.Context, l *slog.Logger, cfg *config.Config, infobaseName string) error {
 	return c.cc.Load(ctx, l, cfg, infobaseName)
 }
 
 // InitDb инициализирует базу данных.
-func (c *convertConfigWrapper) InitDb(ctx *context.Context, l *slog.Logger, cfg *config.Config) error {
+func (c *convertConfigWrapper) InitDb(ctx context.Context, l *slog.Logger, cfg *config.Config) error {
 	return c.cc.InitDb(ctx, l, cfg)
 }
 
 // StoreUnBind отвязывает от хранилища.
-func (c *convertConfigWrapper) StoreUnBind(ctx *context.Context, l *slog.Logger, cfg *config.Config) error {
+func (c *convertConfigWrapper) StoreUnBind(ctx context.Context, l *slog.Logger, cfg *config.Config) error {
 	return c.cc.StoreUnBind(ctx, l, cfg)
 }
 
 // LoadDb загружает конфигурацию в БД.
-func (c *convertConfigWrapper) LoadDb(ctx *context.Context, l *slog.Logger, cfg *config.Config) error {
+func (c *convertConfigWrapper) LoadDb(ctx context.Context, l *slog.Logger, cfg *config.Config) error {
 	return c.cc.LoadDb(ctx, l, cfg)
 }
 
 // DbUpdate обновляет БД.
-func (c *convertConfigWrapper) DbUpdate(ctx *context.Context, l *slog.Logger, cfg *config.Config) error {
+func (c *convertConfigWrapper) DbUpdate(ctx context.Context, l *slog.Logger, cfg *config.Config) error {
 	return c.cc.DbUpdate(ctx, l, cfg)
 }
 
 // DumpDb выгружает БД.
-func (c *convertConfigWrapper) DumpDb(ctx *context.Context, l *slog.Logger, cfg *config.Config) error {
+func (c *convertConfigWrapper) DumpDb(ctx context.Context, l *slog.Logger, cfg *config.Config) error {
 	return c.cc.DumpDb(ctx, l, cfg)
 }
 
 // StoreBind привязывает к хранилищу.
-func (c *convertConfigWrapper) StoreBind(ctx *context.Context, l *slog.Logger, cfg *config.Config) error {
+func (c *convertConfigWrapper) StoreBind(ctx context.Context, l *slog.Logger, cfg *config.Config) error {
 	return c.cc.StoreBind(ctx, l, cfg)
 }
 
 // StoreLock блокирует объекты в хранилище.
-func (c *convertConfigWrapper) StoreLock(ctx *context.Context, l *slog.Logger, cfg *config.Config) error {
+func (c *convertConfigWrapper) StoreLock(ctx context.Context, l *slog.Logger, cfg *config.Config) error {
 	return c.cc.StoreLock(ctx, l, cfg)
 }
 
 // Merge выполняет слияние.
-func (c *convertConfigWrapper) Merge(ctx *context.Context, l *slog.Logger, cfg *config.Config) error {
+func (c *convertConfigWrapper) Merge(ctx context.Context, l *slog.Logger, cfg *config.Config) error {
 	return c.cc.Merge(ctx, l, cfg)
 }
 
 // StoreCommit фиксирует изменения в хранилище.
-func (c *convertConfigWrapper) StoreCommit(ctx *context.Context, l *slog.Logger, cfg *config.Config) error {
+func (c *convertConfigWrapper) StoreCommit(ctx context.Context, l *slog.Logger, cfg *config.Config) error {
 	return c.cc.StoreCommit(ctx, l, cfg)
 }
 
@@ -147,12 +147,12 @@ func createConvertConfigProduction() ConvertConfigOperator {
 }
 
 // createTempDbProduction — production реализация создания временной БД.
-func createTempDbProduction(ctx *context.Context, l *slog.Logger, cfg *config.Config) (string, error) {
+func createTempDbProduction(ctx context.Context, l *slog.Logger, cfg *config.Config) (string, error) {
 	// Генерируем путь для временной базы данных
 	dbPath := filepath.Join(cfg.TmpDir, "temp_db_"+time.Now().Format("20060102_150405"))
 
 	// Вызов функции CreateTempDb с правильными параметрами
-	oneDb, err := designer.CreateTempDb(*ctx, l, cfg, dbPath, cfg.AddArray)
+	oneDb, err := designer.CreateTempDb(ctx, l, cfg, dbPath, cfg.AddArray)
 	if err != nil {
 		return "", err
 	}
