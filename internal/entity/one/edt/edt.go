@@ -188,7 +188,7 @@ func (c *Convert) Convert(ctx *context.Context, l *slog.Logger, cfg *config.Conf
 				slog.String("Error", fmt.Sprint(err)),
 				slog.String("Обработка ошибки", "Завершение работы программы"),
 			)
-			os.Exit(7)
+			return fmt.Errorf("отсутствует исходный каталог: %s", r.PathIn)
 		}
 		ok, _ = exists(r.PathOut)
 		if ok {
@@ -202,7 +202,7 @@ func (c *Convert) Convert(ctx *context.Context, l *slog.Logger, cfg *config.Conf
 					slog.String("Error", err.Error()),
 					slog.String("Обработка ошибки", "Завершение работы программы"),
 				)
-				os.Exit(7)
+				return fmt.Errorf("отсутствует исходный каталог: %s", r.PathIn)
 			}
 			err = os.MkdirAll(r.PathOut, 0750)
 			if err != nil {
@@ -222,7 +222,7 @@ func (c *Convert) Convert(ctx *context.Context, l *slog.Logger, cfg *config.Conf
 				slog.String("Error", err.Error()),
 				slog.String("Обработка ошибки", "Завершение работы программы"),
 			)
-			os.Exit(7)
+			return fmt.Errorf("отсутствует исходный каталог: %s", r.PathIn)
 		}
 		l.Debug("Конвертация каталога",
 			slog.String("Номер итерации", strconv.Itoa(i)),
@@ -238,7 +238,7 @@ func (c *Convert) Convert(ctx *context.Context, l *slog.Logger, cfg *config.Conf
 				slog.String("Error", r.LastErr.Error()),
 				slog.String("Обработка ошибки", "Завершение работы программы"),
 			)
-			os.Exit(7)
+			return fmt.Errorf("отсутствует исходный каталог: %s", r.PathIn)
 		}
 		l.Info("Каталог конвертирован",
 			slog.String("Исходный", r.PathIn),
