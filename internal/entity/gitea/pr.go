@@ -62,7 +62,10 @@ func (g *API) ConflictPR(prNumber int64) (bool, error) {
 	urlString := fmt.Sprintf("%s/api/%s/repos/%s/%s/pulls/%d", g.GiteaURL, constants.APIVersion, g.Owner, g.Repo, prNumber)
 
 	for attempt := 0; attempt < maxRetries; attempt++ {
-		statusCode, body, _ := g.sendReq(urlString, "", "GET")
+		statusCode, body, err := g.sendReq(urlString, "", "GET")
+		if err != nil {
+			return true, fmt.Errorf("ошибка при выполнении запроса ConflictPR: %w", err)
+		}
 		if statusCode != http.StatusOK {
 			return true, fmt.Errorf("ошибка при получении данных PR: %d %d", prNumber, statusCode)
 		}
@@ -119,7 +122,10 @@ func (g *API) ConflictPR(prNumber int64) (bool, error) {
 func (g *API) ConflictFilesPR(prNumber int64) ([]string, error) {
 	var err error
 	urlString := fmt.Sprintf("%s/api/%s/repos/%s/%s/pulls/%d/files", g.GiteaURL, constants.APIVersion, g.Owner, g.Repo, prNumber)
-	statusCode, body, _ := g.sendReq(urlString, "", "GET")
+	statusCode, body, err := g.sendReq(urlString, "", "GET")
+	if err != nil {
+		return []string{}, fmt.Errorf("ошибка при выполнении запроса ConflictFilesPR: %w", err)
+	}
 	if statusCode != http.StatusNoContent {
 		return []string{}, fmt.Errorf("ошибка при получении конфликтующих файлов PR: %d %d", prNumber, statusCode)
 	}
@@ -276,7 +282,10 @@ func (g *API) findExistingPR(head, base string) (*PRResponse, error) {
 //   - error: ошибка получения списка или nil при успехе
 func (g *API) ActivePR() ([]PR, error) {
 	urlString := fmt.Sprintf("%s/api/%s/repos/%s/%s/pulls?state=open&sort=oldest", g.GiteaURL, constants.APIVersion, g.Owner, g.Repo)
-	statusCode, body, _ := g.sendReq(urlString, "", "GET")
+	statusCode, body, err := g.sendReq(urlString, "", "GET")
+	if err != nil {
+		return nil, fmt.Errorf("ошибка при выполнении запроса ActivePR: %w", err)
+	}
 	if statusCode != http.StatusOK {
 		return nil, fmt.Errorf("ошибка при запросе списка PR: %d", statusCode)
 	}
