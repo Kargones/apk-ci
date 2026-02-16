@@ -165,7 +165,12 @@ func (v *ConfigValidator) validateURLs(cfg *config.ScannerConfig, result *Valida
 				fmt.Sprintf("Invalid URL format: %v", err), "URL_INVALID")
 		} else {
 			// Check if URL is reachable (warning only)
-			parsedURL, _ := url.Parse(cfg.ScannerURL)
+			parsedURL, parseErr := url.Parse(cfg.ScannerURL)
+			if parseErr != nil {
+				result.AddError("ScannerURL", cfg.ScannerURL,
+					fmt.Sprintf("Failed to re-parse URL: %v", parseErr), "URL_PARSE_ERROR")
+				return
+			}
 			if parsedURL.Scheme == "" {
 				result.AddWarning("ScannerURL", cfg.ScannerURL,
 					"URL scheme not specified, assuming HTTP", "URL_NO_SCHEME")

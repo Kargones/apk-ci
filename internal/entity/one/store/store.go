@@ -90,7 +90,11 @@ func (s *Store) ReadReport(ctx context.Context, l *slog.Logger, dbConnectString 
 	}
 	r.Params = append(r.Params, "/Out")
 	r.Params = append(r.Params, "/c Отчет хранилища "+s.Name)
-	bOut, _ := r.RunCommand(ctx, l)
+	bOut, err := r.RunCommand(ctx, l)
+	if err != nil {
+		l.Error("Ошибка выполнения команды формирования отчета", slog.String("storeName", s.Name), slog.String("error", err.Error()))
+		return nil, nil, 0, fmt.Errorf("ошибка формирования отчета хранилища %s: %w", s.Name, err)
+	}
 	if len(bOut) > 44 && string(bOut[3:45]) != "Отчет успешно построен" {
 		l.Error("Ошибка формирования отчета", slog.String("storeName", s.Name), slog.String("output", string(bOut)))
 	}

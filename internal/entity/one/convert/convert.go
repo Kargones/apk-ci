@@ -673,8 +673,11 @@ func mergeSetting(cfg *config.Config) (string, error) {
 // Возвращает:
 //   - error: ошибка сохранения файла, nil при успехе
 func (cc *Config) Save(_ context.Context, _ *slog.Logger, _ *config.Config, configPath string) error {
-	ocJSON, _ := json.MarshalIndent(cc, "", "\t")
-	err := os.WriteFile(configPath, ocJSON, 0600)
+	ocJSON, err := json.MarshalIndent(cc, "", "\t")
+	if err != nil {
+		return fmt.Errorf("ошибка сериализации конфигурации: %w", err)
+	}
+	err = os.WriteFile(configPath, ocJSON, 0600)
 	return err
 }
 

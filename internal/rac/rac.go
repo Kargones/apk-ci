@@ -189,12 +189,18 @@ func (c *Client) executeCommandOnce(ctx context.Context, args ...string) (string
 
 	if err != nil {
 		// Конвертируем вывод в UTF-8 для корректного отображения
-		convertedOutput, _ := convertOutputToUTF8(output)
+		convertedOutput, convErr := convertOutputToUTF8(output)
+		if convErr != nil {
+			c.Logger.Warn("Failed to convert error output to UTF-8", "error", convErr)
+		}
 		return "", fmt.Errorf("RAC command failed: %w, output: %s", err, convertedOutput)
 	}
 
 	// Конвертируем успешный вывод в UTF-8
-	convertedOutput, _ := convertOutputToUTF8(output)
+	convertedOutput, convErr := convertOutputToUTF8(output)
+	if convErr != nil {
+		c.Logger.Warn("Failed to convert output to UTF-8", "error", convErr)
+	}
 	return convertedOutput, nil
 }
 

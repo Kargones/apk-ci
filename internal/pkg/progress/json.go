@@ -2,6 +2,8 @@ package progress
 
 import (
 	"encoding/json"
+	"fmt"
+	"os"
 	"time"
 )
 
@@ -36,7 +38,9 @@ func (p *JSONProgress) Start(message string) {
 			Type:    "progress_start",
 			Message: message,
 		}
-		_ = p.encoder.Encode(event)
+		if encErr := p.encoder.Encode(event); encErr != nil {
+			fmt.Fprintf(os.Stderr, "progress: failed to encode event: %v\n", encErr)
+		}
 	}
 }
 

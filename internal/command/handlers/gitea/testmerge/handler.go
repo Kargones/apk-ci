@@ -353,7 +353,10 @@ func (h *TestMergeHandler) checkPR(ctx context.Context, client gitea.Client, pr 
 		result.MergeResult = "conflict"
 
 		// Получаем список конфликтных файлов
-		conflictFiles, _ := client.ConflictFilesPR(ctx, testPR.Number)
+		conflictFiles, conflictErr := client.ConflictFilesPR(ctx, testPR.Number)
+		if conflictErr != nil {
+			log.Warn("Не удалось получить список конфликтных файлов", slog.String("error", conflictErr.Error()))
+		}
 		result.ConflictFiles = conflictFiles
 
 		// Добавляем комментарий о причине закрытия (AC: #6)
