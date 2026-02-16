@@ -162,7 +162,7 @@ func MustLoad() (*Config, error) {
 	}
 
 	// Загрузка конфигурации SonarQube из переменных окружения
-	// TODO (M-2/Review #17): SonarQubeConfig.Validate() и ScannerConfig.Validate()
+	// TODO: SonarQubeConfig.Validate() и ScannerConfig.Validate()
 	// существуют, но не вызываются в MustLoad(). Добавить fail-fast валидацию
 	// по аналогии с AlertingConfig/MetricsConfig/TracingConfig.
 	if cfg.SonarQubeConfig, err = GetSonarQubeConfig(l, &cfg); err != nil {
@@ -224,7 +224,7 @@ func MustLoad() (*Config, error) {
 	}
 	// Fail-fast валидация: обнаруживаем невалидную конфигурацию при загрузке,
 	// а не при первом использовании Alerter в runtime.
-	// TODO (M-1/Review #17): При ошибке валидации код выставляет Enabled=false,
+	// TODO: При ошибке валидации код выставляет Enabled=false,
 	// но невалидные поля (пустой SMTPHost и т.д.) остаются в структуре.
 	// Рекомендуется заменять невалидную конфигурацию на getDefault*Config().
 	if cfg.AlertingConfig != nil && cfg.AlertingConfig.Enabled {

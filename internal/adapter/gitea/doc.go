@@ -35,7 +35,7 @@
 //
 // # Миграция с legacy
 //
-// TODO: H-6 — После реализации Client adapter удалить дублирующиеся структуры
+// TODO: После реализации Client adapter удалить дублирующиеся структуры
 // из internal/entity/gitea/gitea.go и использовать типы из этого пакета.
 // Текущие структуры (Repository, Branch, Commit, Issue, etc.) скопированы
 // из legacy для совместимости JSON-тегов с Gitea API.

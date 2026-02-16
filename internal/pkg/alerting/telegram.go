@@ -17,7 +17,7 @@ import (
 const TelegramAPIBaseURL = "https://api.telegram.org/bot"
 
 // TelegramParseMode — режим парсинга сообщений (Markdown или MarkdownV2).
-// L-4/Review #15: TODO — мигрировать на "MarkdownV2" для расширенного форматирования.
+// TODO: мигрировать на "MarkdownV2" для расширенного форматирования.
 // Markdown v1 deprecated в Telegram API, но v2 требует другого escaping.
 const TelegramParseMode = "Markdown"
 

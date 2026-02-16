@@ -229,7 +229,7 @@ type ConvertConfigFactory interface {
 
 // Git2StoreHandler обрабатывает команду nr-git2store.
 //
-// TODO: [H-5] Рефакторинг: вынести фабрики (gitFactory, convertConfigFactory,
+// TODO: Рефакторинг: вынести фабрики (gitFactory, convertConfigFactory,
 // backupCreator, tempDbCreator) в общий пакет internal/factory или использовать
 // Wire для DI. H-2 (createRACClient) уже решён — см. racutil.NewClient().
 type Git2StoreHandler struct {
@@ -1109,7 +1109,7 @@ func (h *Git2StoreHandler) writeStageError(format, traceID string, start time.Ti
 
 // createBackupProduction создаёт резервную копию хранилища (production реализация).
 //
-// TODO: [H-4] Реализовать полноценный backup хранилища 1C.
+// TODO: Реализовать полноценный backup хранилища 1C.
 // Текущая реализация создаёт только метаданные (backup_info.txt) с информацией
 // для ручного восстановления. Полный backup требует:
 // 1. Вызов 1cv8 DESIGNER /ConfigurationRepositoryDumpCfg для экспорта конфигурации

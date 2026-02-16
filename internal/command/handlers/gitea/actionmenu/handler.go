@@ -37,7 +37,7 @@ const (
 )
 
 // init регистрирует команду nr-action-menu-build с deprecated alias action-menu-build.
-// TODO(H-7): Deprecated alias "action-menu-build" будет удалён в v2.0.0 / Epic 7.
+// TODO: Deprecated alias "action-menu-build" будет удалён в v2.0.0 / Epic 7.
 // После полной миграции на NR-архитектуру, использовать только "nr-action-menu-build".
 func init() {
 	command.RegisterWithAlias(&ActionMenuHandler{}, constants.ActionMenuBuildName)
@@ -243,7 +243,7 @@ func (h *ActionMenuHandler) Execute(ctx context.Context, cfg *config.Config) err
 		slog.Bool("force_update", cfg.ForceUpdate))
 
 	// Получение Gitea клиента (AC: #8)
-	// TODO(H-6): Реализовать фабрику createGiteaClient(cfg) для создания реального клиента.
+	// TODO: Реализовать фабрику createGiteaClient(cfg) для создания реального клиента.
 	// Текущая реализация требует DI через поле giteaClient (используется в тестах).
 	client := h.giteaClient
 	if client == nil {

@@ -1,6 +1,6 @@
 // Package createstoreshandler содержит production реализации для работы с 1C.
 //
-// TODO(M-1): Рефакторить на struct pattern (defaultStoreCreator, defaultTempDbCreator)
+// TODO: Рефакторить на struct pattern (defaultStoreCreator, defaultTempDbCreator)
 // для соответствия паттерну других handlers (storebindhandler.defaultConvertLoader).
 package createstoreshandler
 

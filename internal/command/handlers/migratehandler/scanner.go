@@ -122,7 +122,7 @@ func scanFile(path string, legacyToNR map[string]string) ([]Replacement, error) 
 		}
 
 		// Формат 2: BR_COMMAND=value (inline в run-блоках, с опциональными кавычками)
-		// TODO (H-2/Review #26): FindStringSubmatch находит только первое вхождение.
+		// TODO: FindStringSubmatch находит только первое вхождение.
 		// Если на одной строке несколько BR_COMMAND= (крайне маловероятно в Gitea Actions),
 		// только первое будет обработано. Для полного покрытия нужен FindAllStringSubmatch
 		// + поддержка множественных Replacement на строку в applyReplacements.

@@ -121,13 +121,13 @@ func ProvideFactory(cfg *config.Config) *onec.Factory {
 // Если AlertingConfig == nil или Enabled=false, возвращает NopAlerter.
 // При ошибке создания Alerter возвращает NopAlerter и логирует ошибку.
 //
-// TODO (M2/Review 6-2): Рефакторинг — объединить config.AlertingConfig и alerting.Config
+// TODO: Рефакторинг — объединить config.AlertingConfig и alerting.Config
 // в единую структуру для устранения дублирования. Возможные варианты:
 // 1. Использовать alerting.Config напрямую в config.AppConfig
 // 2. Создать adapter interface для конвертации
 // 3. Вынести общие типы в shared пакет
 //
-// TODO (H-3/Review Epic-6): Alerter инициализируется через DI, но НЕ интегрирован
+// TODO: Alerter инициализируется через DI, но НЕ интегрирован
 // в command handlers. Необходимо добавить вызов alerter.Send() в error paths handlers.
 // Без интеграции email/telegram/webhook/rules — мёртвый код.
 // Реализовать в отдельной story (Epic 7 или отдельный task).
