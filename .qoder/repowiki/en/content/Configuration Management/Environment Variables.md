@@ -6,16 +6,28 @@
 - [sonarqube.go](file://internal/config/sonarqube.go)
 - [action.yaml](file://config/action.yaml)
 - [constants.go](file://internal/constants/constants.go)
+- [providers.go](file://internal/di/providers.go)
+- [factory.go](file://internal/pkg/output/factory.go)
+- [factory.go](file://internal/pkg/logging/factory.go)
 </cite>
+
+## Update Summary
+**Changes Made**   
+- Added new logging environment variables (BR_LOG_LEVEL, BR_LOG_FORMAT, BR_LOG_OUTPUT)
+- Added new output format environment variable (BR_OUTPUT_FORMAT)
+- Updated logging defaults to use text format and stderr output
+- Added output writer selection mechanism
 
 ## Table of Contents
 1. [Configuration Mechanism Overview](#configuration-mechanism-overview)
 2. [Environment Variable Binding with Struct Tags](#environment-variable-binding-with-struct-tags)
 3. [Supported Environment Variables](#supported-environment-variables)
-4. [Configuration Loading Priority](#configuration-loading-priority)
-5. [Practical Examples for Different Workflows](#practical-examples-for-different-workflows)
-6. [Common Issues and Troubleshooting](#common-issues-and-troubleshooting)
-7. [Best Practices for CI/CD and Development](#best-practices-for-cicd-and-development)
+4. [Logging Configuration Variables](#logging-configuration-variables)
+5. [Output Writer Configuration](#output-writer-configuration)
+6. [Configuration Loading Priority](#configuration-loading-priority)
+7. [Practical Examples for Different Workflows](#practical-examples-for-different-workflows)
+8. [Common Issues and Troubleshooting](#common-issues-and-troubleshooting)
+9. [Best Practices for CI/CD and Development](#best-practices-for-cicd-and-development)
 
 ## Configuration Mechanism Overview
 
@@ -59,6 +71,8 @@ These variables control fundamental application behavior and are required for ba
 - **BR_FORCE_UPDATE**: Boolean flag to force operations even when not necessary. Default: "false".
 - **BR_ISSUE_NUMBER**: Integer specifying the issue number in Gitea. Default: 1.
 - **BR_START_EPF**: URL to an external processing file (.epf) for execution. No default value.
+- **BR_EXT_DIR**: Directory for extensions. No default value.
+- **BR_DRY_RUN**: Boolean flag to perform dry run operations. Default: "false".
 
 ### Configuration File Path Variables
 These variables specify the locations of configuration files:
@@ -70,28 +84,11 @@ These variables specify the locations of configuration files:
 - **BR_CONFIG_MENU_MAIN**: Path to the main menu configuration file (menu_main.yaml). No default value.
 - **BR_CONFIG_MENU_DEBUG**: Path to the debug menu configuration file (menu_debug.yaml). No default value.
 
-### SonarQube Integration Variables
-These variables configure the SonarQube integration:
+### Implementation Selection Variables
+These variables control which implementation tools to use:
 
-- **SONARQUBE_URL**: Base URL of the SonarQube server. Default: "http://localhost:9000".
-- **SONARQUBE_TOKEN**: Authentication token for SonarQube API access. Required.
-- **SONARQUBE_TIMEOUT**: Timeout for SonarQube API requests. Default: 30 seconds.
-- **SONARQUBE_RETRY_ATTEMPTS**: Number of retry attempts for failed API requests. Default: 3.
-- **SONARQUBE_RETRY_DELAY**: Initial delay between retry attempts. Default: 5 seconds.
-- **SONARQUBE_PROJECT_PREFIX**: Prefix for SonarQube project keys. Default: "benadis".
-- **SONARQUBE_DEFAULT_VISIBILITY**: Default visibility for new projects ("private" or "public"). Default: "private".
-- **SONARQUBE_QUALITY_GATE_TIMEOUT**: Timeout for quality gate status checks. Default: 300 seconds.
-- **SONARQUBE_DISABLE_BRANCH_ANALYSIS**: Disables branch analysis for Community Edition compatibility. Default: true.
-
-### Scanner Configuration Variables
-These variables control the sonar-scanner tool:
-
-- **SONARQUBE_SCANNER_URL**: URL to download the sonar-scanner. Default: points to version 4.8.0.2856.
-- **SONARQUBE_SCANNER_VERSION**: Version of sonar-scanner to use. Default: "4.8.0.2856".
-- **SONARQUBE_JAVA_OPTS**: JVM options for the scanner. Default: "-Xmx2g".
-- **SONARQUBE_SCANNER_TIMEOUT**: Timeout for scanner execution. Default: 600 seconds.
-- **SONARQUBE_SCANNER_WORK_DIR**: Working directory for scanner execution. Default: "/tmp/benadis".
-- **SONARQUBE_SCANNER_TEMP_DIR**: Temporary directory for scanner files. Default: "/tmp/benadis/scanner/temp".
+- **BR_IMPL_CONFIG_EXPORT**: Tool for configuration export ("1cv8", "ibcmd", "native"). Default: "1cv8".
+- **BR_IMPL_DB_CREATE**: Tool for database creation ("1cv8", "ibcmd"). Default: "1cv8".
 
 ### Git Configuration Variables
 These variables configure Git operations:
@@ -116,9 +113,121 @@ These variables configure Remote Administration Console operations:
 - **RAC_TIMEOUT**: Timeout for RAC operations. Default: 30 seconds.
 - **RAC_RETRIES**: Number of retry attempts for RAC operations. Default: 3.
 
+### Database Restore Configuration Variables
+These variables configure database restore operations:
+
+- **DBRESTORE_SERVER**: Database server for restore operations. No default value.
+- **DBRESTORE_USER**: Database user for restore operations. No default value.
+- **DBRESTORE_PASSWORD**: Database password for restore operations. No default value.
+- **DBRESTORE_DATABASE**: Database name for restore operations. No default value.
+- **DBRESTORE_BACKUP**: Path to backup file for restore operations. No default value.
+- **DBRESTORE_TIMEOUT**: Timeout for restore operations. Default: 30 seconds.
+- **DBRESTORE_SRC_SERVER**: Source server for restore operations. No default value.
+- **DBRESTORE_SRC_DB**: Source database for restore operations. No default value.
+- **DBRESTORE_DST_SERVER**: Destination server for restore operations. No default value.
+- **DBRESTORE_DST_DB**: Destination database for restore operations. No default value.
+- **DBRESTORE_AUTOTIMEOUT**: Boolean flag for automatic timeout calculation. Default: false.
+
+### Service Mode Configuration Variables
+These variables configure service mode operations:
+
+- **SERVICE_RAC_PATH**: Path to RAC executable for service mode. No default value.
+- **SERVICE_RAC_SERVER**: RAC server address for service mode. No default value.
+- **SERVICE_RAC_PORT**: RAC port for service mode. No default value.
+- **SERVICE_RAC_USER**: RAC user for service mode. No default value.
+- **SERVICE_RAC_PASSWORD**: RAC password for service mode. No default value.
+- **SERVICE_DB_USER**: Database user for service mode. No default value.
+- **SERVICE_DB_PASSWORD**: Database password for service mode. No default value.
+- **SERVICE_RAC_TIMEOUT**: Timeout for service mode operations. Default: 30 seconds.
+- **SERVICE_RAC_RETRIES**: Retry attempts for service mode operations. Default: 3.
+
+### EDT Configuration Variables
+These variables configure Enterprise Development Tools:
+
+- **EDT_CLI_PATH**: Path to EDT CLI executable. No default value.
+- **EDT_WORKSPACE**: EDT workspace directory. No default value.
+- **EDT_PROJECT_DIR**: EDT project directory. No default value.
+
+### GitHub Actions Integration Variables
+These variables are passed through GitHub Actions inputs:
+
+- **INPUT_DBNAME**: Database name from GitHub Actions. No default value.
+- **INPUT_CONFIGSECRET**: Secret configuration path from GitHub Actions. No default value.
+- **INPUT_TERMINATESESSIONS**: Terminate sessions flag from GitHub Actions. No default value.
+- **INPUT_ACTOR**: Actor from GitHub Actions. No default value.
+- **INPUT_CONFIGPROJECT**: Project configuration path from GitHub Actions. No default value.
+- **INPUT_COMMAND**: Command from GitHub Actions. No default value.
+- **INPUT_ISSUENUMBER**: Issue number from GitHub Actions. No default value.
+- **INPUT_LOGLEVEL**: Log level from GitHub Actions. No default value.
+- **INPUT_CONFIGSYSTEM**: System configuration path from GitHub Actions. No default value.
+- **INPUT_CONFIGDBDATA**: Database configuration path from GitHub Actions. No default value.
+- **INPUT_ACCESSTOKEN**: Access token from GitHub Actions. No default value.
+- **INPUT_GITEAURL**: Gitea URL from GitHub Actions. No default value.
+- **INPUT_REPOSITORY**: Repository from GitHub Actions. No default value.
+- **INPUT_FORCE_UPDATE**: Force update flag from GitHub Actions. No default value.
+- **INPUT_MENUMAIN**: Main menu configuration from GitHub Actions. No default value.
+- **INPUT_MENUDEBUG**: Debug menu configuration from GitHub Actions. No default value.
+- **INPUT_STARTEPF**: Start EPF URL from GitHub Actions. No default value.
+- **INPUT_BRANCHFORSCAN**: Branch for scan from GitHub Actions. No default value.
+- **INPUT_COMMITHASH**: Commit hash from GitHub Actions. No default value.
+
 **Section sources**
 - [config.go](file://internal/config/config.go#L130-L200)
 - [sonarqube.go](file://internal/config/sonarqube.go#L15-L50)
+
+## Logging Configuration Variables
+
+The benadis-runner includes comprehensive logging configuration through environment variables with the `BR_LOG_*` prefix. These variables control the logging behavior and output format.
+
+### Logging Level Configuration
+- **BR_LOG_LEVEL**: Sets the logging verbosity level. Valid values: "debug", "info", "warn", "error". Default: "info".
+- **INPUT_LOGLEVEL**: GitHub Actions input for log level override. Default: empty.
+
+### Logging Format Configuration
+- **BR_LOG_FORMAT**: Sets the log output format. Valid values: "json", "text". Default: "text".
+- **BR_LOG_OUTPUT**: Sets the log output destination. Valid values: "stdout", "stderr", "file". Default: "stderr".
+
+### File Logging Configuration
+When BR_LOG_OUTPUT is set to "file", additional variables control file logging:
+
+- **BR_LOG_FILE_PATH**: Path to log file when output is "file". Default: "/var/log/benadis-runner.log".
+- **BR_LOG_MAX_SIZE**: Maximum log file size in MB. Default: 100.
+- **BR_LOG_MAX_BACKUPS**: Maximum number of backup log files. Default: 3.
+- **BR_LOG_MAX_AGE**: Maximum age of backup log files in days. Default: 7.
+- **BR_LOG_COMPRESS**: Whether to compress backup log files. Default: true.
+
+**Updated** Added comprehensive logging configuration variables with new defaults for improved readability and separation of concerns.
+
+**Section sources**
+- [config.go](file://internal/config/config.go#L328-L353)
+- [config.go](file://internal/config/config.go#L597-L609)
+
+## Output Writer Configuration
+
+The benadis-runner includes a flexible output writer system controlled by the `BR_OUTPUT_FORMAT` environment variable. This system allows switching between different output formats without restarting the application.
+
+### Output Format Selection
+- **BR_OUTPUT_FORMAT**: Controls the output format for command results. Valid values: "json", "text". Default: "text".
+
+### Output Writer Behavior
+The output writer system provides:
+- **JSON Format**: Structured JSON output suitable for machine processing
+- **Text Format**: Human-readable text output suitable for console display
+- **Automatic Selection**: Uses environment variable to determine output format
+- **Default Fallback**: Falls back to text format if environment variable is empty or invalid
+
+### Output Writer Factory
+The output writer is created through a factory pattern:
+- `output.NewWriter()` creates writers based on format string
+- Supports "json" and "text" formats
+- Returns TextWriter as default for unknown formats
+- Independent of Config struct for flexibility
+
+**Updated** Added new output writer configuration system with BR_OUTPUT_FORMAT environment variable for flexible output format selection.
+
+**Section sources**
+- [providers.go](file://internal/di/providers.go#L36-L51)
+- [factory.go](file://internal/pkg/output/factory.go#L9-L22)
 
 ## Configuration Loading Priority
 
@@ -142,12 +251,15 @@ When multiple configuration sources provide values for the same parameter, the h
 ## Practical Examples for Different Workflows
 
 ### Database Restore Workflow
-To perform a database restore operation, set the following environment variables:
+To perform a database restore operation with enhanced logging:
 
 ```bash
 export BR_COMMAND=dbrestore
 export BR_INFOBASE_NAME="test_database"
 export BR_ACTOR="gitops-bot"
+export BR_LOG_LEVEL="debug"
+export BR_LOG_FORMAT="json"
+export BR_LOG_OUTPUT="stderr"
 export BR_GITEAURL="https://gitea.example.com"
 export BR_REPOSITORY="organization/project"
 export BR_ACCESS_TOKEN="your-access-token"
@@ -157,15 +269,16 @@ export DBRESTORE_BACKUP="/backups/test_database.bak"
 export DBRESTORE_TIMEOUT="300s"
 ```
 
-This configuration will initiate a database restore operation using the specified backup file, with the operation logged under the gitops-bot actor.
+This configuration will initiate a database restore operation using the specified backup file, with detailed JSON logs sent to stderr.
 
 ### Service Mode Management
-To enable service mode for maintenance operations:
+To enable service mode for maintenance operations with custom output:
 
 ```bash
 export BR_COMMAND=service-mode-enable
 export BR_INFOBASE_NAME="production_db"
 export BR_ACTOR="admin-user"
+export BR_OUTPUT_FORMAT="json"
 export BR_GITEAURL="https://gitea.example.com"
 export BR_REPOSITORY="organization/project"
 export BR_ACCESS_TOKEN="your-access-token"
@@ -178,17 +291,20 @@ To disable service mode after maintenance:
 export BR_COMMAND=service-mode-disable
 export BR_INFOBASE_NAME="production_db"
 export BR_ACTOR="admin-user"
+export BR_OUTPUT_FORMAT="text"
 export BR_GITEAURL="https://gitea.example.com"
 export BR_REPOSITORY="organization/project"
 export BR_ACCESS_TOKEN="your-access-token"
 ```
 
 ### SonarQube Scanning
-To scan a specific branch with SonarQube:
+To scan a specific branch with SonarQube and custom logging:
 
 ```bash
 export BR_COMMAND=sq-scan-branch
 export BR_ACTOR="ci-bot"
+export BR_OUTPUT_FORMAT="json"
+export BR_LOG_LEVEL="info"
 export BR_GITEAURL="https://gitea.example.com"
 export BR_REPOSITORY="organization/project"
 export BR_ACCESS_TOKEN="your-access-token"
@@ -198,7 +314,7 @@ export INPUT_BRANCHFORSCAN="feature/new-module"
 export INPUT_COMMITHASH="a1b2c3d4e5f6"
 ```
 
-This configuration will trigger a SonarQube scan on the specified branch and commit, using the provided SonarQube server credentials.
+This configuration will trigger a SonarQube scan on the specified branch and commit, using JSON output format for machine processing.
 
 **Section sources**
 - [config.go](file://internal/config/config.go#L130-L200)
@@ -210,11 +326,13 @@ This configuration will trigger a SonarQube scan on the specified branch and com
 ### Incorrect Naming Conventions
 One common issue is incorrect environment variable naming. Ensure that:
 - All BR_* variables use uppercase letters and underscores
+- Logging variables use the BR_LOG_* pattern (BR_LOG_LEVEL, BR_LOG_FORMAT, BR_LOG_OUTPUT)
+- Output variables use the BR_OUTPUT_FORMAT pattern
 - SonarQube variables follow the SONARQUBE_* pattern
 - Git variables use the GIT_* pattern
 - RAC variables use the RAC_* pattern
 
-For example, use `BR_COMMAND` instead of `br_command` or `BrCommand`.
+For example, use `BR_LOG_LEVEL` instead of `br_log_level` or `BrLogLevel`.
 
 ### Missing Required Variables
 Certain variables are required for the application to function properly:
@@ -232,6 +350,7 @@ Ensure that environment variables are set with appropriate types:
 - Numeric values should be valid numbers
 - Duration values should use Go duration format (e.g., "30s", "5m", "1h")
 - Array values should be properly formatted according to the expected input
+- Logging levels should be valid strings: "debug", "info", "warn", "error"
 
 For example, `BR_TERMINATE_SESSIONS` expects "true" or "false" as a string, not a boolean value.
 
@@ -245,10 +364,18 @@ If experiencing unexpected behavior, check for conflicting values between:
 
 Use logging output to verify which values are actually being used by the application.
 
+### Logging Configuration Issues
+For logging-related problems:
+- Verify BR_LOG_* variables are set correctly
+- Check that BR_OUTPUT_FORMAT is set to "json" or "text"
+- Ensure BR_LOG_OUTPUT is one of "stdout", "stderr", or "file"
+- Validate file permissions if using file output
+- Check log file path exists and is writable
+
 **Section sources**
 - [config.go](file://internal/config/config.go#L400-L600)
 
-## Best Practices for CI/CD and Local Development
+## Best Practices for CI/CD and Development
 
 ### CI/CD Pipeline Configuration
 For CI/CD pipelines, follow these best practices:
@@ -261,7 +388,9 @@ For CI/CD pipelines, follow these best practices:
 
 4. **Validation Before Execution**: Implement pre-execution validation to check for required environment variables before starting the runner.
 
-5. **Logging and Monitoring**: Enable appropriate logging levels based on the environment (more verbose in development, less in production).
+5. **Logging Configuration**: Configure appropriate logging levels based on the environment (more verbose in development, less in production).
+
+6. **Output Format Selection**: Choose appropriate output formats for different environments (JSON for machine processing, text for human readability).
 
 ### Local Development Setup
 For local development, consider these practices:
@@ -287,6 +416,12 @@ export BR_ENV="development"
 export BR_GITEAURL="https://gitea-dev.example.com"
 export BR_REPOSITORY="organization/project-dev"
 export BR_ACCESS_TOKEN="dev-token"
+export BR_OUTPUT_FORMAT="text"
+
+# Set logging configuration for development
+export BR_LOG_LEVEL="debug"
+export BR_LOG_FORMAT="text"
+export BR_LOG_OUTPUT="stderr"
 
 # Set SonarQube configuration for development
 export SONARQUBE_URL="https://sonarqube-dev.example.com"
@@ -298,8 +433,17 @@ export BR_COMMAND="analyze-project"
 echo "Development environment configured"
 ```
 
+### Production Deployment Considerations
+For production deployments:
+- Use BR_OUTPUT_FORMAT="json" for machine-readable logs
+- Set BR_LOG_LEVEL="info" or "warn" for reduced verbosity
+- Use BR_LOG_OUTPUT="stderr" to separate application logs from stdout
+- Configure file logging with appropriate rotation settings
+- Monitor log file permissions and disk space
+
 Following these best practices ensures consistent and reliable operation of the benadis-runner across different environments while maintaining security and ease of use.
 
 **Section sources**
 - [config.go](file://internal/config/config.go#L130-L200)
 - [action.yaml](file://config/action.yaml#L1-L120)
+- [providers.go](file://internal/di/providers.go#L36-L51)

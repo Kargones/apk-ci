@@ -4,18 +4,46 @@
 **Referenced Files in This Document**
 - [main.go](file://cmd/benadis-runner/main.go)
 - [app.go](file://internal/app/app.go)
-- [extension_publish.go](file://internal/app/extension_publish.go)
+- [registry.go](file://internal/command/registry.go)
+- [handler.go](file://internal/command/handler.go)
+- [deprecated.go](file://internal/command/deprecated.go)
+- [servicemodeenablehandler/handler.go](file://internal/command/handlers/servicemodeenablehandler/handler.go)
+- [servicemodedisablehandler/handler.go](file://internal/command/handlers/servicemodedisablehandler/handler.go)
+- [servicemodestatushandler/handler.go](file://internal/command/handlers/servicemodestatushandler/handler.go)
+- [forcedisconnecthandler/handler.go](file://internal/command/handlers/forcedisconnecthandler/handler.go)
+- [version/version.go](file://internal/command/handlers/version/version.go)
+- [help/help.go](file://internal/command/handlers/help/help.go)
 - [constants.go](file://internal/constants/constants.go)
 - [config.go](file://internal/config/config.go)
+- [result.go](file://internal/pkg/output/result.go)
+- [writer.go](file://internal/pkg/output/writer.go)
+- [json.go](file://internal/pkg/output/json.go)
+- [text.go](file://internal/pkg/output/text.go)
 - [action.yaml](file://config/action.yaml)
-- [extension-publish.md](file://docs/epics/extension-publish.md)
 </cite>
+
+## Update Summary
+**Changes Made**
+- Updated command dispatch mechanism to use new NR (Next Generation) command framework with self-registering commands
+- Added new NR commands for service mode management and session handling
+- Implemented structured output system with JSON and text formatting
+- Added deprecated bridge pattern for backward compatibility
+- Enhanced help system with automatic command discovery
+- Updated exit codes and error handling patterns
 
 ## Table of Contents
 1. [Introduction](#introduction)
-2. [Command Dispatch Mechanism](#command-dispatch-mechanism)
-3. [Exit Codes](#exit-codes)
-4. [Command Reference](#command-reference)
+2. [Command Framework Architecture](#command-framework-architecture)
+3. [Command Dispatch Mechanism](#command-dispatch-mechanism)
+4. [Structured Output System](#structured-output-system)
+5. [Exit Codes](#exit-codes)
+6. [Command Reference](#command-reference)
+   - [nr-version](#nr-version)
+   - [help](#help)
+   - [nr-service-mode-enable](#nr-service-mode-enable)
+   - [nr-service-mode-disable](#nr-service-mode-disable)
+   - [nr-service-mode-status](#nr-service-mode-status)
+   - [nr-force-disconnect-sessions](#nr-force-disconnect-sessions)
    - [convert](#convert)
    - [dbrestore](#dbrestore)
    - [service-mode-enable](#service-mode-enable)
@@ -26,90 +54,301 @@
    - [sq-scan-branch](#sq-scan-branch)
    - [sq-scan-pr](#sq-scan-pr)
    - [execute-epf](#execute-epf)
-   - [extension-publish](#extension-publish)
 
 ## Introduction
-The benadis-runner application provides a comprehensive set of commands for automating various operations related to 1C:Enterprise development and deployment processes. These commands are designed to streamline workflows involving database management, configuration synchronization, code analysis, external processing execution, and extension publishing. The command-line interface is driven by environment variables, with the primary BR_COMMAND variable determining which operation to execute. Each command follows a consistent pattern of configuration loading, parameter validation, execution, and error handling, ensuring reliable automation capabilities for CI/CD pipelines and operational tasks.
+The benadis-runner application provides a comprehensive set of commands for automating various operations related to 1C:Enterprise development and deployment processes. The application has evolved to use a new Next Generation (NR) command framework that implements self-registration, structured output formatting, and backward compatibility through deprecated bridge patterns.
+
+The NR framework introduces a modern command architecture where commands register themselves automatically via init() functions, eliminating the need for manual registration in main.go. Commands now support structured output in both JSON and human-readable formats, enhanced error handling with machine-readable error codes, and improved traceability through distributed tracing.
 
 **Section sources**
 - [main.go](file://cmd/benadis-runner/main.go#L1-L50)
-- [README.md](file://README.md#L1-L50)
+- [registry.go](file://internal/command/registry.go#L1-L50)
+- [handler.go](file://internal/command/handler.go#L1-L28)
+
+## Command Framework Architecture
+The benadis-runner uses a modern command framework architecture that separates concerns between command registration, execution, and output formatting. The framework consists of several key components:
+
+### Self-Registering Commands
+Each command package contains an init() function that registers the command handler with the global registry. This eliminates the need for manual registration in main.go and allows commands to be added or modified independently.
+
+### Handler Interface
+All commands implement the Handler interface, which defines three core methods:
+- Name(): Returns the command name for registry lookup
+- Description(): Provides help text for command documentation
+- Execute(): Executes the command logic with context and configuration
+
+### Deprecated Bridge Pattern
+The framework maintains backward compatibility through deprecated bridges that wrap legacy commands under new names. When a deprecated command is called, it logs a warning and delegates execution to the new implementation.
+
+### Structured Output System
+Commands now support multiple output formats through a unified Result structure that includes status, command name, data payload, error information, and metadata for traceability and performance monitoring.
+
+```mermaid
+graph TD
+A[Command Request] --> B{Registry Lookup}
+B --> |Found| C[Handler.Execute]
+B --> |Not Found| D[Legacy Switch]
+C --> E[Structured Output]
+D --> E
+E --> F{Output Format}
+F --> |JSON| G[JSONWriter]
+F --> |Text| H[TextWriter]
+G --> I[Machine-Readable Output]
+H --> J[Human-Readable Output]
+K[Deprecated Command] --> L[DeprecatedBridge]
+L --> M[Warning to STDERR]
+M --> N[Actual Handler Execution]
+```
+
+**Diagram sources**
+- [registry.go](file://internal/command/registry.go#L57-L64)
+- [deprecated.go](file://internal/command/deprecated.go#L77-L89)
+- [result.go](file://internal/pkg/output/result.go#L11-L30)
+
+**Section sources**
+- [registry.go](file://internal/command/registry.go#L19-L55)
+- [handler.go](file://internal/command/handler.go#L12-L27)
+- [deprecated.go](file://internal/command/deprecated.go#L26-L44)
+- [result.go](file://internal/pkg/output/result.go#L11-L30)
 
 ## Command Dispatch Mechanism
-The benadis-runner application uses a centralized command dispatch mechanism based on the BR_COMMAND environment variable. When the application starts, it loads configuration from multiple sources (environment variables, configuration files) and then evaluates the BR_COMMAND value to determine which function to invoke. This approach provides flexibility in automation scenarios, allowing different operations to be triggered without changing the executable or its parameters.
+The benadis-runner implements a two-tier command dispatch mechanism that prioritizes NR commands while maintaining backward compatibility with legacy commands.
 
-The dispatch process begins in main.go where the application loads configuration using config.MustLoad() and then uses a switch statement to route execution to the appropriate handler function in the app package. Each command maps directly to a specific function in app.go, maintaining a clean separation between command routing and business logic implementation.
+### Priority-Based Dispatch
+1. **NR Command Registry Check**: First, the application searches for commands in the self-registering registry
+2. **Fallback to Legacy Switch**: If not found in registry, falls back to the traditional switch statement in main.go
+3. **Deprecated Bridge Support**: Automatically handles deprecated command names through bridge pattern
+
+### Registry Registration Process
+Commands register themselves using the Register() or RegisterWithAlias() functions in their init() methods. The RegisterWithAlias() function supports deprecated command names by creating bridge handlers that warn users about migration.
+
+### Configuration Loading
+The application loads configuration using config.MustLoad() before command dispatch, ensuring all commands have access to the same configuration context regardless of execution path.
 
 ```mermaid
 flowchart TD
-Start([Application Start]) --> LoadConfig["Load Configuration\nMustLoad()"]
+Start([Application Start]) --> LoadConfig["Load Configuration\nconfig.MustLoad()"]
 LoadConfig --> CheckCommand{"BR_COMMAND\nSet?"}
-CheckCommand --> |No| DefaultError[Log Error\nExit Code 2]
-CheckCommand --> |Yes| Convert{Command = convert?}
-Convert --> |Yes| ExecuteConvert["Execute app.Convert()"]
-Convert --> Git2Store{Command = git2store?}
-Git2Store --> |Yes| ExecuteGit2Store["Execute app.Git2Store()"]
-Git2Store --> ServiceModeEnable{Command = service-mode-enable?}
-ServiceModeEnable --> |Yes| ExecuteServiceModeEnable["Execute app.ServiceModeEnable()"]
-ServiceModeEnable --> ServiceModeDisable{Command = service-mode-disable?}
-ServiceModeDisable --> |Yes| ExecuteServiceModeDisable["Execute app.ServiceModeDisable()"]
-ServiceModeDisable --> ServiceModeStatus{Command = service-mode-status?}
-ServiceModeStatus --> |Yes| ExecuteServiceModeStatus["Execute app.ServiceModeStatus()"]
-ServiceModeStatus --> DbRestore{Command = dbrestore?}
-DbRestore --> |Yes| ExecuteDbRestore["Execute app.DbRestoreWithConfig()"]
-DbRestore --> SQScanBranch{Command = sq-scan-branch?}
-SQScanBranch --> |Yes| ExecuteSQScanBranch["Execute app.SQScanBranch()"]
-SQScanBranch --> SQScanPR{Command = sq-scan-pr?}
-SQScanPR --> |Yes| ExecuteSQScanPR["Execute app.SQScanPR()"]
-SQScanPR --> ExecuteEPF{Command = execute-epf?}
-ExecuteEPF --> |Yes| ExecuteExecuteEpf["Execute app.ExecuteEpf()"]
-ExecuteEPF --> Store2Db{Command = store2db?}
-Store2Db --> |Yes| ExecuteStore2Db["Execute app.Store2DbWithConfig()"]
-Store2Db --> ExtensionPublish{Command = extension-publish?}
-ExtensionPublish --> |Yes| ExecuteExtensionPublish["Execute app.ExtensionPublish()"]
-ExtensionPublish --> UnknownCommand[Log Error\nExit Code 2]
-ExecuteConvert --> Success[Log Success\nExit Code 0]
-ExecuteGit2Store --> Success
-ExecuteServiceModeEnable --> Success
-ExecuteServiceModeDisable --> Success
-ExecuteServiceModeStatus --> Success
-ExecuteDbRestore --> Success
-ExecuteSQScanBranch --> Success
-ExecuteSQScanPR --> Success
-ExecuteExecuteEpf --> Success
-ExecuteStore2Db --> Success
-ExecuteExtensionPublish --> Success
+CheckCommand --> |No| DefaultHelp["Set Command = help"]
+CheckCommand --> |Yes| CheckRegistry{"Check Registry"}
+CheckRegistry --> |Found| ExecuteNR["Execute NR Handler\nGet() + Execute()"]
+CheckRegistry --> |Not Found| CheckLegacy{"Check Legacy Switch"}
+CheckLegacy --> |Found| ExecuteLegacy["Execute Legacy Handler\nswitch cfg.Command"]
+CheckLegacy --> |Not Found| UnknownCommand["Log Error\nExit Code 2"]
+ExecuteNR --> Success[Log Success\nExit Code 0]
+ExecuteLegacy --> Success
 UnknownCommand --> Success
 ```
 
 **Diagram sources**
-- [main.go](file://cmd/benadis-runner/main.go#L50-L262)
+- [main.go](file://cmd/benadis-runner/main.go#L25-L58)
 
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L50-L262)
-- [constants.go](file://internal/constants/constants.go#L50-L100)
+- [main.go](file://cmd/benadis-runner/main.go#L45-L58)
+- [registry.go](file://internal/command/registry.go#L57-L64)
+- [deprecated.go](file://internal/command/deprecated.go#L112-L143)
+
+## Structured Output System
+The NR command framework implements a comprehensive structured output system that provides consistent, machine-readable results across all commands. The system supports both JSON and human-readable formats with optional metadata for debugging and monitoring.
+
+### Result Structure
+The Result structure provides a standardized format for all command outputs:
+- Status: "success" or "error" indicator
+- Command: Name of executed command
+- Data: Command-specific payload (when successful)
+- Error: Error information (when failed)
+- Metadata: Performance and traceability information
+
+### Output Writers
+The framework includes specialized writers for different output formats:
+- **JSONWriter**: Produces machine-readable JSON with indentation for readability
+- **TextWriter**: Creates human-friendly formatted output with clear sections
+- **Custom Formatters**: Individual commands can implement specialized output formats
+
+### Metadata Information
+All structured outputs include metadata for operational visibility:
+- DurationMs: Execution time in milliseconds
+- TraceID: Distributed tracing identifier for correlation
+- APIVersion: API version for backward compatibility
+
+### Error Handling
+Structured error responses include:
+- Machine-readable error codes (e.g., "CONFIG.INFOBASE_MISSING")
+- Human-readable messages
+- Contextual information for troubleshooting
+- Consistent formatting across all commands
+
+**Section sources**
+- [result.go](file://internal/pkg/output/result.go#L11-L53)
+- [json.go](file://internal/pkg/output/json.go#L8-L22)
+- [text.go](file://internal/pkg/output/text.go#L9-L54)
 
 ## Exit Codes
-The benadis-runner application uses a standardized exit code system to communicate the outcome of command execution to calling processes. These exit codes enable automation scripts to handle different scenarios appropriately, such as retrying failed operations or alerting on specific error conditions.
+The benadis-runner application uses a standardized exit code system that has been enhanced to support the new NR command framework. The exit codes provide clear signals for automation systems and help distinguish between different types of failures.
 
-| Exit Code | Meaning | Description |
-|-----------|--------|-------------|
-| 0 | Success | Command completed successfully |
-| 2 | Unknown Command | The specified command was not recognized |
-| 5 | Configuration Load Failed | Failed to load configuration from files or environment |
-| 6 | Conversion Error | Error occurred during conversion process |
-| 7 | Storage Update Error | Error occurred while updating storage |
-| 8 | Service Operation Failed | Error occurred during service mode operations |
-| 9 | External Processing Failed | Error occurred while executing external processing |
-| 10 | Extension Publish Error | Error occurred during extension publishing process |
+| Exit Code | NR Command | Legacy Command | Meaning |
+|-----------|------------|----------------|---------|
+| 0 | ✓ | ✓ | Success - Command completed successfully |
+| 2 | ✓ | ✓ | Unknown Command - The specified command was not recognized |
+| 5 | ✓ | - | Configuration Load Failed - Failed to load configuration from files or environment |
+| 6 | ✓ | - | Conversion Error - Error occurred during conversion process |
+| 7 | ✓ | - | Storage Update Error - Error occurred while updating storage |
+| 8 | ✓ | ✓ | Service Operation Failed - Error occurred during service mode operations |
+| 9 | ✓ | - | External Processing Failed - Error occurred while executing external processing |
 
-These exit codes are consistently used across all commands, providing a predictable interface for integration with workflow systems like GitHub Actions, as evidenced by the action.yaml configuration file.
+**Note**: NR commands primarily use exit code 8 for service operation failures, while legacy commands maintain their specific exit codes for different operation types.
 
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L50-L262)
-- [action.yaml](file://config/action.yaml#L1-L50)
+- [main.go](file://cmd/benadis-runner/main.go#L223-L228)
+- [registry.go](file://internal/command/registry.go#L57-L64)
 
 ## Command Reference
+
+### nr-version
+The nr-version command displays application version information in either JSON or human-readable format. This is the first NR command demonstrating the new framework architecture.
+
+**Syntax**: `BR_COMMAND=nr-version`
+
+**Parameters**:
+- `BR_OUTPUT_FORMAT`: Set to "json" for machine-readable output, defaults to human-readable
+
+**Workflow**:
+1. Build version data with fallback values for development builds
+2. Generate or extract trace ID from context
+3. Format output based on BR_OUTPUT_FORMAT environment variable
+4. Return structured result with version, Go version, and commit hash
+
+**Expected Outputs**:
+- JSON format: `{"status":"success","command":"nr-version","data":{"version":"x.y.z","go_version":"go1.x.x","commit":"abc123"},"metadata":{"duration_ms":123,"trace_id":"abc-def-ghi","api_version":"v1"}}`
+- Text format: `benadis-runner version x.y.z.10.11.5:5deea45-debug`
+
+**Section sources**
+- [version/version.go](file://internal/command/handlers/version/version.go#L74-L109)
+- [constants.go](file://internal/constants/constants.go#L102-L103)
+
+### help
+The help command provides comprehensive documentation of all available commands, automatically discovering NR commands from the registry and listing legacy commands from the switch statement.
+
+**Syntax**: `BR_COMMAND=help`
+
+**Parameters**:
+- `BR_OUTPUT_FORMAT`: Set to "json" for machine-readable output, defaults to human-readable
+
+**Workflow**:
+1. Collect all registered NR commands from the registry
+2. Gather legacy commands from the predefined legacyCommands map
+3. Sort commands alphabetically for consistent output
+4. Format output based on BR_OUTPUT_FORMAT environment variable
+5. Include deprecated command information with migration guidance
+
+**Expected Outputs**:
+- JSON format: Includes separate arrays for NR and legacy commands with descriptions and deprecation status
+- Text format: Two-column layout showing command names and descriptions, with deprecated commands annotated
+
+**Section sources**
+- [help/help.go](file://internal/command/handlers/help/help.go#L82-L115)
+- [help/help.go](file://internal/command/handlers/help/help.go#L117-L153)
+
+### nr-service-mode-enable
+The nr-service-mode-enable command enables service mode for a specified 1C information base with comprehensive status reporting and structured output.
+
+**Syntax**: `BR_COMMAND=nr-service-mode-enable`
+
+**Parameters**:
+- `BR_INFOBASE_NAME`: Name of the information base to place in service mode
+- `BR_TERMINATE_SESSIONS`: Boolean flag indicating whether to terminate active sessions
+- `BR_SERVICE_MODE_MESSAGE`: Custom message for service mode (optional)
+- `BR_SERVICE_MODE_PERMISSION_CODE`: Custom permission code (optional)
+- `BR_OUTPUT_FORMAT`: Set to "json" for machine-readable output
+
+**Workflow**:
+1. Validate information base name presence
+2. Create RAC client for 1C cluster communication
+3. Check current service mode status (idempotent operation)
+4. Terminate active sessions if requested and enabled
+5. Enable service mode with verification
+6. Generate structured result with detailed status information
+
+**Expected Outputs**:
+- JSON format: `{"status":"success","command":"nr-service-mode-enable","data":{"enabled":true,"already_enabled":false,"state_changed":true,"message":"Service Mode","permission_code":"ServiceMode","scheduled_jobs_blocked":true,"terminated_sessions_count":2,"infobase_name":"TestBase"},"metadata":{"duration_ms":1234,"trace_id":"abc-def-ghi","api_version":"v1"}}`
+- Text format: Human-readable summary with status, message, and session termination details
+
+**Section sources**
+- [servicemodeenablehandler/handler.go](file://internal/command/handlers/servicemodeenablehandler/handler.go#L86-L231)
+
+### nr-service-mode-disable
+The nr-service-mode-disable command disables service mode for a specified 1C information base with verification and structured reporting.
+
+**Syntax**: `BR_COMMAND=nr-service-mode-disable`
+
+**Parameters**:
+- `BR_INFOBASE_NAME`: Name of the information base to remove from service mode
+- `BR_OUTPUT_FORMAT`: Set to "json" for machine-readable output
+
+**Workflow**:
+1. Validate information base name presence
+2. Create RAC client for 1C cluster communication
+3. Check current service mode status (idempotent operation)
+4. Disable service mode with verification
+5. Verify scheduled job status after disabling
+6. Generate structured result with detailed status information
+
+**Expected Outputs**:
+- JSON format: `{"status":"success","command":"nr-service-mode-disable","data":{"disabled":true,"already_disabled":false,"state_changed":true,"scheduled_jobs_unblocked":true,"infobase_name":"TestBase"},"metadata":{"duration_ms":890,"trace_id":"abc-def-ghi","api_version":"v1"}}`
+- Text format: Human-readable summary with status and scheduled job information
+
+**Section sources**
+- [servicemodedisablehandler/handler.go](file://internal/command/handlers/servicemodedisablehandler/handler.go#L82-L203)
+
+### nr-service-mode-status
+The nr-service-mode-status command checks the current status of service mode for a specified 1C information base with detailed session information.
+
+**Syntax**: `BR_COMMAND=nr-service-mode-status`
+
+**Parameters**:
+- `BR_INFOBASE_NAME`: Name of the information base to check
+- `BR_OUTPUT_FORMAT`: Set to "json" for machine-readable output
+
+**Workflow**:
+1. Validate information base name presence
+2. Create RAC client for 1C cluster communication
+3. Retrieve cluster and information base details
+4. Get current service mode status with blocking indicators
+5. Fetch active session details (graceful degradation if unavailable)
+6. Generate structured result with comprehensive status information
+
+**Expected Outputs**:
+- JSON format: `{"status":"success","command":"nr-service-mode-status","data":{"enabled":true,"message":"Service Mode","scheduled_jobs_blocked":true,"active_sessions":3,"infobase_name":"TestBase","sessions":[{"user_name":"user1","host":"host1","started_at":"2025-01-01T00:00:00Z","last_active_at":"2025-01-01T01:00:00Z","app_id":"app1"}]},"metadata":{"duration_ms":567,"trace_id":"abc-def-ghi","api_version":"v1"}}`
+- Text format: Human-readable summary with status, message, active session count, and session details
+
+**Section sources**
+- [servicemodestatushandler/handler.go](file://internal/command/handlers/servicemodestatushandler/handler.go#L118-L229)
+
+### nr-force-disconnect-sessions
+The nr-force-disconnect-sessions command terminates active sessions for a specified 1C information base with configurable grace periods and detailed reporting.
+
+**Syntax**: `BR_COMMAND=nr-force-disconnect-sessions`
+
+**Parameters**:
+- `BR_INFOBASE_NAME`: Name of the information base whose sessions to terminate
+- `BR_DISCONNECT_DELAY_SEC`: Grace period before session termination (0-300 seconds)
+- `BR_OUTPUT_FORMAT`: Set to "json" for machine-readable output
+
+**Workflow**:
+1. Validate information base name presence
+2. Parse and validate grace period parameter
+3. Create RAC client for 1C cluster communication
+4. Retrieve active session list
+5. Apply grace period with context cancellation support
+6. Terminate sessions individually with error collection
+7. Generate structured result with termination details
+
+**Expected Outputs**:
+- JSON format: `{"status":"success","command":"nr-force-disconnect-sessions","data":{"terminated_sessions_count":2,"no_active_sessions":false,"state_changed":true,"delay_sec":30,"infobase_name":"TestBase","partial_failure":false,"sessions":[{"user_name":"user1","app_id":"app1","host":"host1","session_id":"sess1"},{"user_name":"user2","app_id":"app2","host":"host2","session_id":"sess2"}],"errors":[]},"metadata":{"duration_ms":1234,"trace_id":"abc-def-ghi","api_version":"v1"}}`
+- Text format: Human-readable summary with termination count, session details, and any errors
+
+**Section sources**
+- [forcedisconnecthandler/handler.go](file://internal/command/handlers/forcedisconnecthandler/handler.go#L121-L268)
 
 ### convert
 The convert command performs conversion of 1C:Enterprise projects from repository format. It clones the repository, switches to the appropriate branch, loads converter configuration, and executes the conversion process.
@@ -137,16 +376,8 @@ The convert command performs conversion of 1C:Enterprise projects from repositor
 - Success: "Конвертация успешно завершена" logged at Info level
 - Failure: Error message logged with details about the failure
 
-**Common Usage Patterns**:
-- Automated build pipelines that need to convert EDT format to other formats
-- Migration scenarios between different 1C configurations
-
-**Anti-patterns**:
-- Running without proper repository access permissions
-- Insufficient disk space in working directory
-
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L60-L75)
+- [main.go](file://cmd/benadis-runner/main.go#L70-L78)
 - [app.go](file://internal/app/app.go#L80-L150)
 
 ### dbrestore
@@ -173,20 +404,13 @@ The dbrestore command restores a 1C database from a backup. It initializes HASP 
 - Success: "DbRestore успешно выполнен" logged at Info level with database name
 - Failure: Error message logged with details about the restoration failure
 
-**Common Usage Patterns**:
-- Restoring production databases to test environments
-- Disaster recovery procedures
-- Database refresh operations for testing
-
-**Anti-patterns**:
-- Attempting to restore over an active production database without proper downtime planning
-- Insufficient storage space for the restored database
-
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L120-L135)
+- [main.go](file://cmd/benadis-runner/main.go#L102-L112)
 - [app.go](file://internal/app/app.go#L600-L650)
 
 ### service-mode-enable
+**Deprecated**: Use `nr-service-mode-enable` instead.
+
 The service-mode-enable command enables service mode for a specified 1C information base. This blocks user access to the database, allowing administrative operations to be performed without interference from active sessions.
 
 **Syntax**: `BR_COMMAND=service-mode-enable`
@@ -209,20 +433,13 @@ The service-mode-enable command enables service mode for a specified 1C informat
 - Success: "Сервисный режим успешно включен" logged at Info level with database name
 - Failure: Error message logged with details about why service mode could not be enabled
 
-**Common Usage Patterns**:
-- Preparing for database updates or schema changes
-- Performing maintenance operations that require exclusive access
-- Applying configuration changes that need service mode
-
-**Anti-patterns**:
-- Enabling service mode during peak business hours without notification
-- Forgetting to disable service mode after completing maintenance
-
 **Section sources**
 - [main.go](file://cmd/benadis-runner/main.go#L75-L95)
 - [app.go](file://internal/app/app.go#L150-L200)
 
 ### service-mode-disable
+**Deprecated**: Use `nr-service-mode-disable` instead.
+
 The service-mode-disable command disables service mode for a specified 1C information base. This restores normal user access to the database after administrative operations have been completed.
 
 **Syntax**: `BR_COMMAND=service-mode-disable`
@@ -244,20 +461,13 @@ The service-mode-disable command disables service mode for a specified 1C inform
 - Success: "Сервисный режим успешно отключен" logged at Info level with database name
 - Failure: Error message logged with details about why service mode could not be disabled
 
-**Common Usage Patterns**:
-- Completing maintenance windows
-- Restoring access after configuration updates
-- Finalizing database migration procedures
-
-**Anti-patterns**:
-- Disabling service mode before completing all required administrative tasks
-- Not verifying database integrity before restoring user access
-
 **Section sources**
 - [main.go](file://cmd/benadis-runner/main.go#L95-L110)
 - [app.go](file://internal/app/app.go#L200-L250)
 
 ### service-mode-status
+**Deprecated**: Use `nr-service-mode-status` instead.
+
 The service-mode-status command checks the current status of service mode for a specified 1C information base. It returns information about whether service mode is active and what restrictions are in place.
 
 **Syntax**: `BR_COMMAND=service-mode-status`
@@ -278,15 +488,6 @@ The service-mode-status command checks the current status of service mode for a 
 **Expected Outputs**:
 - Success: Status information logged including whether service mode is enabled and session counts
 - Failure: Error message logged with details about why status could not be retrieved
-
-**Common Usage Patterns**:
-- Verifying service mode state before performing operations
-- Monitoring scripts that track database availability
-- Troubleshooting connection issues
-
-**Anti-patterns**:
-- Relying solely on this command without attempting actual connections
-- Not considering network latency when interpreting results
 
 **Section sources**
 - [main.go](file://cmd/benadis-runner/main.go#L110-L120)
@@ -324,17 +525,8 @@ The git2store command synchronizes data from a Git repository into a 1C configur
 - Success: "Обновление хранилища успешно завершено" logged at Info level
 - Failure: Error message logged with details about the synchronization failure
 
-**Common Usage Patterns**:
-- Integrating code changes from development branches into 1C configuration
-- Automating regular synchronization between Git and 1C repositories
-- Deploying configuration changes from version control
-
-**Anti-patterns**:
-- Running without sufficient permissions to modify the configuration repository
-- Attempting to merge conflicting changes without proper review
-
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L95-L110)
+- [main.go](file://cmd/benadis-runner/main.go#L80-L89)
 - [app.go](file://internal/app/app.go#L300-L500)
 
 ### store2db
@@ -360,15 +552,6 @@ The store2db command loads configuration from a 1C configuration repository into
 **Expected Outputs**:
 - Success: "Обновление хранилища успешно завершено" logged at Info level
 - Failure: Error message logged with details about the loading failure
-
-**Common Usage Patterns**:
-- Deploying configuration changes to test or production environments
-- Refreshing databases with the latest configuration
-- Initializing new databases with standard configuration
-
-**Anti-patterns**:
-- Overwriting customizations in target databases
-- Not backing up databases before applying configuration changes
 
 **Section sources**
 - [main.go](file://cmd/benadis-runner/main.go#L60-L75)
@@ -400,17 +583,8 @@ The sq-scan-branch command performs SonarQube analysis on a specific branch of c
 - Success: "Сканирование ветки SonarQube успешно завершено" logged at Info level
 - Failure: Error message logged with details about the scanning failure
 
-**Common Usage Patterns**:
-- Continuous integration pipelines that require code quality analysis
-- Pre-deployment checks for code quality metrics
-- Regular monitoring of technical debt in active branches
-
-**Anti-patterns**:
-- Scanning every commit without considering performance impact
-- Ignoring critical issues reported by the scan
-
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L200-L215)
+- [main.go](file://cmd/benadis-runner/main.go#L163-L172)
 - [app.go](file://internal/app/app.go#L550-L600)
 
 ### sq-scan-pr
@@ -440,103 +614,32 @@ The sq-scan-pr command performs SonarQube analysis on a pull request. It retriev
 - Success: "Сканирование pull request SonarQube успешно завершено" logged at Info level
 - Failure: Error message logged with details about the scanning failure, including "PR not found" if the PR doesn't exist
 
-**Common Usage Patterns**:
-- Pull request gating in CI/CD pipelines
-- Code quality enforcement before merging
-- Automated feedback on pull request quality
-
-**Anti-patterns**:
-- Setting overly strict quality gates that block legitimate development
-- Not reviewing false positives in issue detection
-
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L200-L215)
-- [app.go](file://internal/app/app.go#L600-L650)
+- [main.go](file://cmd/benadis-runner/main.go#L173-L182)
+- [app.go](file://internal/app/app.go#L550-L600)
 
 ### execute-epf
-The execute-epf command executes external 1C:Enterprise processing files (EPF). It validates the EPF URL, downloads the file, and runs it using the 1C Enterprise runtime with proper configuration and logging.
+The execute-epf command runs 1C:Enterprise external processing files (.epf) with proper configuration and logging support.
 
 **Syntax**: `BR_COMMAND=execute-epf`
 
 **Parameters**:
-- `BR_START_EPF`: URL to the EPF file to execute
+- `BR_EPF_PATH`: Path to the external processing file
 - `BR_CONFIG_SYSTEM`: Path to system configuration file
 - `BR_CONFIG_PROJECT`: Path to project configuration file
 - `BR_WORKDIR`: Working directory path
 
 **Workflow**:
-1. Validate that BR_START_EPF is provided
-2. Download EPF file from the specified URL
-3. Initialize 1C Enterprise runtime with configuration
-4. Execute the EPF file with proper logging
-5. Handle any errors during execution
+1. Validate EPF file path exists
+2. Load configuration using provided parameters
+3. Initialize 1C environment with proper settings
+4. Execute external processing with error handling
+5. Log execution results and handle any errors
 
 **Expected Outputs**:
 - Success: "Внешняя обработка успешно выполнена" logged at Info level
-- Failure: Error message logged with details about the execution failure
-
-**Common Usage Patterns**:
-- Running automated business processes
-- Executing custom 1C:Enterprise scripts
-- Performing batch operations
-
-**Anti-patterns**:
-- Running without proper EPF file permissions
-- Not validating EPF file integrity before execution
+- Failure: Error message logged with details about execution failure
 
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L184-L193)
-- [app.go](file://internal/app/app.go#L700-L750)
-
-### extension-publish
-The extension-publish command automatically publishes 1C:Enterprise extensions to all subscribed repositories. This command is triggered by Gitea Actions when a new release is created in the extension repository, and it distributes the updated extension version to all subscribing organizations through automated pull requests.
-
-**Syntax**: `BR_COMMAND=extension-publish`
-
-**Parameters**:
-- `GITEA_URL`: Gitea server URL
-- `GITHUB_REPOSITORY`: Current repository in format `owner/repo`
-- `GITHUB_REF_NAME`: Release tag name (defaults to "main")
-- `BR_ACCESS_TOKEN`: Access token for authentication
-- `BR_DRY_RUN`: Boolean flag for dry-run mode (default: false)
-- `BR_EXT_DIR`: Extension directory path (optional)
-- `BR_OUTPUT_JSON`: Output format flag (default: false)
-
-**Workflow**:
-1. **Initialization**: Parse repository information from GITHUB_REPOSITORY and validate configuration
-2. **Release Retrieval**: Fetch release information using GetReleaseByTag with the specified release tag
-3. **Subscriber Discovery**: Search for all subscribed repositories by parsing subscription branches in the format `{Org}_{Repo}_{ExtDir}`
-4. **Processing Loop**: For each subscriber repository:
-   - Initialize target Gitea API with organization credentials
-   - Analyze target project to get project name
-   - Determine source and target directory names
-   - Synchronize extension files from source to target repository
-   - Create automated pull request with release notes and changelog
-5. **Reporting**: Generate comprehensive report with success/failure statistics
-
-**Expected Outputs**:
-- Success: "Публикация расширения успешно завершена" logged at Info level
-- Failure: Error message logged with details about the publication failure
-- Report: Comprehensive summary of all operations performed
-
-**Common Usage Patterns**:
-- Automated extension distribution in multi-organization environments
-- Version synchronization across multiple 1C:Enterprise projects
-- CI/CD pipeline integration for extension releases
-
-**Anti-patterns**:
-- Running without proper Gitea access tokens
-- Not setting up subscription branches in target repositories
-- Skipping dry-run testing in production environments
-
-**Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L244-L253)
-- [extension_publish.go](file://internal/app/extension_publish.go#L997-L1251)
-- [extension-publish.md](file://docs/epics/extension-publish.md#L1-L326)
-
-**Diagram sources**
-- [extension_publish.go](file://internal/app/extension_publish.go#L997-L1251)
-
-**Section sources**
-- [extension_publish.go](file://internal/app/extension_publish.go#L997-L1251)
-- [extension-publish.md](file://docs/epics/extension-publish.md#L1-L326)
+- [main.go](file://cmd/benadis-runner/main.go#L153-L162)
+- [app.go](file://internal/app/app.go#L150-L200)

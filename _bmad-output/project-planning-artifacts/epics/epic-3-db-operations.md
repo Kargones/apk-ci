@@ -1,10 +1,67 @@
 # Epic 3: Database Operations
 
-**Статус:** 🟡 В планировании
+**Статус:** 🟠 Legacy существует, NR не начат
 **Приоритет:** Высокий
 **Риск:** 🔴 Высокий
-**Stories:** 6
+**Stories:** 0/6 NR (legacy работает)
 **FRs:** FR10-13, FR58, FR67
+**Аудит:** 2026-01-26
+
+---
+
+## 📊 Gap Analysis (Аудит 2026-01-26)
+
+### Статус реализации: 🟠 Legacy существует, NR не начат
+
+| Компонент | План (NR) | Legacy реализация | Статус |
+|-----------|-----------|-------------------|--------|
+| MSSQL Adapter Interface | `internal/adapter/mssql/interfaces.go` | ❌ Нет интерфейса | 🔴 |
+| nr-dbrestore | Command Registry | `main.go:133` (switch-case) | 🟠 Legacy |
+| nr-dbupdate | Command Registry | `main.go:122` (switch-case) | 🟠 Legacy |
+| nr-create-temp-db | Command Registry | `main.go:164` (switch-case) | 🟠 Legacy |
+| Progress Bar (FR67) | `internal/pkg/progress/` | ❌ Не реализовано | 🔴 |
+| Dry-run режим (FR58) | Story 3.6 | ❌ Не реализовано | 🔴 |
+| Auto-timeout (FR11) | Story 3.2 | ✅ Реализовано | ✅ |
+
+### Текущее состояние кода
+
+```
+LEGACY РЕАЛИЗАЦИЯ:
+├── internal/entity/dbrestore/dbrestore.go  ✅ DbRestore logic
+├── internal/app/app.go                     ✅ DbRestore*, DbUpdate*
+├── internal/service/                       ✅ Сервисный слой
+└── cmd/benadis-runner/main.go              ✅ switch-case
+
+NR АРХИТЕКТУРА (ОЖИДАЕТСЯ):
+├── internal/command/handlers/database/     ❌ НЕ СУЩЕСТВУЕТ
+├── internal/adapter/mssql/interfaces.go    ❌ НЕ СУЩЕСТВУЕТ
+└── internal/pkg/progress/                  ❌ НЕ СУЩЕСТВУЕТ
+```
+
+### 🔒 Prerequisite
+
+**Требует Epic 1 + Epic 2!**
+- Epic 1: Command Registry
+- Epic 2: Service Mode (для блокировки базы при restore)
+
+### Legacy команды в production
+
+| Команда | Статус | Auto-timeout | Progress |
+|---------|--------|--------------|----------|
+| dbrestore | ✅ Работает | ✅ | ❌ |
+| dbupdate | ✅ Работает | N/A | ❌ |
+| create-temp-db | ✅ Работает | N/A | ❌ |
+
+### Stories Progress
+
+| Story | Название | Статус |
+|-------|----------|--------|
+| 3.1 | MSSQL Adapter Interface | 🔴 Ждёт Epic 1 |
+| 3.2 | nr-dbrestore с auto-timeout | 🟠 Auto-timeout есть |
+| 3.3 | Progress Bar (FR67) | 🔴 Не начат |
+| 3.4 | nr-dbupdate | 🟠 Legacy есть |
+| 3.5 | nr-create-temp-db | 🟠 Legacy есть |
+| 3.6 | Dry-run режим (FR58) | 🔴 Не начат |
 
 ---
 
@@ -193,4 +250,5 @@ Restore/update баз с progress bar и dry-run режимом. Решение 
 
 ---
 
-_Последнее обновление: 2025-11-25_
+_Последнее обновление: 2026-01-26_
+_Аудит проведён: 2026-01-26 (BMAD Party Mode)_

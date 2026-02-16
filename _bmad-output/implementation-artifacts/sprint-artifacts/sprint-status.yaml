@@ -60,102 +60,102 @@ development_status:
   # Epic 1: Architectural Foundation
   # DI + Registry + Output + Logging + Tracing + первая NR-команда
   # ═══════════════════════════════════════════════════════════════════════════
-  epic-1: backlog
-  1-1-command-registry-self-registration: backlog
-  1-2-nr-migration-bridge-deprecatedbridge: backlog
-  1-3-outputwriter-structured-errors: backlog
-  1-4-logger-interface-slog-adapter: backlog
-  1-5-trace-id-generation: backlog
-  1-6-config-extensions: backlog
-  1-7-wire-di-setup-providers: backlog
-  1-8-first-nr-command-nr-version: backlog
-  1-9-auto-generated-help-from-registry: backlog
+  epic-1: done
+  1-1-command-registry-self-registration: done
+  1-2-nr-migration-bridge-deprecatedbridge: done
+  1-3-outputwriter-structured-errors: done
+  1-4-logger-interface-slog-adapter: done
+  1-5-trace-id-generation: done
+  1-6-config-extensions: done
+  1-7-wire-di-setup-providers: done
+  1-8-first-nr-command-nr-version: done
+  1-9-auto-generated-help-from-registry: done
   epic-1-retrospective: optional
 
   # ═══════════════════════════════════════════════════════════════════════════
   # Epic 2: Service Mode Management (Proof of Concept)
   # ═══════════════════════════════════════════════════════════════════════════
-  epic-2: backlog
-  2-1-rac-adapter-interface: backlog
-  2-2-rac-client-implementation: backlog
-  2-3-nr-service-mode-status: backlog
-  2-4-session-info-service-mode-status: backlog
-  2-5-nr-service-mode-enable: backlog
-  2-6-force-disconnect-sessions: backlog
-  2-7-nr-service-mode-disable: backlog
-  2-8-state-aware-execution: backlog
+  epic-2: done
+  2-1-rac-adapter-interface: done
+  2-2-rac-client-implementation: done
+  2-3-nr-service-mode-status: done
+  2-4-session-info-service-mode-status: done
+  2-5-nr-service-mode-enable: done
+  2-6-force-disconnect-sessions: done
+  2-7-nr-service-mode-disable: done
+  2-8-state-aware-execution: done
   epic-2-retrospective: optional
 
   # ═══════════════════════════════════════════════════════════════════════════
   # Epic 3: Database Operations
   # Restore/update с progress bar и dry-run
   # ═══════════════════════════════════════════════════════════════════════════
-  epic-3: backlog
-  3-1-mssql-adapter-interface: backlog
-  3-2-nr-dbrestore-auto-timeout: backlog
-  3-3-progress-bar-long-operations: backlog
-  3-4-nr-dbupdate: backlog
-  3-5-nr-create-temp-db: backlog
-  3-6-dry-run-mode: backlog
+  epic-3: done
+  3-1-mssql-adapter-interface: done
+  3-2-nr-dbrestore-auto-timeout: done
+  3-3-progress-bar-long-operations: done
+  3-4-nr-dbupdate: done
+  3-5-nr-create-temp-db: done
+  3-6-dry-run-mode: done
   epic-3-retrospective: optional
 
   # ═══════════════════════════════════════════════════════════════════════════
   # Epic 4: Configuration Sync
   # EDT↔Store↔DB цикл с детальным reporting
   # ═══════════════════════════════════════════════════════════════════════════
-  epic-4: backlog
-  4-1-1c-operations-factory: backlog
-  4-2-nr-store2db: backlog
-  4-3-nr-storebind: backlog
-  4-4-nr-create-stores: backlog
-  4-5-nr-convert: backlog
-  4-6-nr-git2store: backlog
-  4-7-nr-execute-epf: backlog
+  epic-4: in-progress
+  4-1-1c-operations-factory: done
+  4-2-nr-store2db: done
+  4-3-nr-storebind: done
+  4-4-nr-create-stores: done
+  4-5-nr-convert: done
+  4-6-nr-git2store: done
+  4-7-nr-execute-epf: done
   epic-4-retrospective: optional
 
   # ═══════════════════════════════════════════════════════════════════════════
   # Epic 5: Quality & Integration
   # SonarQube + Gitea интеграция
   # ═══════════════════════════════════════════════════════════════════════════
-  epic-5: backlog
-  5-1-sonarqube-adapter-interface: backlog
-  5-2-gitea-adapter-interface: backlog
-  5-3-nr-sq-scan-branch: backlog
-  5-4-nr-sq-scan-pr: backlog
-  5-5-nr-sq-report-branch: backlog
-  5-6-nr-sq-project-update: backlog
-  5-7-nr-test-merge: backlog
-  5-8-nr-action-menu-build: backlog
-  5-9-command-summary: backlog
+  epic-5: done
+  5-1-sonarqube-adapter-interface: done
+  5-2-gitea-adapter-interface: done
+  5-3-nr-sq-scan-branch: done
+  5-4-nr-sq-scan-pr: done
+  5-5-nr-sq-report-branch: done
+  5-6-nr-sq-project-update: done
+  5-7-nr-test-merge: done
+  5-8-nr-action-menu-build: done
+  5-9-command-summary: done
   epic-5-retrospective: optional
 
   # ═══════════════════════════════════════════════════════════════════════════
   # Epic 6: Advanced Observability
   # Алерты, Prometheus, Delve
   # ═══════════════════════════════════════════════════════════════════════════
-  epic-6: backlog
-  6-1-log-file-rotation: backlog
-  6-2-email-alerting: backlog
-  6-3-telegram-alerting: backlog
-  6-4-webhook-alerting: backlog
-  6-5-prometheus-metrics: backlog
-  6-6-alert-rules-configuration: backlog
-  6-7-opentelemetry-export: backlog
-  6-8-trace-sampling: backlog
-  6-9-delve-debugging: backlog
+  epic-6: done
+  6-1-log-file-rotation: done
+  6-2-email-alerting: done
+  6-3-telegram-alerting: done
+  6-4-webhook-alerting: done
+  6-5-prometheus-metrics: done
+  6-6-alert-rules-configuration: done
+  6-7-opentelemetry-export: done
+  6-8-trace-sampling: done
+  6-9-delve-debugging: done
   epic-6-retrospective: optional
 
   # ═══════════════════════════════════════════════════════════════════════════
   # Epic 7: Finalization
   # Shadow-run, cleanup, UX polish
   # ═══════════════════════════════════════════════════════════════════════════
-  epic-7: backlog
-  7-1-shadow-run-mode: backlog
-  7-2-smoke-tests: backlog
-  7-3-operation-plan-display: backlog
-  7-4-rollback-support: backlog
-  7-5-migration-script: backlog
-  7-6-deprecated-code-audit: backlog
+  epic-7: in-progress
+  7-1-shadow-run-mode: done
+  7-2-smoke-tests: done
+  7-3-operation-plan-display: done
+  7-4-rollback-support: done
+  7-5-migration-script: done
+  7-6-deprecated-code-audit: done
   7-7-deprecated-code-removal: backlog
   7-8-adr-management: backlog
   7-9-data-masking: backlog

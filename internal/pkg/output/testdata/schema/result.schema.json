@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Kargones/apk-ci/result.schema.json",
+  "title": "Result",
+  "description": "Структурированный результат выполнения команды benadis-runner",
+  "type": "object",
+  "required": ["status", "command"],
+  "properties": {
+    "status": {
+      "type": "string",
+      "enum": ["success", "error"],
+      "description": "Статус выполнения команды"
+    },
+    "command": {
+      "type": "string",
+      "description": "Имя выполненной команды"
+    },
+    "data": {
+      "description": "Command-specific payload"
+    },
+    "error": {
+      "type": "object",
+      "required": ["code", "message"],
+      "properties": {
+        "code": {
+          "type": "string",
+          "pattern": "^[A-Z]+\\.[A-Z_]+$",
+          "description": "Машиночитаемый код ошибки в формате CATEGORY.SPECIFIC"
+        },
+        "message": {
+          "type": "string",
+          "description": "Человекочитаемое описание ошибки"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Информация об ошибке (только при status=error)"
+    },
+    "metadata": {
+      "type": "object",
+      "required": ["api_version"],
+      "properties": {
+        "duration_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Время выполнения команды в миллисекундах"
+        },
+        "trace_id": {
+          "type": "string",
+          "description": "Идентификатор трассировки для корреляции логов"
+        },
+        "api_version": {
+          "type": "string",
+          "pattern": "^v[0-9]+$",
+          "description": "Версия формата API"
+        },
+        "summary": {
+          "type": "object",
+          "description": "Сводка результатов операции (Story 5-9 AC-3)"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Метаданные выполнения команды"
+    },
+    "dry_run": {
+      "type": "boolean",
+      "description": "Указывает что результат — это dry-run план, а не реальное выполнение"
+    },
+    "plan_only": {
+      "type": "boolean",
+      "description": "Указывает что результат — это plan-only отображение плана (Story 7.3)"
+    },
+    "plan": {
+      "type": "object",
+      "description": "План операций для dry-run режима",
+      "properties": {
+        "command": {
+          "type": "string",
+          "description": "Имя команды"
+        },
+        "steps": {
+          "type": "array",
+          "description": "Шаги плана",
+          "items": {
+            "type": "object",
+            "required": ["order", "operation"],
+            "properties": {
+              "order": {
+                "type": "integer",
+                "description": "Порядковый номер шага"
+              },
+              "operation": {
+                "type": "string",
+                "description": "Название операции"
+              },
+              "parameters": {
+                "type": "object",
+                "description": "Параметры операции (ключ-значение)",
+                "additionalProperties": true
+              },
+              "expected_changes": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Ожидаемые изменения"
+              },
+              "skipped": {
+                "type": "boolean",
+                "description": "Пропущен ли шаг"
+              },
+              "skip_reason": {
+                "type": "string",
+                "description": "Причина пропуска"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "summary": {
+          "type": "string",
+          "description": "Краткое описание плана"
+        },
+        "validation_passed": {
+          "type": "boolean",
+          "description": "Прошла ли валидация"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "if": {
+    "properties": {
+      "status": { "const": "error" }
+    }
+  },
+  "then": {
+    "required": ["status", "command", "error"]
+  }
+}

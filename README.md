@@ -1,4 +1,4 @@
-# apk-ci
+# benadis-runner
 
 Инструмент для автоматизации работы с системой 1С:Предприятие, включающий модули для конвертации данных, восстановления баз данных, управления сервисным режимом и работы с EDT.
 
@@ -16,14 +16,14 @@
 
 ```bash
 git clone <repository-url>
-cd apk-ci
-go build -o apk-ci ./cmd/apk-ci
+cd benadis-runner
+go build -o benadis-runner ./cmd/benadis-runner
 ```
 
 ### Использование в качестве библиотеки
 
 ```bash
-go get github.com/your-org/apk-ci
+go get github.com/your-org/benadis-runner
 ```
 
 ## Конфигурация
@@ -61,13 +61,13 @@ cp examples/all-modules-config.env .env
 
 ```bash
 # Управление сервисным режимом
-./apk-ci service-mode-enable --infobase MyInfobase
+./benadis-runner service-mode-enable --infobase MyInfobase
 
 # Восстановление базы данных
-./apk-ci dbrestore --config config.yaml
+./benadis-runner dbrestore --config config.yaml
 
 # Конвертация данных
-./apk-ci convert --config convert-config.json
+./benadis-runner convert --config convert-config.json
 ```
 
 ### Программный интерфейс

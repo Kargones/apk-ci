@@ -615,11 +615,13 @@ func TestGetDefaultConfigs(t *testing.T) {
 		if loggingConfig.Level != "info" {
 			t.Errorf("Expected Level = info, got %s", loggingConfig.Level)
 		}
-		if loggingConfig.Format != "json" {
-			t.Errorf("Expected Format = json, got %s", loggingConfig.Format)
+		// ИЗМЕНЕНО: default Format теперь "text" для human-readable вывода
+		if loggingConfig.Format != "text" {
+			t.Errorf("Expected Format = text, got %s", loggingConfig.Format)
 		}
-		if loggingConfig.Output != "stdout" {
-			t.Errorf("Expected Output = stdout, got %s", loggingConfig.Output)
+		// ИЗМЕНЕНО: default Output теперь "stderr" для separation of concerns
+		if loggingConfig.Output != "stderr" {
+			t.Errorf("Expected Output = stderr, got %s", loggingConfig.Output)
 		}
 	})
 
@@ -1600,4 +1602,41 @@ func TestAnalyzeProject(t *testing.T) {
 // TestReloadConfig тестирует перезагрузку конфигурации
 func TestReloadConfig(t *testing.T) {
 	t.Skip("Skipping ReloadConfig test due to external API dependencies")
+}
+
+// TestValidateTracingConfig_SamplingRate проверяет валидацию SamplingRate
+// при загрузке конфигурации (validateTracingConfig).
+func TestValidateTracingConfig_SamplingRate(t *testing.T) {
+	tests := []struct {
+		name    string
+		rate    float64
+		wantErr bool
+	}{
+		{"отрицательный rate", -0.1, true},
+		{"нулевой rate (валидно)", 0.0, false},
+		{"половинный rate", 0.5, false},
+		{"полный rate", 1.0, false},
+		{"больше единицы", 1.1, true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cfg := &TracingConfig{
+				Enabled:      true,
+				Endpoint:     "localhost:4318",
+				ServiceName:  "test",
+				Timeout:      5 * time.Second,
+				SamplingRate: tt.rate,
+			}
+			err := validateTracingConfig(cfg)
+			if tt.wantErr {
+				if err == nil {
+					t.Errorf("ожидалась ошибка для rate=%f", tt.rate)
+				}
+			} else {
+				if err != nil {
+					t.Errorf("не ожидалась ошибка для rate=%f, получено: %v", tt.rate, err)
+				}
+			}
+		})
+	}
 }

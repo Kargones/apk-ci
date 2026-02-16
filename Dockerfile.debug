@@ -1,0 +1,45 @@
+# Multi-stage build для debug
+# Используется для отладки через Delve в Docker-контейнере
+# НЕ для production deployment!
+
+FROM golang:1.25-bookworm AS builder
+
+# H-10/Review #16: git нужен для git rev-parse при сборке (GitCommit в ldflags)
+RUN apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
+
+# Установка Delve
+RUN go install github.com/go-delve/delve/cmd/dlv@latest
+
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+
+# Сборка с debug информацией (отключена оптимизация)
+RUN GIT_COMMIT=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown") && \
+    CGO_ENABLED=0 go build -gcflags="all=-N -l" \
+    -ldflags "-X main.Version=debug -X main.BuildTime=$(date -u '+%Y-%m-%d_%H:%M:%S') -X main.GitCommit=$GIT_COMMIT" \
+    -o /app/benadis-runner-debug ./cmd/benadis-runner/
+
+FROM debian:bookworm-slim
+
+# L-14/Review #15: LABEL для автоматической идентификации debug-образа в CI/CD
+LABEL benadis.build-type="debug"
+LABEL benadis.warning="НЕ для production deployment"
+
+# Непривилегированный пользователь для запуска отладчика
+RUN useradd --create-home --shell /bin/false debuguser
+
+# Копировать бинарник и dlv
+COPY --from=builder /go/bin/dlv /usr/local/bin/dlv
+COPY --from=builder /app/benadis-runner-debug /app/benadis-runner-debug
+
+USER debuguser
+EXPOSE 2345
+
+# M-6/Review #17: --listen=:2345 привязывает к 0.0.0.0 внутри контейнера.
+# ОБЯЗАТЕЛЬНО используйте -p 127.0.0.1:2345:2345 при docker run,
+# чтобы порт был доступен только с localhost.
+# Пример: docker run -p 127.0.0.1:2345:2345 benadis-runner-debug
+ENTRYPOINT ["dlv", "exec", "/app/benadis-runner-debug", \
+    "--headless", "--listen=:2345", "--api-version=2", "--accept-multiclient"]

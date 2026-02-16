@@ -1,14 +1,26 @@
 # Check Service Mode Status
 
 <cite>
-**Referenced Files in This Document**   
-- [main.go](file://cmd/benadis-runner/main.go)
-- [servicemode.go](file://internal/servicemode/servicemode.go)
+**Referenced Files in This Document**
+- [handler.go](file://internal/command/handlers/servicemodestatushandler/handler.go)
+- [handler_test.go](file://internal/command/handlers/servicemodestatushandler/handler_test.go)
+- [interfaces.go](file://internal/adapter/onec/rac/interfaces.go)
 - [service_mode.go](file://internal/rac/service_mode.go)
-- [app.go](file://internal/app/app.go)
+- [result.go](file://internal/pkg/output/result.go)
+- [json.go](file://internal/pkg/output/json.go)
 - [constants.go](file://internal/constants/constants.go)
+- [main.go](file://cmd/benadis-runner/main.go)
 - [config.go](file://internal/config/config.go)
 </cite>
+
+## Update Summary
+**Changes Made**
+- Updated command name from "service-mode-status" to "nr-service-mode-status" with deprecated alias support
+- Added comprehensive session information display with detailed user session data
+- Enhanced structured output formats with JSON validation and standardized result structure
+- Implemented graceful degradation for session retrieval errors
+- Added support for both text and JSON output formats with proper formatting
+- Updated error handling with machine-readable error codes and structured error responses
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -16,229 +28,295 @@
 3. [Parameter Requirements](#parameter-requirements)
 4. [Internal Processing Flow](#internal-processing-flow)
 5. [Status Response Structure](#status-response-structure)
-6. [Automation Pipeline Integration](#automation-pipeline-integration)
-7. [Error Handling and Diagnostics](#error-handling-and-diagnostics)
-8. [Usage Examples](#usage-examples)
-9. [Configuration Management](#configuration-management)
+6. [Structured Output Formats](#structured-output-formats)
+7. [Session Information Display](#session-information-display)
+8. [Automation Pipeline Integration](#automation-pipeline-integration)
+9. [Error Handling and Diagnostics](#error-handling-and-diagnostics)
+10. [Usage Examples](#usage-examples)
+11. [Configuration Management](#configuration-management)
 
 ## Introduction
 
-The service-mode-status command in benadis-runner provides a critical monitoring capability for 1C:Enterprise information bases by retrieving the current service mode state. This functionality enables automation systems to make informed decisions about deployment operations based on the operational status of information bases. The command is designed to be integrated into continuous integration/continuous deployment (CI/CD) pipelines, allowing teams to verify system availability before executing maintenance operations or deployments.
+The nr-service-mode-status command in benadis-runner provides a comprehensive monitoring capability for 1C:Enterprise information bases by retrieving detailed service mode status information. This NR (New Runner) command represents a significant enhancement over the legacy service-mode-status, offering structured output formats, detailed session information display, and robust error handling mechanisms.
 
-By checking whether service mode is active and counting active user sessions, this command helps prevent conflicts between automated processes and user activities. It serves as a safety mechanism that ensures deployments and maintenance tasks only proceed when appropriate, reducing the risk of data corruption or service disruption. The structured logging output provides clear visibility into the system state, making it easier to troubleshoot issues and maintain audit trails.
+The command retrieves not only the current service mode state but also provides comprehensive details about active user sessions, including user names, host information, application IDs, and session timing data. This enhanced functionality enables automation systems to make informed decisions about deployment operations based on both service mode status and user activity levels.
+
+By supporting both text and JSON output formats with standardized result structures, the command facilitates seamless integration with modern CI/CD pipelines, monitoring systems, and automation frameworks. The structured output includes machine-readable error codes, trace IDs, and metadata that enhance observability and troubleshooting capabilities.
 
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L101-L115)
+- [handler.go](file://internal/command/handlers/servicemodestatushandler/handler.go#L102-L116)
+- [constants.go](file://internal/constants/constants.go#L104-L111)
 
 ## Command Functionality
 
-The service-mode-status command retrieves the current service mode state of a 1C:Enterprise infobase through a series of coordinated operations. When executed, the command initiates a process that validates the requested action, loads necessary configuration parameters, creates a client connection to the 1C:Enterprise platform via RAC (Remote Administration Console), and invokes the GetServiceModeStatus function to obtain detailed status information.
+The nr-service-mode-status command performs a comprehensive status check of a 1C:Enterprise information base through a multi-stage process. The command begins by validating the required BR_INFOBASE_NAME parameter, then establishes a connection to the RAC (Remote Administration Console) client to gather detailed system information.
 
-The primary purpose of this command is to determine whether service mode is currently active on the specified infobase and to count the number of active user sessions. This information is crucial for automation workflows that need to assess whether it's safe to proceed with deployments, updates, or other maintenance operations that require exclusive access to the database. The command returns structured information about the service mode status, enabling downstream processes to make conditional decisions based on the current system state.
+The enhanced functionality includes retrieving service mode status, counting active user sessions, and fetching detailed session information for each connected user. This information encompasses user identification, host details, application context, and temporal data about session establishment and last activity timestamps.
 
-Unlike commands that modify system state, service-mode-status performs a read-only operation that has no impact on the running system. This makes it safe to execute frequently for monitoring purposes without risking unintended side effects. The command's output provides a reliable indicator of the infobase's availability for maintenance operations.
+The command implements graceful degradation - if session retrieval fails, the service mode status is still returned with an empty sessions array rather than failing the entire operation. This design ensures that critical service mode information remains accessible even when session data cannot be retrieved.
 
 ```mermaid
 sequenceDiagram
 participant User as "User/System"
-participant Main as "main.go"
-participant App as "app.go"
-participant ServiceMode as "servicemode.go"
+participant Handler as "ServiceModeStatusHandler"
 participant RAC as "RAC Client"
-participant 1C as "1C : Enterprise Platform"
-User->>Main : Execute service-mode-status
-Main->>App : Call ServiceModeStatus()
-App->>ServiceMode : ManageServiceMode("status")
-ServiceMode->>ServiceMode : LoadServiceModeConfigForDb()
-ServiceMode->>ServiceMode : NewClient()
-ServiceMode->>RAC : GetClusterUUID()
-RAC-->>ServiceMode : Cluster UUID
-ServiceMode->>RAC : GetInfobaseUUID()
-RAC-->>ServiceMode : Infobase UUID
-ServiceMode->>RAC : GetServiceModeStatus()
-RAC-->>ServiceMode : Status response
-ServiceMode-->>App : Return status
-App-->>Main : Return result
-Main-->>User : Output structured logs
+participant 1C as "1C Platform"
+User->>Handler : Execute nr-service-mode-status
+Handler->>Handler : Validate BR_INFOBASE_NAME
+Handler->>RAC : Create RAC Client
+Handler->>RAC : GetClusterInfo()
+RAC-->>Handler : Cluster Information
+Handler->>RAC : GetInfobaseInfo(clusterUUID, name)
+RAC-->>Handler : Infobase Information
+Handler->>RAC : GetServiceModeStatus(clusterUUID, infobaseUUID)
+RAC-->>Handler : Service Mode Status
+Handler->>RAC : GetSessions(clusterUUID, infobaseUUID)
+RAC-->>Handler : Session List (graceful fallback)
+Handler->>Handler : Format Output (JSON/Text)
+Handler-->>User : Structured Result
 ```
 
-**Diagram sources **
-- [main.go](file://cmd/benadis-runner/main.go#L101-L115)
-- [app.go](file://internal/app/app.go#L380-L395)
-- [servicemode.go](file://internal/servicemode/servicemode.go#L170-L220)
+**Diagram sources**
+- [handler.go](file://internal/command/handlers/servicemodestatushandler/handler.go#L118-L229)
+- [interfaces.go](file://internal/adapter/onec/rac/interfaces.go#L35-L61)
 
 ## Parameter Requirements
 
-The service-mode-status command requires exactly one parameter to function correctly: BR_INFOBASE_NAME, which specifies the name of the 1C:Enterprise infobase to check. This environment variable is mandatory and must be set before executing the command. Without this parameter, the command will fail with an error indicating that the infobase name was not specified.
+The nr-service-mode-status command requires exactly one mandatory parameter: BR_INFOBASE_NAME, which specifies the name of the 1C:Enterprise information base to check. This environment variable is essential for the command's operation and must be set before execution.
 
-The BR_INFOBASE_NAME parameter must match the exact name of an existing infobase within the 1C:Enterprise cluster. The name is case-sensitive and must correspond to the infobase as registered in the cluster configuration. If the specified infobase does not exist or cannot be found, the command will return an error during the UUID lookup phase.
+The BR_INFOBASE_NAME parameter must match the exact name of an existing information base within the 1C:Enterprise cluster. The name is case-sensitive and corresponds to the information base registration in the cluster configuration. If the specified information base does not exist or cannot be located, the command will return an error during the UUID lookup phase.
 
-No additional parameters are required for the basic functionality of retrieving service mode status. However, the command relies on several configuration parameters that are typically set in configuration files or environment variables, including the RAC path, server address, port, and authentication credentials. These parameters are automatically loaded from the application's configuration system and do not need to be specified directly when calling the service-mode-status command.
+Additional configuration parameters are automatically loaded from the application's configuration system, including RAC path, server address, port, authentication credentials, and timeout settings. These parameters are resolved from environment variables, configuration files, and secret stores without requiring manual specification.
 
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L101-L115)
-- [constants.go](file://internal/constants/constants.go#L120-L125)
+- [handler.go](file://internal/command/handlers/servicemodestatushandler/handler.go#L130-L136)
+- [config.go](file://internal/config/config.go#L184-L192)
 
 ## Internal Processing Flow
 
-The internal processing flow of the service-mode-status command follows a well-defined sequence of operations that ensures reliable status retrieval. The process begins with action validation in the main.go file, where the command checks if BR_INFOBASE_NAME is provided and exits with an error code if this required parameter is missing.
+The internal processing flow of the nr-service-mode-status command follows a robust sequence designed for reliability and comprehensive information gathering. The process begins with input validation in the handler, where the command checks for the presence of BR_INFOBASE_NAME and exits with a structured error if this required parameter is missing.
 
-Once validated, control passes to the ServiceModeStatus function in app.go, which creates a logger adapter and calls ManageServiceMode from the servicemode package with the "status" action parameter. This function then loads the service mode configuration for the specified database by calling LoadServiceModeConfigForDb, which extracts RAC connection parameters from the application configuration.
+The command then creates a RAC client instance using the application's configuration settings. The client initialization process resolves server information from the database configuration, applies timeout and retry settings, and establishes authentication credentials from environment variables and secret stores.
 
-With the configuration loaded, the system creates a new RAC client instance that encapsulates the connection details and logging interface. The client then executes a three-step process: first retrieving the cluster UUID through GetClusterUUID, then obtaining the infobase-specific UUID via GetInfobaseUUID using both the cluster UUID and the infobase name, and finally calling GetServiceModeStatus with these identifiers to retrieve the current status.
+The processing continues with cluster and information base discovery through UUID resolution. The command obtains the cluster UUID, validates cluster accessibility, then retrieves the information base UUID using the cluster UUID and information base name. Finally, it queries the service mode status and attempts to fetch detailed session information.
 
-Throughout this process, comprehensive logging captures each step at the debug level, while any errors trigger detailed error messages that include context about the failed operation. Successful execution results in structured log output containing the service mode status and active session count, which can be parsed by automation systems for decision-making purposes.
+Throughout this process, the command implements structured logging with trace IDs, comprehensive error handling with machine-readable error codes, and graceful degradation for session retrieval failures. The execution time is tracked and included in the metadata for performance monitoring.
 
 ```mermaid
 flowchart TD
 Start([Start]) --> ValidateInput["Validate BR_INFOBASE_NAME"]
 ValidateInput --> InputValid{"Input Valid?"}
-InputValid --> |No| ReturnError["Log Error & Exit Code 8"]
-InputValid --> |Yes| LoadConfig["Load Service Mode Configuration"]
-LoadConfig --> CreateClient["Create RAC Client"]
-CreateClient --> GetClusterUUID["Get Cluster UUID"]
-GetClusterUUID --> ClusterValid{"Cluster Accessible?"}
-ClusterValid --> |No| HandleClusterError["Log Cluster Error"]
-ClusterValid --> |Yes| GetInfobaseUUID["Get Infobase UUID"]
-GetInfobaseUUID --> InfobaseValid{"Infobase Exists?"}
-InfobaseValid --> |No| HandleInfobaseError["Log Infobase Error"]
-InfobaseValid --> |Yes| GetStatus["Get Service Mode Status"]
-GetStatus --> GetSessions["Get Active Sessions Count"]
-GetSessions --> FormatOutput["Format Structured Log Output"]
+InputValid --> |No| ReturnError["Structured Error Response"]
+InputValid --> |Yes| CreateClient["Create RAC Client"]
+CreateClient --> GetClusterInfo["Get Cluster Information"]
+GetClusterInfo --> ClusterValid{"Cluster Accessible?"}
+ClusterValid --> |No| ClusterError["RAC.CLUSTER_FAILED"]
+ClusterValid --> |Yes| GetInfobaseInfo["Get Infobase Information"]
+GetInfobaseInfo --> InfobaseValid{"Infobase Found?"}
+InfobaseValid --> |No| InfobaseError["RAC.INFOBASE_FAILED"]
+InfobaseValid --> |Yes| GetServiceMode["Get Service Mode Status"]
+GetServiceMode --> GetSessions["Get Session Details (Graceful)"]
+GetSessions --> FormatOutput["Format Structured Output"]
 FormatOutput --> SuccessEnd([Success])
-HandleClusterError --> ErrorEnd([Error])
-HandleInfobaseError --> ErrorEnd
+ClusterError --> ErrorEnd([Error])
+InfobaseError --> ErrorEnd
 ReturnError --> ErrorEnd
 ```
 
-**Diagram sources **
-- [main.go](file://cmd/benadis-runner/main.go#L101-L115)
-- [app.go](file://internal/app/app.go#L380-L395)
-- [servicemode.go](file://internal/servicemode/servicemode.go#L170-L220)
-- [service_mode.go](file://internal/rac/service_mode.go#L150-L250)
+**Diagram sources**
+- [handler.go](file://internal/command/handlers/servicemodestatushandler/handler.go#L118-L229)
+- [result.go](file://internal/pkg/output/result.go#L11-L30)
 
 ## Status Response Structure
 
-The service-mode-status command returns its findings through structured logs that contain two key pieces of information: the Enabled status and the ActiveSessions count. These values are part of the ServiceModeStatus struct defined in the RAC package, which represents the response from the 1C:Enterprise platform.
+The nr-service-mode-status command returns comprehensive status information through a structured data model that extends beyond simple boolean flags. The response includes the ServiceModeStatusData structure with the following key components:
 
-The Enabled field is a boolean value that indicates whether service mode is currently active on the infobase. When true, it means the infobase is in service mode, restricting normal user access according to the configured policies. When false, the infobase is operating in normal mode, allowing unrestricted user access.
+**Core Status Information:**
+- `enabled`: Boolean flag indicating whether service mode is active
+- `message`: Human-readable message describing the service mode state
+- `scheduled_jobs_blocked`: Boolean indicating if scheduled jobs are blocked
+- `active_sessions`: Integer count of currently active user sessions
+- `infobase_name`: The name of the information base being queried
 
-The ActiveSessions field contains an integer representing the number of currently active user sessions connected to the infobase. This count is obtained by calling the GetSessions function and measuring the length of the returned sessions array. Even when service mode is not enabled, this information is valuable for understanding the current load on the system.
+**Enhanced Session Information:**
+- `sessions`: Array of SessionInfoData objects containing detailed session metadata
+  - `user_name`: Name of the authenticated user
+  - `host`: Network host from which the session was established
+  - `started_at`: ISO 8601 timestamp of session initiation
+  - `last_active_at`: ISO 8601 timestamp of last user activity
+  - `app_id`: Application identifier (typically "1CV8C" for 1C:Enterprise clients)
 
-These values are logged at the Info level with descriptive keys, making them easy to parse programmatically. The structured format includes the infobase name, enabled status, and active sessions count in a single log entry, providing a complete snapshot of the service mode state that can be used by monitoring systems or pipeline decision logic.
+The structured output format ensures compatibility with both human consumption and automated processing, providing a complete picture of the information base's operational state including user activity levels that are crucial for deployment planning.
 
-```mermaid
-classDiagram
-class ServiceModeStatus {
-+bool Enabled
-+string Message
-+int ActiveSessions
-}
-class SessionInfo {
-+string SessionID
-+string UserName
-+string AppID
-+time.Time StartedAt
-+time.Time LastActiveAt
-}
-class RacClientInterface {
-+GetClusterUUID(ctx Context) string
-+GetInfobaseUUID(ctx Context, cluster, name) string
-+GetServiceModeStatus(ctx Context, cluster, base) ServiceModeStatus
-}
-class Manager {
-+EnableServiceMode(ctx Context, name, terminate) error
-+DisableServiceMode(ctx Context, name) error
-+GetServiceModeStatus(ctx Context, name) ServiceModeStatus
-}
-ServiceModeStatus --> SessionInfo : "contains"
-Manager --> RacClientInterface : "uses"
-ServiceModeStatus <-- Manager : "returns"
-```
+**Section sources**
+- [handler.go](file://internal/command/handlers/servicemodestatushandler/handler.go#L40-L54)
+- [interfaces.go](file://internal/adapter/onec/rac/interfaces.go#L35-L61)
 
-**Diagram sources **
-- [service_mode.go](file://internal/rac/service_mode.go#L15-L25)
-- [servicemode.go](file://internal/servicemode/servicemode.go#L15-L45)
+## Structured Output Formats
+
+The nr-service-mode-status command supports dual output formats through the BR_OUTPUT_FORMAT environment variable, providing flexibility for different consumption scenarios.
+
+**JSON Format (BR_OUTPUT_FORMAT=json):**
+The JSON output follows the standardized Result structure with the following components:
+- `status`: "success" or "error" indicator
+- `command`: "nr-service-mode-status" identifier
+- `data`: ServiceModeStatusData object containing all status information
+- `error`: ErrorInfo object (present only on failures)
+- `metadata`: Execution metadata including duration, trace ID, and API version
+
+**Text Format (BR_OUTPUT_FORMAT=text):**
+The text output provides human-readable status information with formatted session details:
+- Service mode state (ВКЛЮЧЁН/ВЫКЛЮЧЕН)
+- Information base name
+- Service mode message
+- Scheduled job blocking status
+- Active session count
+- Detailed session information with user names, hosts, and application IDs
+
+Both formats maintain consistency in error reporting, with structured error responses that include machine-readable error codes and human-readable messages. The JSON format is optimized for automation and monitoring system integration, while the text format provides immediate readability for manual inspection.
+
+**Section sources**
+- [handler.go](file://internal/command/handlers/servicemodestatushandler/handler.go#L210-L229)
+- [result.go](file://internal/pkg/output/result.go#L11-L30)
+- [json.go](file://internal/pkg/output/json.go#L8-L22)
+
+## Session Information Display
+
+The nr-service-mode-status command provides comprehensive session information display that goes beyond simple session counts. The enhanced session display includes detailed metadata for each active session, enabling administrators and automation systems to make informed decisions about system usage.
+
+**Session Details Display:**
+- User identification with usernames
+- Host information showing client connection sources
+- Application context with application IDs
+- Temporal information including session start times and last activity timestamps
+- Truncated display for large session counts (top 5 sessions with remaining count indication)
+
+**Display Logic:**
+- Zero sessions: "Нет активных сессий" (No active sessions)
+- Up to 5 sessions: Full display of all sessions with detailed information
+- More than 5 sessions: Top 5 sessions plus "и ещё N сессий" (and N more sessions) indication
+- Session retrieval errors: Graceful degradation with empty sessions array
+
+The session information is particularly valuable for deployment planning, as it reveals not just the number of active users but also their locations and applications, enabling more nuanced decision-making about system maintenance scheduling.
+
+**Section sources**
+- [handler.go](file://internal/command/handlers/servicemodestatushandler/handler.go#L56-L100)
+- [handler_test.go](file://internal/command/handlers/servicemodestatushandler/handler_test.go#L413-L453)
 
 ## Automation Pipeline Integration
 
-The service-mode-status command plays a vital role in automation pipelines by providing decision-making data for deployment workflows. Teams can use the command's output to determine whether it's safe to proceed with deployments, updates, or maintenance operations that require exclusive access to the 1C:Enterprise infobase.
+The nr-service-mode-status command is specifically designed for integration into modern CI/CD pipelines and automation workflows. The structured output format and comprehensive session information enable sophisticated deployment strategies that consider both system availability and user activity levels.
 
-In practice, pipelines typically execute the service-mode-status command as a pre-flight check before attempting to enable service mode for a deployment. By examining the Enabled status, automation scripts can avoid redundant operations - if service mode is already active, they might skip the enable step or investigate why it was previously activated. More importantly, the ActiveSessions count allows pipelines to make informed decisions about proceeding with disruptive operations.
+**Pipeline Decision Logic:**
+- Service mode status: Determines if the system is in maintenance mode
+- Active session count: Influences deployment timing decisions
+- Session details: Enables targeted communication with specific user groups
+- Graceful degradation: Ensures pipeline reliability even with partial information
 
-For example, a deployment script might check if ActiveSessions is zero before proceeding, ensuring no users are actively working in the system. Alternatively, some workflows might tolerate a small number of sessions (such as automated processes) while blocking deployments if there are multiple active user sessions. This granular control helps balance system availability with maintenance requirements.
+**Integration Scenarios:**
+- Pre-flight checks before enabling service mode
+- Deployment scheduling based on user activity patterns
+- Automated session management for maintenance operations
+- Monitoring dashboard integration for system health visualization
 
-The structured log output format makes it easy to integrate with various CI/CD platforms, as the JSON-formatted logs can be parsed to extract the specific status values needed for conditional logic. This enables sophisticated deployment strategies that consider both the service mode state and user activity levels when determining whether to proceed with potentially disruptive operations.
+The standardized Result structure with trace IDs and metadata enables correlation of command executions with system logs, facilitating comprehensive troubleshooting and audit capabilities. The machine-readable error codes allow for precise error handling and recovery strategies in automated environments.
 
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L101-L115)
-- [servicemode.go](file://internal/servicemode/servicemode.go#L170-L220)
+- [handler.go](file://internal/command/handlers/servicemodestatushandler/handler.go#L210-L229)
+- [result.go](file://internal/pkg/output/result.go#L41-L53)
 
 ## Error Handling and Diagnostics
 
-The service-mode-status command implements comprehensive error handling to address various failure scenarios that may occur during execution. When the required BR_INFOBASE_NAME parameter is missing, the command immediately fails with a descriptive error message and exit code 8, preventing further processing with incomplete configuration.
+The nr-service-mode-status command implements comprehensive error handling with structured error responses and detailed diagnostic information. The error handling system provides both machine-readable error codes and human-readable messages, enabling effective automation and manual troubleshooting.
 
-Connection failures are handled at multiple levels of the processing chain. If the RAC client cannot connect to the 1C:Enterprise cluster, the GetClusterUUID call fails with a specific error that is propagated up the call stack. Similarly, if the specified infobase cannot be found within the cluster, the GetInfobaseUUID operation returns an error indicating that the infobase UUID could not be retrieved.
+**Error Categories:**
+- `CONFIG.INFOBASE_MISSING`: Missing BR_INFOBASE_NAME parameter
+- `RAC.CLIENT_CREATE_FAILED`: RAC client initialization failures
+- `RAC.CLUSTER_FAILED`: Cluster connectivity and authentication issues
+- `RAC.INFOBASE_FAILED`: Information base not found or inaccessible
+- `RAC.STATUS_FAILED`: Service mode status retrieval failures
 
-Misconfigured RAC paths represent another common failure point. If the RAC executable path specified in the configuration is incorrect or the file is not executable, the underlying command execution fails with a "command not found" or "permission denied" error. The system captures these errors and includes them in the structured log output, making diagnosis straightforward.
+**Graceful Degradation:**
+The command implements graceful degradation for session retrieval failures. When session information cannot be obtained, the service mode status is still returned with an empty sessions array rather than failing the entire operation. This design ensures that critical system state information remains available even under partial failure conditions.
 
-Diagnostic tips for troubleshooting include verifying the RAC path configuration, confirming network connectivity to the 1C:Enterprise server, checking authentication credentials, and validating that the infobase name matches exactly with the name registered in the cluster. The debug-level logging provides a complete trace of the execution flow, showing exactly which step failed and with what error message, significantly reducing mean time to resolution for operational issues.
+**Diagnostic Features:**
+- Structured error responses with machine-readable codes
+- Trace ID generation for correlation across system logs
+- Comprehensive logging with contextual information
+- Metadata inclusion for performance monitoring
+- Environment-specific error messages for troubleshooting
 
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L101-L115)
-- [service_mode.go](file://internal/rac/service_mode.go#L150-L250)
-- [servicemode.go](file://internal/servicemode/servicemode.go#L170-L220)
+- [handler.go](file://internal/command/handlers/servicemodestatushandler/handler.go#L231-L262)
+- [handler_test.go](file://internal/command/handlers/servicemodestatushandler/handler_test.go#L180-L207)
 
 ## Usage Examples
 
-The service-mode-status command can be integrated into various monitoring and automation scenarios. For monitoring scripts, it can be executed periodically to track the service mode state of critical infobases, with the output fed into monitoring systems to generate alerts when unexpected changes occur.
+The nr-service-mode-status command supports flexible usage patterns for both manual inspection and automated integration. The command can be executed with different output formats and environment configurations to suit various operational needs.
 
-A typical monitoring script might look like:
+**Manual Inspection:**
 ```bash
-export BR_COMMAND="service-mode-status"
+# Text format for human-readable output
+export BR_OUTPUT_FORMAT=text
 export BR_INFOBASE_NAME="ProductionERP"
+./benadis-runner
+
+# JSON format for automation integration
+export BR_OUTPUT_FORMAT=json
+export BR_INFOBASE_NAME="CustomerPortal"
 ./benadis-runner
 ```
 
-For pre-flight checks before enabling service mode, the command can be used to assess the current state and make conditional decisions:
+**Automation Integration:**
 ```bash
-# Check current status before deployment
-export BR_COMMAND="service-mode-status"
-export BR_INFOBASE_NAME="CustomerPortal"
-STATUS_OUTPUT=$(./benadis-runner 2>&1)
+#!/bin/bash
+# Deployment pre-flight check
+export BR_OUTPUT_FORMAT=json
+export BR_INFOBASE_NAME="${INFODB}"
 
-# Parse output to determine next steps
-if echo "$STATUS_OUTPUT" | grep -q "enabled\":true"; then
-    echo "Service mode already active, proceeding with deployment"
-else
-    ACTIVE_SESSIONS=$(echo "$STATUS_OUTPUT" | grep -o '"active_sessions":[0-9]*' | cut -d: -f2)
-    if [ "$ACTIVE_SESSIONS" -eq 0 ]; then
-        echo "No active sessions, safely enabling service mode"
-        # Proceed with enabling service mode
-    else
-        echo "Warning: $ACTIVE_SESSIONS active sessions detected"
-        # Alert administrators or delay deployment
-    fi
+STATUS_OUTPUT=$(./benadis-runner 2>&1)
+EXIT_CODE=$?
+
+if [ $EXIT_CODE -ne 0 ]; then
+    echo "Service mode check failed: $(echo "$STATUS_OUTPUT" | jq -r '.error.message')"
+    exit 1
+fi
+
+ENABLED=$(echo "$STATUS_OUTPUT" | jq -r '.data.enabled')
+ACTIVE_SESSIONS=$(echo "$STATUS_OUTPUT" | jq -r '.data.active_sessions')
+
+if [ "$ENABLED" = "true" ]; then
+    echo "System already in service mode"
+elif [ "$ACTIVE_SESSIONS" -gt 0 ]; then
+    echo "Warning: $ACTIVE_SESSIONS active sessions detected"
+    # Implement user notification logic
 fi
 ```
 
-These usage patterns demonstrate how the command supports safe automation practices by providing the information needed to make intelligent decisions about when and how to proceed with system maintenance operations.
+**Monitoring Integration:**
+The JSON output format enables easy integration with monitoring systems and alerting mechanisms. The structured data can be parsed by log aggregation systems, monitoring dashboards, and automated response systems.
 
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L101-L115)
-- [app.go](file://internal/app/app.go#L380-L395)
+- [handler.go](file://internal/command/handlers/servicemodestatushandler/handler.go#L210-L229)
+- [handler_test.go](file://internal/command/handlers/servicemodestatushandler/handler_test.go#L53-L82)
 
 ## Configuration Management
 
-The service-mode-status command relies on a hierarchical configuration management system that combines multiple sources of configuration data. The primary configuration is loaded from YAML files stored in the config directory, including app.yaml, dbconfig.yaml, and secret.yaml, which provide default values for RAC connection parameters and other settings.
+The nr-service-mode-status command leverages a comprehensive configuration management system that combines multiple configuration sources for maximum flexibility. The configuration hierarchy ensures that sensitive credentials are properly secured while allowing for environment-specific customization.
 
-Environment variables serve as the highest priority configuration source, allowing specific parameters to be overridden at runtime. Key configuration variables include RAC_PATH, RAC_SERVER, RAC_PORT, RAC_USER, RAC_PASSWORD, and SERVICE_RAC_* variants for service mode-specific settings. These variables enable flexible configuration across different environments without modifying configuration files.
+**Configuration Sources:**
+- Application configuration (app.yaml): Core application settings and defaults
+- Database configuration (dbconfig.yaml): Information base and server mappings
+- Secret configuration (secret.yaml): Sensitive credentials and tokens
+- Environment variables: Runtime overrides and deployment-specific settings
 
-The configuration loading process follows a specific order: first loading defaults from YAML files, then augmenting with secrets from secure storage, and finally applying environment variable overrides. This layered approach ensures that sensitive credentials are kept separate from code while still allowing for environment-specific customization.
+**RAC Client Configuration:**
+The command automatically resolves RAC client settings including server addresses, ports, timeouts, and authentication credentials. The configuration system prioritizes environment variables for runtime flexibility while maintaining security through secret storage.
 
-For the service-mode-status command, the most critical configuration elements are the RAC path and server address, which determine how the system connects to the 1C:Enterprise platform. The configuration system automatically resolves the appropriate RAC server for a given infobase by consulting the dbconfig.yaml file, ensuring that commands target the correct infrastructure component.
+**Legacy Compatibility:**
+The command maintains compatibility with legacy configuration patterns while introducing enhanced NR command naming conventions. The deprecated "service-mode-status" alias continues to work for backward compatibility, with automatic redirection to the new "nr-service-mode-status" implementation.
 
 **Section sources**
-- [config.go](file://internal/config/config.go#L800-L850)
-- [app.yaml](file://config/app.yaml#L1-L50)
-- [constants.go](file://internal/constants/constants.go#L120-L125)
+- [handler.go](file://internal/command/handlers/servicemodestatushandler/handler.go#L264-L309)
+- [config.go](file://internal/config/config.go#L148-L200)
+- [constants.go](file://internal/constants/constants.go#L104-L111)

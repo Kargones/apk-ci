@@ -99,6 +99,68 @@ const (
 	ActTestMerge = "test-merge"
 	// ActExtensionPublish - действие публикации расширения 1C
 	ActExtensionPublish = "extension-publish"
+	// ActNRVersion - действие вывода информации о версии (NR-команда)
+	ActNRVersion = "nr-version"
+	// ActNRServiceModeStatus - действие проверки статуса сервисного режима (NR-команда)
+	ActNRServiceModeStatus = "nr-service-mode-status"
+	// ActNRServiceModeEnable - действие включения сервисного режима (NR-команда)
+	ActNRServiceModeEnable = "nr-service-mode-enable"
+	// ActNRForceDisconnectSessions - действие принудительного завершения сессий (NR-команда)
+	ActNRForceDisconnectSessions = "nr-force-disconnect-sessions"
+	// ActNRServiceModeDisable - действие отключения сервисного режима (NR-команда)
+	ActNRServiceModeDisable = "nr-service-mode-disable"
+	// ActHelp - действие вывода списка доступных команд
+	ActHelp = "help"
+	// ActNRDbrestore - действие восстановления базы данных (NR-команда)
+	ActNRDbrestore = "nr-dbrestore"
+	// ActNRDbupdate - действие обновления структуры БД (NR-команда)
+	ActNRDbupdate = "nr-dbupdate"
+	// ActNRCreateTempDb - действие создания временной базы данных (NR-команда)
+	ActNRCreateTempDb = "nr-create-temp-db"
+	// ActNRStore2db - действие загрузки конфигурации из хранилища в БД (NR-команда)
+	ActNRStore2db = "nr-store2db"
+	// ActNRStorebind - действие привязки хранилища к БД (NR-команда)
+	ActNRStorebind = "nr-storebind"
+	// ActNRCreateStores - действие инициализации хранилищ конфигурации (NR-команда)
+	ActNRCreateStores = "nr-create-stores"
+	// ActNRConvert - действие конвертации форматов EDT/XML (NR-команда)
+	ActNRConvert = "nr-convert"
+	// ActNRGit2store - действие синхронизации Git → хранилище 1C (NR-команда)
+	ActNRGit2store = "nr-git2store"
+	// ActNRExecuteEpf - действие выполнения внешней обработки 1C (NR-команда)
+	ActNRExecuteEpf = "nr-execute-epf"
+	// ActNRSQScanBranch - действие сканирования ветки SonarQube (NR-команда)
+	ActNRSQScanBranch = "nr-sq-scan-branch"
+	// ActNRSQScanPR - действие сканирования pull request SonarQube (NR-команда)
+	ActNRSQScanPR = "nr-sq-scan-pr"
+	// ActNRSQReportBranch - действие генерации отчёта о качестве ветки SonarQube (NR-команда)
+	ActNRSQReportBranch = "nr-sq-report-branch"
+	// ActNRSQProjectUpdate - действие обновления метаданных проекта SonarQube (NR-команда)
+	ActNRSQProjectUpdate = "nr-sq-project-update"
+	// ActNRTestMerge - действие проверки конфликтов слияния PR (NR-команда)
+	ActNRTestMerge = "nr-test-merge"
+	// ActNRActionMenuBuild - действие построения меню действий (NR-команда)
+	ActNRActionMenuBuild = "nr-action-menu-build"
+	// ActNRMigrate - действие миграции пайплайнов с legacy-команд на NR-команды (NR-команда)
+	ActNRMigrate = "nr-migrate"
+	// ActNRDeprecatedAudit - действие аудита deprecated кода в проекте (NR-команда)
+	ActNRDeprecatedAudit = "nr-deprecated-audit"
+)
+
+// Константы переменных окружения
+const (
+	// EnvDryRun - имя переменной окружения для активации dry-run режима
+	EnvDryRun = "BR_DRY_RUN"
+	// EnvShadowRun - имя переменной окружения для активации shadow-run режима
+	EnvShadowRun = "BR_SHADOW_RUN"
+	// EnvPlanOnly - имя переменной окружения для активации plan-only режима
+	EnvPlanOnly = "BR_PLAN_ONLY"
+	// EnvVerbose - имя переменной окружения для активации verbose режима
+	EnvVerbose = "BR_VERBOSE"
+	// EnvMigratePath - путь к директории с workflow-файлами для миграции
+	EnvMigratePath = "BR_MIGRATE_PATH"
+	// EnvMigrateNoBackup - отключение создания .bak файлов при миграции
+	EnvMigrateNoBackup = "BR_MIGRATE_NO_BACKUP"
 )
 
 // Константы заголовков задач
@@ -121,8 +183,6 @@ const (
 
 // Константы API и групп
 const (
-
-
 	// APIVersion - версия API
 	APIVersion = "v1"
 	// GroupName - имя группы в Gitea

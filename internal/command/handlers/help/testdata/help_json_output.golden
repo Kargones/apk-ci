@@ -1,0 +1,95 @@
+{
+  "status": "success",
+  "command": "help",
+  "data": {
+    "nr_commands": [
+      {
+        "name": "help",
+        "description": "Вывод списка доступных команд"
+      }
+    ],
+    "legacy_commands": [
+      {
+        "name": "action-menu-build",
+        "description": "Построение меню действий"
+      },
+      {
+        "name": "convert",
+        "description": "Конвертация форматов данных"
+      },
+      {
+        "name": "create-stores",
+        "description": "Создание хранилищ конфигурации"
+      },
+      {
+        "name": "create-temp-db",
+        "description": "Создание временной базы данных"
+      },
+      {
+        "name": "dbrestore",
+        "description": "Восстановление базы данных"
+      },
+      {
+        "name": "dbupdate",
+        "description": "Обновление базы данных"
+      },
+      {
+        "name": "execute-epf",
+        "description": "Выполнение внешней обработки"
+      },
+      {
+        "name": "extension-publish",
+        "description": "Публикация расширения 1C"
+      },
+      {
+        "name": "git2store",
+        "description": "Синхронизация Git → хранилище 1C"
+      },
+      {
+        "name": "service-mode-disable",
+        "description": "Отключение сервисного режима"
+      },
+      {
+        "name": "service-mode-enable",
+        "description": "Включение сервисного режима"
+      },
+      {
+        "name": "service-mode-status",
+        "description": "Статус сервисного режима"
+      },
+      {
+        "name": "sq-project-update",
+        "description": "Обновление проекта SonarQube"
+      },
+      {
+        "name": "sq-report-branch",
+        "description": "Отчёт по ветке SonarQube"
+      },
+      {
+        "name": "sq-scan-branch",
+        "description": "Сканирование ветки SonarQube"
+      },
+      {
+        "name": "sq-scan-pr",
+        "description": "Сканирование PR SonarQube"
+      },
+      {
+        "name": "store2db",
+        "description": "Загрузка конфигурации из хранилища"
+      },
+      {
+        "name": "storebind",
+        "description": "Привязка хранилища к базе"
+      },
+      {
+        "name": "test-merge",
+        "description": "Проверка конфликтов слияния"
+      }
+    ]
+  },
+  "metadata": {
+    "duration_ms": 0,
+    "trace_id": "825e5e536ef5c22275b1ea877b5ebe28",
+    "api_version": "v1"
+  }
+}

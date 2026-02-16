@@ -1,0 +1,384 @@
+@startuml Схема структур
+package cmd\benadis-runner{
+annotation cmd\benadis-runner {
+
+
+-main()
+}
+}
+package cmd\onepars{
+annotation cmd\onepars {
+
+
+-main()
+-test2()
++GetFileList(path string): []string
+}
+class ConfigDumpInfo {
++XMLName: Name
++Xmlns: string
++Xen: string
++Xs: string
++Xsi: string
++Format: string
++Version: string
++ConfigVersions: ConfigVersions
++Load(b []byte): error
++GetDataForFile(): []byte
+}
+class ConfigVersions {
++Metadata: []Metadata
+
+}
+class Metadata {
++Name: string
++ID: string
++ConfigVersion: string
++MetadataShort: []MetadataShort
+
+}
+class MetadataShort {
++Name: string
++ID: string
+
+}
+class MetaDataObject {
++XMLName: Name
++Xmlns: string
++App: string
++Cfg: string
++Cmi: string
++Ent: string
++Lf: string
++Style: string
++Sys: string
++V8: string
++V8ui: string
++Web: string
++Win: string
++Xen: string
++Xpr: string
++Xr: string
++Xs: string
++Xsi: string
++Version: string
++Configuration: interface{}
++Load(b []byte): error
++GetDataForFile(): []byte
+}
+}
+package cmd\storegit{
+annotation cmd\storegit {
+
+
+-main()
+}
+}
+package cmd\update{
+annotation cmd\update {
+
+
+-main()
+}
+}
+package internal\app{
+annotation internal\app {
+
+
++GetStoreData()
+}
+}
+package internal\config{
+annotation internal\config {
+
+
++MustLoad(): *Config
+}
+class Config {
++Env: string
++Bin1cv8: string
++BinIbcmd: string
++Connect: string
++RepPath: string
++WorkDir: string
++TmpDir: string
++ConfigName: string
+
+}
+}
+package internal\entity\conductor{
+annotation internal\entity\conductor {
+-const TaskReportStore: STRING
+
++GetTaskReportStore(tc *TaskChain, resoures []Resource): *TaskChain
++LoadAndRun()
+}
+class Conductor {
++TaskChains: []TaskChain
++Load(tcs []TaskChain)
++Run(): error
+}
+class TaskChain {
++Name: string
++Tasks: []TaskItem
++CreateTaskChainByName(nameTaskChain string, resoures []Resource): *TaskChain
+}
+class TaskItem {
++Id: int
++Task: Task
++Resource: []Resource
+
+}
+class TaskResource {
++Resource: Resource
++In: bool
++Free: string
+
+}
+}
+package internal\entity\one\store{
+annotation internal\entity\one\store {
+
+
++ParseReport(path string): []StoreRecord, []User, int, error
+}
+class Store {
++Name: string
++Path: string
++User: string
++Pass: string
++Command: string
++ReadReport(dbConnectString string, cfg *Config, startVersion int): []StoreRecord, []User, int, error
++GetStoreParam(dbConnectString string, cfg *Config): Runner
+}
+class StoreRecord {
++Version: int
++ConfVersion: string
++User: string
++Date: Time
++Comment: string
+
+}
+class User {
++StoreUserName: string
++AccountName: string
++Email: string
+
+}
+}
+package internal\entity\resources{
+annotation internal\entity\resources {
+-const Bin1cv8: STRING
+
++New(resourceType string): Resource
+}
+interface Resource{
++GetResourceName(): string
++GetResourceType(): string
++GetResourcePath(): string
+}
+}
+package internal\entity\runner{
+annotation internal\entity\runner {
+
+
++RunTask(task Task): error
+}
+}
+package internal\entity\task{
+annotation internal\entity\task {
+-const OneStoreTaskType: STRING
+
++New(taskType string): Task
++NewOneStoreTask(): Task
+}
+interface Task{
++GetAppPath(): string
++GetTaskType(): string
++GetParam(): string
+}
+class OneStoreTask {
++Type: string
++AppPath: Resource
++Param: OneStoreTaskParam
++GetTaskType(): string
++GetParam(): string
++GetAppPath(): string
+}
+class OneStoreTaskParam {
+
+
+}
+}
+package internal\git{
+annotation internal\git {
+
+
++NewGitConfigs(): GitConfigs
+}
+class Git {
++RepURL: string
++RepPath: string
++Clone(repURL string, repPath string)
++Config(repPath string)
++Add(repPath string)
++Commit(repPath string, comment string)
++Push(repPath string)
++SetUser(repPath string, name string, email string)
+}
+class GitConfigs {
++GitConfig: []GitConfig
+
+}
+class GitConfig {
++Name: string
++Value: string
+
+}
+}
+package internal\util\filer{
+annotation internal\util\filer {
+
+
++GetBakPath(path string): string
+}
+class DirManipulate {
++Source: string
++Destination: string
++Copy(): error
+}
+}
+package internal\util\onestore\onestore{
+annotation internal\util\onestore\onestore {
+
+
++MustLoad(path string): *OneConf
++UpdateFromReport(path string, cd *ConfigData, sd *StoreData): error
++GetDbName(cfg *Config, oneConfName string): string
++GetStoreParam(storeRoot string, sd StoreData, dbPath string, cfg *Config): Runner
+}
+interface GitRunner{
++Clone( string,  string)
++Config( string)
+}
+class StoreData {
++MainConfig: bool
++Name: string
++SavedVersion: int
++MaxVersion: int
++StorePath: string
++StoreUser: string
++StorePass: string
++Records: []StoreRecord
++GetStoreRep(storeRoot string, dbPath string, cfg *Config): string, error
++SaveDump(repPath string, dbPath string, cfg *Config): string, error
+}
+class ConfigData {
++Name: string
++RepURL: string
++StoreRoot: string
++NeedCopy: bool
++UserList: []User
++StoreData: []StoreData
++SaveChain: []SaveChain
++SaveToPath(dbPath string, cfg *Config, oc *OneConf, cdID int, confName string): string, error
++GetUser(name string): User
++SortVersion(): []SaveChain
++PrepareDB(cfg *Config): string
+}
+class OtherSource {
++Name: string
++SourceType: string
++Path: string
++ConnectString: string
++Records: []SourceRecord
+
+}
+class User {
++StoreUserName: string
++AccountName: string
++Email: string
+
+}
+class SaveChain {
++StoreDataID: int
++StoreRecordID: int
+
+}
+class SourceRecord {
++Version: int
++ConfVersion: string
++User: string
++Date: Time
++Comment: string
+
+}
+class StoreRecord {
++Version: int
++ConfVersion: string
++User: string
++Date: Time
++Comment: string
++GetComment(): string
+}
+class OneConf {
++ConfList: []ConfigData
++Update(cfg *Config): error
++SaveToJson(path string): error
++Load(path string): error
++LoadConfig(b []byte): error
+}
+}
+package internal\util\runner{
+annotation internal\util\runner {
+
+-var Cfg: *Config
++GetParamFile(): string
++RunAll()
+}
+class OneS {
++Exe: string
++Connect: string
++RepPath: string
++SaveToFiles(): error
++GetStoreRep(): error
++GetConnectString(): string
+}
+class Runner {
++RunString: string
++Params: []string
++Mode: string
++WorkDir: string
++TmpDir: string
++ClearParams()
++RunCommand(): []byte, error
+}
+}
+package internal\util\timer{
+annotation internal\util\timer {
+
+
++Timer(name string): func() 
+}
+}
+
+"ConfigDumpInfo" --> "ConfigVersions"
+"ConfigDumpInfo" --> "Name"
+"MetaDataObject" --> "Name"
+"OneStoreTask" --> "OneStoreTaskParam"
+"parentStack" --> "printer"
+"printer" --> "Encoder"
+"Encoder" --> "printer"
+"typeInfo" --> "fieldInfo"
+"fieldInfo" --> "fieldFlags"
+"StartElement" --> "Name"
+"Decoder" --> "Name"
+"stack" --> "Name"
+"Attr" --> "Name"
+"EndElement" --> "Name"
+"Decoder" --> "Token"
+"Decoder" --> "stack"
+"OneStoreTask" --|> "Task"
+"Git" --|> "GitRunner"
+"Decoder" --|> "TokenReader"
+@enduml

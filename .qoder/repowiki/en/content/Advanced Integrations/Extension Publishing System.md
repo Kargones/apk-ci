@@ -2,15 +2,16 @@
 
 <cite>
 **Referenced Files in This Document**
-- [README.md](file://README.md)
-- [main.go](file://cmd/benadis-runner/main.go)
 - [extension_publish.go](file://internal/app/extension_publish.go)
+- [gitea.go](file://internal/entity/gitea/gitea.go)
+- [gitea_service.go](file://internal/service/gitea_service.go)
+- [main.go](file://cmd/benadis-runner/main.go)
+- [constants.go](file://internal/constants/constants.go)
 - [extension-publish.md](file://docs/epics/extension-publish.md)
 - [external-extension-workflow.md](file://docs/diagrams/external-extension-workflow.md)
-- [gitea.go](file://internal/entity/gitea/gitea.go)
-- [interfaces.go](file://internal/entity/gitea/interfaces.go)
-- [constants.go](file://internal/constants/constants.go)
-- [config.go](file://internal/config/config.go)
+- [extension_publish_test.go](file://internal/app/extension_publish_test.go)
+- [extension_publish_integration_test.go](file://internal/app/extension_publish_integration_test.go)
+- [action.yaml](file://config/action.yaml)
 - [app.yaml](file://config/app.yaml)
 </cite>
 
@@ -20,274 +21,192 @@
 3. [Core Components](#core-components)
 4. [Extension Publishing Workflow](#extension-publishing-workflow)
 5. [Gitea API Integration](#gitea-api-integration)
-6. [Configuration Management](#configuration-management)
+6. [Data Models and Structures](#data-models-and-structures)
 7. [Error Handling and Reporting](#error-handling-and-reporting)
 8. [Testing Strategy](#testing-strategy)
-9. [Deployment and Usage](#deployment-and-usage)
-10. [Troubleshooting Guide](#troubleshooting-guide)
+9. [Configuration Management](#configuration-management)
+10. [Deployment and CI/CD](#deployment-and-cicd)
+11. [Troubleshooting Guide](#troubleshooting-guide)
+12. [Conclusion](#conclusion)
 
 ## Introduction
 
-The Extension Publishing System is a sophisticated automation framework designed to streamline the distribution of 1C:Enterprise external extensions across multiple subscribed repositories. This system automates the entire process of extension updates, from detecting new releases to creating pull requests in target repositories, ensuring consistent and reliable deployment across organizational infrastructure.
+The Extension Publishing System is an automated solution designed to distribute 1C extension updates across multiple subscribed repositories. This system implements a subscription-based mechanism where target repositories maintain "subscription branches" that trigger automatic updates when new releases are published in source extension repositories.
 
-The system operates on a subscription-based model where target repositories maintain special "subscription branches" that indicate their interest in receiving extension updates. When a new release is published in the source extension repository, the system automatically discovers all subscribing repositories and propagates the updated extension files through automated pull requests.
+The system operates through a comprehensive workflow that includes release detection, subscriber discovery, file synchronization, and Pull Request creation. It ensures consistency across distributed extension deployments while maintaining audit trails and providing detailed reporting capabilities.
 
 ## System Architecture
 
-The Extension Publishing System follows a modular architecture with clear separation of concerns:
+The Extension Publishing System follows a layered architecture pattern with clear separation of concerns:
 
 ```mermaid
 graph TB
-subgraph "User Interface Layer"
-CLI[CLI Commands]
-Actions[Gitea Actions]
+subgraph "External Systems"
+Gitea[Gitea Server]
+Extensions[Extension Repositories]
+Projects[Target Projects]
 end
 subgraph "Application Layer"
-Main[Main Application]
-ExtensionPublish[Extension Publisher]
-ConfigLoader[Configuration Loader]
+Main[Command Handler]
+AppLogic[Business Logic]
+Reporting[Reporting Engine]
 end
-subgraph "Business Logic Layer"
-SubscriberFinder[Subscriber Finder]
-SyncEngine[Sync Engine]
-PREngine[PR Engine]
-Reporter[Reporting Engine]
-end
-subgraph "Integration Layer"
-GiteaAPI[Gitea API Client]
-GitOps[Git Operations]
+subgraph "Service Layer"
+GiteaService[Gitea Service]
+ConfigService[Configuration Service]
 end
 subgraph "Data Layer"
-ConfigStore[Configuration Store]
-LogStore[Log Storage]
+GiteaAPI[Gitea API Client]
+Storage[Local Storage]
 end
-CLI --> Main
-Actions --> Main
-Main --> ExtensionPublish
-ExtensionPublish --> ConfigLoader
-ExtensionPublish --> SubscriberFinder
-ExtensionPublish --> SyncEngine
-ExtensionPublish --> PREngine
-ExtensionPublish --> Reporter
-SubscriberFinder --> GiteaAPI
-SyncEngine --> GiteaAPI
-PREngine --> GiteaAPI
-GiteaAPI --> GitOps
-ConfigLoader --> ConfigStore
-Reporter --> LogStore
+Extensions --> Gitea
+Projects --> Gitea
+Gitea --> GiteaAPI
+Main --> AppLogic
+AppLogic --> GiteaService
+GiteaService --> GiteaAPI
+AppLogic --> Reporting
+GiteaAPI --> Storage
 ```
 
 **Diagram sources**
-- [main.go](file://cmd/benadis-runner/main.go#L16-L262)
-- [extension_publish.go](file://internal/app/extension_publish.go#L979-L1253)
+- [extension_publish.go](file://internal/app/extension_publish.go#L1049-L1322)
+- [gitea_service.go](file://internal/service/gitea_service.go#L12-L35)
 
 The architecture consists of several key layers:
 
-- **Presentation Layer**: CLI interface and Gitea Actions integration
-- **Application Layer**: Central command routing and configuration management
-- **Business Logic Layer**: Core publishing algorithms and orchestration
-- **Integration Layer**: Gitea API connectivity and Git operations
-- **Data Layer**: Configuration persistence and logging
+- **Presentation Layer**: Command-line interface and CI/CD integration
+- **Application Layer**: Core business logic and workflow orchestration
+- **Service Layer**: Gitea API abstraction and configuration management
+- **Data Layer**: Gitea API client and local storage mechanisms
 
 ## Core Components
 
-### Main Application Entry Point
-
-The application entry point serves as the central command router, handling various operational modes and delegating to appropriate subsystems based on the selected command.
-
-```mermaid
-flowchart TD
-Start([Application Start]) --> LoadConfig[Load Configuration]
-LoadConfig --> ParseCommand[Parse Command]
-ParseCommand --> CheckCommand{Command Type?}
-CheckCommand --> |extension-publish| CallPublisher[Call ExtensionPublish]
-CheckCommand --> |other commands| CallOther[Call Other Handler]
-CallPublisher --> ValidateConfig[Validate Configuration]
-ValidateConfig --> FindSubscribers[Find Subscribers]
-FindSubscribers --> ProcessSubscribers[Process Each Subscriber]
-ProcessSubscribers --> CreatePR[Create Pull Request]
-CreatePR --> GenerateReport[Generate Report]
-GenerateReport --> End([Complete])
-CallOther --> End
-End --> Exit([Exit Application])
-```
-
-**Diagram sources**
-- [main.go](file://cmd/benadis-runner/main.go#L30-L260)
-
-**Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L16-L262)
-
 ### Extension Publishing Engine
 
-The core publishing engine orchestrates the complete extension distribution process, implementing sophisticated algorithms for subscriber discovery, file synchronization, and pull request creation.
+The core engine handles the complete lifecycle of extension distribution:
 
 ```mermaid
 sequenceDiagram
-participant Source as Source Repository
-participant System as Extension System
-participant Target as Target Repository
+participant Release as Release Trigger
+participant Engine as Extension Engine
 participant Gitea as Gitea API
-Source->>System : New Release Published
-System->>Gitea : Get Latest Release Info
-Gitea-->>System : Release Details
-System->>Gitea : Find All Organizations
-Gitea-->>System : Organization List
-loop For Each Organization
-System->>Gitea : Search Repositories
-Gitea-->>System : Repository List
-loop For Each Repository
-System->>Gitea : Check Subscription Branch
-Gitea-->>System : Branch Exists?
-alt Branch Exists
-System->>Gitea : Get Source Files
-Gitea-->>System : File Contents
-System->>Gitea : Get Target Files
-Gitea-->>System : Target Contents
-System->>Gitea : Create Branch + Commit
-Gitea-->>System : Commit Created
-System->>Gitea : Create Pull Request
-Gitea-->>System : PR Created
+participant Subscribers as Target Repositories
+Release->>Engine : New Release Detected
+Engine->>Gitea : Get Release Information
+Gitea-->>Engine : Release Details
+Engine->>Gitea : Find Subscribed Repositories
+Gitea-->>Engine : Subscriber List
+loop For Each Subscriber
+Engine->>Gitea : Get Source Files
+Engine->>Gitea : Synchronize Files
+Engine->>Gitea : Create Pull Request
+Gitea-->>Engine : PR Details
 end
-end
-end
-System->>System : Generate Final Report
+Engine->>Engine : Generate Report
 ```
 
 **Diagram sources**
-- [extension_publish.go](file://internal/app/extension_publish.go#L979-L1253)
+- [extension_publish.go](file://internal/app/extension_publish.go#L1049-L1322)
+
+### Subscription Management
+
+The system uses a sophisticated subscription mechanism where target repositories maintain specific branch naming patterns:
+
+| Subscription Pattern | Description | Example |
+|---------------------|-------------|---------|
+| `{Org}_{Repo}_{ExtDir}` | Standard subscription format | `lib_apk_ssl_AПК_БСП` |
+| `lib_common_cfe_utils` | Nested directory support | `lib/common/cfe/utils` |
+| `MyOrg_MyProject_extensions_v2_common` | Deep nesting support | `MyOrg/MyProject/extensions/v2/common` |
 
 **Section sources**
-- [extension_publish.go](file://internal/app/extension_publish.go#L456-L567)
+- [extension_publish.go](file://internal/app/extension_publish.go#L117-L153)
+- [extension_publish.go](file://internal/app/extension_publish.go#L19-L27)
 
-### Subscription Management System
+### File Synchronization Engine
 
-The subscription management system maintains a registry of interested parties through a unique branch naming convention that enables automatic discovery of target repositories.
-
-```mermaid
-classDiagram
-class SubscribedRepo {
-+string Organization
-+string Repository
-+string TargetBranch
-+string TargetDirectory
-+string SubscriptionBranch
-}
-class SubscriptionBranchParser {
-+ParseSubscriptionBranch(branchName) SubscribedRepo
-+IsSubscriptionBranch(branchName) bool
-}
-class SubscriberFinder {
-+FindSubscribedRepos(l, api, sourceRepo, extensions) []SubscribedRepo
-+generateBranchPatterns(extensions) []string
-}
-class BranchPatternGenerator {
-+generatePattern(org, repo, extDir) string
-}
-SubscriptionBranchParser --> SubscribedRepo : creates
-SubscriberFinder --> SubscriptionBranchParser : uses
-SubscriberFinder --> BranchPatternGenerator : uses
-SubscriberFinder --> SubscribedRepo : returns
-```
-
-**Diagram sources**
-- [extension_publish.go](file://internal/app/extension_publish.go#L60-L148)
-
-**Section sources**
-- [extension_publish.go](file://internal/app/extension_publish.go#L150-L267)
-
-## Extension Publishing Workflow
-
-### Subscription Branch Format
-
-The system uses a standardized branch naming convention to identify subscription targets:
-
-```
-{Organization}_{Repository}_{ExtensionDirectory}
-```
-
-Where:
-- **Organization**: Target repository's organization name
-- **Repository**: Target repository name  
-- **ExtensionDirectory**: Path to extension directory within target project
-
-**Example**: `APKHolding_ERP_cfe_CommonExt` indicates the `APKHolding/ERP` repository wants updates for the `cfe/CommonExt` extension directory.
-
-### File Synchronization Process
-
-The synchronization process ensures complete parity between source and target repositories:
+The synchronization process ensures complete file replacement with intelligent comparison:
 
 ```mermaid
 flowchart TD
-Start([Start Sync Process]) --> GetSourceFiles[Get Source Files]
-GetSourceFiles --> GetTargetFiles[Get Target Files Map]
-GetTargetFiles --> GenerateBranch[Generate Branch Name]
-GenerateBranch --> CompareFiles[Compare Files]
-CompareFiles --> SourceExists{File Exists in Source?}
-SourceExists --> |Yes| CheckTargetExists{File Exists in Target?}
-SourceExists --> |No| DeleteFile[Delete from Target]
-CheckTargetExists --> |Yes| CheckContent{Content Changed?}
-CheckTargetExists --> |No| CreateFile[Create in Target]
-CheckContent --> |Yes| UpdateFile[Update in Target]
-CheckContent --> |No| SkipFile[Skip File]
-DeleteFile --> NextFile[Next File]
-CreateFile --> NextFile
-UpdateFile --> NextFile
-SkipFile --> NextFile
-NextFile --> MoreFiles{More Files?}
-MoreFiles --> |Yes| CompareFiles
-MoreFiles --> |No| CreateCommit[Create Commit]
-CreateCommit --> End([Sync Complete])
+Start([Start Sync Process]) --> GetSource[Get Source Files]
+GetSource --> GetTarget[Get Target Files Map]
+GetTarget --> Compare[Compare Files]
+Compare --> CreateOps[Generate Operations]
+CreateOps --> CreateFiles[Create Operations]
+CreateOps --> UpdateFiles[Update Operations]
+CreateOps --> DeleteFiles[Delete Operations]
+CreateFiles --> BatchCommit[Batch Commit]
+UpdateFiles --> BatchCommit
+DeleteFiles --> BatchCommit
+BatchCommit --> CreatePR[Create Pull Request]
+CreatePR --> End([Sync Complete])
 ```
 
 **Diagram sources**
-- [extension_publish.go](file://internal/app/extension_publish.go#L456-L567)
+- [extension_publish.go](file://internal/app/extension_publish.go#L458-L637)
 
 **Section sources**
-- [extension_publish.go](file://internal/app/extension_publish.go#L269-L418)
+- [extension_publish.go](file://internal/app/extension_publish.go#L271-L319)
+- [extension_publish.go](file://internal/app/extension_publish.go#L458-L637)
+
+## Extension Publishing Workflow
+
+### Release Detection and Processing
+
+The system monitors Gitea for new releases and automatically triggers the publishing process:
+
+1. **Release Detection**: Monitors release events in source repositories
+2. **Metadata Extraction**: Retrieves release information including version tags and notes
+3. **Subscriber Discovery**: Scans all accessible repositories for subscription branches
+4. **File Synchronization**: Updates target repositories with new extension files
+5. **Pull Request Creation**: Generates PRs with detailed release information
+
+### Subscriber Discovery Process
+
+The discovery mechanism employs a multi-stage approach:
+
+```mermaid
+flowchart LR
+Start([Start Discovery]) --> GetOrgs[Get User Organizations]
+GetOrgs --> LoopOrgs{Loop Organizations}
+LoopOrgs --> |Each Org| GetRepos[Get Organization Repositories]
+GetRepos --> LoopRepos{Loop Repositories}
+LoopRepos --> |Each Repo| CheckProjectYAML[Check project.yaml]
+CheckProjectYAML --> ParseSubscriptions[Parsed Subscriptions]
+ParseSubscriptions --> ValidateMatch{Validate Match}
+ValidateMatch --> |Match Found| AddSubscriber[Add to Subscribers]
+ValidateMatch --> |No Match| NextRepo[Next Repository]
+NextRepo --> LoopRepos
+LoopRepos --> LoopOrgs
+LoopOrgs --> End([Discovery Complete])
+```
+
+**Diagram sources**
+- [extension_publish.go](file://internal/app/extension_publish.go#L155-L269)
+
+**Section sources**
+- [extension_publish.go](file://internal/app/extension_publish.go#L155-L269)
 
 ### Pull Request Generation
 
-Each successful synchronization triggers automated pull request creation with comprehensive metadata:
+Each successful synchronization creates a standardized Pull Request with comprehensive metadata:
 
-```mermaid
-classDiagram
-class PRGenerator {
-+BuildExtensionPRTitle(extName, version) string
-+BuildExtensionPRBody(release, sourceRepo, extName, releaseURL) string
-+CreateExtensionPR(l, api, syncResult, release, extName, sourceRepo, releaseURL) PRResponse
-}
-class PRMetadata {
-+string Title
-+string Body
-+string Head
-+string Base
-+int64 Number
-+string HTMLURL
-}
-class ReleaseInfo {
-+string TagName
-+string Name
-+string Body
-+string HTMLURL
-+time CreatedAt
-}
-PRGenerator --> PRMetadata : creates
-PRGenerator --> ReleaseInfo : uses
-PRGenerator --> PRMetadata : returns
-```
-
-**Diagram sources**
-- [extension_publish.go](file://internal/app/extension_publish.go#L625-L688)
+| PR Field | Content Format | Purpose |
+|----------|----------------|---------|
+| **Title** | `Update {Extension} to {Version}` | Clear identification of changes |
+| **Body** | Markdown with release details | Comprehensive change information |
+| **Head** | `update-{extname}-{version}` | Branch reference for changes |
+| **Base** | Target repository default branch | Merge target |
 
 **Section sources**
-- [extension_publish.go](file://internal/app/extension_publish.go#L569-L624)
+- [extension_publish.go](file://internal/app/extension_publish.go#L639-L758)
 
 ## Gitea API Integration
 
 ### API Client Architecture
 
-The system integrates deeply with Gitea's REST API through a comprehensive client implementation that supports all required operations for extension publishing.
+The system implements a robust Gitea API client with comprehensive functionality:
 
 ```mermaid
 classDiagram
@@ -297,216 +216,235 @@ class GiteaAPI {
 +string Repo
 +string AccessToken
 +string BaseBranch
-+string NewBranch
-+string Command
-+NewGiteaAPI(config) API
-+sendReq(urlString, reqBody, respType) Response
-}
-class APIInterface {
-<<interface>>
-+GetLatestRelease() Release
-+GetReleaseByTag(tag) Release
-+SearchOrgRepos(orgName) []Repository
-+HasBranch(owner, repo, branch) bool
-+GetRepositoryContents(filepath, branch) []FileInfo
-+AnalyzeProject(branch) []string
-+SetRepositoryStateWithNewBranch(l, operations, branch, newBranch, message) string
++CreateTestBranch() error
++GetFileContent(fileName) []byte
++GetRepositoryContents(path, branch) []FileInfo
++SetRepositoryStateWithNewBranch() string
 +CreatePRWithOptions(opts) PRResponse
++GetReleaseByTag(tag) Release
++AnalyzeProject(branch) []string
 }
-class Release {
+class ChangeFileOperation {
++string Operation
++string Path
++string Content
++string SHA
++string FromPath
+}
+class PRResponse {
 +int64 ID
-+string TagName
-+string Name
++int64 Number
++string HTMLURL
++string State
++string Title
 +string Body
-+[]ReleaseAsset Assets
-+string CreatedAt
-+string PublishedAt
++bool Mergeable
 }
-class Repository {
-+int64 ID
-+string Name
-+string FullName
-+RepositoryOwner Owner
-+string DefaultBranch
-+bool Private
-+bool Fork
-}
-GiteaAPI ..|> APIInterface : implements
-GiteaAPI --> Release : manages
-GiteaAPI --> Repository : manages
+GiteaAPI --> ChangeFileOperation : "creates"
+GiteaAPI --> PRResponse : "returns"
 ```
 
 **Diagram sources**
-- [gitea.go](file://internal/entity/gitea/gitea.go#L288-L317)
-- [interfaces.go](file://internal/entity/gitea/interfaces.go#L18-L57)
-
-**Section sources**
-- [gitea.go](file://internal/entity/gitea/gitea.go#L1182-L1200)
-- [interfaces.go](file://internal/entity/gitea/interfaces.go#L18-L57)
+- [gitea.go](file://internal/entity/gitea/gitea.go#L288-L774)
 
 ### Authentication and Security
 
-The system implements robust authentication mechanisms for secure Gitea API access:
+The system implements secure authentication through personal access tokens with comprehensive error handling:
 
-- **Token-Based Authentication**: Uses bearer tokens for API requests
-- **Environment Variable Management**: Secure token storage through environment variables
-- **Rate Limiting**: Built-in handling for API rate limits and retry logic
-- **Error Handling**: Comprehensive error propagation with meaningful error messages
+| Security Feature | Implementation | Purpose |
+|------------------|----------------|---------|
+| **Personal Access Tokens** | OAuth 2.0 compatible | Secure API access |
+| **Token Validation** | Pre-flight checks | Prevent unauthorized access |
+| **Rate Limiting** | Built-in Gitea protection | Prevent API abuse |
+| **Error Propagation** | Structured error handling | Clear failure diagnosis |
 
 **Section sources**
 - [gitea.go](file://internal/entity/gitea/gitea.go#L469-L503)
 
-## Configuration Management
+## Data Models and Structures
 
-### Multi-Layer Configuration System
+### Core Data Structures
 
-The system employs a hierarchical configuration approach supporting environment variables, YAML files, and default values:
+The system defines several critical data structures for managing extension publishing:
 
 ```mermaid
-flowchart TD
-Environment[Environment Variables] --> Priority1[Priority 1]
-YAMLConfig[YAML Configuration Files] --> Priority2[Priority 2]
-Defaults[Default Values] --> Priority3[Priority 3]
-Priority1 --> Merge[Configuration Merge]
-Priority2 --> Merge
-Priority3 --> Merge
-Merge --> Apply[Apply to System]
-Apply --> Runtime[Runtime Configuration]
+erDiagram
+SUBSCRIBED_REPO {
+string Organization
+string Repository
+string TargetBranch
+string TargetDirectory
+string SubscriptionID
+}
+SYNC_RESULT {
+SubscribedRepo Subscriber
+int FilesCreated
+int FilesDeleted
+string NewBranch
+string CommitSHA
+error Error
+}
+PUBLISH_RESULT {
+SubscribedRepo Subscriber
+PublishStatus Status
+int PRNumber
+string PRURL
+string ErrorMessage
+int DurationMs
+}
+PUBLISH_REPORT {
+string ExtensionName
+string Version
+string SourceRepo
+time StartTime
+time EndTime
+}
+SUBSCRIBED_REPO ||--o{ SYNC_RESULT : "produces"
+SYNC_RESULT ||--o{ PUBLISH_RESULT : "generates"
+PUBLISH_RESULT ||--|| PUBLISH_REPORT : "aggregates"
 ```
 
 **Diagram sources**
-- [config.go](file://internal/config/config.go#L548-L702)
+- [extension_publish.go](file://internal/app/extension_publish.go#L94-L115)
+- [extension_publish.go](file://internal/app/extension_publish.go#L75-L92)
+- [extension_publish.go](file://internal/app/extension_publish.go#L827-L853)
 
-### Key Configuration Parameters
+### Status Management
 
-| Parameter | Purpose | Environment Variable | Default Value |
-|-----------|---------|---------------------|---------------|
-| `BR_COMMAND` | Command selection | `BR_COMMAND` | Empty |
-| `GITEA_TOKEN` | API authentication | `GITHUB_TOKEN` | None |
-| `GITHUB_REPOSITORY` | Source repository | `GITHUB_REPOSITORY` | None |
-| `GITHUB_REF_NAME` | Release tag | `GITHUB_REF_NAME` | `main` |
-| `BR_EXT_DIR` | Extension directory | `BR_EXT_DIR` | Auto-detected |
-| `BR_DRY_RUN` | Test mode | `BR_DRY_RUN` | `false` |
+The system tracks publication status through a comprehensive state machine:
+
+| Status | Description | Trigger Condition |
+|--------|-------------|-------------------|
+| **Success** | Publication completed successfully | Files synchronized and PR created |
+| **Failed** | Publication encountered errors | API failures, permission issues, or sync errors |
+| **Skipped** | Operation bypassed (dry-run) | Dry-run mode enabled or manual skip |
 
 **Section sources**
-- [config.go](file://internal/config/config.go#L128-L209)
-- [app.yaml](file://config/app.yaml#L1-L138)
+- [extension_publish.go](file://internal/app/extension_publish.go#L815-L825)
 
 ## Error Handling and Reporting
 
 ### Comprehensive Error Management
 
-The system implements structured error handling with detailed reporting capabilities:
+The system implements robust error handling with detailed reporting:
 
 ```mermaid
-classDiagram
-class PublishResult {
-+SubscribedRepo Subscriber
-+PublishStatus Status
-+SyncResult SyncResult
-+int PRNumber
-+string PRURL
-+error Error
-+string ErrorMessage
-+int64 DurationMs
-}
-class PublishReport {
-+string ExtensionName
-+string Version
-+string SourceRepo
-+time StartTime
-+time EndTime
-+[]PublishResult Results
-+SuccessCount() int
-+FailedCount() int
-+SkippedCount() int
-+HasErrors() bool
-+TotalDuration() time.Duration
-}
-class PublishStatus {
-<<enumeration>>
-+success
-+failed
-+skipped
-}
-PublishReport --> PublishResult : contains
-PublishResult --> PublishStatus : uses
+flowchart TD
+Start([Operation Start]) --> TryOp[Try Operation]
+TryOp --> Success{Operation Success?}
+Success --> |Yes| LogSuccess[Log Success]
+Success --> |No| CaptureError[Capture Error Details]
+CaptureError --> CheckSeverity{Check Error Severity}
+CheckSeverity --> |Critical| StopPipeline[Stop Pipeline]
+CheckSeverity --> |Non-Critical| ContinuePipeline[Continue Pipeline]
+LogSuccess --> GenerateReport[Generate Report]
+ContinuePipeline --> GenerateReport
+StopPipeline --> GenerateReport
+GenerateReport --> OutputReport[Output Report]
+OutputReport --> End([Operation Complete])
 ```
 
 **Diagram sources**
-- [extension_publish.go](file://internal/app/extension_publish.go#L745-L849)
+- [extension_publish.go](file://internal/app/extension_publish.go#L1154-L1322)
 
-### Reporting Formats
+### Reporting System
 
-The system supports dual reporting formats:
+The system provides dual-format reporting for different consumption patterns:
 
-**JSON Output** (`BR_OUTPUT_JSON=true`):
-- Machine-readable structured data
-- Complete execution statistics
-- Error details for automation
-
-**Human-Readable Output**:
-- Formatted console logs
-- Summary statistics
-- Individual subscriber status
+| Report Type | Format | Use Case |
+|-------------|--------|----------|
+| **Text Report** | Human-readable | Console output, logs |
+| **JSON Report** | Machine-parseable | CI/CD integration, automation |
 
 **Section sources**
-- [extension_publish.go](file://internal/app/extension_publish.go#L869-L977)
+- [extension_publish.go](file://internal/app/extension_publish.go#L939-L1047)
 
 ## Testing Strategy
 
-### Comprehensive Test Coverage
+### Unit Testing Approach
 
-The system implements extensive testing across multiple layers:
+The system employs comprehensive unit testing with specialized test scenarios:
 
 ```mermaid
 graph TB
 subgraph "Unit Tests"
-UT_API[Gitea API Unit Tests]
-UT_Publish[Extension Publish Unit Tests]
-UT_Utils[Utility Function Tests]
+ParseTests[ParseSubscriptionID Tests]
+FindTests[FindSubscribedRepos Tests]
+SyncTests[Sync Operations Tests]
+FileTests[File Operations Tests]
 end
 subgraph "Integration Tests"
-IT_API[Gitea API Integration Tests]
-IT_Publish[End-to-End Publish Tests]
-IT_Config[Configuration Tests]
+RealGitea[Real Gitea Tests]
+EndToEnd[End-to-End Tests]
 end
 subgraph "Mock Infrastructure"
-MockGitea[Mock Gitea Server]
-MockFS[Mock File System]
-TestDB[Test Database]
+MockAPI[Mock Gitea API]
+TestServer[Test HTTP Server]
 end
-UT_API --> MockGitea
-UT_Publish --> MockGitea
-IT_Publish --> MockGitea
-IT_API --> MockGitea
-MockGitea --> TestDB
-MockFS --> TestDB
+ParseTests --> MockAPI
+FindTests --> MockAPI
+SyncTests --> MockAPI
+FileTests --> MockAPI
+RealGitea --> TestServer
+EndToEnd --> TestServer
 ```
 
 **Diagram sources**
-- [extension_publish_test.go](file://internal/app/extension_publish_test.go)
-- [extension_publish_integration_test.go](file://internal/app/extension_publish_integration_test.go)
+- [extension_publish_test.go](file://internal/app/extension_publish_test.go#L26-L118)
+- [extension_publish_integration_test.go](file://internal/app/extension_publish_integration_test.go#L24-L66)
 
-### Test Categories
+### Test Coverage Areas
 
-- **Unit Tests**: Individual function and method testing
-- **Integration Tests**: Cross-component functionality validation
-- **Mock Testing**: External dependency simulation
-- **Regression Tests**: Prevent functionality degradation
+| Test Category | Coverage Area | Test Methods |
+|---------------|---------------|--------------|
+| **Parser Tests** | Subscription ID parsing | Valid/Invalid formats |
+| **Discovery Tests** | Subscriber finding | Empty lists, errors, success |
+| **Synchronization Tests** | File operations | Create, update, delete |
+| **Integration Tests** | Real system testing | End-to-end workflows |
 
 **Section sources**
-- [extension_publish_test.go](file://internal/app/extension_publish_test.go)
-- [extension_publish_integration_test.go](file://internal/app/extension_publish_integration_test.go)
+- [extension_publish_test.go](file://internal/app/extension_publish_test.go#L120-L451)
+- [extension_publish_integration_test.go](file://internal/app/extension_publish_integration_test.go#L68-L151)
 
-## Deployment and Usage
+## Configuration Management
 
-### Gitea Actions Integration
+### Environment Variables
 
-The system seamlessly integrates with Gitea Actions for automated extension publishing:
+The system uses a comprehensive set of environment variables for configuration:
+
+| Variable | Purpose | Required | Default |
+|----------|---------|----------|---------|
+| **GITEA_URL** | Gitea server URL | Yes | - |
+| **ACCESS_TOKEN** | API authentication | Yes | - |
+| **REPOSITORY** | Source repository name | Yes | - |
+| **COMMAND** | Execution command | Yes | - |
+| **LOG_LEVEL** | Logging verbosity | No | info |
+| **BR_EXT_DIR** | Extension directory override | No | - |
+| **BR_DRY_RUN** | Dry-run mode toggle | No | false |
+| **BR_OUTPUT_JSON** | JSON output format | No | false |
+
+### Configuration Files
+
+The system supports multiple configuration file formats:
+
+| File Type | Purpose | Location |
+|-----------|---------|----------|
+| **app.yaml** | Application settings | `/config/app.yaml` |
+| **action.yaml** | GitHub Actions configuration | `/config/action.yaml` |
+| **project.yaml** | Project-specific settings | Repository root |
+
+**Section sources**
+- [app.yaml](file://config/app.yaml#L1-L138)
+- [action.yaml](file://config/action.yaml#L1-L121)
+
+## Deployment and CI/CD
+
+### GitHub Actions Integration
+
+The system integrates seamlessly with GitHub Actions workflows:
 
 ```yaml
-name: Publish Extension
+name: Extension Publish
 on:
   release:
     types: [published]
@@ -521,54 +459,76 @@ jobs:
           BR_COMMAND: extension-publish
           GITEA_TOKEN: ${{ secrets.GITEA_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_REF_NAME: ${{ github.ref_name }}
 ```
 
-### Manual Execution
+### Docker Containerization
 
-For manual execution scenarios:
+The system is containerized for easy deployment and scaling:
 
-```bash
-# Configure environment
-export BR_COMMAND=extension-publish
-export GITEA_TOKEN=your_access_token
-export GITHUB_REPOSITORY=organization/repository
-
-# Execute publisher
-./benadis-runner extension-publish
-```
+| Container Feature | Implementation |
+|------------------|----------------|
+| **Multi-stage Builds** | Optimized image size |
+| **Health Checks** | Container readiness verification |
+| **Resource Limits** | CPU and memory constraints |
+| **Logging Integration** | Structured log output |
 
 **Section sources**
-- [extension-publish.md](file://docs/epics/extension-publish.md#L299-L326)
+- [external-extension-workflow.md](file://docs/diagrams/external-extension-workflow.md#L299-L316)
 
 ## Troubleshooting Guide
 
 ### Common Issues and Solutions
 
-| Issue | Symptoms | Solution |
-|-------|----------|----------|
-| **Authentication Failure** | API returns 401/403 errors | Verify GITEA_TOKEN validity and permissions |
-| **Subscription Not Found** | No subscribers detected | Check branch naming format `{Org}_{Repo}_{Dir}` |
-| **File Synchronization Errors** | Partial updates or missing files | Verify source repository structure and permissions |
-| **Pull Request Creation Failures** | PR not created despite successful sync | Check target repository branch protection rules |
+| Issue Category | Symptoms | Solution Steps |
+|----------------|----------|----------------|
+| **Authentication Failures** | 401/403 errors | Verify ACCESS_TOKEN validity |
+| **Repository Not Found** | 404 errors | Check GITEA_URL and repository names |
+| **Permission Denied** | Access control errors | Verify user permissions |
+| **Rate Limiting** | API throttling | Implement retry delays |
+| **Network Connectivity** | Timeout errors | Check firewall and proxy settings |
 
-### Debug Mode
+### Debug Mode Features
 
-Enable debug logging for detailed troubleshooting:
+The system provides comprehensive debugging capabilities:
 
-```bash
-export LOG_LEVEL=debug
-export BR_OUTPUT_JSON=true
-./benadis-runner extension-publish
+```mermaid
+flowchart TD
+DebugMode[Enable Debug Mode] --> VerboseLogs[Verbose Logging]
+VerboseLogs --> DetailedAPI[Detailed API Calls]
+DetailedAPI --> OperationTracing[Operation Tracing]
+OperationTracing --> ErrorDiagnostics[Error Diagnostics]
+ErrorDiagnostics --> LogAnalysis[Log Analysis Tools]
+LogAnalysis --> PerformanceMetrics[Performance Metrics]
 ```
 
-### Monitoring and Metrics
+**Diagram sources**
+- [extension_publish.go](file://internal/app/extension_publish.go#L1068-L1106)
 
-The system provides comprehensive logging for operational visibility:
+### Monitoring and Alerting
 
-- **Execution Time**: Per-subscriber processing duration
-- **Success Rates**: Overall publication success metrics  
-- **Error Patterns**: Common failure categories and frequencies
-- **API Usage**: Rate limiting and quota consumption
+The system includes built-in monitoring capabilities:
+
+| Monitoring Aspect | Implementation | Alerts |
+|-------------------|----------------|--------|
+| **API Health** | Connection testing | Service availability |
+| **Operation Success** | Result tracking | Failure notifications |
+| **Performance Metrics** | Timing measurements | Slow operation alerts |
+| **Error Rates** | Error counting | Exception thresholds |
 
 **Section sources**
-- [extension_publish.go](file://internal/app/extension_publish.go#L869-L977)
+- [extension_publish.go](file://internal/app/extension_publish.go#L949-L957)
+
+## Conclusion
+
+The Extension Publishing System provides a robust, scalable solution for automated 1C extension distribution across multiple repositories. Its subscription-based architecture ensures consistent updates while maintaining flexibility for diverse project structures.
+
+Key strengths of the system include:
+
+- **Automated Workflow**: End-to-end automation from release detection to PR creation
+- **Scalable Architecture**: Support for unlimited subscribers and extensions
+- **Comprehensive Error Handling**: Detailed diagnostics and recovery mechanisms
+- **Flexible Configuration**: Environment-based customization for various deployment scenarios
+- **Production Ready**: Thorough testing, monitoring, and CI/CD integration
+
+The system successfully addresses the challenges of distributed extension management while maintaining auditability, traceability, and operational reliability. Its modular design facilitates future enhancements and adaptation to evolving requirements.

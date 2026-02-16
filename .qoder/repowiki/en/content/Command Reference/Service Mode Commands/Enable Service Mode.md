@@ -1,20 +1,27 @@
-Now I have gathered sufficient information to create comprehensive documentation for the service-mode-enable command. Let me create the documentation:
-
-<docs>
 # Enable Service Mode
 
 <cite>
 **Referenced Files in This Document**
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go)
-- [internal/app/app.go](file://internal/app/app.go)
-- [internal/servicemode/servicemode.go](file://internal/servicemode/servicemode.go)
-- [internal/rac/service_mode.go](file://internal/rac/service_mode.go)
-- [internal/config/config.go](file://internal/config/config.go)
-- [internal/constants/constants.go](file://internal/constants/constants.go)
-- [internal/servicemode/servicemode_test.go](file://internal/servicemode/servicemode_test.go)
-- [old/service-mode-usage.md](file://old/service-mode-usage.md)
-- [README.md](file://README.md)
+- [handler.go](file://internal/command/handlers/servicemodeenablehandler/handler.go)
+- [handler_test.go](file://internal/command/handlers/servicemodeenablehandler/handler_test.go)
+- [interfaces.go](file://internal/adapter/onec/rac/interfaces.go)
+- [client.go](file://internal/adapter/onec/rac/client.go)
+- [registry.go](file://internal/command/registry.go)
+- [result.go](file://internal/pkg/output/result.go)
+- [factory.go](file://internal/pkg/output/factory.go)
+- [json.go](file://internal/pkg/output/json.go)
+- [text.go](file://internal/pkg/output/text.go)
+- [constants.go](file://internal/constants/constants.go)
+- [config.go](file://internal/config/config.go)
 </cite>
+
+## Update Summary
+**Changes Made**
+- Updated to reflect new NR (Named Reference) command implementation with structured JSON/text output
+- Added comprehensive error handling with machine-readable error codes
+- Integrated RAC client with idempotent operations and session termination
+- Implemented Command Registry pattern with deprecation support
+- Enhanced output formatting with metadata and trace ID tracking
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -23,29 +30,32 @@ Now I have gathered sufficient information to create comprehensive documentation
 4. [Internal Workflow](#internal-workflow)
 5. [Code Implementation](#code-implementation)
 6. [Integration with 1C Server](#integration-with-1c-server)
-7. [Session Management](#session-management)
-8. [Error Handling](#error-handling)
-9. [Use Cases](#use-cases)
-10. [Troubleshooting](#troubleshooting)
-11. [Best Practices](#best-practices)
+7. [Structured Output Format](#structured-output-format)
+8. [Idempotent Operations](#idempotent-operations)
+9. [Session Management](#session-management)
+10. [Error Handling](#error-handling)
+11. [Use Cases](#use-cases)
+12. [Troubleshooting](#troubleshooting)
+13. [Best Practices](#best-practices)
 
 ## Introduction
 
-The `service-mode-enable` command in benadis-runner is a critical component designed to manage service mode operations on 1C:Enterprise infobases. Service mode restricts user access to prevent conflicts during administrative operations such as configuration updates, database migrations, or maintenance procedures. This command provides a robust, automated solution for controlling access to production systems while ensuring data integrity and operational continuity.
+The `nr-service-mode-enable` command represents a modernized approach to managing service mode operations on 1C:Enterprise infobases within the benadis-runner framework. This NR (Named Reference) command provides a comprehensive, idempotent solution for controlling access to production systems during administrative operations, featuring structured output formats, robust error handling, and seamless integration with the Command Registry architecture.
 
-Service mode acts as a protective barrier that prevents users from accessing the system during critical maintenance windows, allowing administrators to perform updates without risking data corruption or concurrent modifications. The implementation follows industry best practices for secure system administration and provides comprehensive logging and error handling capabilities.
+The implementation follows modern Go practices with dependency injection, interface segregation, and comprehensive testing patterns. It maintains backward compatibility through deprecated alias support while introducing enhanced functionality for CI/CD automation and operational excellence.
 
 ## Command Overview
 
-The `service-mode-enable` command enables service mode on a specified 1C:Enterprise infobase by blocking user access and optionally terminating active sessions. This operation is essential for maintaining system stability during configuration changes, database updates, or other maintenance activities.
+The `nr-service-mode-enable` command enables service mode on a specified 1C:Enterprise infobase through a structured, idempotent process that ensures operational safety and provides detailed feedback through both human-readable and machine-consumable formats.
 
 ### Key Features
 
-- **Access Restriction**: Blocks user connections to prevent concurrent modifications
-- **Session Management**: Optionally terminates active user sessions
-- **Message Customization**: Allows setting custom maintenance messages
-- **Structured Logging**: Comprehensive logging with debug, info, and error levels
-- **Error Recovery**: Robust error handling with detailed diagnostic information
+- **Idempotent Operations**: Automatically detects existing service mode state and avoids redundant operations
+- **Structured Output**: Supports both JSON and text output formats with standardized metadata
+- **Session Termination**: Optional termination of active user sessions with configurable behavior
+- **Command Registry Integration**: Part of the modern NR command architecture with deprecation support
+- **Enhanced Error Handling**: Machine-readable error codes with detailed diagnostic information
+- **Trace ID Tracking**: Comprehensive logging correlation across distributed operations
 
 ### Command Execution Flow
 
@@ -53,32 +63,35 @@ The `service-mode-enable` command enables service mode on a specified 1C:Enterpr
 flowchart TD
 Start([Command Execution]) --> ValidateEnv["Validate Environment Variables"]
 ValidateEnv --> EnvValid{"Environment Valid?"}
-EnvValid --> |No| EnvError["Log Environment Error<br/>Exit with Code 8"]
-EnvValid --> |Yes| LoadConfig["Load Service Mode Configuration"]
-LoadConfig --> ConfigLoaded{"Config Loaded?"}
-ConfigLoaded --> |No| ConfigError["Log Configuration Error<br/>Exit with Code 8"]
-ConfigLoaded --> |Yes| CreateClient["Create RAC Client"]
-CreateClient --> EnableMode["Enable Service Mode"]
-EnableMode --> SessionsTerm{"Terminate Sessions?"}
+EnvValid --> |No| EnvError["Write Structured Error<br/>Exit with Code 8"]
+EnvValid --> |Yes| LoadConfig["Load Configuration"]
+LoadConfig --> CreateClient["Create RAC Client"]
+CreateClient --> GetCluster["Get Cluster Information"]
+GetCluster --> GetInfobase["Get Infobase Information"]
+GetInfobase --> CheckState["Check Service Mode State"]
+CheckState --> AlreadyEnabled{"Already Enabled?"}
+AlreadyEnabled --> |Yes| ReturnSuccess["Return Success Response"]
+AlreadyEnabled --> |No| EnableMode["Enable Service Mode"]
+EnableMode --> VerifyMode["Verify Service Mode"]
+VerifyMode --> SessionsTerm{"Terminate Sessions?"}
 SessionsTerm --> |Yes| TermSessions["Terminate Active Sessions"]
 SessionsTerm --> |No| LogSuccess["Log Success"]
 TermSessions --> LogSuccess
-LogSuccess --> End([Command Complete])
+ReturnSuccess --> End([Command Complete])
+LogSuccess --> End
 EnvError --> End
-ConfigError --> End
 ```
 
 **Diagram sources**
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L50-L65)
-- [internal/app/app.go](file://internal/app/app.go#L140-L155)
+- [handler.go](file://internal/command/handlers/servicemodeenablehandler/handler.go#L87-L231)
 
 **Section sources**
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L50-L65)
-- [internal/constants/constants.go](file://internal/constants/constants.go#L65-L67)
+- [handler.go](file://internal/command/handlers/servicemodeenablehandler/handler.go#L76-L84)
+- [constants.go](file://internal/constants/constants.go#L107-L107)
 
 ## Environment Variables
 
-The service-mode-enable command relies on several environment variables to configure its operation. These variables provide flexibility in deployment scenarios while maintaining security through controlled configuration.
+The `nr-service-mode-enable` command utilizes a comprehensive set of environment variables that provide flexible configuration while maintaining security through controlled parameter injection.
 
 ### Required Variables
 
@@ -87,9 +100,30 @@ The service-mode-enable command relies on several environment variables to confi
 - **Type**: String
 - **Required**: Yes
 - **Example**: `export BR_INFOBASE_NAME="ProductionDB"`
-- **Validation**: Must not be empty; triggers exit code 8 if missing
+- **Validation**: Triggers structured error response with code "CONFIG.INFOBASE_MISSING" if empty
 
 ### Optional Variables
+
+**BR_OUTPUT_FORMAT**
+- **Purpose**: Controls output format (json or text)
+- **Type**: String
+- **Default**: "text"
+- **Example**: `export BR_OUTPUT_FORMAT="json"`
+- **Behavior**: Determines structured JSON output vs human-readable text
+
+**BR_SERVICE_MODE_MESSAGE**
+- **Purpose**: Custom maintenance message for service mode
+- **Type**: String
+- **Default**: "Система находится в режиме обслуживания" (from constants)
+- **Example**: `export BR_SERVICE_MODE_MESSAGE="Scheduled maintenance window"`
+- **Usage**: Affects response data but RAC client uses hardcoded "ServiceMode" permission code
+
+**BR_SERVICE_MODE_PERMISSION_CODE**
+- **Purpose**: Permission code for service mode access
+- **Type**: String
+- **Default**: "ServiceMode"
+- **Example**: `export BR_SERVICE_MODE_PERMISSION_CODE="CustomCode"`
+- **Usage**: Included in response data for informational purposes
 
 **BR_TERMINATE_SESSIONS**
 - **Purpose**: Controls whether active user sessions should be terminated
@@ -98,295 +132,423 @@ The service-mode-enable command relies on several environment variables to confi
 - **Example**: `export BR_TERMINATE_SESSIONS="true"`
 - **Behavior**: When set to `true`, all active sessions are terminated before enabling service mode
 
-**BR_COMMAND**
-- **Purpose**: Specifies the operation type
-- **Type**: String
-- **Value**: `service-mode-enable`
-- **Example**: `export BR_COMMAND="service-mode-enable"`
-
 ### RAC Configuration Variables
 
-The command integrates with Remote Administration Console (RAC) for 1C:Enterprise server management. These variables configure the RAC connection:
+The command integrates with Remote Administration Console (RAC) for 1C:Enterprise server management:
 
-- **RAC_PATH**: Path to rac executable
-- **RAC_SERVER**: 1C:Enterprise server address
-- **RAC_PORT**: RAC port (default: 1545)
-- **RAC_USER**: RAC administrator username
-- **RAC_PASSWORD**: RAC administrator password
-- **RAC_TIMEOUT**: Connection timeout in seconds
-- **RAC_RETRIES**: Number of retry attempts
+- **RAC_PATH**: Path to rac executable (from AppConfig.Paths.Rac)
+- **RAC_SERVER**: 1C:Enterprise server address (from AppConfig.Rac.Server)
+- **RAC_PORT**: RAC port (default: 1545, from AppConfig.Rac.Port)
+- **RAC_USER**: RAC administrator username (from AppConfig.Users.Rac)
+- **RAC_PASSWORD**: RAC administrator password (from SecretConfig.Passwords.Rac)
+- **RAC_TIMEOUT**: Connection timeout in seconds (from AppConfig.Rac.Timeout)
+- **RAC_RETRIES**: Number of retry attempts (from AppConfig.Rac.Retries)
 
 **Section sources**
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L50-L65)
-- [internal/config/config.go](file://internal/config/config.go#L150-L160)
+- [handler.go](file://internal/command/handlers/servicemodeenablehandler/handler.go#L95-L123)
+- [config.go](file://internal/config/config.go#L355-L383)
 
 ## Internal Workflow
 
-The service-mode-enable command follows a structured workflow that ensures reliable operation and comprehensive error handling. The process involves multiple layers of validation, configuration loading, and RAC communication.
+The `nr-service-mode-enable` command follows a sophisticated workflow that ensures reliable operation, comprehensive error handling, and idempotent behavior through state checking and verification mechanisms.
 
 ### Step-by-Step Process
 
 ```mermaid
 sequenceDiagram
-participant Main as "Main Function"
-participant App as "App Layer"
-participant SM as "Service Mode"
-participant Client as "RAC Client"
+participant Handler as "ServiceModeEnableHandler"
+participant Registry as "Command Registry"
+participant Config as "Configuration"
+participant RAC as "RAC Client"
 participant Server as "1C Server"
-Main->>App : ServiceModeEnable(ctx, logger, config, infobase, terminate)
-App->>SM : ManageServiceMode(enable, infobase, terminate, config, logger)
-SM->>SM : Validate action ("enable")
-SM->>SM : LoadServiceModeConfigForDb(infobase, config)
-SM->>Client : NewClient(config, logger)
-Client->>Server : Connect to RAC
-Server-->>Client : Connection established
-SM->>Client : EnableServiceMode(ctx, infobase, terminate)
-Client->>Server : GetClusterUUID()
-Server-->>Client : Cluster UUID
-Client->>Server : GetInfobaseUUID(clusterUUID, infobase)
-Server-->>Client : Infobase UUID
-Client->>Server : EnableServiceMode(clusterUUID, infobaseUUID, terminate)
+Handler->>Registry : RegisterWithAlias("nr-service-mode-enable", "service-mode-enable")
+Registry-->>Handler : Registration Complete
+Handler->>Config : Validate Infobase Name
+Config-->>Handler : Configuration Valid
+Handler->>Handler : Create RAC Client
+Handler->>RAC : GetClusterInfo()
+RAC->>Server : cluster list
+Server-->>RAC : Cluster Information
+RAC-->>Handler : ClusterInfo
+Handler->>RAC : GetInfobaseInfo(clusterUUID, infobaseName)
+RAC->>Server : infobase summary list
+Server-->>RAC : Infobase Information
+RAC-->>Handler : InfobaseInfo
+Handler->>RAC : GetServiceModeStatus(clusterUUID, infobaseUUID)
+RAC->>Server : infobase info
+Server-->>RAC : Current Status
+RAC-->>Handler : ServiceModeStatus
+alt Already Enabled
+Handler->>Handler : Return Success Response (already_enabled : true)
+else Not Enabled
+Handler->>RAC : EnableServiceMode(clusterUUID, infobaseUUID, terminateSessions)
+RAC->>Server : infobase update (sessions-deny=on, scheduled-jobs-deny=on)
+Server-->>RAC : Operation Successful
+RAC-->>Handler : Success
+Handler->>RAC : VerifyServiceMode(clusterUUID, infobaseUUID, true)
+RAC->>Server : infobase info
+Server-->>RAC : Verified Status
+RAC-->>Handler : Verification Complete
 alt terminateSessions = true
-Client->>Server : GetSessions(clusterUUID, infobaseUUID)
-Server-->>Client : List of active sessions
-loop For each session
-Client->>Server : TerminateSession(sessionID)
+Handler->>RAC : TerminateAllSessions(clusterUUID, infobaseUUID)
+RAC->>Server : session list + terminate
+Server-->>RAC : Sessions Terminated
+RAC-->>Handler : Success
 end
 end
-Server-->>Client : Service mode enabled
-Client-->>SM : Success
-SM-->>App : Success
-App-->>Main : Success
+Handler->>Handler : Format Output (JSON/Text)
+Handler-->>Handler : Return Success/Error Response
 ```
 
 **Diagram sources**
-- [internal/servicemode/servicemode.go](file://internal/servicemode/servicemode.go#L170-L220)
-- [internal/servicemode/servicemode.go](file://internal/servicemode/servicemode.go#L320-L380)
+- [handler.go](file://internal/command/handlers/servicemodeenablehandler/handler.go#L125-L231)
+- [registry.go](file://internal/command/registry.go#L112-L144)
+
+### Idempotent State Checking
+
+The implementation includes sophisticated idempotent behavior that prevents unnecessary operations:
+
+1. **Pre-operation State Check**: Queries current service mode status before attempting changes
+2. **Already Enabled Detection**: Returns success immediately if service mode is already active
+3. **State Change Tracking**: Distinguishes between already-enabled and newly-enabled states
+4. **Fail-Open Strategy**: Continues with operations even if status check fails
 
 ### Configuration Loading Process
 
-The configuration loading process extracts RAC settings from the application configuration:
+The configuration loading process follows a hierarchical approach:
 
-1. **Database Lookup**: Searches `dbconfig.yaml` for the specified infobase
-2. **App Configuration**: Retrieves RAC settings from `app.yaml`
-3. **Secret Configuration**: Loads credentials from `secret.yaml`
-4. **Validation**: Ensures all required configuration values are present
-
-### Client Initialization
-
-The RAC client initialization creates a connection wrapper with the following characteristics:
-
-- **Connection Parameters**: Host, port, credentials, timeouts
-- **Logging Integration**: Structured logging through SlogLogger
-- **Error Handling**: Built-in retry mechanisms
-- **Resource Management**: Proper cleanup and connection pooling
+1. **Application Configuration**: Loads from AppConfig (paths, ports, timeouts)
+2. **Secret Configuration**: Injects credentials from SecretConfig
+3. **Database Configuration**: Resolves 1C server from DbConfig if not in AppConfig
+4. **Fallback Resolution**: Provides sensible defaults when configuration is incomplete
 
 **Section sources**
-- [internal/servicemode/servicemode.go](file://internal/servicemode/servicemode.go#L170-L220)
-- [internal/servicemode/servicemode.go](file://internal/servicemode/servicemode.go#L280-L320)
+- [handler.go](file://internal/command/handlers/servicemodeenablehandler/handler.go#L156-L183)
+- [handler.go](file://internal/command/handlers/servicemodeenablehandler/handler.go#L289-L334)
 
 ## Code Implementation
 
-The service-mode-enable functionality is implemented through a layered architecture that separates concerns and promotes maintainability. The implementation follows Go best practices for error handling, logging, and modular design.
+The `nr-service-mode-enable` implementation represents a modern Go architecture with clear separation of concerns, dependency injection, and comprehensive testing patterns.
 
-### Core Implementation Details
+### Core Handler Architecture
 
-#### Main Entry Point
-
-The main entry point in `cmd/benadis-runner/main.go` handles command-line argument processing and environment validation:
+#### ServiceModeEnableHandler Structure
 
 ```go
-case constants.ActServiceModeEnable:
-    // Получаем имя информационной базы из переменной окружения
-    infobaseName := cfg.InfobaseName
-    if infobaseName == "" {
-        l.Error("Не указано имя информационной базы",
-            slog.String("env_var", "BR_INFOBASE_NAME"),
-            slog.String(constants.MsgErrProcessing, constants.MsgAppExit),
-        )
-        os.Exit(8)
-    }
-    terminateSessions := cfg.TerminateSessions
-    err = app.ServiceModeEnable(&ctx, l, cfg, infobaseName, terminateSessions)
-    if err != nil {
-        l.Error("Ошибка включения сервисного режима",
-            slog.String("infobase", infobaseName),
-            slog.String("error", err.Error()),
-            slog.String(constants.MsgErrProcessing, constants.MsgAppExit),
-        )
-        os.Exit(8)
-    }
-    l.Info("Сервисный режим успешно включен", "infobase", infobaseName)
-```
-
-#### Application Layer
-
-The application layer provides the primary interface for service mode operations:
-
-```go
-func ServiceModeEnable(ctx *context.Context, l *slog.Logger, cfg *config.Config, infobaseName string, terminateSessions bool) error {
-    // Создаем логгер для servicemode
-    logger := &servicemode.SlogLogger{Logger: l}
-
-    // Выполняем операцию включения сервисного режима
-    err := servicemode.ManageServiceMode(*ctx, "enable", infobaseName, terminateSessions, cfg, logger)
-    if err != nil {
-        l.Error("Failed to enable service mode", "error", err, "infobase", infobaseName)
-        return err
-    }
-
-    l.Info("Service mode enabled successfully", "infobase", infobaseName)
-    return nil
+type ServiceModeEnableHandler struct {
+    // racClient — опциональный RAC клиент (nil в production, mock в тестах)
+    racClient rac.Client
 }
 ```
 
-#### Service Mode Management
+The handler implements the `command.Handler` interface with automatic registration through package initialization.
 
-The core service mode management logic resides in the `ManageServiceMode` function:
+#### Command Registration
 
 ```go
-func ManageServiceMode(ctx context.Context, action, infobaseName string, terminateSessions bool, cfg *config.Config, logger Logger) error {
-    // Сначала проверяем валидность action
-    switch action {
-    case "enable", "disable", "status":
-        // Валидные действия, продолжаем
-    default:
-        logger.Error("Unknown service mode action", "action", action)
-        return fmt.Errorf("unknown action: %s", action)
-    }
-
-    config, err := LoadServiceModeConfigForDb(infobaseName, cfg)
-    if err != nil {
-        return err
-    }
-
-    client := NewClient(config, logger)
-
-    switch action {
-    case "enable":
-        logger.Debug("Executing enable service mode action")
-        err := client.EnableServiceMode(ctx, infobaseName, terminateSessions)
-        if err != nil {
-            logger.Error("Failed to enable service mode",
-                "error", err,
-                "infobaseName", infobaseName,
-                "terminateSessions", terminateSessions)
-            return err
-        }
-        logger.Info("Service mode enabled successfully",
-            "infobaseName", infobaseName,
-            "terminateSessions", terminateSessions)
-        return nil
-    // ... other cases
-    }
+func init() {
+    command.RegisterWithAlias(&ServiceModeEnableHandler{}, constants.ActServiceModeEnable)
 }
 ```
 
-### Logging Patterns
+This registration pattern supports both new "nr-service-mode-enable" and deprecated "service-mode-enable" aliases with automatic bridging.
 
-The implementation uses structured logging with different severity levels:
+### ServiceModeEnableData Structure
 
-#### Debug Logging
+The response data structure provides comprehensive information about the operation:
+
 ```go
-logger.Debug("Executing enable service mode action")
-logger.Debug("Getting cluster UUID for service mode operation")
-logger.Debug("Enabling service mode with RAC client",
-    "clusterUUID", clusterUUID,
-    "infobaseUUID", infobaseUUID,
-    "terminateSessions", terminateSessions)
+type ServiceModeEnableData struct {
+    Enabled bool `json:"enabled"`
+    AlreadyEnabled bool `json:"already_enabled"`
+    StateChanged bool `json:"state_changed"`
+    Message string `json:"message"`
+    PermissionCode string `json:"permission_code"`
+    ScheduledJobsBlocked bool `json:"scheduled_jobs_blocked"`
+    TerminatedSessionsCount int `json:"terminated_sessions_count"`
+    InfobaseName string `json:"infobase_name"`
+}
 ```
 
-#### Information Logging
-```go
-logger.Info("Service mode enabled successfully",
-    "infobaseName", infobaseName,
-    "terminateSessions", terminateSessions)
-logger.Info("Service mode disabled successfully", "infobaseName", infobaseName)
+### Output Formatting System
+
+The implementation supports dual output formats through a pluggable writer system:
+
+#### JSON Output Structure
+
+```json
+{
+  "status": "success",
+  "command": "nr-service-mode-enable",
+  "data": {
+    "enabled": true,
+    "already_enabled": false,
+    "state_changed": true,
+    "message": "Система находится в режиме обслуживания",
+    "permission_code": "ServiceMode",
+    "scheduled_jobs_blocked": true,
+    "terminated_sessions_count": 0,
+    "infobase_name": "ProductionDB"
+  },
+  "metadata": {
+    "duration_ms": 1234,
+    "trace_id": "abc123def456",
+    "api_version": "v1"
+  }
+}
 ```
 
-#### Error Logging
-```go
-logger.Error("Failed to enable service mode",
-    "error", err,
-    "infobaseName", infobaseName,
-    "terminateSessions", terminateSessions)
-logger.Error("Failed to get cluster UUID for service mode",
-    "error", err,
-    "infobase", infobaseName)
+#### Text Output Format
+
+```
+nr-service-mode-enable: success
+Data: {
+  "enabled": true,
+  "already_enabled": false,
+  "state_changed": true,
+  "message": "Система находится в режиме обслуживания",
+  "permission_code": "ServiceMode",
+  "scheduled_jobs_blocked": true,
+  "terminated_sessions_count": 0,
+  "infobase_name": "ProductionDB"
+}
+Duration: 1234ms
 ```
 
 **Section sources**
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L50-L65)
-- [internal/app/app.go](file://internal/app/app.go#L140-L155)
-- [internal/servicemode/servicemode.go](file://internal/servicemode/servicemode.go#L170-L220)
+- [handler.go](file://internal/command/handlers/servicemodeenablehandler/handler.go#L26-L68)
+- [handler.go](file://internal/command/handlers/servicemodeenablehandler/handler.go#L233-L254)
+- [result.go](file://internal/pkg/output/result.go#L11-L30)
 
 ## Integration with 1C Server
 
-The service-mode-enable command integrates with 1C:Enterprise servers through the Remote Administration Console (RAC) protocol. This integration provides secure, programmatic access to server management functions while maintaining compatibility with various 1C:Enterprise versions.
+The `nr-service-mode-enable` command integrates seamlessly with 1C:Enterprise servers through the RAC (Remote Administration Console) protocol, utilizing a modern client architecture with comprehensive error handling and state verification.
 
-### RAC Protocol Implementation
+### RAC Client Architecture
 
-The RAC integration is implemented through the `rac.Client` structure, which provides methods for:
+The RAC client implements a composite interface pattern that separates concerns through interface segregation:
 
-- **Cluster Management**: Getting cluster UUID and managing cluster-wide settings
-- **Infobase Operations**: Managing individual infobase configurations and states
-- **Session Control**: Monitoring and controlling user sessions
-- **Command Execution**: Running RAC commands with proper error handling
+```go
+type Client interface {
+    ClusterProvider
+    InfobaseProvider
+    SessionProvider
+    ServiceModeManager
+}
+```
 
-### Command Construction
+This design allows for focused testing and mocking while maintaining clean abstractions.
 
-The service mode enable operation constructs RAC commands with specific parameters:
+### Command Construction and Execution
+
+The RAC client constructs precise RAC commands for service mode operations:
 
 ```go
 args := []string{
     "infobase", "update",
     "--cluster=" + clusterUUID,
     "--infobase=" + infobaseUUID,
-    "--denied-from=" + time.Now().Format("2006-01-02T15:04:05"),
-    "--denied-message=" + message,
-    "--permission-code=" + "ServiceMode",
     "--sessions-deny=on",
     "--scheduled-jobs-deny=on",
+    "--denied-from=" + time.Now().Format("2006-01-02T15:04:05"),
+    "--denied-message=" + deniedMessage,
+    "--permission-code=ServiceMode",
 }
 ```
 
-### Authentication and Security
+### State Verification Mechanism
 
-The RAC client supports multiple authentication methods:
+The implementation includes robust verification to ensure operations completed successfully:
 
-- **Basic Authentication**: Username/password for cluster and infobase access
-- **Credential Injection**: Secure credential passing through command-line arguments
-- **Connection Security**: Support for encrypted connections where available
+```go
+func (c *racClient) VerifyServiceMode(ctx context.Context, clusterUUID, infobaseUUID string, expectedEnabled bool) error {
+    status, err := c.GetServiceModeStatus(ctx, clusterUUID, infobaseUUID)
+    if err != nil {
+        return err
+    }
+
+    if status.Enabled != expectedEnabled {
+        return apperrors.NewAppError(ErrRACVerify,
+            fmt.Sprintf("несоответствие статуса сервисного режима: ожидалось %v, получено %v",
+                expectedEnabled, status.Enabled), nil)
+    }
+
+    return nil
+}
+```
 
 ### Error Handling Integration
 
-The RAC integration includes comprehensive error handling:
+The RAC integration provides comprehensive error handling with specific error codes:
 
-```go
-_, err = c.ExecuteCommand(ctx, args...)
-if err != nil {
-    return fmt.Errorf("failed to enable service mode: %w", err)
+- **ErrRACExec**: "RAC.EXEC_FAILED" - RAC process execution errors
+- **ErrRACTimeout**: "RAC.TIMEOUT" - Operation timeout errors  
+- **ErrRACParse**: "RAC.PARSE_FAILED" - Output parsing errors
+- **ErrRACNotFound**: "RAC.NOT_FOUND" - Object not found errors
+- **ErrRACSession**: "RAC.SESSION_FAILED" - Session operation errors
+- **ErrRACVerify**: "RAC.VERIFY_FAILED" - State verification failures
+
+**Section sources**
+- [interfaces.go](file://internal/adapter/onec/rac/interfaces.go#L102-L109)
+- [client.go](file://internal/adapter/onec/rac/client.go#L404-L449)
+- [client.go](file://internal/adapter/onec/rac/client.go#L539-L558)
+
+## Structured Output Format
+
+The `nr-service-mode-enable` command provides two distinct output formats through a unified interface, supporting both human readability and machine consumption for automation scenarios.
+
+### JSON Output Format
+
+The JSON output follows a standardized structure defined by the `output.Result` type:
+
+```json
+{
+  "status": "success",
+  "command": "nr-service-mode-enable",
+  "data": {
+    "enabled": true,
+    "already_enabled": false,
+    "state_changed": true,
+    "message": "Система находится в режиме обслуживания",
+    "permission_code": "ServiceMode",
+    "scheduled_jobs_blocked": true,
+    "terminated_sessions_count": 0,
+    "infobase_name": "ProductionDB"
+  },
+  "metadata": {
+    "duration_ms": 1234,
+    "trace_id": "abc123def456",
+    "api_version": "v1"
+  }
 }
 ```
 
+### Text Output Format
+
+The text format provides human-readable information with clear field organization:
+
+```
+nr-service-mode-enable: success
+Data: {
+  "enabled": true,
+  "already_enabled": false,
+  "state_changed": true,
+  "message": "Система находится в режиме обслуживания",
+  "permission_code": "ServiceMode",
+  "scheduled_jobs_blocked": true,
+  "terminated_sessions_count": 0,
+  "infobase_name": "ProductionDB"
+}
+Duration: 1234ms
+```
+
+### Output Writer Factory
+
+The output system uses a factory pattern to select appropriate writers:
+
+```go
+func NewWriter(format string) Writer {
+    switch format {
+    case FormatJSON:
+        return NewJSONWriter()
+    case FormatText:
+        return NewTextWriter()
+    default:
+        return NewTextWriter()
+    }
+}
+```
+
+### Metadata Tracking
+
+Both output formats include comprehensive metadata for operational insights:
+
+- **DurationMs**: Operation execution time in milliseconds
+- **TraceID**: Correlation identifier for log aggregation
+- **APIVersion**: Version identifier for backward compatibility
+
 **Section sources**
-- [internal/rac/service_mode.go](file://internal/rac/service_mode.go#L30-L80)
-- [internal/servicemode/servicemode.go](file://internal/servicemode/servicemode.go#L320-L380)
+- [result.go](file://internal/pkg/output/result.go#L11-L54)
+- [factory.go](file://internal/pkg/output/factory.go#L9-L23)
+- [json.go](file://internal/pkg/output/json.go#L8-L23)
+- [text.go](file://internal/pkg/output/text.go#L9-L55)
+
+## Idempotent Operations
+
+The `nr-service-mode-enable` command implements sophisticated idempotent behavior that prevents redundant operations and ensures predictable results even in failure scenarios.
+
+### State Detection Mechanism
+
+The handler performs pre-operation state checking to determine if service mode is already enabled:
+
+```go
+// Check idempotent state: already enabled?
+status, err := racClient.GetServiceModeStatus(ctx, clusterInfo.UUID, infobaseInfo.UUID)
+if err != nil {
+    // Not critical - continue with enable (fail-open for check)
+    log.Warn("Не удалось проверить текущий статус перед включением", slog.String("error", err.Error()))
+}
+
+// Log current state before potential change
+if status != nil {
+    log.Info("Текущее состояние перед операцией",
+        slog.Bool("enabled", status.Enabled),
+        slog.Bool("scheduled_jobs_blocked", status.ScheduledJobsBlocked),
+        slog.Int("active_sessions", status.ActiveSessions))
+}
+
+if status != nil && status.Enabled {
+    log.Info("Сервисный режим уже включён", slog.String("infobase", cfg.InfobaseName))
+    // Return success without making changes
+    data := &ServiceModeEnableData{
+        Enabled: true,
+        AlreadyEnabled: true,
+        StateChanged: false,
+        Message: status.Message,
+        PermissionCode: permissionCode,
+        ScheduledJobsBlocked: status.ScheduledJobsBlocked,
+        InfobaseName: cfg.InfobaseName,
+    }
+    return h.outputResult(format, data, traceID, start)
+}
+```
+
+### Fail-Open Strategy
+
+The implementation uses a fail-open approach for state detection:
+
+- **Non-critical failures**: Status check errors don't prevent operation
+- **Conservative behavior**: When uncertain, proceeds with enabling to ensure desired state
+- **Logging transparency**: All fallback decisions are logged for auditability
+
+### Response Differentiation
+
+The handler distinguishes between different operational outcomes:
+
+- **Already Enabled**: Returns `already_enabled: true` with `state_changed: false`
+- **Newly Enabled**: Returns `already_enabled: false` with `state_changed: true`
+- **Verification Failed**: Returns structured error with machine-readable code
+
+**Section sources**
+- [handler.go](file://internal/command/handlers/servicemodeenablehandler/handler.go#L156-L183)
+- [handler.go](file://internal/command/handlers/servicemodeenablehandler/handler.go#L164-L169)
 
 ## Session Management
 
-The service-mode-enable command provides sophisticated session management capabilities that allow administrators to control user access during maintenance operations. The session management system operates at multiple levels to ensure comprehensive access control.
+The `nr-service-mode-enable` command provides sophisticated session management capabilities that allow administrators to control user access during maintenance operations through the RAC client integration.
 
 ### Session Termination Process
 
-When the `BR_TERMINATE_SESSIONS` flag is set to `true`, the system performs the following sequence:
+When the `BR_TERMINATE_SESSIONS` flag is set to `true`, the system performs controlled session termination:
 
 ```mermaid
 flowchart TD
-Start([Session Termination Request]) --> GetSessions["Get Active Sessions"]
-GetSessions --> HasSessions{"Sessions Found?"}
-HasSessions --> |No| NoSessions["Log: No active sessions"]
-HasSessions --> |Yes| LoopSessions["For Each Session"]
+Start([Session Termination Request]) --> GetStatus["Get Current Service Mode Status"]
+GetStatus --> CountSessions["Count Active Sessions"]
+CountSessions --> HasSessions{"Sessions Found?"}
+HasSessions --> |No| LogNoSessions["Log: No active sessions"]
+HasSessions --> |Yes| GetSessions["Get Session List"]
+GetSessions --> LoopSessions["For Each Session"]
 LoopSessions --> TerminateSession["Terminate Session"]
 TerminateSession --> NextSession{"More Sessions?"}
 NextSession --> |Yes| LoopSessions
@@ -396,26 +558,31 @@ LogSuccess --> End
 ```
 
 **Diagram sources**
-- [internal/rac/service_mode.go](file://internal/rac/service_mode.go#L380-L420)
+- [client.go](file://internal/adapter/onec/rac/client.go#L374-L402)
 
 ### Session Information Structure
 
-Each active session is represented by a `SessionInfo` structure containing:
+The RAC client provides comprehensive session information through the `SessionInfo` structure:
 
-- **SessionID**: Unique identifier for the session
-- **UserName**: User account name
-- **AppID**: Application identifier
-- **StartedAt**: Session creation timestamp
-- **LastActiveAt**: Last activity timestamp
+```go
+type SessionInfo struct {
+    SessionID string
+    UserName string
+    AppID string
+    Host string
+    StartedAt time.Time
+    LastActiveAt time.Time
+}
+```
 
 ### Session Termination Logic
 
-The session termination process includes several safety checks:
+The session termination process includes multiple safety mechanisms:
 
 1. **Session Validation**: Verifies session existence and accessibility
-2. **Grace Period**: Respects session lifecycle and completion
-3. **Error Handling**: Manages partial failures gracefully
-4. **Logging**: Records all termination attempts and outcomes
+2. **Batch Processing**: Handles multiple sessions efficiently
+3. **Error Aggregation**: Collects and reports multiple termination failures
+4. **Logging Integration**: Provides detailed audit trail of all operations
 
 ### Impact on Connected Users
 
@@ -428,10 +595,10 @@ When service mode is enabled with session termination:
 
 ### Session Status Monitoring
 
-The system continuously monitors session status during service mode operations:
+The system provides real-time session status monitoring:
 
 ```go
-// Получаем количество активных сессий
+// Get active session count for reporting
 sessions, err := c.GetSessions(ctx, clusterUUID, infobaseUUID)
 if err != nil {
     c.Logger.Warn("Failed to get active sessions count", "error", err)
@@ -441,194 +608,159 @@ if err != nil {
 ```
 
 **Section sources**
-- [internal/rac/service_mode.go](file://internal/rac/service_mode.go#L380-L458)
-- [internal/servicemode/servicemode.go](file://internal/servicemode/servicemode.go#L380-L440)
+- [client.go](file://internal/adapter/onec/rac/client.go#L330-L402)
+- [interfaces.go](file://internal/adapter/onec/rac/interfaces.go#L47-L61)
 
 ## Error Handling
 
-The service-mode-enable command implements comprehensive error handling to ensure reliable operation and meaningful diagnostics. The error handling strategy covers configuration validation, network connectivity, authentication, and operational failures.
+The `nr-service-mode-enable` command implements comprehensive error handling with machine-readable error codes, structured responses, and detailed diagnostic information for effective troubleshooting.
 
-### Error Categories
+### Error Classification System
+
+The implementation uses a systematic approach to error classification:
 
 #### Configuration Errors
-- **Missing Environment Variables**: Empty `BR_INFOBASE_NAME`
-- **Invalid Configuration**: Malformed database configuration
-- **Missing Credentials**: Incomplete RAC authentication setup
+- **CONFIG.INFOBASE_MISSING**: "Не указано имя информационной базы" - Missing BR_INFOBASE_NAME
+- **CONFIG.LOAD_FAILED**: Configuration loading failures
+- **RAC.CLIENT_CREATE_FAILED**: RAC client instantiation errors
 
-#### Network and Connectivity Errors
-- **RAC Connection Failures**: Server unavailability or network issues
-- **Timeout Errors**: Exceeded connection or operation timeouts
-- **Authentication Failures**: Invalid credentials or permissions
+#### RAC Communication Errors  
+- **RAC.CLUSTER_FAILED**: "Не удалось получить информацию о кластере" - Cluster retrieval failures
+- **RAC.INFOBASE_FAILED**: "Не удалось получить информацию об информационной базе" - Infobase retrieval failures
+- **RAC.ENABLE_FAILED**: "Не удалось включить сервисный режим" - Service mode enable failures
+- **RAC.VERIFY_FAILED**: "Верификация сервисного режима не прошла" - State verification failures
 
 #### Operational Errors
-- **UUID Resolution**: Unable to resolve cluster or infobase UUIDs
-- **Command Execution**: RAC command failures
-- **Session Management**: Issues with session termination
+- **RAC.EXEC_FAILED**: RAC process execution errors
+- **RAC.TIMEOUT**: Operation timeout errors
+- **RAC.SESSION_FAILED**: Session termination failures
 
-### Error Handling Implementation
+### Structured Error Response
 
-```go
-// Example error handling in EnableServiceMode
-func (c *Client) EnableServiceMode(ctx context.Context, infobaseName string, terminateSessions bool) error {
-    if infobaseName == "" {
-        return fmt.Errorf("infobase name cannot be empty")
-    }
+The error handling system provides consistent structured responses:
 
-    c.logger.Debug("Enabling service mode",
-        "infobase", infobaseName,
-        "terminateSessions", terminateSessions)
-
-    // Получаем UUID кластера
-    c.logger.Debug("Getting cluster UUID for service mode operation")
-    clusterUUID, err := c.racClient.GetClusterUUID(ctx)
-    if err != nil {
-        c.logger.Error("Failed to get cluster UUID for service mode",
-            "error", err,
-            "infobase", infobaseName)
-        return fmt.Errorf("failed to get cluster UUID: %w", err)
-    }
-    c.logger.Debug("Successfully obtained cluster UUID", "clusterUUID", clusterUUID)
-
-    // ... subsequent operations with error handling
+```json
+{
+  "status": "error",
+  "command": "nr-service-mode-enable", 
+  "error": {
+    "code": "RAC.ENABLE_FAILED",
+    "message": "Не удалось включить сервисный режим: connection refused"
+  },
+  "metadata": {
+    "duration_ms": 1234,
+    "trace_id": "abc123def456",
+    "api_version": "v1"
+  }
 }
 ```
 
-### Exit Codes and Error Reporting
+### Error Propagation and Logging
 
-The command uses standardized exit codes for different error conditions:
+The implementation ensures comprehensive error tracking:
 
-- **Exit Code 8**: General service mode operation failure
-- **Exit Code 5**: Configuration loading failure
-- **Exit Code 7**: Store-related operation failure
+1. **Structured Logging**: All errors are logged with context and trace IDs
+2. **Machine-Readable Codes**: Consistent error codes for automation
+3. **Human-Readable Messages**: Descriptive messages for manual troubleshooting
+4. **Metadata Preservation**: Error responses include timing and correlation data
 
-### Diagnostic Information
+### Recovery Strategies
 
-The error handling system provides comprehensive diagnostic information:
+The error handling system supports multiple recovery approaches:
 
-```go
-logger.Error("Failed to enable service mode",
-    "error", err,
-    "infobaseName", infobaseName,
-    "terminateSessions", terminateSessions,
-    "clusterUUID", clusterUUID,
-    "infobaseUUID", infobaseUUID)
-```
-
-### Retry Mechanisms
-
-The implementation includes built-in retry mechanisms for transient failures:
-
-- **Connection Retries**: Automatic retry for temporary network issues
-- **Command Retries**: Retry failed RAC commands with exponential backoff
-- **Fallback Strategies**: Alternative approaches for critical operations
+- **Retry Logic**: Built-in retry mechanisms for transient failures
+- **Fail-Open Behavior**: Conservative operation when status checks fail
+- **Graceful Degradation**: Partial success reporting when operations partially complete
+- **Audit Trail**: Complete logging for forensic analysis
 
 **Section sources**
-- [internal/servicemode/servicemode.go](file://internal/servicemode/servicemode.go#L320-L380)
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L50-L65)
+- [handler.go](file://internal/command/handlers/servicemodeenablehandler/handler.go#L256-L287)
+- [client.go](file://internal/adapter/onec/rac/client.go#L17-L25)
 
 ## Use Cases
 
-The service-mode-enable command serves multiple critical use cases in enterprise environments where 1C:Enterprise systems require maintenance, updates, or administrative operations. Understanding these use cases helps organizations implement service mode effectively.
+The `nr-service-mode-enable` command serves multiple critical use cases in enterprise environments where 1C:Enterprise systems require maintenance, updates, or administrative operations with automated orchestration and monitoring.
 
 ### CI/CD Pipeline Integration
 
-Service mode is essential for continuous integration and deployment pipelines:
+The command is optimized for automated deployment scenarios with structured output and idempotent operations:
 
 ```bash
-# Automated deployment script
-export BR_COMMAND="service-mode-enable"
+# Automated deployment script with structured output
+export BR_COMMAND="nr-service-mode-enable"
 export BR_INFOBASE_NAME="ProductionDB"
 export BR_TERMINATE_SESSIONS="true"
-export BR_SERVICE_MODE_MESSAGE="Deployment in progress"
+export BR_OUTPUT_FORMAT="json"
 
-# Enable service mode before deployment
-./benadis-runner
+# Enable service mode with JSON output for automation
+benadis-runner > service_mode_enable.json
 
-# Perform deployment operations
-deploy_application.sh
-
-# Disable service mode after deployment
-export BR_COMMAND="service-mode-disable"
-./benadis-runner
+# Parse JSON output for CI/CD decision making
+if jq -e '.status == "success"' service_mode_enable.json; then
+    echo "Service mode enabled successfully"
+    # Proceed with deployment operations
+    deploy_application.sh
+else
+    echo "Service mode enable failed"
+    exit 1
+fi
 ```
 
-### Database Maintenance Operations
+### Database Maintenance Automation
 
-During routine database maintenance, service mode prevents user interference:
+During routine database maintenance operations, the command provides reliable access control:
 
-- **Schema Updates**: Applying database schema changes
-- **Index Rebuilds**: Optimizing database performance
-- **Data Migration**: Moving data between systems
-- **Backup Operations**: Creating consistent backup snapshots
+- **Schema Updates**: Applying database schema changes with controlled user access
+- **Index Rebuilds**: Optimizing database performance with minimal user disruption  
+- **Data Migration**: Moving data between systems with session termination
+- **Backup Operations**: Creating consistent backup snapshots with service mode
 
-### Configuration Updates
+### Configuration Update Orchestration
 
-Service mode protects against configuration conflicts:
+The command supports complex configuration update scenarios:
 
-- **Module Updates**: Installing new system modules
-- **Customization Changes**: Updating business logic
-- **Security Patches**: Applying security fixes
-- **Performance Tuning**: Adjusting system parameters
+- **Module Updates**: Installing new system modules with access restrictions
+- **Customization Changes**: Updating business logic during maintenance windows
+- **Security Patches**: Applying security fixes with controlled user access
+- **Performance Tuning**: Adjusting system parameters with operational safety
 
-### Emergency Maintenance
+### Emergency Response Systems
 
-In emergency situations, service mode provides rapid response:
+In emergency situations, the command provides rapid response capabilities:
 
-- **Critical Bug Fixes**: Immediate system corrections
-- **Security Incidents**: Rapid response to security threats
-- **Performance Issues**: Quick resolution of performance problems
-- **Data Corruption**: Emergency data recovery operations
-
-### Scheduled Maintenance Windows
-
-Organizations use service mode for planned maintenance:
-
-```mermaid
-gantt
-title Service Mode Maintenance Schedule
-dateFormat HH:mm
-axisFormat %H:%M
-section Monday
-Normal Operations :done, mon, 08:00, 17:00
-Maintenance Window :active, mon, 17:00, 19:00
-Service Mode :mon, 17:00, 19:00
-section Wednesday
-Normal Operations :done, wed, 08:00, 17:00
-Maintenance Window :wed, 17:00, 19:00
-Service Mode :wed, 17:00, 19:00
-section Friday
-Normal Operations :done, fri, 08:00, 17:00
-Maintenance Window :fri, 17:00, 19:00
-Service Mode :fri, 17:00, 19:00
-```
+- **Critical Bug Fixes**: Immediate system corrections with user access control
+- **Security Incidents**: Rapid response to security threats with session termination
+- **Performance Issues**: Quick resolution of performance problems with maintenance mode
+- **Data Corruption**: Emergency data recovery operations with controlled access
 
 ### Multi-Environment Coordination
 
-Service mode coordinates maintenance across multiple environments:
+The command supports coordinated maintenance across multiple environments:
 
-- **Development**: Testing configuration changes
-- **Testing**: Validating updates in isolation
-- **Staging**: Pre-production validation
-- **Production**: Live system maintenance
+- **Development**: Testing configuration changes with minimal user impact
+- **Testing**: Validating updates in isolation with controlled access
+- **Staging**: Pre-production validation with service mode
+- **Production**: Live system maintenance with comprehensive access control
 
 **Section sources**
-- [old/service-mode-usage.md](file://old/service-mode-usage.md#L50-L100)
+- [handler_test.go](file://internal/command/handlers/servicemodeenablehandler/handler_test.go#L52-L74)
+- [handler_test.go](file://internal/command/handlers/servicemodeenablehandler/handler_test.go#L166-L194)
 
 ## Troubleshooting
 
-This section provides comprehensive troubleshooting guidance for common issues encountered when using the service-mode-enable command. The troubleshooting approach combines diagnostic techniques, error interpretation, and resolution strategies.
+This section provides comprehensive troubleshooting guidance for common issues encountered when using the `nr-service-mode-enable` command, focusing on the modern NR command implementation with structured error handling and debugging capabilities.
 
 ### Common Issues and Solutions
 
-#### Issue: "Не указано имя информационной базы" (BR_INFOBASE_NAME not set)
+#### Issue: "CONFIG.INFOBASE_MISSING" Error
 
 **Symptoms:**
-- Command exits with code 8
-- Error message: "Не указано имя информационной базы"
-- No service mode operation performed
+- Command exits with structured error response
+- Error code: "CONFIG.INFOBASE_MISSING"
+- Message: "Не указано имя информационной базы (BR_INFOBASE_NAME)"
 
 **Causes:**
-- Missing environment variable configuration
+- Missing BR_INFOBASE_NAME environment variable
 - Incorrect variable name specification
 - Shell environment not properly loaded
 
@@ -641,7 +773,7 @@ echo $BR_INFOBASE_NAME
 export BR_INFOBASE_NAME="ProductionDB"
 
 # Or use inline assignment
-BR_INFOBASE_NAME="ProductionDB" ./benadis-runner
+BR_INFOBASE_NAME="ProductionDB" benadis-runner
 
 # Check variable precedence
 env | grep BR_INFOBASE_NAME
@@ -650,7 +782,7 @@ env | grep BR_INFOBASE_NAME
 #### Issue: RAC Connection Failures
 
 **Symptoms:**
-- Timeout errors during RAC operations
+- RAC.ENABLE_FAILED or RAC.CLUSTER_FAILED errors
 - Connection refused messages
 - Authentication failures
 
@@ -676,8 +808,7 @@ rac version
 #### Issue: UUID Resolution Failures
 
 **Symptoms:**
-- "Failed to get cluster UUID" errors
-- "Failed to get infobase UUID" errors
+- "RAC.NOT_FOUND" errors for cluster or infobase
 - Operation timeout during UUID resolution
 
 **Solutions:**
@@ -687,7 +818,7 @@ rac cluster list
 rac infobase list --cluster=<cluster_uuid>
 
 # Verify database configuration
-cat dbconfig.yaml | grep -A 5 ProductionDB
+cat config/dbconfig.yaml | grep -A 5 ProductionDB
 
 # Check 1C server status
 systemctl status 1cv8
@@ -698,7 +829,7 @@ systemctl status 1cv8
 **Symptoms:**
 - Authentication failures
 - Access denied messages
-- Insufficient privileges
+- RAC.ENABLE_FAILED with permission errors
 
 **Solutions:**
 ```bash
@@ -713,93 +844,86 @@ export RAC_PASSWORD="correct_password"
 # Navigate to 1C:Enterprise server management console
 ```
 
-### Diagnostic Commands
+### Advanced Debugging Techniques
 
-#### Environment Verification
+#### Enabling Detailed Logging
+
 ```bash
-# Check all relevant environment variables
-env | grep -E "(BR_|RAC_|INFOBASE)"
+# Set debug level for comprehensive logging
+export BR_LOG_LEVEL="debug"
+export BR_OUTPUT_FORMAT="json"
 
-# Verify configuration files
-ls -la config/
-cat config/app.yaml | grep -i rac
-cat config/dbconfig.yaml | grep -i ProductionDB
+# Capture detailed execution trace
+benadis-runner service-mode-enable 2>&1 | tee service_mode_debug.log
 ```
 
-#### Network Diagnostics
-```bash
-# Test network connectivity
-ping <rac_server>
-telnet <rac_server> 1545
+#### Trace ID Analysis
 
-# Check firewall rules
-iptables -L | grep 1545
-firewall-cmd --list-ports | grep 1545
+The command generates unique trace IDs for correlation:
+
+```bash
+# Extract trace ID from JSON output
+TRACE_ID=$(jq -r '.metadata.trace_id' service_mode_response.json)
+
+# Search logs for trace correlation
+grep "$TRACE_ID" /var/log/benadis-runner.log
+
+# Analyze operation duration
+DURATION=$(jq -r '.metadata.duration_ms' service_mode_response.json)
+echo "Operation took ${DURATION}ms"
 ```
 
-#### RAC Command Testing
+#### Session Termination Verification
+
 ```bash
-# Test basic RAC functionality
-rac --version
-rac cluster list
+# Verify session termination effectiveness
+export BR_OUTPUT_FORMAT="json"
+benadis-runner service-mode-enable
 
-# Test infobase operations
-rac infobase info --cluster=<cluster_uuid> --infobase=<infobase_uuid>
-```
-
-### Log Analysis
-
-#### Enable Debug Logging
-```bash
-export BR_LOGLEVEL="Debug"
-./benadis-runner service-mode-enable
-```
-
-#### Log File Analysis
-```bash
-# Check recent logs
-tail -f /var/log/benadis-runner.log
-
-# Filter service mode operations
-grep "service mode" /var/log/benadis-runner.log
-
-# Analyze error patterns
-grep "ERROR" /var/log/benadis-runner.log | tail -20
+# Check session count in subsequent status queries
+rac session list --cluster=<cluster_uuid> --infobase=<infobase_uuid>
 ```
 
 ### Recovery Procedures
 
 #### Partial Failure Recovery
+
 When service mode partially fails to enable:
 
 ```bash
-# Attempt manual recovery
+# Attempt manual recovery using RAC directly
 rac infobase update \
     --cluster=<cluster_uuid> \
     --infobase=<infobase_uuid> \
     --sessions-deny=off \
     --scheduled-jobs-deny=off
+
+# Verify recovery
+rac infobase info --cluster=<cluster_uuid> --infobase=<infobase_uuid>
 ```
 
 #### Emergency Service Mode Disable
+
 ```bash
-# Force disable service mode
-export BR_COMMAND="service-mode-disable"
+# Force disable service mode using NR command
+export BR_COMMAND="nr-service-mode-disable"
 export BR_INFOBASE_NAME="ProductionDB"
-./benadis-runner
+benadis-runner
 ```
 
 ### Performance Troubleshooting
 
-#### Slow Service Mode Operations
+#### Slow Operation Diagnostics
+
 - **Network Latency**: Check network connectivity to 1C server
-- **Large Session Counts**: Consider disabling session termination
+- **Large Session Counts**: Consider disabling session termination for large user bases
 - **Server Load**: Monitor 1C server performance metrics
 - **Configuration Issues**: Verify RAC server configuration
 
 #### Memory and Resource Usage
+
 ```bash
-# Monitor system resources
+# Monitor system resources during operation
 top -p $(pgrep benadis-runner)
 free -h
 
@@ -808,31 +932,34 @@ rac server info --cluster=<cluster_uuid>
 ```
 
 **Section sources**
-- [internal/servicemode/servicemode.go](file://internal/servicemode/servicemode.go#L320-L380)
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L50-L65)
+- [handler.go](file://internal/command/handlers/servicemodeenablehandler/handler.go#L256-L287)
+- [handler_test.go](file://internal/command/handlers/servicemodeenablehandler/handler_test.go#L284-L350)
 
 ## Best Practices
 
-Implementing service mode effectively requires adherence to established best practices that ensure reliability, security, and operational efficiency. These practices have evolved from real-world deployments and provide guidance for optimal service mode usage.
+Implementing the `nr-service-mode-enable` command effectively requires adherence to established best practices that ensure reliability, security, and operational efficiency in modern CI/CD and enterprise environments.
 
 ### Configuration Management
 
 #### Environment Variable Organization
+
 ```bash
 # Production environment
 export BR_ENV="production"
 export BR_INFOBASE_NAME="ProductionDB"
 export BR_TERMINATE_SESSIONS="true"
 export BR_SERVICE_MODE_MESSAGE="Scheduled maintenance window"
+export BR_OUTPUT_FORMAT="json"
 
-# Development environment
+# Development environment  
 export BR_ENV="development"
 export BR_INFOBASE_NAME="DevDB"
 export BR_TERMINATE_SESSIONS="false"
-export BR_SERVICE_MODE_MESSAGE="Development update"
+export BR_OUTPUT_FORMAT="text"
 ```
 
 #### Configuration Validation
+
 ```bash
 # Pre-deployment validation script
 #!/bin/bash
@@ -861,6 +988,7 @@ echo "RAC connectivity test passed"
 ### Operational Procedures
 
 #### Service Mode Lifecycle Management
+
 ```bash
 #!/bin/bash
 # service-mode-maintenance.sh
@@ -868,17 +996,20 @@ echo "RAC connectivity test passed"
 INFODBASE="${BR_INFOBASE_NAME}"
 MESSAGE="Scheduled maintenance window"
 
-# Enable service mode
+# Enable service mode with structured output
 echo "Enabling service mode for $INFODBASE..."
-export BR_COMMAND="service-mode-enable"
+export BR_COMMAND="nr-service-mode-enable"
 export BR_SERVICE_MODE_MESSAGE="$MESSAGE"
 export BR_TERMINATE_SESSIONS="true"
-./benadis-runner
+export BR_OUTPUT_FORMAT="json"
+benadis-runner > enable_output.json
 
-if [[ $? -eq 0 ]]; then
+if jq -e '.status == "success"' enable_output.json; then
     echo "Service mode enabled successfully"
+    echo "Sessions terminated: $(jq -r '.data.terminated_sessions_count' enable_output.json)"
 else
     echo "Failed to enable service mode"
+    cat enable_output.json
     exit 1
 fi
 
@@ -888,10 +1019,10 @@ echo "Performing maintenance operations..."
 
 # Disable service mode
 echo "Disabling service mode for $INFODBASE..."
-export BR_COMMAND="service-mode-disable"
-./benadis-runner
+export BR_COMMAND="nr-service-mode-disable"
+benadis-runner > disable_output.json
 
-if [[ $? -eq 0 ]]; then
+if jq -e '.status == "success"' disable_output.json; then
     echo "Service mode disabled successfully"
 else
     echo "Failed to disable service mode"
@@ -899,21 +1030,120 @@ else
 fi
 ```
 
-#### Monitoring and Alerting
+#### Monitoring and Alerting Integration
+
 ```bash
-# Health check script
+# Health check script with structured output
 #!/bin/bash
 INFODBASE="${BR_INFOBASE_NAME}"
 
-# Check service mode status
-export BR_COMMAND="service-mode-status"
+# Check service mode status with JSON output
+export BR_COMMAND="nr-service-mode-status"
 export BR_INFOBASE_NAME="$INFODBASE"
-STATUS_OUTPUT=$(./benadis-runner 2>&1)
+export BR_OUTPUT_FORMAT="json"
+STATUS_OUTPUT=$(benadis-runner 2>&1)
 
-if [[ $? -ne 0 ]]; then
+if jq -e '.status == "success"' <<< "$STATUS_OUTPUT"; then
+    ENABLED=$(jq -r '.data.enabled' <<< "$STATUS_OUTPUT")
+    ACTIVE_SESSIONS=$(jq -r '.data.active_sessions' <<< "$STATUS_OUTPUT")
+    
+    echo "Service mode: $ENABLED (Active sessions: $ACTIVE_SESSIONS)"
+    
+    # Alert on unexpected states
+    if [[ "$ENABLED" == "true" && "$ACTIVE_SESSIONS" -gt 0 ]]; then
+        echo "WARNING: Service mode enabled with active sessions"
+        # Send alert to monitoring system
+    fi
+else
     echo "ERROR: Service mode status check failed"
     echo "$STATUS_OUTPUT"
     # Send alert to monitoring system
-    curl -X POST "$WEBHOOK_URL" \
-         -H "Content-Type: application/json" \
-         -d '{"text":"Service mode status check failed for '$
+fi
+```
+
+### Security and Compliance
+
+#### Credential Management
+
+```bash
+# Secure credential injection using SecretConfig
+export RAC_PASSWORD=$(cat /vault/secrets/rac_password)
+export DB_PASSWORD=$(cat /vault/secrets/db_password)
+
+# Validate credentials before operation
+if rac cluster list --cluster-user="$RAC_USER" --cluster-pwd="$RAC_PASSWORD" >/dev/null 2>&1; then
+    echo "Credentials validated successfully"
+else
+    echo "Credential validation failed"
+    exit 1
+fi
+```
+
+#### Audit Trail and Compliance
+
+```bash
+# Comprehensive logging for compliance
+LOG_FILE="/var/log/service-mode-operations.log"
+
+echo "$(date): Service mode enable requested for $BR_INFOBASE_NAME" >> $LOG_FILE
+echo "Trace ID: $(uuidgen)" >> $LOG_FILE
+echo "Requestor: $(whoami)" >> $LOG_FILE
+echo "Environment: $BR_ENV" >> $LOG_FILE
+echo "Termination flag: $BR_TERMINATE_SESSIONS" >> $LOG_FILE
+
+# Include structured output in audit log
+benadis-runner > operation_output.json
+jq -r '.metadata.trace_id' operation_output.json >> $LOG_FILE
+jq -r '.metadata.duration_ms' operation_output.json >> $LOG_FILE
+jq -r '.data.message' operation_output.json >> $LOG_FILE
+```
+
+### Performance Optimization
+
+#### Batch Operation Efficiency
+
+```bash
+# Optimize for multiple infobases
+INFODBASES=("ProductionDB" "StagingDB" "TestDB")
+
+for DB in "${INFODBASES[@]}"; do
+    export BR_INFOBASE_NAME=$DB
+    export BR_OUTPUT_FORMAT="json"
+    
+    # Use background processing for independent operations
+    benadis-runner service-mode-enable &
+done
+
+# Wait for all operations to complete
+wait
+
+# Aggregate results
+for job in $(jobs -p); do
+    wait $job
+done
+```
+
+#### Resource Management
+
+```bash
+# Monitor resource usage during operations
+while benadis-runner service-mode-enable; do
+    # Check system resources
+    MEM_USAGE=$(free | awk 'NR==2{printf "%.1f%%", $3*100/$2}') 
+    CPU_USAGE=$(top -bn1 | grep "Cpu(s)" | awk "{print \$2}" | cut -d'%' -f1)
+    
+    echo "Memory: $MEM_USAGE, CPU: $CPU_USAGE"
+    
+    # Implement backoff for resource-constrained environments
+    if (( $(echo "$MEM_USAGE > 80" | bc -l) )) || (( $(echo "$CPU_USAGE > 80" | bc -l) )); then
+        sleep 30
+    else
+        break
+    fi
+done
+```
+
+**Section sources**
+- [handler.go](file://internal/command/handlers/servicemodeenablehandler/handler.go#L233-L254)
+- [registry.go](file://internal/command/registry.go#L112-L144)
+- [config.go](file://internal/config/config.go#L626-L793)

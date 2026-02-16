@@ -1071,15 +1071,17 @@ func ExtensionPublish(_ *context.Context, l *slog.Logger, cfg *config.Config) er
 	extensions := cfg.AddArray // Список расширений для публикации
 	dryRun := cfg.DryRun
 
-	// ToDo: Проверить, что cfg.Repo имеет формат owner/repo
-	sourceRepo := fmt.Sprintf("%s/%s", cfg.Owner, cfg.Repo)
-
 	// 2. Валидация обязательных параметров
-	if sourceRepo == "" {
+	// Проверяем Owner и Repo из конфигурации (заполняются из GITHUB_REPOSITORY)
+	if cfg.Owner == "" && cfg.Repo == "" {
 		return fmt.Errorf("переменная окружения GITHUB_REPOSITORY не установлена")
 	}
+	if cfg.Owner == "" || cfg.Repo == "" {
+		return fmt.Errorf("некорректный формат GITHUB_REPOSITORY: %s/%s (ожидается owner/repo)", cfg.Owner, cfg.Repo)
+	}
+
 	if releaseTag == "" {
-		releaseTag = "main"
+		return fmt.Errorf("переменная окружения GITHUB_REF_NAME не установлена")
 	}
 
 	// Валидация конфигурации
@@ -1090,13 +1092,9 @@ func ExtensionPublish(_ *context.Context, l *slog.Logger, cfg *config.Config) er
 		return fmt.Errorf("AccessToken не настроен в конфигурации")
 	}
 
-	// Парсим owner/repo
-	parts := strings.SplitN(sourceRepo, "/", 2)
-	if len(parts) != 2 {
-		return fmt.Errorf("некорректный формат GITHUB_REPOSITORY: %s (ожидается owner/repo)", sourceRepo)
-	}
-	owner := parts[0]
-	repo := parts[1]
+	sourceRepo := fmt.Sprintf("%s/%s", cfg.Owner, cfg.Repo)
+	owner := cfg.Owner
+	repo := cfg.Repo
 
 	l.Info("Запуск публикации расширения",
 		slog.String("repository", sourceRepo),

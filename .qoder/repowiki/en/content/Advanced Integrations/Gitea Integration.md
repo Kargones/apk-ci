@@ -1,45 +1,44 @@
 # Gitea Integration
 
 <cite>
-**Referenced Files in This Document**   
-- [gitea.go](file://internal/entity/gitea/gitea.go) - *Enhanced with SearchOrgRepos, HasBranch, and SetRepositoryStateWithNewBranch methods*
-- [interfaces.go](file://internal/entity/gitea/interfaces.go) - *Updated interface definitions*
-- [gitea_service.go](file://internal/service/gitea_service.go) - *Service layer implementation*
-- [gitea_factory.go](file://internal/service/gitea_factory.go) - *Component creation factory*
-- [extension_publish.go](file://internal/app/extension_publish.go) - *Extension publishing system implementation*
-- [gitea_search_test.go](file://internal/entity/gitea/gitea_search_test.go) - *SearchOrgRepos testing*
-- [config.go](file://internal/config/config.go) - *Configuration management*
-- [constants.go](file://internal/constants/constants.go) - *Constant definitions*
-- [action.yaml](file://config/action.yaml) - *GitHub Actions configuration*
-- [Git2Store.puml](file://old/PlantUML/Git2Store.puml) - *Architecture diagram*
+**Referenced Files in This Document**
+- [gitea.go](file://internal/entity/gitea/gitea.go)
+- [interfaces.go](file://internal/entity/gitea/interfaces.go)
+- [gitea_service.go](file://internal/service/gitea_service.go)
+- [gitea_factory.go](file://internal/service/gitea_factory.go)
+- [config.go](file://internal/config/config.go)
+- [constants.go](file://internal/constants/constants.go)
+- [extension_publish.go](file://internal/app/extension_publish.go)
+- [gitea_release_test.go](file://internal/entity/gitea/gitea_release_test.go)
+- [action.yaml](file://config/action.yaml)
+- [Git2Store.puml](file://old/PlantUML/Git2Store.puml)
 </cite>
 
 ## Update Summary
-**Changes Made**   
-- Added documentation for new Gitea API methods: SearchOrgRepos, HasBranch, and SetRepositoryStateWithNewBranch
-- Updated Extension Publishing System section with new workflow capabilities
-- Enhanced organization and repository management documentation
-- Added comprehensive examples for batch operations with new branch creation
-- Updated error handling section with new method-specific error scenarios
-- Expanded testing documentation with new method coverage
+**Changes Made**
+- Added comprehensive release management capabilities with GetLatestRelease and GetReleaseByTag methods
+- Implemented repository search functionality with SearchOrgRepos for organization-wide repository discovery
+- Enhanced error handling with improved conflict resolution and retry logic for large repositories
+- Expanded interface abstraction to support new release and search operations
+- Updated authentication and access token management documentation
+- Added practical examples for release-based extension publishing workflows
 
 ## Table of Contents
 1. [Introduction](#introduction)
 2. [Core Repository Operations](#core-repository-operations)
-3. [Organization and Repository Management](#organization-and-repository-management)
-4. [Batch Operations with New Branch Creation](#batch-operations-with-new-branch-creation)
+3. [Release Management](#release-management)
+4. [Repository Search Capabilities](#repository-search-capabilities)
 5. [Interface Abstraction and Mock Testing](#interface-abstraction-and-mock-testing)
 6. [Authentication and Access Token Management](#authentication-and-access-token-management)
 7. [Git2Store and StoreBind Workflows](#git2store-and-storebind-workflows)
-8. [Extension Publishing System](#extension-publishing-system)
-9. [Error Handling and Common Issues](#error-handling-and-common-issues)
-10. [Webhook Configuration and Event Delivery](#webhook-configuration-and-event-delivery)
-11. [Best Practices](#best-practices)
+8. [Error Handling and Common Issues](#error-handling-and-common-issues)
+9. [Webhook Configuration and Event Delivery](#webhook-configuration-and-event-delivery)
+10. [Best Practices](#best-practices)
 
 ## Introduction
-The Gitea integration in benadis-runner provides a comprehensive interface for managing repository operations, including branch creation, commit retrieval, pull request management, and issue tracking. The integration is designed to support automated workflows for synchronizing 1C configurations with Gitea repositories through Git2Store and storebind operations. This document details the implementation of these features, focusing on the gitea.go module and its supporting components.
+The Gitea integration in benadis-runner provides a comprehensive interface for managing repository operations, including branch creation, commit retrieval, pull request management, issue tracking, release management, and repository search capabilities. The integration supports automated workflows for synchronizing 1C configurations with Gitea repositories through Git2Store and storebind operations, with enhanced release-based publishing workflows.
 
-The integration follows a layered architecture with clear separation between the API client, service layer, and business logic. It leverages interface abstraction to enable mock testing and extensibility, allowing for flexible configuration and reliable operation in various environments. The system uses access tokens from SecretConfig.Gitea for authentication and implements robust error handling for common issues such as rate limits, merge conflicts, and synchronization race conditions.
+The integration follows a layered architecture with clear separation between the API client, service layer, and business logic. It leverages interface abstraction to enable mock testing and extensibility, allowing for flexible configuration and reliable operation in various environments. The system uses access tokens from SecretConfig.Gitea for authentication and implements robust error handling for common issues such as rate limits, merge conflicts, synchronization race conditions, and repository search limitations.
 
 **Section sources**
 - [gitea.go](file://internal/entity/gitea/gitea.go#L1-L100)
@@ -77,7 +76,8 @@ The integration supports comprehensive commit retrieval and history analysis cap
 These operations are crucial for understanding changes between different states of the repository and for implementing change tracking in the Git2Store workflow. The commit data includes author information, timestamps, and commit messages, providing rich context for analysis and reporting.
 
 **Section sources**
-- [gitea.go](file://internal/entity/gitea/gitea.go#L800-L900)
+- [gitea.go](file://internal/entity/gitea/gitea.go#L1257-L1279)
+- [gitea.go](file://internal/entity/gitea/gitea.go#L1329-L1372)
 
 ### Pull Request Management
 Pull request (PR) management is a core component of the Gitea integration, enabling automated code review and merge processes. The `CreatePR` method initiates a new pull request by specifying the source (head) and target (base) branches, while `ActivePR` retrieves all open PRs for processing.
@@ -178,8 +178,7 @@ end
 **Section sources**
 - [gitea.go](file://internal/entity/gitea/gitea.go#L561-L613)
 - [gitea.go](file://internal/entity/gitea/gitea.go#L624-L642)
-- [gitea.go](file://internal/entity/gitea/gitea.go#L653-L676)
-- [gitea.go](file://internal/entity/gitea/gitea.go#L782-L800)
+- [gitea_service.go](file://internal/service/gitea_service.go#L36-L166)
 
 ### Issue Tracking and Management
 The integration provides comprehensive issue tracking capabilities, allowing for automated creation, updating, and closure of issues in the Gitea repository. The `GetIssue` method retrieves detailed information about a specific issue, including its title, body, state, and metadata.
@@ -191,99 +190,143 @@ For collaboration and notification purposes, the `AddIssueComment` method enable
 - [gitea.go](file://internal/entity/gitea/gitea.go#L429-L443)
 - [gitea.go](file://internal/entity/gitea/gitea.go#L453-L467)
 
-## Organization and Repository Management
+## Release Management
 
-### Organization Repository Search
-The `SearchOrgRepos` method provides comprehensive organization-wide repository discovery capabilities. This method is essential for the Extension Publishing System, enabling automated scanning of all repositories within an organization to identify subscribed extensions.
-
-```mermaid
-flowchart TD
-Start([SearchOrgRepos]) --> ValidateInput["Validate Organization Name"]
-ValidateInput --> SetupPagination["Setup Pagination Parameters"]
-SetupPagination --> LoopPages["Loop Through Pages"]
-LoopPages --> CheckStatus{"HTTP Status"}
-CheckStatus --> |404| ReturnEmpty["Return Empty Slice"]
-CheckStatus --> |200| ParseResponse["Parse JSON Response"]
-CheckStatus --> |Other| HandleError["Handle Error"]
-ParseResponse --> CheckEmpty{"Empty Response?"}
-CheckEmpty --> |Yes| BreakLoop["Break Loop"]
-CheckEmpty --> |No| AppendResults["Append Repositories"]
-AppendResults --> LoopPages
-ReturnEmpty --> End([End])
-HandleError --> End
-BreakLoop --> End
-```
-
-**Diagram sources**
-- [gitea.go](file://internal/entity/gitea/gitea.go#L2058-L2093)
-
-The method implements robust pagination handling with built-in safety mechanisms:
-- **Maximum Pages**: 100 pages to prevent infinite loops
-- **Page Limit**: 50 repositories per page (maximum supported by Gitea API)
-- **Error Handling**: Graceful handling of HTTP 404 for non-existent organizations
-- **Memory Efficiency**: Streaming results to avoid excessive memory usage
-
-**Section sources**
-- [gitea.go](file://internal/entity/gitea/gitea.go#L2058-L2093)
-- [gitea_search_test.go](file://internal/entity/gitea/gitea_search_test.go#L64-L144)
-
-### Branch Existence Verification
-The `HasBranch` method provides efficient branch existence checking for arbitrary repositories. This capability is crucial for the Extension Publishing System to verify target branch availability before attempting synchronization operations.
+### Latest Release Retrieval
+The integration now includes comprehensive release management capabilities through the `GetLatestRelease` method, which retrieves information about the most recent release in the repository. This method returns a `Release` struct containing metadata such as tag name, release name, description, publication timestamp, and attached assets.
 
 ```mermaid
 flowchart TD
-Start([HasBranch]) --> BuildURL["Build Branch API URL"]
-BuildURL --> SendRequest["Send GET Request"]
-SendRequest --> CheckStatus{"HTTP Status"}
-CheckStatus --> |200| BranchExists["Branch Exists"]
-CheckStatus --> |404| BranchMissing["Branch Missing"]
-CheckStatus --> |Other| HandleError["Handle Error"]
-BranchExists --> ReturnTrue["Return true, nil"]
-BranchMissing --> ReturnFalse["Return false, nil"]
-HandleError --> ReturnError["Return false, error"]
+A[GetLatestRelease] --> B[Send API Request]
+B --> C{HTTP Status}
+C --> |200 OK| D[Parse Release JSON]
+C --> |404 Not Found| E[Return Error]
+C --> |Other Error| F[Return Error]
+D --> G[Return Release Object]
+E --> H[Return Error]
+F --> H
 ```
 
 **Diagram sources**
-- [gitea.go](file://internal/entity/gitea/gitea.go#L2162-L2182)
+- [gitea.go](file://internal/entity/gitea/gitea.go#L1187-L1210)
 
-The method offers several advantages over alternative approaches:
-- **Direct API Call**: Single HTTP request vs. listing all branches
-- **Cross-Organization Support**: Works with any owner/repo combination
-- **Performance**: Minimal overhead for simple existence checks
-- **Reliability**: Direct status code interpretation
+The method handles various error scenarios including releases not found (HTTP 404) and server errors (HTTP 5xx). When successful, it returns a fully populated `Release` object with all associated assets and metadata.
 
 **Section sources**
-- [gitea.go](file://internal/entity/gitea/gitea.go#L2162-L2182)
+- [gitea.go](file://internal/entity/gitea/gitea.go#L1187-L1210)
 
-## Batch Operations with New Branch Creation
-
-### Advanced Batch Operations
-The `SetRepositoryStateWithNewBranch` method represents a significant enhancement to the Gitea integration, providing comprehensive batch file operations with automatic branch creation. This method combines the functionality of `SetRepositoryState` with new branch creation capabilities.
+### Tag-Based Release Lookup
+For more specific release retrieval, the `GetReleaseByTag` method allows searching for releases by their exact tag name. This method URL-encodes the tag parameter to handle special characters and spaces in tag names.
 
 ```mermaid
 flowchart TD
-Start([SetRepositoryStateWithNewBranch]) --> ValidateOps["Validate Operations Array"]
-ValidateOps --> BuildRequest["Build ChangeFilesOptions"]
-BuildRequest --> SerializeJSON["Serialize JSON Request"]
-SerializeJSON --> SendRequest["Send POST Request to /contents API"]
-SendRequest --> CheckStatus{"HTTP Status"}
-CheckStatus --> |200/201| ParseResponse["Parse Response for Commit SHA"]
-CheckStatus --> |Other| HandleError["Handle Error"]
-ParseResponse --> ReturnSHA["Return Commit SHA"]
-HandleError --> ReturnError["Return Error"]
+A[GetReleaseByTag] --> B[URL-Encode Tag Parameter]
+B --> C[Send API Request to /releases/tags/{tag}]
+C --> D{HTTP Status}
+D --> |200 OK| E[Parse Release JSON]
+D --> |404 Not Found| F[Return Error: Release Not Found]
+D --> |Other Error| G[Return Error]
+E --> H[Return Release Object]
+F --> I[Return Error]
+G --> I
 ```
 
 **Diagram sources**
-- [gitea.go](file://internal/entity/gitea/gitea.go#L1473-L1528)
+- [gitea.go](file://internal/entity/gitea/gitea.go#L1220-L1246)
 
-The method supports multiple file operations in a single atomic transaction:
-- **Create Operations**: New file creation with base64-encoded content
-- **Update Operations**: File modification with SHA validation
-- **Delete Operations**: File removal with SHA validation
-- **Mixed Operations**: Combination of create, update, and delete operations
+This method is particularly useful for extension publishing workflows where releases are tagged with semantic versioning schemes (e.g., "v1.2.3"). The URL encoding ensures compatibility with tags containing forward slashes, hyphens, and other special characters.
 
 **Section sources**
-- [gitea.go](file://internal/entity/gitea/gitea.go#L1473-L1528)
+- [gitea.go](file://internal/entity/gitea/gitea.go#L1220-L1246)
+
+### Release Asset Management
+The `Release` and `ReleaseAsset` structures provide comprehensive support for release artifacts. Each release can contain multiple assets (binary files, documentation, etc.), with each asset having properties like ID, name, size, and download URL.
+
+```mermaid
+classDiagram
+class Release {
++int64 ID
++string TagName
++string Name
++string Body
++[]ReleaseAsset Assets
++string CreatedAt
++string PublishedAt
+}
+class ReleaseAsset {
++int64 ID
++string Name
++int64 Size
++string DownloadURL
+}
+Release --> ReleaseAsset : contains multiple
+```
+
+**Diagram sources**
+- [gitea.go](file://internal/entity/gitea/gitea.go#L269-L286)
+
+**Section sources**
+- [gitea.go](file://internal/entity/gitea/gitea.go#L269-L286)
+
+## Repository Search Capabilities
+
+### Organization-Wide Repository Discovery
+The integration includes powerful repository search capabilities through the `SearchOrgRepos` method, which performs pagination-aware searches across all repositories within an organization. This functionality is essential for extension publishing workflows where multiple repositories need to be scanned for subscription configurations.
+
+```mermaid
+flowchart TD
+A[SearchOrgRepos] --> B[Initialize Empty Slice]
+B --> C[Loop Through Pages 1..100]
+C --> D[Construct API URL with Page & Limit]
+D --> E[Send GET Request]
+E --> F{HTTP Status}
+F --> |200 OK| G[Parse JSON Response]
+F --> |404 Not Found| H[Return Empty Slice]
+F --> |Other Error| I[Return Error]
+G --> J{Response Length}
+J --> |0| K[BREAK Loop]
+J --> |>0| L[Append Repositories]
+L --> M[Next Page]
+M --> C
+K --> N[Return All Repositories]
+H --> O[Return Empty Slice]
+I --> P[Return Error]
+```
+
+**Diagram sources**
+- [gitea.go](file://internal/entity/gitea/gitea.go#L2095-L2130)
+
+The search implementation includes several safety mechanisms:
+- **Pagination Control**: Maximum 100 pages with 50 repositories per page limit
+- **Error Handling**: Graceful handling of organization-not-found scenarios
+- **Early Termination**: Stops when an empty response is received
+- **Memory Efficiency**: Builds results incrementally to handle large organizations
+
+**Section sources**
+- [gitea.go](file://internal/entity/gitea/gitea.go#L2095-L2130)
+
+### Team and User Management
+The integration provides comprehensive team and user management capabilities through methods like `IsUserInTeam` and `GetTeamMembers`. These functions enable role-based access control and permission management for automated workflows.
+
+```mermaid
+sequenceDiagram
+participant Client as "Client Application"
+participant API as "Gitea API"
+Client->>API : Search Teams by Name
+API-->>Client : Team Search Results
+Client->>API : Get Team Members
+API-->>Client : Team Member List
+Client->>API : Check User Membership
+API-->>Client : Membership Status
+```
+
+**Diagram sources**
+- [gitea.go](file://internal/entity/gitea/gitea.go#L851-L913)
+- [gitea.go](file://internal/entity/gitea/gitea.go#L1076-L1146)
+
+**Section sources**
+- [gitea.go](file://internal/entity/gitea/gitea.go#L851-L913)
+- [gitea.go](file://internal/entity/gitea/gitea.go#L1076-L1146)
 
 ## Interface Abstraction and Mock Testing
 
@@ -303,9 +346,9 @@ class APIInterface {
 +CreateTestBranch() error
 +MergePR(prNumber int64, l *slog.Logger) error
 +SetRepositoryState(l *slog.Logger, operations []BatchOperation, branch, commitMessage string) error
++GetLatestRelease() (*Release, error)
++GetReleaseByTag(tag string) (*Release, error)
 +SearchOrgRepos(orgName string) ([]Repository, error)
-+HasBranch(owner, repo, branchName string) (bool, error)
-+SetRepositoryStateWithNewBranch(l *slog.Logger, operations []BatchOperation, baseBranch, newBranch, commitMessage string) (string, error)
 }
 class API {
 -GiteaURL string
@@ -327,16 +370,16 @@ class MockAPI {
 +CreateTestBranch() error
 +MergePR(prNumber int64, l *slog.Logger) error
 +SetRepositoryState(l *slog.Logger, operations []BatchOperation, branch, commitMessage string) error
++GetLatestRelease() (*Release, error)
++GetReleaseByTag(tag string) (*Release, error)
 +SearchOrgRepos(orgName string) ([]Repository, error)
-+HasBranch(owner, repo, branchName string) (bool, error)
-+SetRepositoryStateWithNewBranch(l *slog.Logger, operations []BatchOperation, baseBranch, newBranch, commitMessage string) (string, error)
 }
 APIInterface <|.. MockAPI : implements
 ```
 
 **Diagram sources**
 - [interfaces.go](file://internal/entity/gitea/interfaces.go#L18-L57)
-- [gitea.go](file://internal/entity/gitea/gitea.go#L288-L317)
+- [gitea.go](file://internal/entity/gitea/gitea.go#L289-L317)
 
 This interface abstraction allows for dependency injection and makes the system highly testable. During unit tests, a mock implementation of the interface can be used instead of the real API, enabling comprehensive testing without requiring a live Gitea server.
 
@@ -348,25 +391,43 @@ The service layer, implemented in gitea_service.go, utilizes the interface abstr
 
 The service layer decouples business logic from the specific API implementation, making it easier to modify or replace the underlying API client without affecting higher-level functionality. This separation also facilitates testing, as the service can be tested with a mock API implementation.
 
-```go
-[GiteaService.TestMerge](file://internal/service/gitea_service.go#L46-L167)
-[GiteaService.AnalyzeProject](file://internal/service/gitea_service.go#L179-L182)
+```mermaid
+flowchart TD
+A[GiteaService] --> B[APIInterface]
+B --> C[Real API Implementation]
+B --> D[Mock API for Testing]
+A --> E[Business Logic]
+E --> F[Pull Request Management]
+E --> G[Project Analysis]
+E --> H[Release Operations]
 ```
 
+**Diagram sources**
+- [gitea_service.go](file://internal/service/gitea_service.go#L12-L35)
+
 **Section sources**
-- [gitea_service.go](file://internal/service/gitea_service.go#L1-L200)
+- [gitea_service.go](file://internal/service/gitea_service.go#L12-L35)
 
 ### Factory Pattern for Component Creation
 The integration uses a factory pattern to create and configure Gitea components, implemented in gitea_factory.go. The `GiteaFactory` struct provides methods for creating both the API configuration and the complete Gitea service with all dependencies properly injected.
 
 This approach centralizes the creation logic and ensures consistent configuration across the application. The factory pattern also makes it easy to extend the system with new components or modify existing ones without changing the code that uses them.
 
-```go
-[GiteaFactory.CreateGiteaService](file://internal/service/gitea_factory.go#L40-L60)
+```mermaid
+flowchart TD
+A[GiteaFactory] --> B[CreateGiteaConfig]
+A --> C[CreateGiteaService]
+B --> D[Config Struct]
+C --> E[API Client]
+C --> F[Project Analyzer]
+C --> G[GiteaService Instance]
 ```
 
+**Diagram sources**
+- [gitea_factory.go](file://internal/service/gitea_factory.go#L8-L65)
+
 **Section sources**
-- [gitea_factory.go](file://internal/service/gitea_factory.go#L1-L70)
+- [gitea_factory.go](file://internal/service/gitea_factory.go#L8-L65)
 
 ## Authentication and Access Token Management
 
@@ -395,12 +456,12 @@ string AccessToken
 ```
 
 **Diagram sources**
-- [config.go](file://internal/config/config.go#L150-L200)
+- [config.go](file://internal/config/config.go#L76-L100)
 
 The access token is passed to the Gitea API client during initialization and included in the Authorization header of all API requests. This ensures that all operations are performed with the appropriate permissions.
 
 **Section sources**
-- [config.go](file://internal/config/config.go#L150-L200)
+- [config.go](file://internal/config/config.go#L76-L100)
 
 ### Token Scope Requirements
 For the Gitea integration to function correctly, the access token must have sufficient permissions to perform all required operations. The minimum required scopes include:
@@ -409,12 +470,13 @@ For the Gitea integration to function correctly, the access token must have suff
 - **Issue Management**: To create, update, and close issues
 - **Commit Access**: To retrieve commit information and history
 - **Team Membership**: To check user membership in teams for access control
-- **Organization Access**: To search repositories within organizations
+- **Release Management**: To access release information and assets
+- **Repository Search**: To discover repositories across organizations
 
 The system does not specify exact scope names as these may vary between Gitea installations, but the token must allow all operations performed by the API methods. Insufficient permissions will result in HTTP 403 errors, which are handled appropriately by the integration.
 
 **Section sources**
-- [gitea.go](file://internal/entity/gitea/gitea.go#L1000-L1100)
+- [gitea.go](file://internal/entity/gitea/gitea.go#L1187-L1246)
 
 ## Git2Store and StoreBind Workflows
 
@@ -451,67 +513,21 @@ The storebind workflow establishes and maintains the connection between the 1C c
 
 The `StoreBind` operation, implemented in the one/convert package, binds the repository configuration to the database, creating the necessary links for synchronization. This includes setting up the main configuration and any extensions, ensuring they are properly ordered and configured.
 
-```go
-[Config.StoreBind](file://internal/entity/one/convert/convert.go#L466-L502)
-```
-
-**Section sources**
-- [convert.go](file://internal/entity/one/convert/convert.go#L466-L502)
-
-## Extension Publishing System
-
-### Automated Extension Synchronization
-The Extension Publishing System leverages the new Gitea API methods to provide comprehensive automated extension management. This system monitors subscribed repositories and automatically synchronizes extension updates to target repositories.
-
 ```mermaid
 flowchart TD
-Start([Extension Publishing System]) --> ScanOrgs["Scan User Organizations"]
-ScanOrgs --> SearchRepos["Search Org Repositories"]
-SearchRepos --> FilterRepos["Filter Subscribed Extensions"]
-FilterRepos --> CheckBranch["Check Target Branch Exists"]
-CheckBranch --> |Exists| SyncFiles["Sync Extension Files"]
-CheckBranch --> |Missing| CreateBranch["Create New Branch"]
-CreateBranch --> SyncFiles
-SyncFiles --> CreatePR["Create Pull Request"]
-CreatePR --> MonitorConflicts["Monitor Merge Conflicts"]
-MonitorConflicts --> |Conflicts| CommentIssue["Comment Issue"]
-MonitorConflicts --> |Success| MergePR["Merge PR"]
-CommentIssue --> End([End])
-MergePR --> End
+A[StoreBind Operation] --> B[Load Repository Configuration]
+B --> C[Validate Configuration Structure]
+C --> D[Establish Database Connection]
+D --> E[Create Configuration Links]
+E --> F[Update Local Database]
+F --> G[Complete Binding Process]
 ```
 
 **Diagram sources**
-- [extension_publish.go](file://internal/app/extension_publish.go#L540-L567)
-
-### Key Features and Capabilities
-The Extension Publishing System utilizes three critical new API methods:
-
-1. **SearchOrgRepos**: Comprehensive organization-wide repository discovery
-2. **HasBranch**: Efficient branch existence verification
-3. **SetRepositoryStateWithNewBranch**: Atomic batch operations with new branch creation
+- [convert.go](file://internal/entity/one/convert/convert.go#L466-L502)
 
 **Section sources**
-- [extension_publish.go](file://internal/app/extension_publish.go#L540-L567)
-
-### Batch Operations with New Branch Creation
-The `SetRepositoryStateWithNewBranch` method enables sophisticated synchronization workflows:
-
-```go
-// Example usage in extension publishing
-commitSHA, err := targetAPI.SetRepositoryStateWithNewBranch(
-    logger,
-    allOperations,
-    subscriber.TargetBranch,
-    branchName,
-    commitMessage,
-)
-```
-
-This method supports complex synchronization scenarios where multiple files need to be updated atomically while creating a new branch for isolation.
-
-**Section sources**
-- [gitea.go](file://internal/entity/gitea/gitea.go#L1473-L1528)
-- [extension_publish.go](file://internal/app/extension_publish.go#L551-L562)
+- [convert.go](file://internal/entity/one/convert/convert.go#L466-L502)
 
 ## Error Handling and Common Issues
 
@@ -533,7 +549,56 @@ This approach ensures that the integration can reliably determine mergeability e
 
 **Section sources**
 - [gitea.go](file://internal/entity/gitea/gitea.go#L561-L613)
-- [gitea_test.go](file://internal/entity/gitea/gitea_test.go#L355-L389)
+
+### Release Management Error Handling
+The release management methods include comprehensive error handling for various scenarios:
+
+- **Release Not Found**: Returns specific error when `GetLatestRelease` or `GetReleaseByTag` encounters HTTP 404
+- **Network Errors**: Handles connection failures gracefully with descriptive error messages
+- **JSON Parsing Errors**: Validates response format and provides meaningful error feedback
+- **URL Encoding Issues**: Properly encodes tag parameters to handle special characters
+
+```go
+// Example error handling pattern for release operations
+func (g *API) GetLatestRelease() (*Release, error) {
+	urlString := fmt.Sprintf("%s/api/%s/repos/%s/%s/releases/latest", g.GiteaURL, constants.APIVersion, g.Owner, g.Repo)
+
+	statusCode, body, err := g.sendReq(urlString, "", "GET")
+	if err != nil {
+		return nil, fmt.Errorf("ошибка при выполнении запроса: %v", err)
+	}
+
+	if statusCode == http.StatusNotFound {
+		return nil, fmt.Errorf("релиз не найден")
+	}
+
+	if statusCode != http.StatusOK {
+		return nil, fmt.Errorf("ошибка при получении релиза: статус %d", statusCode)
+	}
+
+	var release Release
+	err = json.Unmarshal([]byte(body), &release)
+	if err != nil {
+		return nil, fmt.Errorf("ошибка при разборе JSON: %v", err)
+	}
+
+	return &release, nil
+}
+```
+
+**Section sources**
+- [gitea.go](file://internal/entity/gitea/gitea.go#L1187-L1210)
+
+### Repository Search Pagination Safety
+The repository search functionality includes built-in safety mechanisms to prevent infinite loops and excessive API calls:
+
+- **Maximum Pages**: Limits search to 100 pages maximum
+- **Page Size Control**: Enforces 50 repositories per page limit
+- **Early Exit**: Stops when empty response is received
+- **Organization Validation**: Handles organization-not-found gracefully
+
+**Section sources**
+- [gitea.go](file://internal/entity/gitea/gitea.go#L2095-L2130)
 
 ### Rate Limit Handling
 The integration includes comprehensive rate limit handling to prevent API throttling. When rate limits are approached or exceeded, the system implements exponential backoff with jitter to avoid overwhelming the Gitea server.
@@ -551,7 +616,7 @@ func (g *API) handleRateLimit(err error, attempt int) error {
 ```
 
 **Section sources**
-- [gitea.go](file://internal/entity/gitea/gitea.go#L369-L403)
+- [gitea.go](file://internal/entity/gitea/gitea.go#L469-L503)
 
 ### Merge Conflict Resolution
 When merge conflicts are detected, the system follows a structured resolution process:
@@ -565,38 +630,13 @@ When merge conflicts are detected, the system follows a structured resolution pr
 The enhanced implementation now waits for definitive conflict status in large repositories before proceeding with resolution steps.
 
 **Section sources**
-- [gitea.go](file://internal/entity/gitea/gitea.go#L514-L542)
+- [gitea.go](file://internal/entity/gitea/gitea.go#L529-L548)
 - [gitea_service.go](file://internal/service/gitea_service.go#L104-L149)
-
-### New Method-Specific Error Handling
-The new Gitea API methods introduce additional error scenarios:
-
-#### SearchOrgRepos Error Handling
-- **HTTP 404**: Non-existent organizations return empty slices
-- **Network Errors**: Proper error propagation with descriptive messages
-- **JSON Parsing**: Graceful handling of malformed responses
-- **Pagination Limits**: Built-in protection against infinite loops
-
-#### HasBranch Error Handling
-- **HTTP 404**: Branch not found returns false, nil
-- **HTTP 403**: Permission errors return appropriate error messages
-- **Invalid Repository**: Malformed owner/repo combinations handled gracefully
-
-#### SetRepositoryStateWithNewBranch Error Handling
-- **Empty Operations**: Validates non-empty operation arrays
-- **Serialization Errors**: Proper error handling for JSON marshaling
-- **API Response Errors**: Detailed error messages for failed batch operations
-- **SHA Extraction**: Graceful fallback when commit SHA cannot be extracted
-
-**Section sources**
-- [gitea.go](file://internal/entity/gitea/gitea.go#L2058-L2093)
-- [gitea.go](file://internal/entity/gitea/gitea.go#L2162-L2182)
-- [gitea.go](file://internal/entity/gitea/gitea.go#L1473-L1528)
 
 ## Webhook Configuration and Event Delivery
 To trigger automated scans and ensure reliable event delivery, configure webhooks in your Gitea repository with the following settings:
 
-- **Trigger events**: Push events, Pull Request events
+- **Trigger events**: Push events, Pull Request events, Release events
 - **Content type**: application/json
 - **SSL verification**: Enabled (recommended)
 - **Secret**: Configure a shared secret for payload verification
@@ -605,6 +645,7 @@ The webhook endpoint should be configured to handle the following event types:
 - `push`: Trigger repository scans and analysis
 - `pull_request`: Initiate merge conflict checking
 - `issue`: Update issue tracking and notifications
+- `release`: Trigger extension publishing workflows
 
 Ensure your webhook URL is accessible from the Gitea server and implement proper error handling to prevent event loss.
 
@@ -627,12 +668,17 @@ For large repositories, consider:
 - Using repository mirroring for faster access
 - Caching frequently accessed data
 
-For the Extension Publishing System:
-- **Implement organization caching** to reduce API calls
-- **Use HasBranch for pre-validation** before expensive operations
-- **Leverage SetRepositoryStateWithNewBranch** for atomic synchronization
-- **Monitor organization size limits** (5000 repositories maximum)
-- **Handle pagination gracefully** in custom implementations
+For release-based workflows:
+- Use semantic versioning for release tags
+- Include release notes and changelogs
+- Attach binary assets and documentation
+- Monitor release distribution to subscribers
+
+For repository search operations:
+- Implement pagination controls
+- Handle organization boundaries
+- Cache search results when appropriate
+- Monitor API quotas for search operations
 
 **Section sources**
 - [gitea.go](file://internal/entity/gitea/gitea.go)

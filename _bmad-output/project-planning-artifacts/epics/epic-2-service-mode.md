@@ -1,10 +1,68 @@
 # Epic 2: Service Mode Management
 
-**Статус:** 🟡 В планировании
+**Статус:** 🟠 Legacy существует, NR не начат
 **Приоритет:** Высокий (Proof of Concept)
 **Риск:** 🟢 Низкий
-**Stories:** 8
+**Stories:** 0/8 NR (legacy работает)
 **FRs:** FR6-9, FR60-62, FR66
+**Аудит:** 2026-01-26
+
+---
+
+## 📊 Gap Analysis (Аудит 2026-01-26)
+
+### Статус реализации: 🟠 Legacy существует, NR не начат
+
+| Компонент | План (NR) | Legacy реализация | Статус |
+|-----------|-----------|-------------------|--------|
+| RAC Adapter Interface | `internal/adapter/onec/rac/interfaces.go` | `internal/servicemode/servicemode.go:14` | 🟠 Legacy |
+| RAC Client | `internal/adapter/onec/rac/client.go` | `internal/rac/` | 🟠 Legacy |
+| nr-service-mode-status | Command Registry | `main.go:102` (switch-case) | 🟠 Legacy |
+| nr-service-mode-enable | Command Registry | `main.go:61` (switch-case) | 🟠 Legacy |
+| nr-service-mode-disable | Command Registry | `main.go:82` (switch-case) | 🟠 Legacy |
+| Session Info (FR66) | Story 2.4 | ❌ Не реализовано | 🔴 |
+| Force Disconnect (FR9) | Story 2.6 | ⚠️ Частично (флаг есть) | 🟡 |
+| Idempotency (FR60-62) | Story 2.8 | ❌ Не реализовано | 🔴 |
+
+### Текущее состояние кода
+
+```
+LEGACY РЕАЛИЗАЦИЯ:
+├── internal/servicemode/servicemode.go     ✅ Manager interface
+├── internal/rac/                           ✅ RAC client
+├── internal/app/app.go                     ✅ ServiceMode* функции
+└── cmd/benadis-runner/main.go:61-121       ✅ switch-case
+
+NR АРХИТЕКТУРА (ОЖИДАЕТСЯ):
+├── internal/command/handlers/servicemode/  ❌ НЕ СУЩЕСТВУЕТ
+├── internal/adapter/onec/rac/interfaces.go ❌ НЕ СУЩЕСТВУЕТ
+└── Command Registry integration            ❌ НЕ СУЩЕСТВУЕТ
+```
+
+### 🔒 Prerequisite
+
+**Требует Epic 1!** Без Command Registry невозможно создать NR-команды.
+
+### Legacy команды в production
+
+| Команда | Статус | Используется |
+|---------|--------|--------------|
+| service-mode-enable | ✅ Работает | В CI/CD |
+| service-mode-disable | ✅ Работает | В CI/CD |
+| service-mode-status | ✅ Работает | В CI/CD |
+
+### Stories Progress
+
+| Story | Название | Статус |
+|-------|----------|--------|
+| 2.1 | RAC Adapter Interface | 🔴 Ждёт Epic 1 |
+| 2.2 | RAC Client Implementation | 🟠 Legacy есть |
+| 2.3 | nr-service-mode-status | 🔴 Ждёт Epic 1 |
+| 2.4 | Session Info (FR66) | 🔴 Не начат |
+| 2.5 | nr-service-mode-enable | 🔴 Ждёт Epic 1 |
+| 2.6 | Force Disconnect (FR9) | 🟡 Частично |
+| 2.7 | nr-service-mode-disable | 🔴 Ждёт Epic 1 |
+| 2.8 | State-Aware Execution | 🔴 Не начат |
 
 ---
 
@@ -242,4 +300,5 @@ DevOps может управлять доступом к базам через N
 
 ---
 
-_Последнее обновление: 2025-11-25_
+_Последнее обновление: 2026-01-26_
+_Аудит проведён: 2026-01-26 (BMAD Party Mode)_

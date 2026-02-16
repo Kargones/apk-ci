@@ -1,8 +1,8 @@
-# apk-ci Project Context
+# benadis-runner Project Context
 
 ## Project Overview
 
-apk-ci is a Go-based automation tool for working with 1C:Enterprise systems. It provides modules for:
+benadis-runner is a Go-based automation tool for working with 1C:Enterprise systems. It provides modules for:
 
 - Converting data between formats
 - Restoring and managing MSSQL databases
@@ -24,9 +24,9 @@ The project is built with a modular architecture where each module handles a spe
 ## Project Structure
 
 ```
-apk-ci/
+benadis-runner/
 ├── cmd/
-│   └── apk-ci/
+│   └── benadis-runner/
 │       └── main.go              # Entry point
 ├── internal/
 │   ├── app/                     # Main application logic
@@ -116,16 +116,16 @@ make test-integration
 
 ```bash
 # View help
-./build/apk-ci --help
+./build/benadis-runner --help
 
 # Enable service mode
-./build/apk-ci service-mode-enable --infobase MyInfobase
+./build/benadis-runner service-mode-enable --infobase MyInfobase
 
 # Disable service mode
-./build/apk-ci service-mode-disable --infobase MyInfobase
+./build/benadis-runner service-mode-disable --infobase MyInfobase
 
 # Check service mode status
-./build/apk-ci service-mode-status --infobase MyInfobase
+./build/benadis-runner service-mode-status --infobase MyInfobase
 ```
 
 ## Configuration
@@ -205,7 +205,7 @@ users:
 
 ### Main Entry Point
 
-`cmd/apk-ci/main.go` is the application entry point that:
+`cmd/benadis-runner/main.go` is the application entry point that:
 1. Loads configuration
 2. Routes to appropriate command handlers based on `BR_COMMAND` environment variable
 3. Handles errors and exit codes
@@ -240,24 +240,24 @@ Documentation is available in:
 
 ```bash
 # Enable service mode without terminating sessions
-./build/apk-ci service-mode-enable --infobase MyInfobase
+./build/benadis-runner service-mode-enable --infobase MyInfobase
 
 # Enable service mode and terminate active sessions
-./build/apk-ci service-mode-enable --infobase MyInfobase --terminate-sessions
+./build/benadis-runner service-mode-enable --infobase MyInfobase --terminate-sessions
 ```
 
 ### Disabling Service Mode
 
 ```bash
 # Disable service mode
-./build/apk-ci service-mode-disable --infobase MyInfobase
+./build/benadis-runner service-mode-disable --infobase MyInfobase
 ```
 
 ### Checking Service Mode Status
 
 ```bash
 # Check service mode status
-./build/apk-ci service-mode-status --infobase MyInfobase
+./build/benadis-runner service-mode-status --infobase MyInfobase
 ```
 
 ## Exit Codes

@@ -13,6 +13,8 @@ import (
 
 	"github.com/Kargones/apk-ci/internal/constants"
 	"github.com/Kargones/apk-ci/internal/entity/gitea"
+	"github.com/Kargones/apk-ci/internal/pkg/alerting"
+	"github.com/Kargones/apk-ci/internal/pkg/urlutil"
 	"github.com/Kargones/apk-ci/internal/util/runner"
 
 	"github.com/ilyakaznacheev/cleanenv"
@@ -56,7 +58,11 @@ type AppConfig struct {
 	Git        GitConfig       `yaml:"git"`
 	EdtTimeout time.Duration   `yaml:"edt_timeout" env:"EDT_TIMEOUT" env-default:"90m"`
 
-	Logging LoggingConfig `yaml:"logging"`
+	Logging         LoggingConfig         `yaml:"logging"`
+	Implementations ImplementationsConfig `yaml:"implementations"`
+	Alerting        AlertingConfig        `yaml:"alerting"`
+	Metrics         MetricsConfig         `yaml:"metrics"`
+	Tracing         TracingConfig         `yaml:"tracing"`
 }
 
 // ProjectConfig представляет настройки проекта из файла project.yaml.
@@ -97,6 +103,16 @@ type DatabaseInfo struct {
 	OneServer string `yaml:"one-server"`
 	Prod      bool   `yaml:"prod"`
 	DbServer  string `yaml:"dbserver"`
+}
+
+// GetServer возвращает сервер для подключения к базе данных.
+// LOW-2 fix (Review #4): централизованная логика fallback OneServer → DbServer.
+// Приоритет: OneServer (если указан), иначе DbServer.
+func (d *DatabaseInfo) GetServer() string {
+	if d.OneServer != "" {
+		return d.OneServer
+	}
+	return d.DbServer
 }
 
 // InputParams представляет параметры, переданные через GitHub Actions.
@@ -168,8 +184,20 @@ type Config struct {
 	// Logging настройки
 	LoggingConfig *LoggingConfig
 
+	// Implementations настройки (выбор реализаций операций)
+	ImplementationsConfig *ImplementationsConfig
+
 	// RAC настройки
 	RacConfig *RacConfig
+
+	// Alerting настройки
+	AlertingConfig *AlertingConfig
+
+	// Metrics настройки
+	MetricsConfig *MetricsConfig
+
+	// Tracing настройки (OpenTelemetry)
+	TracingConfig *TracingConfig
 
 	// MenuMain содержит шаблон главного меню как массив строк
 	MenuMain []string
@@ -196,6 +224,7 @@ type Config struct {
 	// SonarQube настройки
 	BranchForScan string
 	CommitHash    string
+	PRNumber      int64 `env:"BR_PR_NUMBER" env-default:"0"`
 
 	// Устаревшие поля (сохранены для обратной совместимости)
 	// TODO: Удалить после полной миграции
@@ -203,7 +232,7 @@ type Config struct {
 	RepPath     string `env:"RepPath" env-default:"/tmp/4del/rep"`
 	WorkDir     string `env:"WorkDir" env-default:"/tmp/4del"`
 	TmpDir      string `env:"TmpDir" env-default:"/tmp"`
-	AccessToken string `env:"BR_ACCESS_TOKEN" env-default:"aa6a7d04119fc5dc23d8166a2fb4a5b8e967ce73"`
+	AccessToken string `env:"BR_ACCESS_TOKEN" env-default:""`
 	PathOut     string `env:"RepPath" env-default:"/tmp/4del/xml/Tester"`
 	WorkSpace   string `env:"RepPath" env-default:"/tmp/4del/ws01"`
 }
@@ -285,31 +314,273 @@ type GitConfig struct {
 
 // ResilienceConfig содержит настройки для resilience паттернов.
 
+// ImplementationsConfig содержит настройки выбора реализаций операций.
+// Позволяет переключаться между различными инструментами (1cv8/ibcmd/native)
+// без изменения кода приложения.
+type ImplementationsConfig struct {
+	// ConfigExport определяет инструмент для выгрузки конфигурации.
+	// Допустимые значения: "1cv8" (default), "ibcmd", "native"
+	ConfigExport string `yaml:"config_export" env:"BR_IMPL_CONFIG_EXPORT" env-default:"1cv8"`
+
+	// DBCreate определяет инструмент для создания базы данных.
+	// Допустимые значения: "1cv8" (default), "ibcmd"
+	DBCreate string `yaml:"db_create" env:"BR_IMPL_DB_CREATE" env-default:"1cv8"`
+}
+
+// Validate проверяет корректность значений ImplementationsConfig.
+// Возвращает ошибку если значения не соответствуют допустимым.
+func (c *ImplementationsConfig) Validate() error {
+	// Применяем defaults для пустых значений
+	if c.ConfigExport == "" {
+		c.ConfigExport = "1cv8"
+	}
+	if c.DBCreate == "" {
+		c.DBCreate = "1cv8"
+	}
+
+	validConfigExport := map[string]bool{"1cv8": true, "ibcmd": true, "native": true}
+	validDBCreate := map[string]bool{"1cv8": true, "ibcmd": true}
+
+	if !validConfigExport[c.ConfigExport] {
+		return fmt.Errorf("недопустимое значение ConfigExport: %q, допустимые: 1cv8, ibcmd, native", c.ConfigExport)
+	}
+	if !validDBCreate[c.DBCreate] {
+		return fmt.Errorf("недопустимое значение DBCreate: %q, допустимые: 1cv8, ibcmd", c.DBCreate)
+	}
+	return nil
+}
+
 // LoggingConfig содержит настройки для логирования.
+//
+// TODO (M-10/Review #13): Dual source of truth — LoggingConfig здесь и logging.Config
+// в internal/pkg/logging/config.go дублируют поля. При добавлении новых опций нужно
+// менять оба места и синхронизировать defaults. Рефакторинг: использовать одну структуру.
 type LoggingConfig struct {
 	// Level - уровень логирования (debug, info, warn, error)
-	Level string `yaml:"level" env:"LOG_LEVEL"`
+	Level string `yaml:"level" env:"BR_LOG_LEVEL" env-default:"info"`
 
 	// Format - формат логов (json, text)
-	Format string `yaml:"format" env:"LOG_FORMAT"`
+	Format string `yaml:"format" env:"BR_LOG_FORMAT" env-default:"text"`
 
 	// Output - вывод логов (stdout, stderr, file)
-	Output string `yaml:"output" env:"LOG_OUTPUT"`
+	Output string `yaml:"output" env:"BR_LOG_OUTPUT" env-default:"stderr"`
 
 	// FilePath - путь к файлу логов (если output=file)
-	FilePath string `yaml:"filePath" env:"LOG_FILE_PATH"`
+	FilePath string `yaml:"filePath" env:"BR_LOG_FILE_PATH"`
 
 	// MaxSize - максимальный размер файла лога в MB
-	MaxSize int `yaml:"maxSize" env:"LOG_MAX_SIZE"`
+	MaxSize int `yaml:"maxSize" env:"BR_LOG_MAX_SIZE" env-default:"100"`
 
 	// MaxBackups - максимальное количество backup файлов
-	MaxBackups int `yaml:"maxBackups" env:"LOG_MAX_BACKUPS"`
+	MaxBackups int `yaml:"maxBackups" env:"BR_LOG_MAX_BACKUPS" env-default:"3"`
 
 	// MaxAge - максимальный возраст backup файлов в днях
-	MaxAge int `yaml:"maxAge" env:"LOG_MAX_AGE"`
+	MaxAge int `yaml:"maxAge" env:"BR_LOG_MAX_AGE" env-default:"7"`
 
 	// Compress - сжимать ли backup файлы
-	Compress bool `yaml:"compress" env:"LOG_COMPRESS"`
+	// TODO (M-4/Review #9): bool с env-default:"true" — в YAML yaml:"compress" false будет
+	// перезаписан env-default при cleanenv.ReadEnv. Поведение корректно только при чтении
+	// из env. Для YAML-source используется getDefaultLoggingConfig() где Compress=true.
+	Compress bool `yaml:"compress" env:"BR_LOG_COMPRESS" env-default:"true"`
+}
+
+// AlertingConfig содержит настройки для алертинга.
+type AlertingConfig struct {
+	// Enabled — включён ли алертинг (по умолчанию false).
+	Enabled bool `yaml:"enabled" env:"BR_ALERTING_ENABLED" env-default:"false"`
+
+	// RateLimitWindow — минимальный интервал между алертами одного типа.
+	RateLimitWindow time.Duration `yaml:"rateLimitWindow" env:"BR_ALERTING_RATE_LIMIT_WINDOW" env-default:"5m"`
+
+	// Email — конфигурация email канала.
+	Email EmailChannelConfig `yaml:"email"`
+
+	// Telegram — конфигурация telegram канала.
+	Telegram TelegramChannelConfig `yaml:"telegram"`
+
+	// Webhook — конфигурация webhook канала.
+	Webhook WebhookChannelConfig `yaml:"webhook"`
+
+	// Rules — правила фильтрации алертов.
+	Rules AlertRulesConfig `yaml:"rules"`
+}
+
+// AlertRulesConfig содержит настройки правил фильтрации алертов.
+type AlertRulesConfig struct {
+	// MinSeverity — минимальный уровень severity для отправки алерта.
+	// Значения: "INFO", "WARNING", "CRITICAL". По умолчанию: "INFO" (все алерты).
+	MinSeverity string `yaml:"minSeverity" env:"BR_ALERTING_RULES_MIN_SEVERITY" env-default:"INFO"`
+
+	// ExcludeErrorCodes — коды ошибок, для которых НЕ отправляются алерты.
+	ExcludeErrorCodes []string `yaml:"excludeErrorCodes" env:"BR_ALERTING_RULES_EXCLUDE_ERRORS" env-separator:","`
+
+	// IncludeErrorCodes — если задан, алерты отправляются ТОЛЬКО для этих кодов.
+	// Имеет приоритет над ExcludeErrorCodes.
+	IncludeErrorCodes []string `yaml:"includeErrorCodes" env:"BR_ALERTING_RULES_INCLUDE_ERRORS" env-separator:","`
+
+	// ExcludeCommands — команды, для которых НЕ отправляются алерты.
+	ExcludeCommands []string `yaml:"excludeCommands" env:"BR_ALERTING_RULES_EXCLUDE_COMMANDS" env-separator:","`
+
+	// IncludeCommands — если задан, алерты отправляются ТОЛЬКО для этих команд.
+	// Имеет приоритет над ExcludeCommands.
+	IncludeCommands []string `yaml:"includeCommands" env:"BR_ALERTING_RULES_INCLUDE_COMMANDS" env-separator:","`
+
+	// ChannelOverrides — правила для конкретных каналов.
+	// ВНИМАНИЕ: channel override ПОЛНОСТЬЮ ЗАМЕНЯЕТ глобальные правила для канала,
+	// а НЕ мержит с ними. Если указан override с excludeErrorCodes но без minSeverity,
+	// будет использован minSeverity=INFO (default), а не глобальный minSeverity.
+	//
+	// Пример НЕПРАВИЛЬНОЙ конфигурации (email получит ВСЕ severity, не только CRITICAL):
+	//   rules:
+	//     minSeverity: "CRITICAL"
+	//     channels:
+	//       email:
+	//         excludeErrorCodes: ["ERR_SPAM"]
+	//
+	// Пример ПРАВИЛЬНОЙ конфигурации (повторяем minSeverity в override):
+	//   rules:
+	//     minSeverity: "CRITICAL"
+	//     channels:
+	//       email:
+	//         minSeverity: "CRITICAL"
+	//         excludeErrorCodes: ["ERR_SPAM"]
+	ChannelOverrides map[string]ChannelRuleConfig `yaml:"channels"`
+}
+
+// ChannelRuleConfig — правила для конкретного канала алертинга.
+type ChannelRuleConfig struct {
+	MinSeverity       string   `yaml:"minSeverity"`
+	ExcludeErrorCodes []string `yaml:"excludeErrorCodes"`
+	IncludeErrorCodes []string `yaml:"includeErrorCodes"`
+	ExcludeCommands   []string `yaml:"excludeCommands"`
+	IncludeCommands   []string `yaml:"includeCommands"`
+}
+
+// EmailChannelConfig содержит настройки email канала.
+type EmailChannelConfig struct {
+	// Enabled — включён ли email канал.
+	Enabled bool `yaml:"enabled" env:"BR_ALERTING_EMAIL_ENABLED" env-default:"false"`
+
+	// SMTPHost — адрес SMTP сервера.
+	SMTPHost string `yaml:"smtpHost" env:"BR_ALERTING_SMTP_HOST"`
+
+	// SMTPPort — порт SMTP сервера (25, 465, 587).
+	SMTPPort int `yaml:"smtpPort" env:"BR_ALERTING_SMTP_PORT" env-default:"587"`
+
+	// SMTPUser — пользователь для SMTP авторизации.
+	SMTPUser string `yaml:"smtpUser" env:"BR_ALERTING_SMTP_USER"`
+
+	// SMTPPassword — пароль для SMTP авторизации.
+	SMTPPassword string `yaml:"smtpPassword" env:"BR_ALERTING_SMTP_PASSWORD"`
+
+	// UseTLS — использовать TLS (StartTLS для 587, implicit для 465).
+	// TODO (M-4/Review #9): bool с env-default:"true" — аналогично Compress,
+	// YAML false может быть перезаписан cleanenv.ReadEnv. Для YAML-source
+	// используется getDefaultAlertingConfig() где UseTLS=true.
+	UseTLS bool `yaml:"useTLS" env:"BR_ALERTING_SMTP_TLS" env-default:"true"`
+
+	// From — адрес отправителя.
+	From string `yaml:"from" env:"BR_ALERTING_EMAIL_FROM"`
+
+	// To — список получателей (comma-separated в env).
+	To []string `yaml:"to" env:"BR_ALERTING_EMAIL_TO" env-separator:","`
+
+	// SubjectTemplate — шаблон темы письма.
+	// Placeholders: {{.ErrorCode}}, {{.Command}}, {{.Infobase}}
+	SubjectTemplate string `yaml:"subjectTemplate" env:"BR_ALERTING_EMAIL_SUBJECT" env-default:"[apk-ci] {{.ErrorCode}}: {{.Command}}"`
+
+	// Timeout — таймаут SMTP операций.
+	Timeout time.Duration `yaml:"timeout" env:"BR_ALERTING_SMTP_TIMEOUT" env-default:"30s"`
+}
+
+// TelegramChannelConfig содержит настройки telegram канала.
+type TelegramChannelConfig struct {
+	// Enabled — включён ли telegram канал.
+	Enabled bool `yaml:"enabled" env:"BR_ALERTING_TELEGRAM_ENABLED" env-default:"false"`
+
+	// BotToken — токен Telegram бота (получить у @BotFather).
+	BotToken string `yaml:"botToken" env:"BR_ALERTING_TELEGRAM_BOT_TOKEN"`
+
+	// ChatIDs — список идентификаторов чатов/групп для отправки.
+	// Может быть числовой ID или @username для публичных каналов.
+	ChatIDs []string `yaml:"chatIds" env:"BR_ALERTING_TELEGRAM_CHAT_IDS" env-separator:","`
+
+	// Timeout — таймаут HTTP запросов к Telegram API.
+	// По умолчанию: 10 секунд.
+	Timeout time.Duration `yaml:"timeout" env:"BR_ALERTING_TELEGRAM_TIMEOUT" env-default:"10s"`
+}
+
+// WebhookChannelConfig содержит настройки webhook канала.
+type WebhookChannelConfig struct {
+	// Enabled — включён ли webhook канал.
+	Enabled bool `yaml:"enabled" env:"BR_ALERTING_WEBHOOK_ENABLED" env-default:"false"`
+
+	// URLs — список URL для отправки webhook.
+	// Алерт отправляется на все указанные URL.
+	URLs []string `yaml:"urls" env:"BR_ALERTING_WEBHOOK_URLS" env-separator:","`
+
+	// Headers — дополнительные HTTP заголовки.
+	// Используется для Authorization, X-Api-Key и т.д.
+	// TODO (M-3/Review Epic-6): Headers доступны только через YAML, не через env.
+	// cleanenv не поддерживает map[string]string из env переменных.
+	// Для CI/CD использовать YAML или добавить парсинг "Key=Val,Key2=Val2" из env.
+	Headers map[string]string `yaml:"headers"`
+
+	// Timeout — таймаут HTTP запросов.
+	// По умолчанию: 10 секунд.
+	Timeout time.Duration `yaml:"timeout" env:"BR_ALERTING_WEBHOOK_TIMEOUT" env-default:"10s"`
+
+	// MaxRetries — максимальное количество повторных попыток.
+	// По умолчанию: 3.
+	MaxRetries int `yaml:"maxRetries" env:"BR_ALERTING_WEBHOOK_MAX_RETRIES" env-default:"3"`
+}
+
+// MetricsConfig содержит настройки для Prometheus метрик.
+type MetricsConfig struct {
+	// Enabled — включены ли метрики (по умолчанию false).
+	Enabled bool `yaml:"enabled" env:"BR_METRICS_ENABLED" env-default:"false"`
+
+	// PushgatewayURL — URL Prometheus Pushgateway.
+	// Пример: "http://pushgateway:9091"
+	PushgatewayURL string `yaml:"pushgatewayUrl" env:"BR_METRICS_PUSHGATEWAY_URL"`
+
+	// JobName — имя job для группировки метрик.
+	// По умолчанию: "apk-ci"
+	JobName string `yaml:"jobName" env:"BR_METRICS_JOB_NAME" env-default:"apk-ci"`
+
+	// Timeout — таймаут HTTP запросов к Pushgateway.
+	// По умолчанию: 10 секунд.
+	Timeout time.Duration `yaml:"timeout" env:"BR_METRICS_TIMEOUT" env-default:"10s"`
+
+	// InstanceLabel — переопределение instance label.
+	// Если пусто — используется hostname.
+	InstanceLabel string `yaml:"instanceLabel" env:"BR_METRICS_INSTANCE"`
+}
+
+// TracingConfig содержит настройки OpenTelemetry трейсинга.
+type TracingConfig struct {
+	// Enabled включает отправку трейсов в OTLP бэкенд.
+	Enabled bool `yaml:"enabled" env:"BR_TRACING_ENABLED" env-default:"false"`
+
+	// Endpoint — URL OTLP HTTP endpoint (например, http://jaeger:4318).
+	Endpoint string `yaml:"endpoint" env:"BR_TRACING_ENDPOINT"`
+
+	// ServiceName — имя сервиса для resource attributes.
+	ServiceName string `yaml:"serviceName" env:"BR_TRACING_SERVICE_NAME" env-default:"apk-ci"`
+
+	// Environment — окружение (production, staging, development).
+	Environment string `yaml:"environment" env:"BR_TRACING_ENVIRONMENT" env-default:"production"`
+
+	// Insecure — использовать HTTP вместо HTTPS для OTLP endpoint.
+	// L-11/Review #15: По умолчанию true (HTTP) для совместимости с внутренними сетями.
+	// Для production deployment через публичные сети установить false (HTTPS).
+	Insecure bool `yaml:"insecure" env:"BR_TRACING_INSECURE" env-default:"true"`
+
+	// Timeout — таймаут для экспорта трейсов.
+	Timeout time.Duration `yaml:"timeout" env:"BR_TRACING_TIMEOUT" env-default:"5s"`
+
+	// SamplingRate — доля сэмплируемых трейсов (0.0 — ни один, 1.0 — все).
+	SamplingRate float64 `yaml:"samplingRate" env:"BR_TRACING_SAMPLING_RATE" env-default:"1.0"`
 }
 
 // RacConfig содержит настройки для RAC (Remote Administration Console).
@@ -439,11 +710,59 @@ func loadGitConfig(l *slog.Logger, cfg *Config) (*GitConfig, error) {
 	return gitConfig, nil
 }
 
-// loadLoggingConfig загружает конфигурацию логирования из AppConfig, переменных окружения или устанавливает значения по умолчанию
+// loadImplementationsConfig загружает конфигурацию реализаций из AppConfig, переменных окружения или устанавливает значения по умолчанию
+func loadImplementationsConfig(l *slog.Logger, cfg *Config) (*ImplementationsConfig, error) {
+	// Проверяем, есть ли конфигурация в AppConfig
+	if cfg.AppConfig != nil && (cfg.AppConfig.Implementations != ImplementationsConfig{}) {
+		implConfig := &cfg.AppConfig.Implementations
+		// Применяем переопределения из переменных окружения
+		if err := cleanenv.ReadEnv(implConfig); err != nil {
+			l.Warn("Ошибка загрузки Implementations конфигурации из переменных окружения",
+				slog.String("error", err.Error()),
+			)
+		}
+		l.Info("Implementations конфигурация загружена из AppConfig",
+			slog.String("config_export", implConfig.ConfigExport),
+			slog.String("db_create", implConfig.DBCreate),
+		)
+		return implConfig, nil
+	}
+
+	// Если конфигурация не найдена, используем значения по умолчанию
+	implConfig := getDefaultImplementationsConfig()
+
+	// Применяем переопределения из переменных окружения
+	if err := cleanenv.ReadEnv(implConfig); err != nil {
+		l.Warn("Ошибка загрузки Implementations конфигурации из переменных окружения",
+			slog.String("error", err.Error()),
+		)
+	}
+
+	l.Debug("Implementations конфигурация: используются значения по умолчанию",
+		slog.String("config_export", implConfig.ConfigExport),
+		slog.String("db_create", implConfig.DBCreate),
+	)
+
+	return implConfig, nil
+}
+
+// loadLoggingConfig загружает конфигурацию логирования из AppConfig, переменных окружения или устанавливает значения по умолчанию.
+// Переменные окружения BR_LOG_* переопределяют значения из AppConfig (AC4).
 func loadLoggingConfig(l *slog.Logger, cfg *Config) (*LoggingConfig, error) {
 	// Проверяем, есть ли конфигурация в AppConfig
 	if cfg.AppConfig != nil && (cfg.AppConfig.Logging != LoggingConfig{}) {
-		return &cfg.AppConfig.Logging, nil
+		loggingConfig := &cfg.AppConfig.Logging
+		// Применяем env override для AppConfig (симметрично с loadImplementationsConfig)
+		if err := cleanenv.ReadEnv(loggingConfig); err != nil {
+			l.Warn("Ошибка загрузки Logging конфигурации из переменных окружения",
+				slog.String("error", err.Error()),
+			)
+		}
+		l.Info("Logging конфигурация загружена из AppConfig",
+			slog.String("level", loggingConfig.Level),
+			slog.String("format", loggingConfig.Format),
+		)
+		return loggingConfig, nil
 	}
 
 	loggingConfig := getDefaultLoggingConfig()
@@ -453,6 +772,11 @@ func loadLoggingConfig(l *slog.Logger, cfg *Config) (*LoggingConfig, error) {
 			slog.String("error", err.Error()),
 		)
 	}
+
+	l.Debug("Logging конфигурация: используются значения по умолчанию",
+		slog.String("level", loggingConfig.Level),
+		slog.String("format", loggingConfig.Format),
+	)
 
 	return loggingConfig, nil
 }
@@ -510,17 +834,27 @@ func getDefaultGitConfig() *GitConfig {
 	}
 }
 
-// getDefaultLoggingConfig возвращает конфигурацию логирования по умолчанию
+// getDefaultImplementationsConfig возвращает конфигурацию реализаций по умолчанию
+func getDefaultImplementationsConfig() *ImplementationsConfig {
+	return &ImplementationsConfig{
+		ConfigExport: "1cv8",
+		DBCreate:     "1cv8",
+	}
+}
+
+// getDefaultLoggingConfig возвращает конфигурацию логирования по умолчанию.
+// ВАЖНО: Значения ДОЛЖНЫ совпадать с константами logging.DefaultXxx из
+// internal/pkg/logging/config.go — единственный источник истины для defaults.
 func getDefaultLoggingConfig() *LoggingConfig {
 	return &LoggingConfig{
-		Level:      "info",
-		Format:     "json",
-		Output:     "stdout",
-		FilePath:   "/var/log/apk-ci.log",
-		MaxSize:    100,
-		MaxBackups: 3,
-		MaxAge:     7,
-		Compress:   true,
+		Level:      "info",                         // logging.DefaultLevel
+		Format:     "text",                         // logging.DefaultFormat
+		Output:     "stderr",                       // logging.DefaultOutput
+		FilePath:   "/var/log/apk-ci.log",  // logging.DefaultFilePath
+		MaxSize:    100,                            // logging.DefaultMaxSize
+		MaxBackups: 3,                              // logging.DefaultMaxBackups
+		MaxAge:     7,                              // logging.DefaultMaxAge
+		Compress:   true,                           // logging.DefaultCompress
 	}
 }
 
@@ -537,6 +871,272 @@ func getDefaultRacConfig() *RacConfig {
 		Timeout:     30 * time.Second,
 		Retries:     3,
 	}
+}
+
+// isTracingConfigPresent проверяет, задана ли конфигурация трейсинга.
+// Возвращает true если хотя бы одно значимое поле отличается от zero value.
+func isTracingConfigPresent(cfg *TracingConfig) bool {
+	if cfg == nil {
+		return false
+	}
+	return cfg.Enabled || cfg.Endpoint != ""
+}
+
+// getDefaultTracingConfig возвращает конфигурацию трейсинга по умолчанию.
+// Трейсинг отключён по умолчанию (AC5).
+func getDefaultTracingConfig() *TracingConfig {
+	return &TracingConfig{
+		Enabled:      false,
+		Endpoint:     "",
+		ServiceName:  "apk-ci",
+		Environment:  "production",
+		Insecure:     true,
+		Timeout:      5 * time.Second,
+		SamplingRate: 1.0,
+	}
+}
+
+// validateTracingConfig проверяет корректность конфигурации трейсинга при загрузке.
+// Проверяет обязательные поля при включённом трейсинге.
+func validateTracingConfig(tc *TracingConfig) error {
+	if !tc.Enabled {
+		return nil
+	}
+	if tc.Endpoint == "" {
+		return fmt.Errorf("tracing: endpoint обязателен при enabled=true")
+	}
+	if tc.ServiceName == "" {
+		return fmt.Errorf("tracing: service name обязателен при enabled=true")
+	}
+	if tc.Timeout <= 0 {
+		return fmt.Errorf("tracing: timeout должен быть положительным")
+	}
+	if tc.SamplingRate < 0.0 || tc.SamplingRate > 1.0 {
+		// L-12/Review #15: %g вместо %f для читаемого вывода.
+		return fmt.Errorf("tracing: sampling rate должен быть от 0.0 до 1.0, получено: %g", tc.SamplingRate)
+	}
+	return nil
+}
+
+// loadTracingConfig загружает конфигурацию трейсинга из AppConfig, переменных окружения или устанавливает значения по умолчанию.
+// Переменные окружения BR_TRACING_* переопределяют значения из AppConfig.
+func loadTracingConfig(l *slog.Logger, cfg *Config) (*TracingConfig, error) {
+	// Проверяем, есть ли конфигурация в AppConfig
+	if cfg.AppConfig != nil && isTracingConfigPresent(&cfg.AppConfig.Tracing) {
+		tracingConfig := &cfg.AppConfig.Tracing
+		// Применяем env override для AppConfig
+		if err := cleanenv.ReadEnv(tracingConfig); err != nil {
+			l.Warn("Ошибка загрузки Tracing конфигурации из переменных окружения",
+				slog.String("error", err.Error()),
+			)
+		}
+		l.Debug("Tracing конфигурация загружена из AppConfig",
+			slog.Bool("enabled", tracingConfig.Enabled),
+			slog.String("endpoint", tracingConfig.Endpoint),
+			slog.String("service_name", tracingConfig.ServiceName),
+		)
+		return tracingConfig, nil
+	}
+
+	tracingConfig := getDefaultTracingConfig()
+
+	if err := cleanenv.ReadEnv(tracingConfig); err != nil {
+		l.Warn("Ошибка загрузки Tracing конфигурации из переменных окружения",
+			slog.String("error", err.Error()),
+		)
+	}
+
+	l.Debug("Tracing конфигурация: используются значения по умолчанию",
+		slog.Bool("enabled", tracingConfig.Enabled),
+	)
+
+	return tracingConfig, nil
+}
+
+// isAlertingConfigPresent проверяет, задана ли конфигурация алертинга.
+// Возвращает true если хотя бы одно значимое поле отличается от zero value.
+func isAlertingConfigPresent(cfg *AlertingConfig) bool {
+	if cfg == nil {
+		return false
+	}
+	// Проверяем любое значимое поле (enabled, или настройки email/telegram/webhook)
+	return cfg.Enabled ||
+		cfg.Email.Enabled || cfg.Email.SMTPHost != "" ||
+		cfg.Telegram.Enabled || cfg.Telegram.BotToken != "" ||
+		cfg.Webhook.Enabled || len(cfg.Webhook.URLs) > 0
+}
+
+// getDefaultAlertingConfig возвращает конфигурацию алертинга по умолчанию.
+// Алертинг отключён по умолчанию (AC6).
+// M-1/Review #9: используем константы из пакета alerting вместо magic numbers.
+func getDefaultAlertingConfig() *AlertingConfig {
+	return &AlertingConfig{
+		Enabled:         false,
+		RateLimitWindow: alerting.DefaultRateLimitWindow,
+		Email: EmailChannelConfig{
+			Enabled:         false,
+			SMTPPort:        alerting.DefaultSMTPPort,
+			UseTLS:          true,
+			SubjectTemplate: alerting.DefaultSubjectTemplate,
+			Timeout:         alerting.DefaultSMTPTimeout,
+		},
+		Telegram: TelegramChannelConfig{
+			Enabled: false,
+			Timeout: alerting.DefaultTelegramTimeout,
+		},
+		Webhook: WebhookChannelConfig{
+			Enabled:    false,
+			Timeout:    alerting.DefaultWebhookTimeout,
+			MaxRetries: alerting.DefaultMaxRetries,
+		},
+		Rules: AlertRulesConfig{
+			MinSeverity: "INFO",
+		},
+	}
+}
+
+// loadAlertingConfig загружает конфигурацию алертинга из AppConfig, переменных окружения или устанавливает значения по умолчанию.
+// Переменные окружения BR_ALERTING_* переопределяют значения из AppConfig (AC5).
+func loadAlertingConfig(l *slog.Logger, cfg *Config) (*AlertingConfig, error) {
+	// Проверяем, есть ли конфигурация в AppConfig
+	// Примечание: нельзя сравнивать struct напрямую из-за slice в EmailChannelConfig
+	if cfg.AppConfig != nil && isAlertingConfigPresent(&cfg.AppConfig.Alerting) {
+		alertingConfig := &cfg.AppConfig.Alerting
+		// Применяем env override для AppConfig (симметрично с loadLoggingConfig)
+		if err := cleanenv.ReadEnv(alertingConfig); err != nil {
+			l.Warn("Ошибка загрузки Alerting конфигурации из переменных окружения",
+				slog.String("error", err.Error()),
+			)
+		}
+		l.Info("Alerting конфигурация загружена из AppConfig",
+			slog.Bool("enabled", alertingConfig.Enabled),
+			slog.Bool("email_enabled", alertingConfig.Email.Enabled),
+			slog.Bool("telegram_enabled", alertingConfig.Telegram.Enabled), // L1 fix
+		)
+		return alertingConfig, nil
+	}
+
+	alertingConfig := getDefaultAlertingConfig()
+
+	if err := cleanenv.ReadEnv(alertingConfig); err != nil {
+		l.Warn("Ошибка загрузки Alerting конфигурации из переменных окружения",
+			slog.String("error", err.Error()),
+		)
+	}
+
+	l.Debug("Alerting конфигурация: используются значения по умолчанию",
+		slog.Bool("enabled", alertingConfig.Enabled),
+	)
+
+	return alertingConfig, nil
+}
+
+// isMetricsConfigPresent проверяет, задана ли конфигурация метрик.
+// Возвращает true если хотя бы одно значимое поле отличается от zero value.
+func isMetricsConfigPresent(cfg *MetricsConfig) bool {
+	if cfg == nil {
+		return false
+	}
+	// Проверяем любое значимое поле (enabled, или pushgateway URL)
+	return cfg.Enabled || cfg.PushgatewayURL != ""
+}
+
+// getDefaultMetricsConfig возвращает конфигурацию метрик по умолчанию.
+// Метрики отключены по умолчанию (AC6).
+func getDefaultMetricsConfig() *MetricsConfig {
+	return &MetricsConfig{
+		Enabled:        false,
+		PushgatewayURL: "",
+		JobName:        "apk-ci",
+		Timeout:        10 * time.Second,
+		InstanceLabel:  "",
+	}
+}
+
+// loadMetricsConfig загружает конфигурацию метрик из AppConfig, переменных окружения или устанавливает значения по умолчанию.
+// Переменные окружения BR_METRICS_* переопределяют значения из AppConfig.
+func loadMetricsConfig(l *slog.Logger, cfg *Config) (*MetricsConfig, error) {
+	// Проверяем, есть ли конфигурация в AppConfig
+	if cfg.AppConfig != nil && isMetricsConfigPresent(&cfg.AppConfig.Metrics) {
+		metricsConfig := &cfg.AppConfig.Metrics
+		// Применяем env override для AppConfig (симметрично с loadAlertingConfig)
+		if err := cleanenv.ReadEnv(metricsConfig); err != nil {
+			l.Warn("Ошибка загрузки Metrics конфигурации из переменных окружения",
+				slog.String("error", err.Error()),
+			)
+		}
+		l.Info("Metrics конфигурация загружена из AppConfig",
+			slog.Bool("enabled", metricsConfig.Enabled),
+			slog.String("pushgateway_url", urlutil.MaskURL(metricsConfig.PushgatewayURL)),
+			slog.String("job_name", metricsConfig.JobName),
+		)
+		return metricsConfig, nil
+	}
+
+	metricsConfig := getDefaultMetricsConfig()
+
+	if err := cleanenv.ReadEnv(metricsConfig); err != nil {
+		l.Warn("Ошибка загрузки Metrics конфигурации из переменных окружения",
+			slog.String("error", err.Error()),
+		)
+	}
+
+	l.Debug("Metrics конфигурация: используются значения по умолчанию",
+		slog.Bool("enabled", metricsConfig.Enabled),
+	)
+
+	return metricsConfig, nil
+}
+
+// validateAlertingConfig проверяет корректность конфигурации алертинга при загрузке.
+// Проверяет обязательные поля для каждого включённого канала.
+//
+// M-2/Review #9: Это предварительная (config-level) валидация — проверяет только наличие
+// обязательных полей при загрузке конфигурации. Полная валидация (формат URL, CRLF injection
+// в email адресах, Header Injection в webhook headers) выполняется в alerting.Config.Validate()
+// при создании Alerter через providers.go. Defense-in-depth: fail-fast при явно невалидной конфигурации.
+func validateAlertingConfig(ac *AlertingConfig) error {
+	if !ac.Enabled {
+		return nil
+	}
+	if ac.Email.Enabled {
+		if ac.Email.SMTPHost == "" {
+			return fmt.Errorf("alerting.email: SMTP host обязателен")
+		}
+		if ac.Email.From == "" {
+			return fmt.Errorf("alerting.email: адрес отправителя (from) обязателен")
+		}
+		if len(ac.Email.To) == 0 {
+			return fmt.Errorf("alerting.email: хотя бы один получатель (to) обязателен")
+		}
+	}
+	if ac.Telegram.Enabled {
+		if ac.Telegram.BotToken == "" {
+			return fmt.Errorf("alerting.telegram: bot_token обязателен")
+		}
+		if len(ac.Telegram.ChatIDs) == 0 {
+			return fmt.Errorf("alerting.telegram: хотя бы один chat_id обязателен")
+		}
+	}
+	if ac.Webhook.Enabled && len(ac.Webhook.URLs) == 0 {
+		return fmt.Errorf("alerting.webhook: хотя бы один URL обязателен")
+	}
+	return nil
+}
+
+// validateMetricsConfig проверяет корректность конфигурации метрик при загрузке.
+// Проверяет обязательные поля при включённых метриках.
+func validateMetricsConfig(mc *MetricsConfig) error {
+	if !mc.Enabled {
+		return nil
+	}
+	if mc.PushgatewayURL == "" {
+		return fmt.Errorf("metrics: pushgateway_url обязателен при enabled=true")
+	}
+	if mc.Timeout <= 0 {
+		return fmt.Errorf("metrics: timeout должен быть положительным")
+	}
+	return nil
 }
 
 // MustLoad загружает конфигурацию приложения из файла или завершает выполнение при ошибке.
@@ -639,6 +1239,9 @@ func MustLoad() (*Config, error) {
 	}
 
 	// Загрузка конфигурации SonarQube из переменных окружения
+	// TODO (M-2/Review #17): SonarQubeConfig.Validate() и ScannerConfig.Validate()
+	// существуют, но не вызываются в MustLoad(). Добавить fail-fast валидацию
+	// по аналогии с AlertingConfig/MetricsConfig/TracingConfig.
 	if cfg.SonarQubeConfig, err = GetSonarQubeConfig(l, &cfg); err != nil {
 		l.Warn("ошибка загрузки конфигурации SonarQube", slog.String("error", err.Error()))
 		// Используем значения по умолчанию
@@ -666,11 +1269,83 @@ func MustLoad() (*Config, error) {
 		cfg.LoggingConfig = getDefaultLoggingConfig()
 	}
 
+	// Загрузка конфигурации реализаций
+	if cfg.ImplementationsConfig, err = loadImplementationsConfig(l, &cfg); err != nil {
+		l.Warn("ошибка загрузки конфигурации реализаций", slog.String("error", err.Error()))
+		// Используем значения по умолчанию
+		cfg.ImplementationsConfig = getDefaultImplementationsConfig()
+	}
+
+	// Валидация конфигурации реализаций (AC6: невалидные значения обнаруживаются early)
+	if cfg.ImplementationsConfig != nil {
+		if err = cfg.ImplementationsConfig.Validate(); err != nil {
+			l.Warn("невалидная конфигурация реализаций, используются значения по умолчанию",
+				slog.String("error", err.Error()),
+			)
+			cfg.ImplementationsConfig = getDefaultImplementationsConfig()
+		}
+	}
+
 	// Загрузка конфигурации RAC
 	if cfg.RacConfig, err = loadRacConfig(l, &cfg); err != nil {
 		l.Warn("ошибка загрузки конфигурации RAC", slog.String("error", err.Error()))
 		// Используем значения по умолчанию
 		cfg.RacConfig = getDefaultRacConfig()
+	}
+
+	// Загрузка конфигурации алертинга
+	if cfg.AlertingConfig, err = loadAlertingConfig(l, &cfg); err != nil {
+		l.Warn("ошибка загрузки конфигурации алертинга", slog.String("error", err.Error()))
+		// Используем значения по умолчанию
+		cfg.AlertingConfig = getDefaultAlertingConfig()
+	}
+	// Fail-fast валидация: обнаруживаем невалидную конфигурацию при загрузке,
+	// а не при первом использовании Alerter в runtime.
+	// TODO (M-1/Review #17): При ошибке валидации код выставляет Enabled=false,
+	// но невалидные поля (пустой SMTPHost и т.д.) остаются в структуре.
+	// Рекомендуется заменять невалидную конфигурацию на getDefault*Config().
+	if cfg.AlertingConfig != nil && cfg.AlertingConfig.Enabled {
+		if valErr := validateAlertingConfig(cfg.AlertingConfig); valErr != nil {
+			l.Warn("невалидная конфигурация алертинга, алертинг отключён",
+				slog.String("error", valErr.Error()),
+				slog.String("reason", "validation_failed"),
+			)
+			cfg.AlertingConfig.Enabled = false
+		}
+	}
+
+	// Загрузка конфигурации метрик
+	if cfg.MetricsConfig, err = loadMetricsConfig(l, &cfg); err != nil {
+		l.Warn("ошибка загрузки конфигурации метрик", slog.String("error", err.Error()))
+		// Используем значения по умолчанию
+		cfg.MetricsConfig = getDefaultMetricsConfig()
+	}
+	// Fail-fast валидация: обнаруживаем невалидную конфигурацию при загрузке.
+	if cfg.MetricsConfig != nil && cfg.MetricsConfig.Enabled {
+		if valErr := validateMetricsConfig(cfg.MetricsConfig); valErr != nil {
+			l.Warn("невалидная конфигурация метрик, метрики отключены",
+				slog.String("error", valErr.Error()),
+				slog.String("reason", "validation_failed"),
+			)
+			cfg.MetricsConfig.Enabled = false
+		}
+	}
+
+	// Загрузка конфигурации трейсинга
+	if cfg.TracingConfig, err = loadTracingConfig(l, &cfg); err != nil {
+		l.Warn("ошибка загрузки конфигурации трейсинга", slog.String("error", err.Error()))
+		// Используем значения по умолчанию
+		cfg.TracingConfig = getDefaultTracingConfig()
+	}
+	// Fail-fast валидация: обнаруживаем невалидную конфигурацию при загрузке.
+	if cfg.TracingConfig != nil && cfg.TracingConfig.Enabled {
+		if valErr := validateTracingConfig(cfg.TracingConfig); valErr != nil {
+			l.Warn("невалидная конфигурация трейсинга, трейсинг отключён",
+				slog.String("error", valErr.Error()),
+				slog.String("reason", "validation_failed"),
+			)
+			cfg.TracingConfig.Enabled = false
+		}
 	}
 
 	// l.Debug("Config", "Параметры конфигурации", cfg)

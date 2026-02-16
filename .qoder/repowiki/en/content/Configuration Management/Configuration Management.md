@@ -2,26 +2,29 @@
 
 <cite>
 **Referenced Files in This Document**
-- [internal/config/config.go](file://internal/config/config.go) - *Updated with BR_EXT_DIR, BR_DRY_RUN, and GITHUB_REF_NAME configuration variables*
-- [config/app.yaml](file://config/app.yaml) - *Configuration file for application settings*
-- [config/dbconfig.yaml](file://config/dbconfig.yaml) - *Configuration file for database connections*
-- [config/action.yaml](file://config/action.yaml) - *Configuration file for GitHub Actions integration*
-- [config/menu_main.yaml](file://config/menu_main.yaml) - *Workflow template for main operations*
-- [config/menu_debug.yaml](file://config/menu_debug.yaml) - *Workflow template for debugging operations*
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go) - *Main application entry point*
-- [internal/constants/constants.go](file://internal/constants/constants.go) - *Application constants*
-- [internal/config/config_test.go](file://internal/config/config_test.go) - *Configuration tests*
-- [internal/app/extension_publish.go](file://internal/app/extension_publish.go) - *Extension publishing system implementation*
+- [internal/config/config.go](file://internal/config/config.go)
+- [config/app.yaml](file://config/app.yaml)
+- [config/app.yaml.example](file://config/app.yaml.example)
+- [config/dbconfig.yaml](file://config/dbconfig.yaml)
+- [config/action.yaml](file://config/action.yaml)
+- [config/menu_main.yaml](file://config/menu_main.yaml)
+- [config/menu_debug.yaml](file://config/menu_debug.yaml)
+- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go)
+- [internal/constants/constants.go](file://internal/constants/constants.go)
+- [internal/config/config_test.go](file://internal/config/config_test.go)
+- [internal/config/implementations_test.go](file://internal/config/implementations_test.go)
+- [internal/app/extension_publish.go](file://internal/app/extension_publish.go)
+- [docs/epics/extension-publish.md](file://docs/epics/extension-publish.md)
+- [docs/diagrams/external-extension-workflow.md](file://docs/diagrams/external-extension-workflow.md)
 </cite>
 
 ## Update Summary
 **Changes Made**
-- Added new BR_EXT_DIR configuration variable for specifying extension directories in the Extension Publishing System
-- Added new BR_DRY_RUN configuration variable for safe testing mode in extension publishing
-- Added new GITHUB_REF_NAME configuration variable for GitHub Actions integration
-- Updated configuration loading process to handle new extension publishing variables
-- Enhanced configuration validation to support extension publishing workflow
-- Added documentation for extension publishing system configuration
+- Added new ImplementationsConfig for switching between 1cv8/ibcmd/native implementations
+- Updated logging defaults with BR_LOG_* environment variables and improved configuration precedence
+- Enhanced configuration loading with better environment variable override handling
+- Added comprehensive validation for implementation selection values
+- Updated logging configuration with new default values and environment variable support
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -33,8 +36,10 @@
 7. [Configuration Validation](#configuration-validation)
 8. [Security Considerations](#security-considerations)
 9. [Configuration Examples](#configuration-examples)
-10. [Extension Publishing System](#extension-publishing-system)
-11. [Troubleshooting](#troubleshooting)
+10. [Implementation Selection](#implementation-selection)
+11. [Logging Configuration](#logging-configuration)
+12. [Extension Publishing Workflow](#extension-publishing-workflow)
+13. [Troubleshooting](#troubleshooting)
 
 ## Introduction
 
@@ -46,7 +51,7 @@ The configuration management system supports multiple configuration files for di
 - **action.yaml**: GitHub Actions integration parameters
 - **menu_main.yaml/menu_debug.yaml**: Workflow templates
 
-**Updated** Added support for the Extension Publishing System with new configuration variables for managing external extension distribution across subscribed repositories.
+**Updated** Added support for implementation selection configuration and enhanced logging defaults with BR_LOG_* environment variables.
 
 ## Configuration Architecture
 
@@ -59,20 +64,18 @@ YamlFiles["YAML Configuration Files<br/>(Medium Priority)"] --> CleanEnv
 Defaults["Hardcoded Defaults<br/>(Lowest Priority)"] --> CleanEnv
 CleanEnv --> ConfigStruct["Config Struct<br/>(Central Configuration)"]
 ConfigStruct --> AppConfig["AppConfig<br/>(Application Settings)"]
+ConfigStruct --> ImplementationsConfig["ImplementationsConfig<br/>(Implementation Selection)"]
+ConfigStruct --> LoggingConfig["LoggingConfig<br/>(Logging Settings)"]
 AppConfig --> EdtTimeout["EDT Timeout<br/>(90m default)"]
 AppConfig --> Paths["Executable Paths"]
 AppConfig --> Logging["Logging Configuration"]
 AppConfig --> Services["Service Settings"]
 AppConfig --> Git["Git Configuration"]
-ConfigStruct --> ExtensionPublishing["Extension Publishing<br/>(New Features)"]
-ExtensionPublishing --> ExtDir["BR_EXT_DIR<br/>(Extension Directory)"]
-ExtensionPublishing --> DryRun["BR_DRY_RUN<br/>(Safe Mode)"]
-ExtensionPublishing --> ReleaseTag["GITHUB_REF_NAME<br/>(Release Tag)"]
 ```
 
 **Diagram sources**
-- [internal/config/config.go](file://internal/config/config.go#L186-L188)
-- [config/app.yaml](file://config/app.yaml#L1-L50)
+- [internal/config/config.go](file://internal/config/config.go#L180-L189)
+- [config/app.yaml](file://config/app.yaml#L1-L138)
 
 ## Configuration Files
 
@@ -86,6 +89,8 @@ The primary configuration file containing system-wide settings, executable paths
 - **Service Configurations**: RAC settings, database users, timeouts
 - **Integration Settings**: SonarQube, Git, logging configurations
 - **EDT Timeout**: Timeout for Enterprise Development Tools operations with default value of 90 minutes
+- **Logging Configuration**: New logging settings with BR_LOG_* environment variable support
+- **Implementations Configuration**: New section for selecting implementation tools
 
 **Example Structure:**
 ```yaml
@@ -103,6 +108,22 @@ paths:
 
 # Timeout for EDT operations (export/import configuration)
 edt_timeout: 90m
+
+# New logging configuration section
+logging:
+  level: "info"
+  format: "json"
+  output: "stdout"
+  filePath: "/var/log/benadis-runner.log"
+  maxSize: 100
+  maxBackups: 3
+  maxAge: 28
+  compress: true
+
+# New implementations configuration section
+implementations:
+  config_export: "1cv8"
+  db_create: "1cv8"
 ```
 
 **Section sources**
@@ -146,7 +167,7 @@ Defines the GitHub Actions interface with all configurable parameters.
 Actions automatically set environment variables for each input parameter, prefixed with `INPUT_`.
 
 **Section sources**
-- [config/action.yaml](file://config/action.yaml#L1-L121)
+- [config/action.yaml](file://config/action.yaml#L1-L120)
 
 ### menu_main.yaml/menu_debug.yaml - Workflow Templates
 
@@ -186,6 +207,7 @@ class Config {
 +*ScannerConfig ScannerConfig
 +*GitConfig GitConfig
 +*LoggingConfig LoggingConfig
++*ImplementationsConfig ImplementationsConfig
 +*RacConfig RacConfig
 +[]string MenuMain
 +[]string MenuDebug
@@ -218,7 +240,22 @@ class AppConfig {
 +Scanner Scanner
 +Git Git
 +Logging Logging
++Implementations Implementations
 +time.Duration EdtTimeout
+}
+class ImplementationsConfig {
++string ConfigExport
++string DBCreate
+}
+class LoggingConfig {
++string Level
++string Format
++string Output
++string FilePath
++int MaxSize
++int MaxBackups
++int MaxAge
++bool Compress
 }
 class SecretConfig {
 +Passwords Passwords
@@ -231,12 +268,14 @@ class DatabaseInfo {
 +string DbServer
 }
 Config --> AppConfig : "contains"
+Config --> ImplementationsConfig : "contains"
+Config --> LoggingConfig : "contains"
 Config --> SecretConfig : "contains"
 Config --> DatabaseInfo : "maps to"
 ```
 
 **Diagram sources**
-- [internal/config/config.go](file://internal/config/config.go#L100-L200)
+- [internal/config/config.go](file://internal/config/config.go#L128-L209)
 
 **Section sources**
 - [internal/config/config.go](file://internal/config/config.go#L128-L209)
@@ -272,17 +311,21 @@ YamlFiles-->>Config : DatabaseInfo
 Config->>Config : loadMenuConfigs()
 Config->>YamlFiles : Parse menu files
 YamlFiles-->>Config : Menu Arrays
+Config->>Config : loadLoggingConfig()
+Config->>Cleanenv : ReadEnv(LoggingConfig)
+Config->>Config : loadImplementationsConfig()
+Config->>Cleanenv : ReadEnv(ImplementationsConfig)
 Config->>Config : loadExternalConfigs()
 Config->>Config : validateConfiguration()
 Config-->>Main : Complete Config
 ```
 
 **Diagram sources**
-- [internal/config/config.go](file://internal/config/config.go#L548-L702)
+- [internal/config/config.go](file://internal/config/config.go#L542-L702)
 - [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L16-L262)
 
 **Section sources**
-- [internal/config/config.go](file://internal/config/config.go#L548-L702)
+- [internal/config/config.go](file://internal/config/config.go#L542-L702)
 
 ## Environment Variables and Precedence
 
@@ -294,28 +337,32 @@ Variables follow a structured naming pattern:
 - **Input Parameters**: `INPUT_*` (from GitHub Actions)
 - **Application Settings**: `BR_*` (application-specific)
 - **Service Settings**: `*_PASSWORD`, `*_TOKEN` (service credentials)
+- **Logging Settings**: `BR_LOG_*` (logging configuration)
+- **Implementation Settings**: `BR_IMPL_*` (implementation selection)
 
 ### Precedence Order (Highest to Lowest)
 
-1. **Environment Variables** (`INPUT_*`, `BR_*`)
+1. **Environment Variables** (`INPUT_*`, `BR_*`, `BR_LOG_*`, `BR_IMPL_*`)
 2. **YAML Configuration Files**
 3. **Hardcoded Defaults**
 
-### Example Variable Mapping
+### Enhanced Configuration Precedence
 
-| Environment Variable | YAML Path | Default Value |
-|---------------------|-----------|---------------|
-| `INPUT_COMMAND` | `command` | "" |
-| `BR_ENV` | `env` | "dev" |
-| `BR_CONFIG_SYSTEM` | `configSystem` | "" |
-| `MSSQL_PASSWORD` | `passwords.mssql` | "" |
-| `EDT_TIMEOUT` | `edt_timeout` | "90m" |
-| **`BR_EXT_DIR`** | **`ext_dir`** | **""** |
-| **`BR_DRY_RUN`** | **`dry_run`** | **false** |
-| **`GITHUB_REF_NAME`** | **`release_tag`** | **"main"** |
+**Updated** The system now provides better environment variable override handling:
+
+| Configuration Type | Environment Variable | YAML Path | Default Value |
+|-------------------|---------------------|-----------|---------------|
+| Logging Level | `BR_LOG_LEVEL` | `logging.level` | "info" |
+| Logging Format | `BR_LOG_FORMAT` | `logging.format` | "text" |
+| Logging Output | `BR_LOG_OUTPUT` | `logging.output` | "stderr" |
+| Config Export Tool | `BR_IMPL_CONFIG_EXPORT` | `implementations.config_export` | "1cv8" |
+| DB Create Tool | `BR_IMPL_DB_CREATE` | `implementations.db_create` | "1cv8" |
+| Actor | `BR_ACTOR` | `actor` | "" |
+| Environment | `BR_ENV` | `env` | "dev" |
+| Command | `BR_COMMAND` | `command` | "" |
 
 **Section sources**
-- [internal/config/config.go](file://internal/config/config.go#L134-L188)
+- [internal/config/config.go](file://internal/config/config.go#L180-L189)
 
 ## Configuration Validation
 
@@ -329,6 +376,35 @@ Critical parameters must be present:
 - **Repository**: Full repository name
 - **AccessToken**: Authentication token
 - **Command**: Operation to perform
+
+### Implementation Validation
+
+**New** Implementation selection validation ensures only supported values are used:
+
+```go
+// Validate проверяет корректность значений ImplementationsConfig.
+// Возвращает ошибку если значения не соответствуют допустимым.
+func (c *ImplementationsConfig) Validate() error {
+    // Применяем defaults для пустых значений
+    if c.ConfigExport == "" {
+        c.ConfigExport = "1cv8"
+    }
+    if c.DBCreate == "" {
+        c.DBCreate = "1cv8"
+    }
+
+    validConfigExport := map[string]bool{"1cv8": true, "ibcmd": true, "native": true}
+    validDBCreate := map[string]bool{"1cv8": true, "ibcmd": true}
+
+    if !validConfigExport[c.ConfigExport] {
+        return fmt.Errorf("недопустимое значение ConfigExport: %q, допустимые: 1cv8, ibcmd, native", c.ConfigExport)
+    }
+    if !validDBCreate[c.DBCreate] {
+        return fmt.Errorf("недопустимое значение DBCreate: %q, допустимые: 1cv8, ibcmd", c.DBCreate)
+    }
+    return nil
+}
+```
 
 ### EDT Timeout Validation
 
@@ -345,20 +421,6 @@ if appConfig.EdtTimeout <= 0 {
 
 This validation ensures that if the `edt_timeout` parameter is missing from the configuration file or has a zero/negative value, it will be set to the default value of 90 minutes.
 
-### Extension Publishing Validation
-
-**Updated** The extension publishing system adds new validation requirements:
-
-```go
-// Extension publishing validation
-if cfg.GiteaURL == "" {
-    return fmt.Errorf("GiteaURL не настроен в конфигурации")
-}
-if cfg.AccessToken == "" {
-    return fmt.Errorf("AccessToken не настроен в конфигурации")
-}
-```
-
 ### Validation Process
 
 ```mermaid
@@ -371,14 +433,14 @@ LogError --> ReturnError["Return Validation Error"]
 HasMissing --> |No| ValidateTypes["Validate Type Conversions"]
 ValidateTypes --> CheckRanges["Check Value Ranges"]
 CheckRanges --> ValidateEdtTimeout["Validate EDT Timeout"]
-ValidateEdtTimeout --> ValidateExtensionPublish["Validate Extension Publishing"]
-ValidateExtensionPublish --> ValidateServices["Validate Service Configurations"]
+ValidateEdtTimeout --> ValidateImplementations["Validate Implementation Selection"]
+ValidateImplementations --> ValidateLogging["Validate Logging Configuration"]
+ValidateLogging --> ValidateServices["Validate Service Configurations"]
 ValidateServices --> Success["Validation Successful"]
 ```
 
 **Diagram sources**
 - [internal/config/config.go](file://internal/config/config.go#L384-L415)
-- [internal/app/extension_publish.go](file://internal/app/extension_publish.go#L1015-L1021)
 
 ### Error Handling
 
@@ -414,7 +476,7 @@ The configuration system separates sensitive data into dedicated files and uses 
 - Network isolation for database connections
 
 **Section sources**
-- [internal/config/config.go](file://internal/config/config.go#L77-L91)
+- [internal/config/config.go](file://internal/config/config.go#L75-L91)
 
 ## Configuration Examples
 
@@ -435,6 +497,17 @@ paths:
   binIbcmd: "/opt/1cv8/dev/8.3.27.1606/ibcmd"
   edtCli: "/opt/1C/1CE/dev/1c-edt-2024.2.6+7-x86_64/1cedtcli"
   rac: "/opt/1cv8/dev/8.3.27.1606/rac"
+
+# New logging configuration
+logging:
+  level: "debug"
+  format: "text"
+  output: "stderr"
+
+# New implementations configuration
+implementations:
+  config_export: "ibcmd"
+  db_create: "1cv8"
 
 # secret.yaml
 passwords:
@@ -464,27 +537,70 @@ export BR_CONFIG_DB_DATA="/etc/benadis/prod/dbconfig.yaml"
 export BR_CONFIG_PROJECT="project.yaml"
 export BR_CONFIG_MENU_MAIN="menu_main.yaml"
 export BR_CONFIG_MENU_DEBUG="menu_debug.yaml"
+export BR_LOG_LEVEL="info"
+export BR_LOG_FORMAT="json"
+export BR_LOG_OUTPUT="stderr"
+export BR_IMPL_CONFIG_EXPORT="1cv8"
+export BR_IMPL_DB_CREATE="ibcmd"
 export EDT_TIMEOUT="120m"
 ```
 
-### Extension Publishing Configuration
+### Implementation Selection Configuration
 
-**New** Configuration for the Extension Publishing System:
+**New** Example of implementation selection configuration:
 
 ```yaml
-# Environment Variables for Extension Publishing
-export BR_EXT_DIR="cfe/CommonExt"
-export BR_DRY_RUN="true"
-export GITHUB_REF_NAME="v1.2.3"
+# app.yaml
+app:
+  logLevel: "Debug"
+  workDir: "/tmp/benadis"
+  tmpDir: "/tmp/benadis/temp"
+  timeout: 30
+  edt_timeout: 90m
 
-# Or in GitHub Actions workflow
-- name: Run Extension Publish
-  uses: ./.github/actions/benadis-runner
-  with:
-    command: "extension-publish"
-    extDir: "cfe/CommonExt"
-    dryRun: "true"
-    releaseTag: "v1.2.3"
+# Implementation selection
+implementations:
+  config_export: "native"  # Use native implementation for config export
+  db_create: "ibcmd"       # Use ibcmd for database creation
+
+# Environment Variables for implementation selection
+export BR_IMPL_CONFIG_EXPORT="native"
+export BR_IMPL_DB_CREATE="ibcmd"
+```
+
+### Enhanced Logging Configuration
+
+**Updated** Example of enhanced logging configuration:
+
+```yaml
+# app.yaml
+app:
+  logLevel: "Debug"
+  workDir: "/tmp/benadis"
+  tmpDir: "/tmp/benadis/temp"
+  timeout: 30
+  edt_timeout: 90m
+
+# Enhanced logging configuration
+logging:
+  level: "debug"        # BR_LOG_LEVEL
+  format: "text"        # BR_LOG_FORMAT  
+  output: "stderr"      # BR_LOG_OUTPUT
+  filePath: "/var/log/benadis-runner.log"
+  maxSize: 100
+  maxBackups: 3
+  maxAge: 7
+  compress: true
+
+# Environment Variables for logging
+export BR_LOG_LEVEL="debug"
+export BR_LOG_FORMAT="json"
+export BR_LOG_OUTPUT="file"
+export BR_LOG_FILE_PATH="/var/log/benadis-runner.log"
+export BR_LOG_MAX_SIZE="50"
+export BR_LOG_MAX_BACKUPS="5"
+export BR_LOG_MAX_AGE="14"
+export BR_LOG_COMPRESS="false"
 ```
 
 ### Docker Deployment
@@ -507,88 +623,269 @@ COPY --from=config /app/config/ /app/config/
 ENV BR_CONFIG_SYSTEM=/app/config/app.yaml
 ENV BR_CONFIG_SECRET=/app/config/secret.yaml
 ENV BR_CONFIG_DB_DATA=/app/config/dbconfig.yaml
+ENV BR_LOG_LEVEL="info"
+ENV BR_LOG_FORMAT="json"
+ENV BR_LOG_OUTPUT="stderr"
+ENV BR_IMPL_CONFIG_EXPORT="1cv8"
+ENV BR_IMPL_DB_CREATE="1cv8"
 ENV EDT_TIMEOUT=90m
 ```
 
-## Extension Publishing System
+## Implementation Selection
 
-**New Section** The Extension Publishing System enables automated distribution of 1C external extensions across subscribed repositories.
+**New** The implementation selection system allows switching between different tools for specific operations without changing application code.
 
-### Key Components
+### ImplementationsConfig Structure
 
-#### BR_EXT_DIR - Extension Directory Specification
-- **Purpose**: Specifies which extension directories to publish
-- **Format**: Path within the repository (e.g., "cfe/CommonExt")
-- **Multiple Extensions**: Can specify multiple directories separated by commas
-- **Default**: Empty (publish all extensions)
-
-#### BR_DRY_RUN - Safe Testing Mode
-- **Purpose**: Enables testing without making actual changes
-- **Behavior**: 
-  - Scans for subscribers and processes files
-  - Creates branches and commits locally
-  - Skips PR creation
-  - Reports results as "skipped"
-- **Use Case**: Testing extension publishing workflow before production deployment
-
-#### GITHUB_REF_NAME - Release Tag Integration
-- **Purpose**: Identifies the release tag for extension versioning
-- **GitHub Actions**: Automatically populated by GitHub Actions
-- **Fallback**: Defaults to "main" if not specified
-- **Format**: Semantic versioning (e.g., "v1.2.3")
-
-### Extension Publishing Workflow
-
-```mermaid
-flowchart TD
-Start["Start Extension Publish"] --> ParseEnv["Parse Environment Variables"]
-ParseEnv --> Validate["Validate Configuration"]
-Validate --> FindSubscribers["Find Subscribed Repositories"]
-FindSubscribers --> CheckDryRun{"Dry Run Mode?"}
-CheckDryRun --> |Yes| ProcessOnly["Process Only - No Changes"]
-CheckDryRun --> |No| ProcessFull["Full Processing"]
-ProcessOnly --> SkipResult["Report as Skipped"]
-ProcessFull --> AnalyzeProject["Analyze Target Project"]
-AnalyzeProject --> SyncFiles["Sync Extension Files"]
-SyncFiles --> CreatePR["Create Pull Request"]
-CreatePR --> Report["Generate Report"]
-SkipResult --> Report
-Report --> End["End"]
-```
-
-**Diagram sources**
-- [internal/app/extension_publish.go](file://internal/app/extension_publish.go#L998-L1252)
-
-### Subscription Branch Pattern
-
-The system uses a specific naming convention for subscription branches:
-- **Format**: `{Org}_{Repo}_{ExtDir}`
-- **Example**: `APKHolding_ERP_cfe_CommonExt`
-- **Parsing**: Automatically converts underscores to forward slashes for directory paths
-
-### Configuration Integration
-
-The extension publishing system integrates seamlessly with existing configuration:
+The `ImplementationsConfig` struct provides fine-grained control over tool selection:
 
 ```go
-// Extension publishing configuration fields
-ExtDir string `env:"BR_EXT_DIR" env-default:""`
-DryRun bool   `env:"BR_DRY_RUN" env-default:"false"`
-ReleaseTag string `env:"GITHUB_REF_NAME" env-default:"main"`
+// ImplementationsConfig содержит настройки выбора реализаций операций.
+// Позволяет переключаться между различными инструментами (1cv8/ibcmd/native)
+// без изменения кода приложения.
+type ImplementationsConfig struct {
+    // ConfigExport определяет инструмент для выгрузки конфигурации.
+    // Допустимые значения: "1cv8" (default), "ibcmd", "native"
+    ConfigExport string `yaml:"config_export" env:"BR_IMPL_CONFIG_EXPORT" env-default:"1cv8"`
 
-// Usage in extension publishing
-func ExtensionPublish(ctx *context.Context, l *slog.Logger, cfg *config.Config) error {
-    releaseTag := cfg.ReleaseTag
-    extensions := cfg.AddArray
-    dryRun := cfg.DryRun
-    
-    // Process extensions...
+    // DBCreate определяет инструмент для создания базы данных.
+    // Допустимые значения: "1cv8" (default), "ibcmd"
+    DBCreate string `yaml:"db_create" env:"BR_IMPL_DB_CREATE" env-default:"1cv8"`
 }
 ```
 
+### Available Implementation Tools
+
+| Tool | Purpose | Valid For |
+|------|---------|-----------|
+| `1cv8` | 1C:Enterprise command-line tool | Config export, DB create |
+| `ibcmd` | 1C:Enterprise ibcmd utility | DB create |
+| `native` | Native Go implementation | Config export |
+
+### Implementation Selection Process
+
+```mermaid
+flowchart TD
+Start["Operation Requested"] --> CheckConfig["Check ImplementationsConfig"]
+CheckConfig --> ConfigExport{"Config Export?"}
+ConfigExport --> |Yes| CheckExportTool["Check ConfigExport Tool"]
+CheckExportTool --> Tool1cv8["Use 1cv8 tool"]
+CheckExportTool --> ToolIbcmd["Use ibcmd tool"]
+CheckExportTool --> ToolNative["Use native implementation"]
+ConfigExport --> |No| CheckDBCreate{"DB Create?"}
+CheckDBCreate --> |Yes| CheckDBTool["Check DBCreate Tool"]
+CheckDBTool --> DB1cv8["Use 1cv8 tool"]
+CheckDBTool --> DBIbcmd["Use ibcmd tool"]
+CheckDBTool --> DBNative["Use native implementation"]
+CheckDBCreate --> |No| Default1cv8["Use 1cv8 as default"]
+```
+
+### Implementation Configuration Options
+
+| Field | Environment Variable | Default Value | Description |
+|-------|---------------------|---------------|-------------|
+| `ConfigExport` | `BR_IMPL_CONFIG_EXPORT` | "1cv8" | Tool for configuration export operations |
+| `DBCreate` | `BR_IMPL_DB_CREATE` | "1cv8" | Tool for database creation operations |
+
+### Implementation Configuration Examples
+
+```yaml
+# app.yaml
+implementations:
+  config_export: "native"  # Use native implementation for config export
+  db_create: "ibcmd"       # Use ibcmd for database creation
+```
+
+```bash
+# Environment variables
+export BR_IMPL_CONFIG_EXPORT="native"
+export BR_IMPL_DB_CREATE="ibcmd"
+```
+
 **Section sources**
-- [internal/config/config.go](file://internal/config/config.go#L186-L188)
-- [internal/app/extension_publish.go](file://internal/app/extension_publish.go#L998-L1252)
+- [internal/config/config.go](file://internal/config/config.go#L292-L326)
+- [internal/config/implementations_test.go](file://internal/config/implementations_test.go#L15-L45)
+
+## Logging Configuration
+
+**Updated** The logging system now provides enhanced configuration with BR_LOG_* environment variables and improved defaults.
+
+### LoggingConfig Structure
+
+The `LoggingConfig` struct controls all aspects of application logging:
+
+```go
+// LoggingConfig содержит настройки для логирования.
+type LoggingConfig struct {
+    // Level - уровень логирования (debug, info, warn, error)
+    Level string `yaml:"level" env:"BR_LOG_LEVEL" env-default:"info"`
+
+    // Format - формат логов (json, text)
+    Format string `yaml:"format" env:"BR_LOG_FORMAT" env-default:"text"`
+
+    // Output - вывод логов (stdout, stderr, file)
+    Output string `yaml:"output" env:"BR_LOG_OUTPUT" env-default:"stderr"`
+
+    // FilePath - путь к файлу логов (если output=file)
+    FilePath string `yaml:"filePath" env:"BR_LOG_FILE_PATH"`
+
+    // MaxSize - максимальный размер файла лога в MB
+    MaxSize int `yaml:"maxSize" env:"BR_LOG_MAX_SIZE"`
+
+    // MaxBackups - максимальное количество backup файлов
+    MaxBackups int `yaml:"maxBackups" env:"BR_LOG_MAX_BACKUPS"`
+
+    // MaxAge - максимальный возраст backup файлов в днях
+    MaxAge int `yaml:"maxAge" env:"BR_LOG_MAX_AGE"`
+
+    // Compress - сжимать ли backup файлы
+    Compress bool `yaml:"compress" env:"BR_LOG_COMPRESS"`
+}
+```
+
+### Enhanced Logging Defaults
+
+**Updated** The logging system now uses more sensible defaults:
+
+| Setting | Default Value | Reason |
+|---------|---------------|---------|
+| `Level` | "info" | Balanced verbosity for production |
+| `Format` | "text" | Human-readable output by default |
+| `Output` | "stderr" | Separates logs from application output |
+| `MaxSize` | 100 MB | Reasonable size for most environments |
+| `MaxBackups` | 3 | Maintains recent log history |
+| `MaxAge` | 7 days | Balances storage with retention needs |
+| `Compress` | true | Saves disk space |
+
+### Logging Environment Variables
+
+**New** Comprehensive environment variable support:
+
+| Environment Variable | YAML Path | Description |
+|---------------------|-----------|-------------|
+| `BR_LOG_LEVEL` | `logging.level` | Logging level (debug, info, warn, error) |
+| `BR_LOG_FORMAT` | `logging.format` | Output format (json, text) |
+| `BR_LOG_OUTPUT` | `logging.output` | Output destination (stdout, stderr, file) |
+| `BR_LOG_FILE_PATH` | `logging.filePath` | File path when output=file |
+| `BR_LOG_MAX_SIZE` | `logging.maxSize` | Maximum log file size in MB |
+| `BR_LOG_MAX_BACKUPS` | `logging.maxBackups` | Number of backup files to keep |
+| `BR_LOG_MAX_AGE` | `logging.maxAge` | Maximum age of backup files in days |
+| `BR_LOG_COMPRESS` | `logging.compress` | Whether to compress backup files |
+
+### Logging Configuration Examples
+
+```yaml
+# app.yaml
+logging:
+  level: "debug"
+  format: "text"
+  output: "stderr"
+  filePath: "/var/log/benadis-runner.log"
+  maxSize: 100
+  maxBackups: 3
+  maxAge: 7
+  compress: true
+```
+
+```bash
+# Environment variables for logging
+export BR_LOG_LEVEL="debug"
+export BR_LOG_FORMAT="json"
+export BR_LOG_OUTPUT="file"
+export BR_LOG_FILE_PATH="/var/log/benadis-runner.log"
+export BR_LOG_MAX_SIZE="50"
+export BR_LOG_MAX_BACKUPS="5"
+export BR_LOG_MAX_AGE="14"
+export BR_LOG_COMPRESS="false"
+```
+
+### Logging Implementation Details
+
+**Updated** The logging system initializes with these characteristics:
+
+1. **Default Handler**: Uses JSON handler with source attribution
+2. **Level Control**: Dynamic level setting based on configuration
+3. **Structured Output**: Includes application version information
+4. **Environment Override**: BR_LOG_* variables override YAML settings
+5. **File Rotation**: Automatic log rotation with configurable parameters
+
+**Section sources**
+- [internal/config/config.go](file://internal/config/config.go#L328-L353)
+- [internal/config/implementations_test.go](file://internal/config/implementations_test.go#L66-L94)
+
+## Extension Publishing Workflow
+
+**Updated** The extension publishing workflow extends the configuration system with specialized fields for managing external extension distribution.
+
+### Configuration Fields for Extension Publishing
+
+The Config struct now includes three new fields specifically for extension publishing:
+
+```go
+// ExtDir specifies the directory path for the extension within the repository
+ExtDir string `env:"BR_EXT_DIR" env-default:""`
+
+// DryRun enables dry-run mode for testing extension publishing without making changes
+DryRun bool `env:"BR_DRY_RUN" env-default:"false"`
+
+// ReleaseTag contains the release tag information for the extension version
+ReleaseTag string `env:"GITHUB_REF_NAME" env-default:"main"`
+```
+
+### Extension Publishing Process
+
+The extension publishing workflow follows these steps:
+
+1. **Project Analysis**: Uses `AnalyzeProject()` to determine the extension name and directory
+2. **Release Detection**: Retrieves release information from Gitea API
+3. **Subscriber Discovery**: Searches for subscribed repositories using branch pattern matching
+4. **File Synchronization**: Synchronizes extension files between source and target repositories
+5. **Pull Request Creation**: Creates automated pull requests with release information
+
+### Extension Publishing Configuration Options
+
+| Field | Environment Variable | Default Value | Description |
+|-------|---------------------|---------------|-------------|
+| `ExtDir` | `BR_EXT_DIR` | "" | Directory path for the extension within the repository |
+| `DryRun` | `BR_DRY_RUN` | false | Enables dry-run mode for testing without making changes |
+| `ReleaseTag` | `GITHUB_REF_NAME` | "main" | Release tag used for version identification |
+
+### Extension Publishing Environment Setup
+
+```bash
+# Basic extension publishing setup
+export BR_COMMAND="extension-publish"
+export GITEA_TOKEN="your_gitea_token_here"
+export GITHUB_REPOSITORY="your-org/your-repo"
+
+# Optional extension publishing configuration
+export BR_EXT_DIR="extensions/CommonExt"
+export BR_DRY_RUN="true"
+export GITHUB_REF_NAME="v1.2.3"
+```
+
+### Extension Publishing Workflow Integration
+
+The extension publishing command is integrated into the main application flow:
+
+```go
+case constants.ActExtensionPublish:
+    err = app.ExtensionPublish(&ctx, l, cfg)
+    if err != nil {
+        l.Error("Ошибка публикации расширения",
+            slog.String("error", err.Error()),
+            slog.String(constants.MsgErrProcessing, constants.MsgAppExit),
+        )
+        os.Exit(8)
+    }
+    l.Info("Публикация расширения успешно завершена")
+```
+
+**Section sources**
+- [internal/config/config.go](file://internal/config/config.go#L180-L189)
+- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L213-L222)
+- [internal/constants/constants.go](file://internal/constants/constants.go#L100-L101)
+- [docs/epics/extension-publish.md](file://docs/epics/extension-publish.md#L1-L326)
 
 ## Troubleshooting
 
@@ -618,10 +915,22 @@ Error: EDT operation context deadline exceeded
 Solution: Check edt_timeout configuration in app.yaml or EDT_TIMEOUT environment variable
 ```
 
+**Implementation Selection Errors**
+```
+Error: недопустимое значение ConfigExport: "invalid", допустимые: 1cv8, ibcmd, native
+Solution: Set BR_IMPL_CONFIG_EXPORT to 1cv8, ibcmd, or native
+```
+
+**Logging Configuration Issues**
+```
+Error: Failed to initialize logging
+Solution: Check BR_LOG_* environment variables and logging configuration
+```
+
 **Extension Publishing Issues**
 ```
-Error: GiteaURL не настроен в конфигурации
-Solution: Set BR_GITEA_URL environment variable or configure in app.yaml
+Error: Extension directory not specified
+Solution: Set BR_EXT_DIR environment variable or extDir in app.yaml
 ```
 
 ### Debug Configuration Loading
@@ -629,7 +938,7 @@ Solution: Set BR_GITEA_URL environment variable or configure in app.yaml
 Enable debug logging to troubleshoot configuration issues:
 
 ```bash
-export LOG_LEVEL="Debug"
+export BR_LOG_LEVEL="Debug"
 export BR_ENV="dev"
 ./benadis-runner
 ```
@@ -641,7 +950,7 @@ export BR_ENV="dev"
 yamllint config/app.yaml
 
 # Check environment variables
-env | grep -E "(INPUT_|BR_|MSSQL_|SONARQUBE_|EDT_TIMEOUT|BR_EXT_DIR|BR_DRY_RUN|GITHUB_REF_NAME)"
+env | grep -E "(INPUT_|BR_|MSSQL_|SONARQUBE_|EDT_TIMEOUT|EXT_DIR|DRY_RUN|RELEASE_TAG|IMPL|LOG_)"
 
 # Verify file permissions
 ls -la config/
