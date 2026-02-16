@@ -22,6 +22,7 @@ import (
 	"github.com/Kargones/apk-ci/internal/pkg/output"
 	"github.com/Kargones/apk-ci/internal/pkg/progress"
 	"github.com/Kargones/apk-ci/internal/pkg/tracing"
+	errhandler "github.com/Kargones/apk-ci/internal/command/handlers/shared"
 )
 
 // Код ошибки для попытки restore в production базу.
@@ -336,8 +337,7 @@ func (h *DbRestoreHandler) Execute(ctx context.Context, cfg *config.Config) erro
 func (h *DbRestoreHandler) writeError(format, traceID string, start time.Time, code, message string) error {
 	// Текстовый формат — человекочитаемый вывод ошибки
 	if format != output.FormatJSON {
-		_, _ = fmt.Fprintf(os.Stdout, "Ошибка: %s\nКод: %s\n", message, code)
-		return fmt.Errorf("%s: %s", code, message)
+		return errhandler.HandleError(message, code)
 	}
 
 	// JSON формат — структурированный вывод

@@ -23,6 +23,7 @@ import (
 	"github.com/Kargones/apk-ci/internal/pkg/output"
 	"github.com/Kargones/apk-ci/internal/pkg/tracing"
 	templateprocessor "github.com/Kargones/apk-ci/internal/util"
+	errhandler "github.com/Kargones/apk-ci/internal/command/handlers/shared"
 )
 
 // Коды ошибок — используем shared константы для соблюдения DRY.
@@ -639,8 +640,7 @@ func (h *ActionMenuHandler) writeSuccess(format, traceID string, start time.Time
 func (h *ActionMenuHandler) writeError(format, traceID string, start time.Time, code, message string) error {
 	// Текстовый формат — человекочитаемый вывод ошибки
 	if format != output.FormatJSON {
-		_, _ = fmt.Fprintf(os.Stdout, "Ошибка: %s\nКод: %s\n", message, code)
-		return fmt.Errorf("%s: %s", code, message)
+		return errhandler.HandleError(message, code)
 	}
 
 	// JSON формат — структурированный вывод

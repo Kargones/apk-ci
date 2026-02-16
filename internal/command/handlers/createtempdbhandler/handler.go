@@ -25,6 +25,7 @@ import (
 	"github.com/Kargones/apk-ci/internal/pkg/output"
 	"github.com/Kargones/apk-ci/internal/pkg/progress"
 	"github.com/Kargones/apk-ci/internal/pkg/tracing"
+	errhandler "github.com/Kargones/apk-ci/internal/command/handlers/shared"
 )
 
 // Коды ошибок для команды nr-create-temp-db.
@@ -519,8 +520,7 @@ func (h *CreateTempDbHandler) createProgress() progress.Progress {
 func (h *CreateTempDbHandler) writeError(format, traceID string, start time.Time, code, message string) error {
 	// Текстовый формат — человекочитаемый вывод ошибки
 	if format != output.FormatJSON {
-		_, _ = fmt.Fprintf(os.Stdout, "Ошибка: %s\nКод: %s\n", message, code)
-		return fmt.Errorf("%s: %s", code, message)
+		return errhandler.HandleError(message, code)
 	}
 
 	// JSON формат — структурированный вывод
