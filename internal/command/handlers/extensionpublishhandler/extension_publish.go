@@ -1065,7 +1065,7 @@ func reportResultsText(report *PublishReport, l *slog.Logger) {
 //
 // Возвращает:
 //   - error: агрегированная ошибка или nil при успехе
-func ExtensionPublish(_ *context.Context, l *slog.Logger, cfg *config.Config) error {
+func ExtensionPublish(_ context.Context, l *slog.Logger, cfg *config.Config) error {
 	// 1. Получение параметров из конфигурации
 	releaseTag := cfg.ReleaseTag
 	extensions := cfg.AddArray // Список расширений для публикации

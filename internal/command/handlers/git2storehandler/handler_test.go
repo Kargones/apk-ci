@@ -21,13 +21,13 @@ import (
 
 // mockGitOperator — мок для GitOperator.
 type mockGitOperator struct {
-	cloneFunc     func(ctx *context.Context, l *slog.Logger) error
+	cloneFunc     func(ctx context.Context, l *slog.Logger) error
 	switchFunc    func(ctx context.Context, l *slog.Logger) error
 	setBranchFunc func(branch string)
 	branch        string
 }
 
-func (m *mockGitOperator) Clone(ctx *context.Context, l *slog.Logger) error {
+func (m *mockGitOperator) Clone(ctx context.Context, l *slog.Logger) error {
 	if m.cloneFunc != nil {
 		return m.cloneFunc(ctx, l)
 	}
@@ -63,83 +63,83 @@ func (f *mockGitFactory) CreateGit(l *slog.Logger, cfg *config.Config) (GitOpera
 
 // mockConvertConfigOperator — мок для ConvertConfigOperator.
 type mockConvertConfigOperator struct {
-	loadFunc        func(ctx *context.Context, l *slog.Logger, cfg *config.Config, infobaseName string) error
-	initDbFunc      func(ctx *context.Context, l *slog.Logger, cfg *config.Config) error
-	storeUnBindFunc func(ctx *context.Context, l *slog.Logger, cfg *config.Config) error
-	loadDbFunc      func(ctx *context.Context, l *slog.Logger, cfg *config.Config) error
-	dbUpdateFunc    func(ctx *context.Context, l *slog.Logger, cfg *config.Config) error
-	dumpDbFunc      func(ctx *context.Context, l *slog.Logger, cfg *config.Config) error
-	storeBindFunc   func(ctx *context.Context, l *slog.Logger, cfg *config.Config) error
-	storeLockFunc   func(ctx *context.Context, l *slog.Logger, cfg *config.Config) error
-	mergeFunc       func(ctx *context.Context, l *slog.Logger, cfg *config.Config) error
-	storeCommitFunc func(ctx *context.Context, l *slog.Logger, cfg *config.Config) error
+	loadFunc        func(ctx context.Context, l *slog.Logger, cfg *config.Config, infobaseName string) error
+	initDbFunc      func(ctx context.Context, l *slog.Logger, cfg *config.Config) error
+	storeUnBindFunc func(ctx context.Context, l *slog.Logger, cfg *config.Config) error
+	loadDbFunc      func(ctx context.Context, l *slog.Logger, cfg *config.Config) error
+	dbUpdateFunc    func(ctx context.Context, l *slog.Logger, cfg *config.Config) error
+	dumpDbFunc      func(ctx context.Context, l *slog.Logger, cfg *config.Config) error
+	storeBindFunc   func(ctx context.Context, l *slog.Logger, cfg *config.Config) error
+	storeLockFunc   func(ctx context.Context, l *slog.Logger, cfg *config.Config) error
+	mergeFunc       func(ctx context.Context, l *slog.Logger, cfg *config.Config) error
+	storeCommitFunc func(ctx context.Context, l *slog.Logger, cfg *config.Config) error
 	setOneDBFunc    func(dbConnectString, user, pass string)
 }
 
-func (m *mockConvertConfigOperator) Load(ctx *context.Context, l *slog.Logger, cfg *config.Config, infobaseName string) error {
+func (m *mockConvertConfigOperator) Load(ctx context.Context, l *slog.Logger, cfg *config.Config, infobaseName string) error {
 	if m.loadFunc != nil {
 		return m.loadFunc(ctx, l, cfg, infobaseName)
 	}
 	return nil
 }
 
-func (m *mockConvertConfigOperator) InitDb(ctx *context.Context, l *slog.Logger, cfg *config.Config) error {
+func (m *mockConvertConfigOperator) InitDb(ctx context.Context, l *slog.Logger, cfg *config.Config) error {
 	if m.initDbFunc != nil {
 		return m.initDbFunc(ctx, l, cfg)
 	}
 	return nil
 }
 
-func (m *mockConvertConfigOperator) StoreUnBind(ctx *context.Context, l *slog.Logger, cfg *config.Config) error {
+func (m *mockConvertConfigOperator) StoreUnBind(ctx context.Context, l *slog.Logger, cfg *config.Config) error {
 	if m.storeUnBindFunc != nil {
 		return m.storeUnBindFunc(ctx, l, cfg)
 	}
 	return nil
 }
 
-func (m *mockConvertConfigOperator) LoadDb(ctx *context.Context, l *slog.Logger, cfg *config.Config) error {
+func (m *mockConvertConfigOperator) LoadDb(ctx context.Context, l *slog.Logger, cfg *config.Config) error {
 	if m.loadDbFunc != nil {
 		return m.loadDbFunc(ctx, l, cfg)
 	}
 	return nil
 }
 
-func (m *mockConvertConfigOperator) DbUpdate(ctx *context.Context, l *slog.Logger, cfg *config.Config) error {
+func (m *mockConvertConfigOperator) DbUpdate(ctx context.Context, l *slog.Logger, cfg *config.Config) error {
 	if m.dbUpdateFunc != nil {
 		return m.dbUpdateFunc(ctx, l, cfg)
 	}
 	return nil
 }
 
-func (m *mockConvertConfigOperator) DumpDb(ctx *context.Context, l *slog.Logger, cfg *config.Config) error {
+func (m *mockConvertConfigOperator) DumpDb(ctx context.Context, l *slog.Logger, cfg *config.Config) error {
 	if m.dumpDbFunc != nil {
 		return m.dumpDbFunc(ctx, l, cfg)
 	}
 	return nil
 }
 
-func (m *mockConvertConfigOperator) StoreBind(ctx *context.Context, l *slog.Logger, cfg *config.Config) error {
+func (m *mockConvertConfigOperator) StoreBind(ctx context.Context, l *slog.Logger, cfg *config.Config) error {
 	if m.storeBindFunc != nil {
 		return m.storeBindFunc(ctx, l, cfg)
 	}
 	return nil
 }
 
-func (m *mockConvertConfigOperator) StoreLock(ctx *context.Context, l *slog.Logger, cfg *config.Config) error {
+func (m *mockConvertConfigOperator) StoreLock(ctx context.Context, l *slog.Logger, cfg *config.Config) error {
 	if m.storeLockFunc != nil {
 		return m.storeLockFunc(ctx, l, cfg)
 	}
 	return nil
 }
 
-func (m *mockConvertConfigOperator) Merge(ctx *context.Context, l *slog.Logger, cfg *config.Config) error {
+func (m *mockConvertConfigOperator) Merge(ctx context.Context, l *slog.Logger, cfg *config.Config) error {
 	if m.mergeFunc != nil {
 		return m.mergeFunc(ctx, l, cfg)
 	}
 	return nil
 }
 
-func (m *mockConvertConfigOperator) StoreCommit(ctx *context.Context, l *slog.Logger, cfg *config.Config) error {
+func (m *mockConvertConfigOperator) StoreCommit(ctx context.Context, l *slog.Logger, cfg *config.Config) error {
 	if m.storeCommitFunc != nil {
 		return m.storeCommitFunc(ctx, l, cfg)
 	}
@@ -175,10 +175,10 @@ func (m *mockBackupCreator) CreateBackup(cfg *config.Config, storeRoot string) (
 
 // mockTempDbCreator — мок для TempDbCreator.
 type mockTempDbCreator struct {
-	createTempDbFunc func(ctx *context.Context, l *slog.Logger, cfg *config.Config) (string, error)
+	createTempDbFunc func(ctx context.Context, l *slog.Logger, cfg *config.Config) (string, error)
 }
 
-func (m *mockTempDbCreator) CreateTempDb(ctx *context.Context, l *slog.Logger, cfg *config.Config) (string, error) {
+func (m *mockTempDbCreator) CreateTempDb(ctx context.Context, l *slog.Logger, cfg *config.Config) (string, error) {
 	if m.createTempDbFunc != nil {
 		return m.createTempDbFunc(ctx, l, cfg)
 	}
@@ -529,7 +529,7 @@ func TestGit2StoreHandler_Execute_StageErrors(t *testing.T) {
 			setupMocks: func() (*Git2StoreHandler, *config.Config) {
 				cfg := createTestConfig(t)
 				gitOp := &mockGitOperator{
-					cloneFunc: func(ctx *context.Context, l *slog.Logger) error {
+					cloneFunc: func(ctx context.Context, l *slog.Logger) error {
 						return errors.New("clone failed")
 					},
 				}
@@ -564,7 +564,7 @@ func TestGit2StoreHandler_Execute_StageErrors(t *testing.T) {
 				cfg := createTestConfig(t)
 				gitOp := &mockGitOperator{}
 				ccOp := &mockConvertConfigOperator{
-					loadFunc: func(ctx *context.Context, l *slog.Logger, cfg *config.Config, infobaseName string) error {
+					loadFunc: func(ctx context.Context, l *slog.Logger, cfg *config.Config, infobaseName string) error {
 						return errors.New("load failed")
 					},
 				}
@@ -583,7 +583,7 @@ func TestGit2StoreHandler_Execute_StageErrors(t *testing.T) {
 				cfg := createTestConfig(t)
 				gitOp := &mockGitOperator{}
 				ccOp := &mockConvertConfigOperator{
-					initDbFunc: func(ctx *context.Context, l *slog.Logger, cfg *config.Config) error {
+					initDbFunc: func(ctx context.Context, l *slog.Logger, cfg *config.Config) error {
 						return errors.New("init db failed")
 					},
 				}
@@ -602,7 +602,7 @@ func TestGit2StoreHandler_Execute_StageErrors(t *testing.T) {
 				cfg := createTestConfig(t)
 				gitOp := &mockGitOperator{}
 				ccOp := &mockConvertConfigOperator{
-					storeUnBindFunc: func(ctx *context.Context, l *slog.Logger, cfg *config.Config) error {
+					storeUnBindFunc: func(ctx context.Context, l *slog.Logger, cfg *config.Config) error {
 						return errors.New("unbind failed")
 					},
 				}
@@ -621,7 +621,7 @@ func TestGit2StoreHandler_Execute_StageErrors(t *testing.T) {
 				cfg := createTestConfig(t)
 				gitOp := &mockGitOperator{}
 				ccOp := &mockConvertConfigOperator{
-					loadDbFunc: func(ctx *context.Context, l *slog.Logger, cfg *config.Config) error {
+					loadDbFunc: func(ctx context.Context, l *slog.Logger, cfg *config.Config) error {
 						return errors.New("load db failed")
 					},
 				}
@@ -640,7 +640,7 @@ func TestGit2StoreHandler_Execute_StageErrors(t *testing.T) {
 				cfg := createTestConfig(t)
 				gitOp := &mockGitOperator{}
 				ccOp := &mockConvertConfigOperator{
-					dumpDbFunc: func(ctx *context.Context, l *slog.Logger, cfg *config.Config) error {
+					dumpDbFunc: func(ctx context.Context, l *slog.Logger, cfg *config.Config) error {
 						return errors.New("dump db failed")
 					},
 				}
@@ -659,7 +659,7 @@ func TestGit2StoreHandler_Execute_StageErrors(t *testing.T) {
 				cfg := createTestConfig(t)
 				gitOp := &mockGitOperator{}
 				ccOp := &mockConvertConfigOperator{
-					storeBindFunc: func(ctx *context.Context, l *slog.Logger, cfg *config.Config) error {
+					storeBindFunc: func(ctx context.Context, l *slog.Logger, cfg *config.Config) error {
 						return errors.New("bind failed")
 					},
 				}
@@ -678,7 +678,7 @@ func TestGit2StoreHandler_Execute_StageErrors(t *testing.T) {
 				cfg := createTestConfig(t)
 				gitOp := &mockGitOperator{}
 				ccOp := &mockConvertConfigOperator{
-					storeLockFunc: func(ctx *context.Context, l *slog.Logger, cfg *config.Config) error {
+					storeLockFunc: func(ctx context.Context, l *slog.Logger, cfg *config.Config) error {
 						return errors.New("lock failed")
 					},
 				}
@@ -697,7 +697,7 @@ func TestGit2StoreHandler_Execute_StageErrors(t *testing.T) {
 				cfg := createTestConfig(t)
 				gitOp := &mockGitOperator{}
 				ccOp := &mockConvertConfigOperator{
-					mergeFunc: func(ctx *context.Context, l *slog.Logger, cfg *config.Config) error {
+					mergeFunc: func(ctx context.Context, l *slog.Logger, cfg *config.Config) error {
 						return errors.New("merge failed")
 					},
 				}
@@ -716,7 +716,7 @@ func TestGit2StoreHandler_Execute_StageErrors(t *testing.T) {
 				cfg := createTestConfig(t)
 				gitOp := &mockGitOperator{}
 				ccOp := &mockConvertConfigOperator{
-					storeCommitFunc: func(ctx *context.Context, l *slog.Logger, cfg *config.Config) error {
+					storeCommitFunc: func(ctx context.Context, l *slog.Logger, cfg *config.Config) error {
 						return errors.New("commit failed")
 					},
 				}
@@ -757,7 +757,7 @@ func TestGit2StoreHandler_Execute_BackupIncludedInError(t *testing.T) {
 	backupPath := "/tmp/backup_20260101_120000"
 	gitOp := &mockGitOperator{}
 	ccOp := &mockConvertConfigOperator{
-		storeCommitFunc: func(ctx *context.Context, l *slog.Logger, cfg *config.Config) error {
+		storeCommitFunc: func(ctx context.Context, l *slog.Logger, cfg *config.Config) error {
 			return errors.New("commit failed")
 		},
 	}
@@ -972,7 +972,7 @@ func TestGit2StoreHandler_Execute_TempDbForLocalBase(t *testing.T) {
 		convertConfigFactory: &mockConvertConfigFactory{ccOp: ccOp},
 		backupCreator:        &mockBackupCreator{},
 		tempDbCreator: &mockTempDbCreator{
-			createTempDbFunc: func(ctx *context.Context, l *slog.Logger, cfg *config.Config) (string, error) {
+			createTempDbFunc: func(ctx context.Context, l *slog.Logger, cfg *config.Config) (string, error) {
 				tempDbCalled = true
 				return "/F /tmp/temp_db", nil
 			},
@@ -1017,7 +1017,7 @@ func TestGit2StoreHandler_Execute_TempDbError(t *testing.T) {
 		convertConfigFactory: &mockConvertConfigFactory{ccOp: ccOp},
 		backupCreator:        &mockBackupCreator{},
 		tempDbCreator: &mockTempDbCreator{
-			createTempDbFunc: func(ctx *context.Context, l *slog.Logger, cfg *config.Config) (string, error) {
+			createTempDbFunc: func(ctx context.Context, l *slog.Logger, cfg *config.Config) (string, error) {
 				return "", errors.New("temp db creation failed")
 			},
 		},
@@ -1123,7 +1123,7 @@ func TestGit2StoreHandler_Execute_DurationMs(t *testing.T) {
 	gitOp := &mockGitOperator{}
 	// Добавляем небольшую задержку в mock для проверки duration_ms
 	ccOp := &mockConvertConfigOperator{
-		loadFunc: func(ctx *context.Context, l *slog.Logger, cfg *config.Config, infobaseName string) error {
+		loadFunc: func(ctx context.Context, l *slog.Logger, cfg *config.Config, infobaseName string) error {
 			time.Sleep(5 * time.Millisecond)
 			return nil
 		},
@@ -1182,7 +1182,7 @@ func TestGit2StoreHandler_Execute_UpdateDbError(t *testing.T) {
 	updateCallCount := 0
 	gitOp := &mockGitOperator{}
 	ccOp := &mockConvertConfigOperator{
-		dbUpdateFunc: func(ctx *context.Context, l *slog.Logger, cfg *config.Config) error {
+		dbUpdateFunc: func(ctx context.Context, l *slog.Logger, cfg *config.Config) error {
 			updateCallCount++
 			if updateCallCount == 1 {
 				return errors.New("update db failed")

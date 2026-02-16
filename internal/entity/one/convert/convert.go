@@ -64,7 +64,7 @@ type Source struct {
 // Возвращает:
 //   - *Config: загруженная конфигурация
 //   - error: ошибка чтения или парсинга файла, nil при успехе
-func LoadFromConfig(_ *context.Context, l *slog.Logger, cfg *config.Config) (*Config, error) {
+func LoadFromConfig(_ context.Context, l *slog.Logger, cfg *config.Config) (*Config, error) {
 	// Формирование StoreRoot из AppConfig
 	storeRoot := constants.StoreRoot + cfg.Owner + "/" + cfg.Repo
 
@@ -193,7 +193,7 @@ func getDbPassword(cfg *struct {
 // Возвращает:
 //   - *Config: загруженная конфигурация
 //   - error: ошибка парсинга JSON, nil при успехе
-func LoadConfigFromData(_ *context.Context, l *slog.Logger, _ *config.Config, configData []byte) (*Config, error) {
+func LoadConfigFromData(_ context.Context, l *slog.Logger, _ *config.Config, configData []byte) (*Config, error) {
 	// Сначала парсим JSON во временную структуру для обработки пустых значений
 	var tempConfig struct {
 		Branch     string `json:"Имя ветки"`
@@ -276,7 +276,7 @@ func setupDbParams(cc *Config) {
 //
 // Возвращает:
 //   - error: ошибка загрузки данных, nil при успехе
-func (cc *Config) Load(_ *context.Context, _ *slog.Logger, cfg *config.Config, _ string) error {
+func (cc *Config) Load(_ context.Context, _ *slog.Logger, cfg *config.Config, _ string) error {
 	// Формирование StoreRoot
 	cc.StoreRoot = constants.StoreRoot + cfg.Owner + "/" + cfg.Repo
 
@@ -350,7 +350,7 @@ func exists(path string) bool {
 //
 // Возвращает:
 //   - error: ошибка инициализации базы данных, nil при успехе
-func (cc *Config) InitDb(ctx *context.Context, l *slog.Logger, cfg *config.Config) error {
+func (cc *Config) InitDb(ctx context.Context, l *slog.Logger, cfg *config.Config) error {
 	if cc.OneDB.DbExist {
 		return nil
 	}
@@ -365,7 +365,7 @@ func (cc *Config) InitDb(ctx *context.Context, l *slog.Logger, cfg *config.Confi
 		if cp.Source.Main {
 			continue
 		}
-		err = cc.OneDB.Add(*ctx, l, cfg, cp.Source.Name)
+		err = cc.OneDB.Add(ctx, l, cfg, cp.Source.Name)
 		if err != nil {
 			return err
 		}
@@ -382,13 +382,13 @@ func (cc *Config) InitDb(ctx *context.Context, l *slog.Logger, cfg *config.Confi
 //
 // Возвращает:
 //   - error: ошибка загрузки конфигурации, nil при успехе
-func (cc *Config) LoadDb(ctx *context.Context, l *slog.Logger, cfg *config.Config) error {
+func (cc *Config) LoadDb(ctx context.Context, l *slog.Logger, cfg *config.Config) error {
 	var err error
 	for _, cp := range cc.Pair {
 		if !cp.Source.Main {
 			continue
 		}
-		err = cc.OneDB.Load(*ctx, l, cfg, path.Join(cfg.RepPath, cp.Source.RelPath))
+		err = cc.OneDB.Load(ctx, l, cfg, path.Join(cfg.RepPath, cp.Source.RelPath))
 		if err != nil {
 			return err
 		}
@@ -414,7 +414,7 @@ func (cc *Config) LoadDb(ctx *context.Context, l *slog.Logger, cfg *config.Confi
 //
 // Возвращает:
 //   - error: ошибка выгрузки конфигурации, nil при успехе
-func (cc *Config) DumpDb(ctx *context.Context, l *slog.Logger, cfg *config.Config) error {
+func (cc *Config) DumpDb(ctx context.Context, l *slog.Logger, cfg *config.Config) error {
 	err := cc.OneDB.Dump(ctx, l, cfg)
 	if err != nil {
 		return err
@@ -440,13 +440,13 @@ func (cc *Config) DumpDb(ctx *context.Context, l *slog.Logger, cfg *config.Confi
 //
 // Возвращает:
 //   - error: ошибка блокировки объектов, nil при успехе
-func (cc *Config) StoreLock(ctx *context.Context, l *slog.Logger, cfg *config.Config) error {
+func (cc *Config) StoreLock(ctx context.Context, l *slog.Logger, cfg *config.Config) error {
 	var err error
 	for _, cp := range cc.Pair {
 		if !cp.Source.Main {
 			continue
 		}
-		err = cp.Store.Lock(*ctx, l, cfg, cc.OneDB.FullConnectString, cc.StoreRoot)
+		err = cp.Store.Lock(ctx, l, cfg, cc.OneDB.FullConnectString, cc.StoreRoot)
 		if err != nil {
 			return err
 		}
@@ -456,7 +456,7 @@ func (cc *Config) StoreLock(ctx *context.Context, l *slog.Logger, cfg *config.Co
 		if cp.Source.Main {
 			continue
 		}
-		err = cp.Store.LockAdd(*ctx, l, cfg, cc.OneDB.FullConnectString, cc.StoreRoot, cp.Source.Name)
+		err = cp.Store.LockAdd(ctx, l, cfg, cc.OneDB.FullConnectString, cc.StoreRoot, cp.Source.Name)
 		if err != nil {
 			return err
 		}
@@ -473,7 +473,7 @@ func (cc *Config) StoreLock(ctx *context.Context, l *slog.Logger, cfg *config.Co
 //
 // Возвращает:
 //   - error: ошибка привязки хранилищ, nil при успехе
-func (cc *Config) StoreBind(ctx *context.Context, l *slog.Logger, cfg *config.Config) error {
+func (cc *Config) StoreBind(ctx context.Context, l *slog.Logger, cfg *config.Config) error {
 	for _, cp := range cc.Pair {
 		if !cp.Source.Main {
 			continue
@@ -511,7 +511,7 @@ func (cc *Config) StoreBind(ctx *context.Context, l *slog.Logger, cfg *config.Co
 //
 // Возвращает:
 //   - error: ошибка обновления конфигурации, nil при успехе
-func (cc *Config) DbUpdate(ctx *context.Context, l *slog.Logger, cfg *config.Config) error {
+func (cc *Config) DbUpdate(ctx context.Context, l *slog.Logger, cfg *config.Config) error {
 	var err error
 	for _, cp := range cc.Pair {
 		if !cp.Source.Main {
@@ -544,13 +544,13 @@ func (cc *Config) DbUpdate(ctx *context.Context, l *slog.Logger, cfg *config.Con
 //
 // Возвращает:
 //   - error: ошибка отвязки хранилищ, nil при успехе
-func (cc *Config) StoreUnBind(ctx *context.Context, l *slog.Logger, cfg *config.Config) error {
+func (cc *Config) StoreUnBind(ctx context.Context, l *slog.Logger, cfg *config.Config) error {
 	var err error
 	for _, cp := range cc.Pair {
 		if !cp.Source.Main {
 			continue
 		}
-		err = cp.Store.UnBind(*ctx, l, cfg, cc.OneDB.FullConnectString, cc.StoreRoot)
+		err = cp.Store.UnBind(ctx, l, cfg, cc.OneDB.FullConnectString, cc.StoreRoot)
 		if err != nil {
 			return err
 		}
@@ -560,7 +560,7 @@ func (cc *Config) StoreUnBind(ctx *context.Context, l *slog.Logger, cfg *config.
 		if cp.Source.Main {
 			continue
 		}
-		err = cp.Store.UnBindAdd(*ctx, l, cfg, cc.OneDB.FullConnectString, cc.StoreRoot, cp.Source.Name)
+		err = cp.Store.UnBindAdd(ctx, l, cfg, cc.OneDB.FullConnectString, cc.StoreRoot, cp.Source.Name)
 		if err != nil {
 			return err
 		}
@@ -577,14 +577,14 @@ func (cc *Config) StoreUnBind(ctx *context.Context, l *slog.Logger, cfg *config.
 //
 // Возвращает:
 //   - error: ошибка фиксации изменений, nil при успехе
-func (cc *Config) StoreCommit(ctx *context.Context, l *slog.Logger, cfg *config.Config) error {
+func (cc *Config) StoreCommit(ctx context.Context, l *slog.Logger, cfg *config.Config) error {
 	var err error
 	comment := "Версия создана автоматически\nИсходный репозиторий ххх\nДата создания ххх"
 	for _, cp := range cc.Pair {
 		if !cp.Source.Main {
 			continue
 		}
-		err = cp.Store.StoreCommit(*ctx, l, cfg, cc.OneDB.FullConnectString, cc.StoreRoot, comment)
+		err = cp.Store.StoreCommit(ctx, l, cfg, cc.OneDB.FullConnectString, cc.StoreRoot, comment)
 		if err != nil {
 			return err
 		}
@@ -602,7 +602,7 @@ func (cc *Config) StoreCommit(ctx *context.Context, l *slog.Logger, cfg *config.
 	return err
 }
 
-// func (s *Store) StoreCommitAdd(ctx *context.Context, l *slog.Logger, cfg *config.Config, dbConnectString string, storeRoot string, comment string, addName string) error {
+// func (s *Store) StoreCommitAdd(ctx context.Context, l *slog.Logger, cfg *config.Config, dbConnectString string, storeRoot string, comment string, addName string) error {
 
 // Merge выполняет слияние конфигурации с хранилищем.
 // Объединяет изменения из рабочей директории с версией в хранилище конфигурации.
@@ -613,7 +613,7 @@ func (cc *Config) StoreCommit(ctx *context.Context, l *slog.Logger, cfg *config.
 //
 // Возвращает:
 //   - error: ошибка слияния конфигурации, nil при успехе
-func (cc *Config) Merge(ctx *context.Context, l *slog.Logger, cfg *config.Config) error {
+func (cc *Config) Merge(ctx context.Context, l *slog.Logger, cfg *config.Config) error {
 	mergeSettingFileName, err := mergeSetting(cfg)
 	if err != nil {
 		l.Error("ошибка создания файла настроек слияния",
@@ -631,7 +631,7 @@ func (cc *Config) Merge(ctx *context.Context, l *slog.Logger, cfg *config.Config
 		if !cp.Source.Main {
 			continue
 		}
-		err = cp.Store.Merge(*ctx, l, cfg, cc.OneDB.FullConnectString, path.Join(cfg.WorkDir, "main.cf"), mergeSettingFileName, cc.StoreRoot)
+		err = cp.Store.Merge(ctx, l, cfg, cc.OneDB.FullConnectString, path.Join(cfg.WorkDir, "main.cf"), mergeSettingFileName, cc.StoreRoot)
 		if err != nil {
 			return err
 		}
@@ -641,7 +641,7 @@ func (cc *Config) Merge(ctx *context.Context, l *slog.Logger, cfg *config.Config
 		if cp.Source.Main {
 			continue
 		}
-		err = cp.Store.MergeAdd(*ctx, l, cfg, cc.OneDB.FullConnectString, path.Join(cfg.WorkDir, cp.Source.Name+".cfe"), mergeSettingFileName, cc.StoreRoot, cp.Source.Name)
+		err = cp.Store.MergeAdd(ctx, l, cfg, cc.OneDB.FullConnectString, path.Join(cfg.WorkDir, cp.Source.Name+".cfe"), mergeSettingFileName, cc.StoreRoot, cp.Source.Name)
 		if err != nil {
 			return err
 		}
@@ -672,14 +672,14 @@ func mergeSetting(cfg *config.Config) (string, error) {
 //
 // Возвращает:
 //   - error: ошибка сохранения файла, nil при успехе
-func (cc *Config) Save(_ *context.Context, _ *slog.Logger, _ *config.Config, configPath string) error {
+func (cc *Config) Save(_ context.Context, _ *slog.Logger, _ *config.Config, configPath string) error {
 	ocJSON, _ := json.MarshalIndent(cc, "", "\t")
 	err := os.WriteFile(configPath, ocJSON, 0600)
 	return err
 }
 
 /*
-	func (cc *Config) SourceData(ctx *context.Context, l *slog.Logger, cfg *config.Config) error {
+	func (cc *Config) SourceData(ctx context.Context, l *slog.Logger, cfg *config.Config) error {
 		if len(cc.RepURL) > 10 && cc.RepURL[:4] == "http" {
 			g := git.Git{}
 			g.RepURL = cc.RepURL

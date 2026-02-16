@@ -181,7 +181,7 @@ func (g *Git) Reset(ctx context.Context, l *slog.Logger) error {
 //
 // Возвращает:
 //   - error: ошибка клонирования или nil при успехе
-func (g *Git) Clone(ctx *context.Context, l *slog.Logger) error {
+func (g *Git) Clone(ctx context.Context, l *slog.Logger) error {
 	// Создаем контекст с конфигурируемым таймаутом для клонирования
 	timeout := g.Timeout
 	if timeout == 0 {
@@ -243,7 +243,7 @@ func (g *Git) Clone(ctx *context.Context, l *slog.Logger) error {
 	// 	return err
 	// }
 	// Установка на конкретный коммит
-	// if err := g.Reset(*ctx, l); err != nil {
+	// if err := g.Reset(ctx, l); err != nil {
 	// 	l.Error("Failed to reset git repository", slog.String("error", err.Error()))
 	// 	return err
 	// }

@@ -28,5 +28,5 @@ func (h *ExtensionPublishHandler) Description() string {
 
 // Execute выполняет публикацию расширения.
 func (h *ExtensionPublishHandler) Execute(ctx context.Context, cfg *config.Config) error {
-	return ExtensionPublish(&ctx, cfg.Logger, cfg)
+	return ExtensionPublish(ctx, cfg.Logger, cfg)
 }

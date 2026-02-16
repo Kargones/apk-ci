@@ -50,10 +50,10 @@ func (m *mockStoreCreator) CreateStores(l *slog.Logger, cfg *config.Config, stor
 
 // mockTempDbCreator — mock реализация TempDbCreator для тестов.
 type mockTempDbCreator struct {
-	createTempDbFunc func(ctx *context.Context, l *slog.Logger, cfg *config.Config) (string, error)
+	createTempDbFunc func(ctx context.Context, l *slog.Logger, cfg *config.Config) (string, error)
 }
 
-func (m *mockTempDbCreator) CreateTempDb(ctx *context.Context, l *slog.Logger, cfg *config.Config) (string, error) {
+func (m *mockTempDbCreator) CreateTempDb(ctx context.Context, l *slog.Logger, cfg *config.Config) (string, error) {
 	if m.createTempDbFunc != nil {
 		return m.createTempDbFunc(ctx, l, cfg)
 	}
@@ -436,7 +436,7 @@ func TestCreateStoresHandler_Execute_TempDbError(t *testing.T) {
 	t.Setenv("BR_OUTPUT_FORMAT", "json")
 
 	mockTempDb := &mockTempDbCreator{
-		createTempDbFunc: func(_ *context.Context, _ *slog.Logger, _ *config.Config) (string, error) {
+		createTempDbFunc: func(_ context.Context, _ *slog.Logger, _ *config.Config) (string, error) {
 			return "", fmt.Errorf("не удалось создать временную БД")
 		},
 	}

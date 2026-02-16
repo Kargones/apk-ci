@@ -21,11 +21,11 @@ import (
 
 // mockConvertLoader — mock реализация ConvertLoader для тестов.
 type mockConvertLoader struct {
-	loadFromConfigFunc func(ctx *context.Context, l *slog.Logger, cfg *config.Config) (*convert.Config, error)
-	storeBindFunc      func(cc *convert.Config, ctx *context.Context, l *slog.Logger, cfg *config.Config) error
+	loadFromConfigFunc func(ctx context.Context, l *slog.Logger, cfg *config.Config) (*convert.Config, error)
+	storeBindFunc      func(cc *convert.Config, ctx context.Context, l *slog.Logger, cfg *config.Config) error
 }
 
-func (m *mockConvertLoader) LoadFromConfig(ctx *context.Context, l *slog.Logger, cfg *config.Config) (*convert.Config, error) {
+func (m *mockConvertLoader) LoadFromConfig(ctx context.Context, l *slog.Logger, cfg *config.Config) (*convert.Config, error) {
 	if m.loadFromConfigFunc != nil {
 		return m.loadFromConfigFunc(ctx, l, cfg)
 	}
@@ -35,7 +35,7 @@ func (m *mockConvertLoader) LoadFromConfig(ctx *context.Context, l *slog.Logger,
 	}, nil
 }
 
-func (m *mockConvertLoader) StoreBind(cc *convert.Config, ctx *context.Context, l *slog.Logger, cfg *config.Config) error {
+func (m *mockConvertLoader) StoreBind(cc *convert.Config, ctx context.Context, l *slog.Logger, cfg *config.Config) error {
 	if m.storeBindFunc != nil {
 		return m.storeBindFunc(cc, ctx, l, cfg)
 	}
@@ -45,12 +45,12 @@ func (m *mockConvertLoader) StoreBind(cc *convert.Config, ctx *context.Context, 
 // newMockConvertLoaderSuccess создаёт mock, возвращающий успешные результаты.
 func newMockConvertLoaderSuccess() *mockConvertLoader {
 	return &mockConvertLoader{
-		loadFromConfigFunc: func(_ *context.Context, _ *slog.Logger, _ *config.Config) (*convert.Config, error) {
+		loadFromConfigFunc: func(_ context.Context, _ *slog.Logger, _ *config.Config) (*convert.Config, error) {
 			return &convert.Config{
 				StoreRoot: "tcp://example.com/store",
 			}, nil
 		},
-		storeBindFunc: func(_ *convert.Config, _ *context.Context, _ *slog.Logger, _ *config.Config) error {
+		storeBindFunc: func(_ *convert.Config, _ context.Context, _ *slog.Logger, _ *config.Config) error {
 			return nil
 		},
 	}
@@ -59,7 +59,7 @@ func newMockConvertLoaderSuccess() *mockConvertLoader {
 // newMockConvertLoaderLoadError создаёт mock, возвращающий ошибку при загрузке.
 func newMockConvertLoaderLoadError(errMsg string) *mockConvertLoader {
 	return &mockConvertLoader{
-		loadFromConfigFunc: func(_ *context.Context, _ *slog.Logger, _ *config.Config) (*convert.Config, error) {
+		loadFromConfigFunc: func(_ context.Context, _ *slog.Logger, _ *config.Config) (*convert.Config, error) {
 			return nil, fmt.Errorf("%s", errMsg)
 		},
 	}
@@ -68,12 +68,12 @@ func newMockConvertLoaderLoadError(errMsg string) *mockConvertLoader {
 // newMockConvertLoaderBindError создаёт mock, возвращающий ошибку при привязке.
 func newMockConvertLoaderBindError(errMsg string) *mockConvertLoader {
 	return &mockConvertLoader{
-		loadFromConfigFunc: func(_ *context.Context, _ *slog.Logger, _ *config.Config) (*convert.Config, error) {
+		loadFromConfigFunc: func(_ context.Context, _ *slog.Logger, _ *config.Config) (*convert.Config, error) {
 			return &convert.Config{
 				StoreRoot: "tcp://example.com/store",
 			}, nil
 		},
-		storeBindFunc: func(_ *convert.Config, _ *context.Context, _ *slog.Logger, _ *config.Config) error {
+		storeBindFunc: func(_ *convert.Config, _ context.Context, _ *slog.Logger, _ *config.Config) error {
 			return fmt.Errorf("%s", errMsg)
 		},
 	}

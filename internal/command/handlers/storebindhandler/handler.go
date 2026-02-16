@@ -73,19 +73,19 @@ type StorebindHandler struct {
 // Позволяет заменять реализацию в тестах.
 type ConvertLoader interface {
 	// LoadFromConfig загружает конфигурацию конвертации
-	LoadFromConfig(ctx *context.Context, l *slog.Logger, cfg *config.Config) (*convert.Config, error)
+	LoadFromConfig(ctx context.Context, l *slog.Logger, cfg *config.Config) (*convert.Config, error)
 	// StoreBind выполняет привязку хранилища к базе данных
-	StoreBind(cc *convert.Config, ctx *context.Context, l *slog.Logger, cfg *config.Config) error
+	StoreBind(cc *convert.Config, ctx context.Context, l *slog.Logger, cfg *config.Config) error
 }
 
 // defaultConvertLoader — реализация ConvertLoader по умолчанию.
 type defaultConvertLoader struct{}
 
-func (d *defaultConvertLoader) LoadFromConfig(ctx *context.Context, l *slog.Logger, cfg *config.Config) (*convert.Config, error) {
+func (d *defaultConvertLoader) LoadFromConfig(ctx context.Context, l *slog.Logger, cfg *config.Config) (*convert.Config, error) {
 	return convert.LoadFromConfig(ctx, l, cfg)
 }
 
-func (d *defaultConvertLoader) StoreBind(cc *convert.Config, ctx *context.Context, l *slog.Logger, cfg *config.Config) error {
+func (d *defaultConvertLoader) StoreBind(cc *convert.Config, ctx context.Context, l *slog.Logger, cfg *config.Config) error {
 	return cc.StoreBind(ctx, l, cfg)
 }
 
@@ -150,7 +150,7 @@ func (h *StorebindHandler) Execute(ctx context.Context, cfg *config.Config) erro
 	}
 
 	// Загрузка конфигурации конвертации (AC-2: credentials из cfg.SecretConfig)
-	ctxPtr := &ctx
+	ctxPtr := ctx
 	cc, err := loader.LoadFromConfig(ctxPtr, log, cfg)
 	if err != nil {
 		log.Error("Ошибка загрузки конфигурации", slog.String("error", err.Error()))

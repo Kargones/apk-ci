@@ -43,7 +43,7 @@ func TestOneDb_Create(t *testing.T) {
 	}
 
 	odb := &OneDb{}
-	err = odb.Create(&ctx, logger, cfg)
+	err = odb.Create(ctx, logger, cfg)
 	// Ожидаем ошибку, так как используем echo вместо реального ibcmd
 	if err == nil {
 		t.Log("Create completed without error (expected with echo)")
@@ -171,7 +171,7 @@ func TestOneDb_UpdateCfg(t *testing.T) {
 	}
 
 	odb := &OneDb{}
-	err = odb.UpdateCfg(&ctx, logger, cfg, "")
+	err = odb.UpdateCfg(ctx, logger, cfg, "")
 	if err == nil {
 		t.Log("UpdateCfg completed without error (expected with echo)")
 	} else {
@@ -210,7 +210,7 @@ func TestOneDb_Dump(t *testing.T) {
 	}
 
 	odb := &OneDb{}
-	err = odb.Dump(&ctx, logger, cfg)
+	err = odb.Dump(ctx, logger, cfg)
 	if err == nil {
 		t.Log("Dump completed without error (expected with echo)")
 	} else {
@@ -238,7 +238,7 @@ func TestGetDbName(t *testing.T) {
 		},
 	}
 
-	dbName, err := GetDbName(&ctx, logger, cfg)
+	dbName, err := GetDbName(ctx, logger, cfg)
 	if err != nil {
 		t.Errorf("GetDbName returned error: %v", err)
 	}
@@ -334,7 +334,7 @@ func TestOneDb_LoadAdd(t *testing.T) {
 	}
 
 	odb := &OneDb{DbConnectString: "test_db_path"}
-	err = odb.LoadAdd(&ctx, logger, cfg, sourcePath, "test_extension")
+	err = odb.LoadAdd(ctx, logger, cfg, sourcePath, "test_extension")
 	if err == nil {
 		t.Log("LoadAdd completed without error (expected with echo)")
 	} else {
@@ -383,7 +383,7 @@ func TestOneDb_UpdateAdd(t *testing.T) {
 	}
 
 	odb := &OneDb{DbConnectString: "test_db_path"}
-	err = odb.UpdateAdd(&ctx, logger, cfg, sourcePath, "test_extension")
+	err = odb.UpdateAdd(ctx, logger, cfg, sourcePath, "test_extension")
 	if err == nil {
 		t.Log("UpdateAdd completed without error (expected with echo)")
 	} else {
@@ -422,7 +422,7 @@ func TestOneDb_DumpAdd(t *testing.T) {
 	}
 
 	odb := &OneDb{DbConnectString: "test_db_path"}
-	err = odb.DumpAdd(&ctx, logger, cfg, "test_extension")
+	err = odb.DumpAdd(ctx, logger, cfg, "test_extension")
 	if err == nil {
 		t.Log("DumpAdd completed without error (expected with echo)")
 	} else {
@@ -450,7 +450,7 @@ func TestGetDbName_WithServerDb(t *testing.T) {
 		},
 	}
 
-	dbName, err := GetDbName(&ctx, logger, cfg)
+	dbName, err := GetDbName(ctx, logger, cfg)
 	if err != nil {
 		t.Errorf("GetDbName returned error: %v", err)
 	}
