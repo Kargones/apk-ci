@@ -134,7 +134,9 @@ func writeError(w io.Writer, format, traceID string, start time.Time, err error)
 		}
 
 		writer := output.NewWriter(format)
-		_ = writer.Write(w, result)
+		if writeErr := writer.Write(w, result); writeErr != nil {
+			return fmt.Errorf("failed to write error result: %w (original error: %w)", writeErr, err)
+		}
 	}
 	return err
 }

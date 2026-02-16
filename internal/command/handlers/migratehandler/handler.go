@@ -212,8 +212,9 @@ func writeError(w io.Writer, format, cmdName, traceID string, start time.Time, e
 		}
 
 		writer := output.NewWriter(format)
-		// Ошибка записи JSON маловероятна; в любом случае возвращаем оригинальную ошибку
-		_ = writer.Write(w, result)
+		if writeErr := writer.Write(w, result); writeErr != nil {
+			return fmt.Errorf("failed to write error result: %w (original error: %w)", writeErr, err)
+		}
 	}
 	return err
 }

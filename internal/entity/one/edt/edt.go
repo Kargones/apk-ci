@@ -190,7 +190,12 @@ func (c *Convert) Convert(ctx context.Context, l *slog.Logger, cfg *config.Confi
 			)
 			return fmt.Errorf("отсутствует исходный каталог: %s", r.PathIn)
 		}
-		ok, _ = exists(r.PathOut)
+		ok, err = exists(r.PathOut)
+		if err != nil {
+			l.Error("Ошибка проверки каталога приемника",
+				slog.String("Путь", r.PathOut), slog.String("error", err.Error()))
+			return fmt.Errorf("ошибка проверки каталога приемника %s: %w", r.PathOut, err)
+		}
 		if ok {
 			l.Debug("Начало очистки каталога",
 				slog.String("Путь очистки", r.PathOut),
