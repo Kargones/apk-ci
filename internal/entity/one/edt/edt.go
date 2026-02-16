@@ -202,7 +202,7 @@ func (c *Convert) Convert(ctx *context.Context, l *slog.Logger, cfg *config.Conf
 					slog.String("Error", err.Error()),
 					slog.String("Обработка ошибки", "Завершение работы программы"),
 				)
-				return fmt.Errorf("отсутствует исходный каталог: %s", r.PathIn)
+				return fmt.Errorf("не удалось очистить каталог приемник %s: %w", r.PathOut, err)
 			}
 			err = os.MkdirAll(r.PathOut, 0750)
 			if err != nil {
@@ -222,7 +222,7 @@ func (c *Convert) Convert(ctx *context.Context, l *slog.Logger, cfg *config.Conf
 				slog.String("Error", err.Error()),
 				slog.String("Обработка ошибки", "Завершение работы программы"),
 			)
-			return fmt.Errorf("отсутствует исходный каталог: %s", r.PathIn)
+			return fmt.Errorf("не удалось создать каталог %s: %w", r.PathOut, err)
 		}
 		l.Debug("Конвертация каталога",
 			slog.String("Номер итерации", strconv.Itoa(i)),
@@ -238,7 +238,7 @@ func (c *Convert) Convert(ctx *context.Context, l *slog.Logger, cfg *config.Conf
 				slog.String("Error", r.LastErr.Error()),
 				slog.String("Обработка ошибки", "Завершение работы программы"),
 			)
-			return fmt.Errorf("отсутствует исходный каталог: %s", r.PathIn)
+			return fmt.Errorf("ошибка конвертации %s -> %s: %w", r.PathIn, r.PathOut, r.LastErr)
 		}
 		l.Info("Каталог конвертирован",
 			slog.String("Исходный", r.PathIn),
@@ -276,7 +276,7 @@ func (c *Convert) Convert(ctx *context.Context, l *slog.Logger, cfg *config.Conf
 			slog.String("Error", r.LastErr.Error()),
 			slog.String("Обработка ошибки", "Завершение работы программы"),
 		)
-		os.Exit(8)
+		return fmt.Errorf("ошибка копирования из %s в %s: %w", repDistinationPath, repSourcePath, err)
 	}
 	if err := g.Add(*ctx, l); err != nil {
 		l.Warn("Failed to add files to git",
