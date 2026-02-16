@@ -53,7 +53,7 @@ func (r *Runner) RunCommand(ctx context.Context, l *slog.Logger) ([]byte, error)
 	if len(r.Params) > 0 && r.Params[0] == "@" {
 		tFile, err = os.CreateTemp(r.TmpDir, "*.par")
 		if err != nil {
-			panic(err)
+			return nil, fmt.Errorf("failed to create temp params file: %w", err)
 		}
 		// defer os.Remove(tFile.Name())
 		// l.Debug("Params", "Params", r.Params) // Удалено: выводит пароли до маскировки
@@ -77,7 +77,7 @@ func (r *Runner) RunCommand(ctx context.Context, l *slog.Logger) ([]byte, error)
 			if len(value) >= 4 && value[0:4] == "/Out" {
 				tOut, err = os.CreateTemp(r.TmpDir, "*.out")
 				if err != nil {
-					panic(err)
+					return nil, fmt.Errorf("failed to create temp output file: %w", err)
 				}
 				// defer os.Remove(tOut.Name())
 				r.OutFileName = tOut.Name()

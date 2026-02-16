@@ -164,7 +164,7 @@ func (s *Entity) Authenticate(token string) error {
 	}()
 
 	// Validate the token
-	return s.ValidateToken()
+	return s.ValidateToken(context.Background())
 }
 
 // authenticate adds authentication header to the request.
@@ -242,8 +242,7 @@ func (s *Entity) makeRequest(ctx context.Context, method, endpoint string, body 
 //
 // Returns:
 //   - error: error if token is invalid or validation fails
-func (s *Entity) ValidateToken() error {
-	ctx := context.Background()
+func (s *Entity) ValidateToken(ctx context.Context) error {
 
 	// Make a simple request to validate the token
 	_, err := s.makeRequest(ctx, "GET", "/authentication/validate", nil)
@@ -265,8 +264,7 @@ func (s *Entity) ValidateToken() error {
 // Returns:
 //   - *Project: created project
 //   - error: error if project creation fails
-func (s *Entity) CreateProject(owner, repo, branch string) (*Project, error) {
-	ctx := context.Background()
+func (s *Entity) CreateProject(ctx context.Context, owner, repo, branch string) (*Project, error) {
 
 	// Generate project key based on owner, repo, and branch
 	projectKey := fmt.Sprintf("%s_%s_%s", owner, repo, branch)
@@ -310,8 +308,7 @@ func (s *Entity) CreateProject(owner, repo, branch string) (*Project, error) {
 // Returns:
 //   - *Project: retrieved project
 //   - error: error if project retrieval fails
-func (s *Entity) GetProject(projectKey string) (*Project, error) {
-	ctx := context.Background()
+func (s *Entity) GetProject(ctx context.Context, projectKey string) (*Project, error) {
 
 	// Prepare query parameters
 	params := url.Values{}
@@ -355,8 +352,7 @@ func (s *Entity) GetProject(projectKey string) (*Project, error) {
 //
 // Returns:
 //   - error: error if project update fails
-func (s *Entity) UpdateProject(projectKey string, updates *ProjectUpdate) error {
-	ctx := context.Background()
+func (s *Entity) UpdateProject(ctx context.Context, projectKey string, updates *ProjectUpdate) error {
 
 	// Prepare form data
 	formData := url.Values{}
@@ -383,7 +379,7 @@ func (s *Entity) UpdateProject(projectKey string, updates *ProjectUpdate) error 
 
 	// Set project tags if provided
 	if len(updates.Tags) > 0 {
-		if err := s.SetProjectTags(projectKey, updates.Tags); err != nil {
+		if err := s.SetProjectTags(ctx, projectKey, updates.Tags); err != nil {
 			return fmt.Errorf("failed to set project tags during update: %w", err)
 		}
 	}
@@ -399,8 +395,7 @@ func (s *Entity) UpdateProject(projectKey string, updates *ProjectUpdate) error 
 //
 // Returns:
 //   - error: error if project deletion fails
-func (s *Entity) DeleteProject(projectKey string) error {
-	ctx := context.Background()
+func (s *Entity) DeleteProject(ctx context.Context, projectKey string) error {
 
 	// Prepare form data
 	formData := url.Values{}
@@ -425,8 +420,7 @@ func (s *Entity) DeleteProject(projectKey string) error {
 // Returns:
 //   - []Project: list of projects
 //   - error: error if project listing fails
-func (s *Entity) ListProjects(owner, repo string) ([]Project, error) {
-	ctx := context.Background()
+func (s *Entity) ListProjects(ctx context.Context, owner, repo string) ([]Project, error) {
 
 	// Prepare query parameters
 	params := url.Values{}
@@ -476,8 +470,7 @@ func (s *Entity) ListProjects(owner, repo string) ([]Project, error) {
 // Returns:
 //   - []Analysis: list of analyses
 //   - error: error if analysis retrieval fails
-func (s *Entity) GetAnalyses(projectKey string) ([]Analysis, error) {
-	ctx := context.Background()
+func (s *Entity) GetAnalyses(ctx context.Context, projectKey string) ([]Analysis, error) {
 
 	// Prepare query parameters
 	params := url.Values{}
@@ -510,8 +503,7 @@ func (s *Entity) GetAnalyses(projectKey string) ([]Analysis, error) {
 // Returns:
 //   - *AnalysisStatus: analysis status
 //   - error: error if status retrieval fails
-func (s *Entity) GetAnalysisStatus(analysisID string) (*AnalysisStatus, error) {
-	ctx := context.Background()
+func (s *Entity) GetAnalysisStatus(ctx context.Context, analysisID string) (*AnalysisStatus, error) {
 
 	// Prepare query parameters
 	params := url.Values{}
@@ -551,8 +543,7 @@ func (s *Entity) GetAnalysisStatus(analysisID string) (*AnalysisStatus, error) {
 // Returns:
 //   - []Issue: list of issues
 //   - error: error if issue retrieval fails
-func (s *Entity) GetIssues(projectKey string, params *IssueParams) ([]Issue, error) {
-	ctx := context.Background()
+func (s *Entity) GetIssues(ctx context.Context, projectKey string, params *IssueParams) ([]Issue, error) {
 
 	// Prepare query parameters
 	queryParams := url.Values{}
@@ -604,8 +595,7 @@ func (s *Entity) GetIssues(projectKey string, params *IssueParams) ([]Issue, err
 // Returns:
 //   - *QualityGateStatus: quality gate status
 //   - error: error if status retrieval fails
-func (s *Entity) GetQualityGateStatus(projectKey string) (*QualityGateStatus, error) {
-	ctx := context.Background()
+func (s *Entity) GetQualityGateStatus(ctx context.Context, projectKey string) (*QualityGateStatus, error) {
 
 	// Prepare query parameters
 	params := url.Values{}
@@ -645,8 +635,7 @@ func (s *Entity) GetQualityGateStatus(projectKey string) (*QualityGateStatus, er
 // Returns:
 //   - *Metrics: project metrics
 //   - error: error if metrics retrieval fails
-func (s *Entity) GetMetrics(projectKey string, metricKeys []string) (*Metrics, error) {
-	ctx := context.Background()
+func (s *Entity) GetMetrics(ctx context.Context, projectKey string, metricKeys []string) (*Metrics, error) {
 
 	// Prepare query parameters
 	params := url.Values{}
@@ -696,8 +685,7 @@ func (s *Entity) GetMetrics(projectKey string, metricKeys []string) (*Metrics, e
 // Returns:
 //   - []QualityProfile: list of quality profiles
 //   - error: error if profile retrieval fails
-func (s *Entity) GetQualityProfiles(projectKey string) ([]QualityProfile, error) {
-	ctx := context.Background()
+func (s *Entity) GetQualityProfiles(ctx context.Context, projectKey string) ([]QualityProfile, error) {
 
 	// Prepare query parameters
 	params := url.Values{}
@@ -727,8 +715,7 @@ func (s *Entity) GetQualityProfiles(projectKey string) ([]QualityProfile, error)
 // Returns:
 //   - []QualityGate: list of quality gates
 //   - error: error if gate retrieval fails
-func (s *Entity) GetQualityGates() ([]QualityGate, error) {
-	ctx := context.Background()
+func (s *Entity) GetQualityGates(ctx context.Context) ([]QualityGate, error) {
 
 	// Make API request to get quality gates
 	respBody, err := s.makeRequest(ctx, "GET", "/qualitygates/list", nil)
@@ -757,8 +744,7 @@ func (s *Entity) GetQualityGates() ([]QualityGate, error) {
 // Returns:
 //   - []Rule: list of rules
 //   - error: error if rule retrieval fails
-func (s *Entity) GetRules(params *RuleParams) ([]Rule, error) {
-	ctx := context.Background()
+func (s *Entity) GetRules(ctx context.Context, params *RuleParams) ([]Rule, error) {
 
 	// Prepare query parameters
 	queryParams := url.Values{}
@@ -803,8 +789,7 @@ func (s *Entity) GetRules(params *RuleParams) ([]Rule, error) {
 // SetProjectTags sets tags on a project in SonarQube.
 // Requires 'Administer' rights on the specified project.
 // API: POST api/project_tags/set (since 6.4)
-func (s *Entity) SetProjectTags(projectKey string, tags []string) error {
-	ctx := context.Background()
+func (s *Entity) SetProjectTags(ctx context.Context, projectKey string, tags []string) error {
 
 	// Prepare form data
 	formData := url.Values{}
