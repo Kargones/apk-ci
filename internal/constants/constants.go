@@ -280,7 +280,32 @@ const (
 
 const (
 	// WorkDir - рабочая директория.
-	WorkDir = "/tmp/4del"
+	WorkDir = "/tmp/apk-ci"
 	// TempDir - временная директория.
-	TempDir = "/tmp/4del/temp"
+	TempDir = "/tmp/apk-ci/temp"
 )
+
+// Константы платформы 1С
+const (
+	// Default1CVersion - версия платформы 1С по умолчанию
+	Default1CVersion = "8.3.27.1606"
+	// OneCBasePath - базовый путь установки 1С
+	OneCBasePath = "/opt/1cv8/x86_64"
+	// DefaultEdtCliPath - путь к EDT CLI по умолчанию
+	DefaultEdtCliPath = "/opt/1C/1CE/components/1c-edt-2024.2.6+7-x86_64/1cedtcli"
+)
+
+// OneCBinPath возвращает путь к исполняемому файлу 1cv8 для указанной версии.
+func OneCBinPath(version string) string {
+	return OneCBasePath + "/" + version + "/1cv8"
+}
+
+// OneCIbcmdPath возвращает путь к ibcmd для указанной версии.
+func OneCIbcmdPath(version string) string {
+	return OneCBasePath + "/" + version + "/ibcmd"
+}
+
+// OneCRacPath возвращает путь к rac для указанной версии.
+func OneCRacPath(version string) string {
+	return OneCBasePath + "/" + version + "/rac"
+}

@@ -233,8 +233,8 @@ func TestConfigValidator_ValidateProjectKey(t *testing.T) {
 				ScannerVersion: "4.8.0.2856",
 				JavaOpts:       "-Xmx2g",
 				Timeout:        30 * time.Second,
-				WorkDir:        "/tmp/benadis",
-				TempDir:        "/tmp/benadis/scanner/temp",
+				WorkDir:        "/tmp/apk-ci",
+				TempDir:        "/tmp/apk-ci/scanner/temp",
 				Properties: map[string]string{
 					"sonar.host.url":   "http://localhost:9000",
 					"sonar.projectKey": tt.projectKey,

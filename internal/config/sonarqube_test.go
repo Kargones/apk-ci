@@ -31,8 +31,8 @@ func TestGetDefaultSonarQubeConfig(t *testing.T) {
 		t.Errorf("Expected retry delay 5s, got %v", config.RetryDelay)
 	}
 
-	if config.ProjectPrefix != "benadis" {
-		t.Errorf("Expected project prefix 'benadis', got '%s'", config.ProjectPrefix)
+	if config.ProjectPrefix != "apk-ci" {
+		t.Errorf("Expected project prefix 'apk-ci', got '%s'", config.ProjectPrefix)
 	}
 
 	if config.DefaultVisibility != "private" {
@@ -210,12 +210,12 @@ func TestGetDefaultScannerConfig(t *testing.T) {
 		t.Errorf("Expected timeout 600s, got %v", config.Timeout)
 	}
 
-	if config.WorkDir != "/tmp/benadis" {
-		t.Errorf("Expected work dir '/tmp/benadis', got '%s'", config.WorkDir)
+	if config.WorkDir != "/tmp/apk-ci" {
+		t.Errorf("Expected work dir '/tmp/apk-ci', got '%s'", config.WorkDir)
 	}
 
-	if config.TempDir != "/tmp/benadis/scanner/temp" {
-		t.Errorf("Expected temp dir '/tmp/benadis/scanner/temp', got '%s'", config.TempDir)
+	if config.TempDir != "/tmp/apk-ci/scanner/temp" {
+		t.Errorf("Expected temp dir '/tmp/apk-ci/scanner/temp', got '%s'", config.TempDir)
 	}
 }
 

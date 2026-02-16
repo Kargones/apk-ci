@@ -130,7 +130,7 @@ jobs:
       # Step 1: Service Mode Enable DB
       - name: Service Mode Enable DB
         if: ${{ inputs.action_1 == true }}
-        uses: https://${{ secrets.READER_TOKEN }}:@git.benadis.ru/gitops/benadis-runner@${{ inputs.version }}
+        uses: https://${{ secrets.READER_TOKEN }}:@git.apkholding.ru/gitops/benadis-runner@${{ inputs.version }}
         with:
           giteaURL: ${{ gitea.server_url }}
           repository: ${{ gitea.repository }}
@@ -143,7 +143,7 @@ jobs:
       # Step 2: Service Mode Disable DB
       - name: Service Mode Disable DB
         if: ${{ inputs.action_2 == true }}
-        uses: https://${{ secrets.READER_TOKEN }}:@git.benadis.ru/gitops/benadis-runner@${{ inputs.version }}
+        uses: https://${{ secrets.READER_TOKEN }}:@git.apkholding.ru/gitops/benadis-runner@${{ inputs.version }}
         with:
           giteaURL: ${{ gitea.server_url }}
           repository: ${{ gitea.repository }}
@@ -156,7 +156,7 @@ jobs:
       # Step 3: Store to DB
       - name: Store to DB
         if: ${{ inputs.action_3 == true }}
-        uses: https://${{ secrets.READER_TOKEN }}:@git.benadis.ru/gitops/benadis-runner@${{ inputs.version }}
+        uses: https://${{ secrets.READER_TOKEN }}:@git.apkholding.ru/gitops/benadis-runner@${{ inputs.version }}
         with:
           giteaURL: ${{ gitea.server_url }}
           repository: ${{ gitea.repository }}
@@ -169,7 +169,7 @@ jobs:
       # Step 4: DB Update
       - name: DB Update
         if: ${{ inputs.action_4 == true }}
-        uses: https://${{ secrets.READER_TOKEN }}:@git.benadis.ru/gitops/benadis-runner@${{ inputs.version }}
+        uses: https://${{ secrets.READER_TOKEN }}:@git.apkholding.ru/gitops/benadis-runner@${{ inputs.version }}
         with:
           giteaURL: ${{ gitea.server_url }}
           repository: ${{ gitea.repository }}
@@ -182,7 +182,7 @@ jobs:
       # Step 5: DB Restore
       - name: DB Restore
         if: ${{ inputs.action_5 == true }}
-        uses: https://${{ secrets.READER_TOKEN }}:@git.benadis.ru/gitops/benadis-runner@${{ inputs.version }}
+        uses: https://${{ secrets.READER_TOKEN }}:@git.apkholding.ru/gitops/benadis-runner@${{ inputs.version }}
         with:
           giteaURL: ${{ gitea.server_url }}
           repository: ${{ gitea.repository }}
@@ -195,7 +195,7 @@ jobs:
       # Step 6: Analyze Project
       - name: Analyze Project
         if: ${{ inputs.action_6 == true }}
-        uses: https://${{ secrets.READER_TOKEN }}:@git.benadis.ru/gitops/benadis-runner@${{ inputs.version }}
+        uses: https://${{ secrets.READER_TOKEN }}:@git.apkholding.ru/gitops/benadis-runner@${{ inputs.version }}
         with:
           giteaURL: ${{ gitea.server_url }}
           repository: ${{ gitea.repository }}
@@ -207,7 +207,7 @@ jobs:
       # Step 7: Convert EDT
       - name: Convert EDT
         if: ${{ inputs.action_7 == true }}
-        uses: https://${{ secrets.READER_TOKEN }}:@git.benadis.ru/gitops/benadis-runner@${{ inputs.version }}
+        uses: https://${{ secrets.READER_TOKEN }}:@git.apkholding.ru/gitops/benadis-runner@${{ inputs.version }}
         with:
           giteaURL: ${{ gitea.server_url }}
           repository: ${{ gitea.repository }}
@@ -222,7 +222,7 @@ jobs:
       # Step 8: Convert
       - name: Convert
         if: ${{ inputs.action_8 == true }}
-        uses: https://${{ secrets.READER_TOKEN }}:@git.benadis.ru/gitops/benadis-runner@${{ inputs.version }}
+        uses: https://${{ secrets.READER_TOKEN }}:@git.apkholding.ru/gitops/benadis-runner@${{ inputs.version }}
         with:
           giteaURL: ${{ gitea.server_url }}
           repository: ${{ gitea.repository }}
@@ -234,7 +234,7 @@ jobs:
       # Step 9: Git to Store
       - name: Git to Store
         if: ${{ inputs.action_9 == true }}
-        uses: https://${{ secrets.READER_TOKEN }}:@git.benadis.ru/gitops/benadis-runner@${{ inputs.version }}
+        uses: https://${{ secrets.READER_TOKEN }}:@git.apkholding.ru/gitops/benadis-runner@${{ inputs.version }}
         with:
           giteaURL: ${{ gitea.server_url }}
           repository: ${{ gitea.repository }}
@@ -246,7 +246,7 @@ jobs:
       # Step 10: Test Merge
       - name: Test Merge
         if: ${{ inputs.action_10 == true }}
-        uses: https://${{ secrets.READER_TOKEN }}:@git.benadis.ru/gitops/benadis-runner@${{ inputs.version }}
+        uses: https://${{ secrets.READER_TOKEN }}:@git.apkholding.ru/gitops/benadis-runner@${{ inputs.version }}
         with:
           giteaURL: ${{ gitea.server_url }}
           repository: ${{ gitea.repository }}

@@ -135,7 +135,7 @@ func TestConfig_ProductionBackwardCompat(t *testing.T) {
 
 	// Проверяем что основные поля распарсились
 	assert.Equal(t, "Info", appConfig.LogLevel)
-	assert.Equal(t, "/tmp/benadis", appConfig.WorkDir)
+	assert.Equal(t, "/tmp/apk-ci", appConfig.WorkDir)
 	assert.Equal(t, 1545, appConfig.Rac.Port)
 
 	// Проверяем что отсутствующие секции имеют zero values (не вызывают panic)

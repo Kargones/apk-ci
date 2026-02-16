@@ -1,4 +1,4 @@
-# Smoke-тесты для benadis-runner
+# Smoke-тесты для apk-ci
 # Проверяют системную целостность: регистрацию команд, deprecated aliases, базовый pipeline
 #
 # Этот workflow запускается параллельно с ci.yaml при push на main.

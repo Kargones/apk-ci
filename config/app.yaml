@@ -1,9 +1,9 @@
-# Конфигурация приложения benadis-runner
+# Конфигурация приложения apk-ci
 # Системные настройки приложения
 app:
   logLevel: "Debug"
-  workDir: "/tmp/benadis"
-  tmpDir: "/tmp/benadis/temp"
+  workDir: "/tmp/apk-ci"
+  tmpDir: "/tmp/apk-ci/temp"
   timeout: 30
 
 # Пути к исполняемым файлам 1С
@@ -94,8 +94,8 @@ scanner:
 # Git configuration
 git:
   # Git user configuration
-  userName: "benadis-runner"
-  userEmail: "benadis-runner@benadis.ru"
+  userName: "apk-ci"
+  userEmail: "apk-ci@apkholding.ru"
   
   # Default branch for new repositories
   defaultBranch: "main"
@@ -131,7 +131,7 @@ logging:
   output: "stdout"
   
   # File logging configuration (when output is file)
-  filePath: "/var/log/benadis-runner.log"
+  filePath: "/var/log/apk-ci.log"
   maxSize: 100
   maxBackups: 3
   maxAge: 28

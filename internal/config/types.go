@@ -208,12 +208,12 @@ type Config struct {
 	// Устаревшие поля (сохранены для обратной совместимости)
 	// TODO: Удалить после полной миграции
 	Connect     string `env:"Connect_String" env-default:""`
-	RepPath     string `env:"RepPath" env-default:"/tmp/4del/rep"`
-	WorkDir     string `env:"WorkDir" env-default:"/tmp/4del"`
+	RepPath     string `env:"RepPath" env-default:"/tmp/apk-ci/rep"`
+	WorkDir     string `env:"WorkDir" env-default:"/tmp/apk-ci"`
 	TmpDir      string `env:"TmpDir" env-default:"/tmp"`
 	AccessToken string `env:"BR_ACCESS_TOKEN" env-default:""`
-	PathOut     string `env:"RepPath" env-default:"/tmp/4del/xml/Tester"`
-	WorkSpace   string `env:"RepPath" env-default:"/tmp/4del/ws01"`
+	PathOut     string `env:"RepPath" env-default:"/tmp/apk-ci/xml/Tester"`
+	WorkSpace   string `env:"RepPath" env-default:"/tmp/apk-ci/ws01"`
 }
 // ConvertConfig представляет настройки для конвертации проекта.
 // Содержит параметры ветки, коммита, настройки базы данных

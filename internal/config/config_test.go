@@ -230,8 +230,8 @@ func TestSonarQubeConfig(t *testing.T) {
 		if config.RetryDelay != 5*time.Second {
 			t.Errorf("Expected RetryDelay = 5s, got %v", config.RetryDelay)
 		}
-		if config.ProjectPrefix != "benadis" {
-			t.Errorf("Expected ProjectPrefix = benadis, got %s", config.ProjectPrefix)
+		if config.ProjectPrefix != "apk-ci" {
+			t.Errorf("Expected ProjectPrefix = apk-ci, got %s", config.ProjectPrefix)
 		}
 		if config.DefaultVisibility != "private" {
 			t.Errorf("Expected DefaultVisibility = private, got %s", config.DefaultVisibility)
@@ -409,11 +409,11 @@ func TestScannerConfig(t *testing.T) {
 		if config.Timeout != 600*time.Second {
 			t.Errorf("Expected Timeout = 600s, got %v", config.Timeout)
 		}
-		if config.WorkDir != "/tmp/benadis" {
-			t.Errorf("Expected WorkDir = /tmp/benadis, got %s", config.WorkDir)
+		if config.WorkDir != "/tmp/apk-ci" {
+			t.Errorf("Expected WorkDir = /tmp/apk-ci, got %s", config.WorkDir)
 		}
-		if config.TempDir != "/tmp/benadis/scanner/temp" {
-			t.Errorf("Expected TempDir = /tmp/benadis/scanner/temp, got %s", config.TempDir)
+		if config.TempDir != "/tmp/apk-ci/scanner/temp" {
+			t.Errorf("Expected TempDir = /tmp/apk-ci/scanner/temp, got %s", config.TempDir)
 		}
 	})
 
@@ -596,8 +596,8 @@ func TestGetDefaultConfigs(t *testing.T) {
 		if gitConfig.UserName != "apk-ci" {
 			t.Errorf("Expected UserName = apk-ci, got %s", gitConfig.UserName)
 		}
-		if gitConfig.UserEmail != "runner@benadis.ru" {
-			t.Errorf("Expected UserEmail = runner@benadis.ru, got %s", gitConfig.UserEmail)
+		if gitConfig.UserEmail != "runner@apkholding.ru" {
+			t.Errorf("Expected UserEmail = runner@apkholding.ru, got %s", gitConfig.UserEmail)
 		}
 		if gitConfig.DefaultBranch != "main" {
 			t.Errorf("Expected DefaultBranch = main, got %s", gitConfig.DefaultBranch)
@@ -630,8 +630,8 @@ func TestGetDefaultConfigs(t *testing.T) {
 		if racConfig == nil {
 			t.Fatal("Expected non-nil RacConfig")
 		}
-		if racConfig.RacPath != "/opt/1cv8/x86_64/8.3.25.1257/rac" {
-			t.Errorf("Expected RacPath = /opt/1cv8/x86_64/8.3.25.1257/rac, got %s", racConfig.RacPath)
+		if racConfig.RacPath != "/opt/1cv8/x86_64/8.3.27.1606/rac" {
+			t.Errorf("Expected RacPath = /opt/1cv8/x86_64/8.3.27.1606/rac, got %s", racConfig.RacPath)
 		}
 		if racConfig.RacServer != "localhost" {
 			t.Errorf("Expected RacServer = localhost, got %s", racConfig.RacServer)
@@ -655,11 +655,11 @@ func TestGetDefaultConfigs(t *testing.T) {
 		if appConfig.LogLevel != "Debug" {
 			t.Errorf("Expected LogLevel = Debug, got %s", appConfig.LogLevel)
 		}
-		if appConfig.WorkDir != "/tmp/benadis" {
-			t.Errorf("Expected WorkDir = /tmp/benadis, got %s", appConfig.WorkDir)
+		if appConfig.WorkDir != "/tmp/apk-ci" {
+			t.Errorf("Expected WorkDir = /tmp/apk-ci, got %s", appConfig.WorkDir)
 		}
-		if appConfig.TmpDir != "/tmp/benadis/temp" {
-			t.Errorf("Expected TmpDir = /tmp/benadis/temp, got %s", appConfig.TmpDir)
+		if appConfig.TmpDir != "/tmp/apk-ci/temp" {
+			t.Errorf("Expected TmpDir = /tmp/apk-ci/temp, got %s", appConfig.TmpDir)
 		}
 		if appConfig.Timeout != 30 {
 			t.Errorf("Expected Timeout = 30, got %d", appConfig.Timeout)

@@ -62,8 +62,8 @@ func TestPathConstants(t *testing.T) {
 		{"StoreRoot", StoreRoot, "tcp://prod-1c-repo.apkholding.ru/gitops/"},
 		{"GiteaWorkflowsPath", GiteaWorkflowsPath, ".gitea/workflows"},
 		{"LocalBase", LocalBase, "local"},
-		{"WorkDir", WorkDir, "/tmp/4del"},
-		{"TempDir", TempDir, "/tmp/4del/temp"},
+		{"WorkDir", WorkDir, "/tmp/apk-ci"},
+		{"TempDir", TempDir, "/tmp/apk-ci/temp"},
 	}
 
 	for _, tt := range tests {

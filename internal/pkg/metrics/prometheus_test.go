@@ -44,8 +44,8 @@ func TestPrometheusCollector_RecordCommand(t *testing.T) {
 		found[m.GetName()] = true
 	}
 
-	assert.True(t, found["benadis_command_duration_seconds"], "должен быть histogram duration")
-	assert.True(t, found["benadis_command_success_total"], "должен быть counter success")
+	assert.True(t, found["apk_ci_command_duration_seconds"], "должен быть histogram duration")
+	assert.True(t, found["apk_ci_command_success_total"], "должен быть counter success")
 }
 
 // TestPrometheusCollector_Push проверяет отправку метрик (AC4).
@@ -151,7 +151,7 @@ func TestPrometheusCollector_Labels(t *testing.T) {
 	require.NoError(t, err)
 
 	for _, m := range metrics {
-		if m.GetName() == "benadis_command_duration_seconds" {
+		if m.GetName() == "apk_ci_command_duration_seconds" {
 			for _, metric := range m.GetMetric() {
 				labels := make(map[string]string)
 				for _, l := range metric.GetLabel() {
@@ -322,13 +322,13 @@ func TestPrometheusCollector_ErrorStatus(t *testing.T) {
 
 	// Проверяем error counter
 	for _, m := range metrics {
-		if m.GetName() == "benadis_command_error_total" {
+		if m.GetName() == "apk_ci_command_error_total" {
 			for _, metric := range m.GetMetric() {
 				counter := metric.GetCounter()
 				assert.Equal(t, float64(1), counter.GetValue())
 			}
 		}
-		if m.GetName() == "benadis_command_duration_seconds" {
+		if m.GetName() == "apk_ci_command_duration_seconds" {
 			for _, metric := range m.GetMetric() {
 				labels := make(map[string]string)
 				for _, l := range metric.GetLabel() {
@@ -464,12 +464,12 @@ func TestPrometheusCollector_MultipleRecords(t *testing.T) {
 	// Должны быть метрики для обеих комбинаций команда+база
 	var successCount, errorCount float64
 	for _, m := range metrics {
-		if m.GetName() == "benadis_command_success_total" {
+		if m.GetName() == "apk_ci_command_success_total" {
 			for _, metric := range m.GetMetric() {
 				successCount += metric.GetCounter().GetValue()
 			}
 		}
-		if m.GetName() == "benadis_command_error_total" {
+		if m.GetName() == "apk_ci_command_error_total" {
 			for _, metric := range m.GetMetric() {
 				errorCount += metric.GetCounter().GetValue()
 			}
@@ -505,7 +505,7 @@ func TestPrometheusCollector_HistogramBuckets(t *testing.T) {
 
 	var histogramFound bool
 	for _, m := range metrics {
-		if m.GetName() == "benadis_command_duration_seconds" {
+		if m.GetName() == "apk_ci_command_duration_seconds" {
 			histogramFound = true
 			// Должно быть 3 записи суммарно
 			var totalCount uint64

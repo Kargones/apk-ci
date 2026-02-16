@@ -1,4 +1,4 @@
-# CI workflow для benadis-runner
+# CI workflow для apk-ci
 # Запускается при push и pull request
 name: CI
 
