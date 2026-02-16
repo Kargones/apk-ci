@@ -11,8 +11,8 @@ coverage.html
 *.dll
 *.so
 *.dylib
-/benadis-runner
-benadis-runner-*
+/apk-ci
+apk-ci-*
 *.vsix
 
 # Debug files
@@ -80,3 +80,8 @@ go.work.sum
 
 .env
 .scannerwork
+# Build artifacts and binaries
+plantuml.jar
+*.backup
+/bin/
+/build/

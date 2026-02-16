@@ -3,27 +3,29 @@ version: '3'
 dotenv: ['.env']
 
 vars:
-  GITEA_URL: "https://regdv.apkholding.ru"
+  GITEA_URL: "{{.GITEA_URL_ENV | default \"https://git.apkholding.ru\"}}"
   REPOSITORY: "test/SCUD"
-  ACCESS_TOKEN: "{{.ACCESS_TOKEN}}" # загружается из .env
+  ACCESS_TOKEN: "{{.ACCESS_TOKEN}}"
   COMMAND: "execute-epf"
   LOG_LEVEL: "Debug"
   ISSUE_NUMBER: "1"
-  CONFIG_SYSTEM: "https://regdv.apkholding.ru/api/v1/repos/gitops-tools/gitops_congif/contents/app.yaml?ref=main"
+  CONFIG_SYSTEM: "{{.GITEA_URL}}/api/v1/repos/gitops-tools/gitops_congif/contents/app.yaml?ref=main"
   CONFIG_PROJECT: "project.yaml"
-  CONFIG_SECRET: "https://regdv.apkholding.ru/api/v1/repos/gitops-tools/gitops_congif/contents/secret.yaml?ref=main"
-  CONFIG_DB_DATA: "https://regdv.apkholding.ru/api/v1/repos/gitops-tools/gitops_congif/contents/dbconfig.yaml?ref=main"
-  MENU_MAIN: "https://regdv.apkholding.ru/api/v1/repos/gitops-tools/gitops_congif/contents/menu_main.yaml?ref=main"
-  MENU_DEBUG: "https://regdv.apkholding.ru/api/v1/repos/gitops-tools/gitops_congif/contents/menu_debug.yaml?ref=main"
+  CONFIG_SECRET: "{{.GITEA_URL}}/api/v1/repos/gitops-tools/gitops_congif/contents/secret.yaml?ref=main"
+  CONFIG_DB_DATA: "{{.GITEA_URL}}/api/v1/repos/gitops-tools/gitops_congif/contents/dbconfig.yaml?ref=main"
+  MENU_MAIN: "{{.GITEA_URL}}/api/v1/repos/gitops-tools/gitops_congif/contents/menu_main.yaml?ref=main"
+  MENU_DEBUG: "{{.GITEA_URL}}/api/v1/repos/gitops-tools/gitops_congif/contents/menu_debug.yaml?ref=main"
   ACTOR: "xor"
   DB_NAME: "V8_DEV_DSBEKETOV_APK_TOIR3"
   TERMINATE_SESSIONS: "true"
   FORCE_UPDATE: "true"
   DEBUG_PORT: "2345"
-  BUILD_DIR: "./bin/benadis-runner-bin"
+  BUILD_DIR: "./bin/apk-ci-bin"
   DEBUG_PORT_INPUT: "0"
   WAIT: "false"
-  START_EPF: "https://regdv.apkholding.ru/api/v1/repos/gitops-tools/gitops_congif/contents/start.epf?ref=main"
+  START_EPF: "{{.GITEA_URL}}/api/v1/repos/gitops-tools/gitops_congif/contents/start.epf?ref=main"
+  APP_NAME: "apk-ci"
+  CMD_DIR: "./cmd/apk-ci"
 
 tasks:
   kill-debug-port:
@@ -70,36 +72,33 @@ tasks:
       INPUT_STARTEPF: "{{.START_EPF}}"
     cmds:
       - |
-        dlv debug ./cmd/benadis-runner \
+        dlv debug {{.CMD_DIR}} \
           --headless --listen=127.0.0.1:{{.DEBUG_PORT}} --api-version=2 --accept-multiclient \
           --allow-non-terminal-interactive=true
 
   generate-version:
     desc: "Генерация файла version.go с автоматическими константами версии"
     cmds:
-      - |
-        echo "Генерация файла version.go..."
-        ./scripts/generate-version.sh {{.BUILD_DIR}}
+      - echo "Генерация файла version.go..."
+      - ./scripts/generate-version.sh {{.BUILD_DIR}}
 
   build:
     desc: "Сборка бинарного файла для продакшена"
     cmds:
-      - |
-        echo "Генерация version.go..."
-        ./scripts/generate-version.sh --version-go-only
-        mkdir -p {{.BUILD_DIR}}
-        go build -o {{.BUILD_DIR}}/benadis-runner ./cmd/benadis-runner
-        ./scripts/generate-version.sh --version-md-only {{.BUILD_DIR}}
+      - echo "Генерация version.go..."
+      - ./scripts/generate-version.sh --version-go-only
+      - mkdir -p {{.BUILD_DIR}}
+      - go build -o {{.BUILD_DIR}}/{{.APP_NAME}} {{.CMD_DIR}}
+      - ./scripts/generate-version.sh --version-md-only {{.BUILD_DIR}}
 
   build-debug:
     desc: "Сборка бинарного файла для отладки с сохранением отладочной информации"
     cmds:
-      - |
-        echo "Генерация version.go..."
-        ./scripts/generate-version.sh --version-go-debug
-        mkdir -p {{.BUILD_DIR}}
-        go build -gcflags="-N -l" -o {{.BUILD_DIR}}/benadis-runner ./cmd/benadis-runner
-        ./scripts/generate-version.sh --version-md-only --debug {{.BUILD_DIR}}
+      - echo "Генерация version.go..."
+      - ./scripts/generate-version.sh --version-go-debug
+      - mkdir -p {{.BUILD_DIR}}
+      - go build -gcflags="-N -l" -o {{.BUILD_DIR}}/{{.APP_NAME}} {{.CMD_DIR}}
+      - ./scripts/generate-version.sh --version-md-only --debug {{.BUILD_DIR}}
 
   debug-binary:
     desc: "Запуск отладки собранного отладочного бинарного файла с использованием dlv"
@@ -126,10 +125,11 @@ tasks:
       INPUT_STARTEPF: "{{.START_EPF}}"
     cmds:
       - |
-        echo "Запуск отладки бинарного файла {{.BUILD_DIR}}/benadis-runner..."
-        dlv exec {{.BUILD_DIR}}/benadis-runner \
+        echo "Запуск отладки бинарного файла {{.BUILD_DIR}}/{{.APP_NAME}}..."
+        dlv exec {{.BUILD_DIR}}/{{.APP_NAME}} \
           --headless --listen=127.0.0.1:{{.DEBUG_PORT}} --api-version=2 --accept-multiclient \
           --allow-non-terminal-interactive=true
+
   run:
     desc: "Запуск скомпилированного приложения"
     env:
@@ -153,5 +153,14 @@ tasks:
       INPUT_WAIT: "{{.WAIT}}"
       INPUT_STARTEPF: "{{.START_EPF}}"
     cmds:
-      - |
-        {{.BUILD_DIR}}/benadis-runner
+      - "{{.BUILD_DIR}}/{{.APP_NAME}}"
+
+  test:
+    desc: "Запуск тестов"
+    cmds:
+      - go test -mod=vendor ./... -count=1
+
+  vet:
+    desc: "Статический анализ"
+    cmds:
+      - go vet -mod=vendor ./...
