@@ -77,29 +77,26 @@ tasks:
   generate-version:
     desc: "Генерация файла version.go с автоматическими константами версии"
     cmds:
-      - |
-        echo "Генерация файла version.go..."
-        ./scripts/generate-version.sh {{.BUILD_DIR}}
+      - echo "Генерация файла version.go..."
+      - ./scripts/generate-version.sh {{.BUILD_DIR}}
 
   build:
     desc: "Сборка бинарного файла для продакшена"
     cmds:
-      - |
-        echo "Генерация version.go..."
-        ./scripts/generate-version.sh --version-go-only
-        mkdir -p {{.BUILD_DIR}}
-        go build -o {{.BUILD_DIR}}/apk-ci ./cmd/apk-ci
-        ./scripts/generate-version.sh --version-md-only {{.BUILD_DIR}}
+      - echo "Генерация version.go..."
+      - ./scripts/generate-version.sh --version-go-only
+      - mkdir -p {{.BUILD_DIR}}
+      - go build -o {{.BUILD_DIR}}/apk-ci ./cmd/apk-ci
+      - ./scripts/generate-version.sh --version-md-only {{.BUILD_DIR}}
 
   build-debug:
     desc: "Сборка бинарного файла для отладки с сохранением отладочной информации"
     cmds:
-      - |
-        echo "Генерация version.go..."
-        ./scripts/generate-version.sh --version-go-debug
-        mkdir -p {{.BUILD_DIR}}
-        go build -gcflags="-N -l" -o {{.BUILD_DIR}}/apk-ci ./cmd/apk-ci
-        ./scripts/generate-version.sh --version-md-only --debug {{.BUILD_DIR}}
+      - echo "Генерация version.go..."
+      - ./scripts/generate-version.sh --version-go-debug
+      - mkdir -p {{.BUILD_DIR}}
+      - go build -gcflags="-N -l" -o {{.BUILD_DIR}}/apk-ci ./cmd/apk-ci
+      - ./scripts/generate-version.sh --version-md-only --debug {{.BUILD_DIR}}
 
   debug-binary:
     desc: "Запуск отладки собранного отладочного бинарного файла с использованием dlv"
