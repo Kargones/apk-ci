@@ -12,6 +12,7 @@ import (
 	"github.com/Kargones/apk-ci/internal/command"
 	"github.com/Kargones/apk-ci/internal/config"
 	"github.com/Kargones/apk-ci/internal/constants"
+	"github.com/Kargones/apk-ci/internal/pkg/alerting"
 	"github.com/Kargones/apk-ci/internal/di"
 	"github.com/Kargones/apk-ci/internal/pkg/logging"
 	"github.com/Kargones/apk-ci/internal/pkg/metrics"
@@ -83,6 +84,9 @@ func run() int {
 	logAdapter := logging.NewSlogAdapter(l)
 	metricsCollector := di.ProvideMetricsCollector(cfg, logAdapter)
 
+	// Инициализация alerter для отправки алертов при ошибках
+	alerter := di.ProvideAlerter(cfg, logAdapter)
+
 	// Инициализация OpenTelemetry трейсинга
 	tracerShutdown := di.ProvideTracerProvider(cfg, logAdapter)
 	defer func() {
@@ -120,6 +124,17 @@ func run() int {
 			slog.String(constants.MsgErrProcessing, constants.MsgAppExit),
 		)
 		recordMetrics(metricsCollector, ctx, cfg.Command, cfg.InfobaseName, start, false)
+
+		_ = alerter.Send(ctx, alerting.Alert{
+			ErrorCode: "UNKNOWN_COMMAND",
+			Message:   fmt.Sprintf("Неизвестная команда: %s", cfg.Command),
+			Command:   cfg.Command,
+			Infobase:  cfg.InfobaseName,
+			TraceID:   traceID,
+			Timestamp: time.Now(),
+			Severity:  alerting.SeverityWarning,
+		})
+
 		return 2
 	}
 
@@ -137,6 +152,18 @@ func run() int {
 			slog.String("error", execErr.Error()),
 			slog.String(constants.MsgErrProcessing, constants.MsgAppExit),
 		)
+
+		// Отправляем алерт о неудачном выполнении команды
+		_ = alerter.Send(ctx, alerting.Alert{
+			ErrorCode: "COMMAND_FAILED",
+			Message:   fmt.Sprintf("Команда %s завершилась с ошибкой: %s", cfg.Command, execErr.Error()),
+			Command:   cfg.Command,
+			Infobase:  cfg.InfobaseName,
+			TraceID:   traceID,
+			Timestamp: time.Now(),
+			Severity:  alerting.SeverityCritical,
+		})
+
 		return 8
 	}
 	return 0
