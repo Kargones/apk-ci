@@ -482,6 +482,9 @@ func TestBackupFile_NonExistentFile(t *testing.T) {
 // TestBackupFile_ReadOnlyDir проверяет что backupFile возвращает ошибку
 // при невозможности записи backup (readonly директория).
 func TestBackupFile_ReadOnlyDir(t *testing.T) {
+	if os.Getuid() == 0 {
+		t.Skip("skipping: root ignores file permissions")
+	}
 	tmpDir := t.TempDir()
 	filePath := filepath.Join(tmpDir, "test.yml")
 	require.NoError(t, os.WriteFile(filePath, []byte("content"), 0644))
@@ -512,6 +515,9 @@ func TestApplyReplacements_NonExistentFile(t *testing.T) {
 // при невозможности создания temp-файла (readonly директория).
 func TestApplyReplacements_ReadOnlyDir(t *testing.T) {
 	tmpDir := t.TempDir()
+	if os.Getuid() == 0 {
+		t.Skip("skipping: root ignores file permissions")
+	}
 	filePath := filepath.Join(tmpDir, "test.yml")
 	require.NoError(t, os.WriteFile(filePath, []byte("env:\n  BR_COMMAND: dbrestore\n"), 0644))
 
