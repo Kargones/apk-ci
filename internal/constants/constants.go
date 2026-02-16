@@ -121,6 +121,12 @@ const (
 
 // Константы API и групп
 const (
+	// Version - версия приложения (устанавливается при сборке через ldflags)
+	Version = "dev"
+
+	// PreCommitHash - хеш коммита (устанавливается при сборке через ldflags)
+	PreCommitHash = "unknown"
+
 	// APIVersion - версия API
 	APIVersion = "v1"
 	// GroupName - имя группы в Gitea
