@@ -449,8 +449,8 @@ func loadMenuDebugConfig(l *slog.Logger, cfg *Config) ([]string, error) {
 func getDefaultAppConfig() *AppConfig {
 	return &AppConfig{
 		LogLevel: "Debug",
-		WorkDir:  "/tmp/benadis",
-		TmpDir:   "/tmp/benadis/temp",
+		WorkDir:  "/tmp/apk-ci",
+		TmpDir:   "/tmp/apk-ci/temp",
 		Timeout:  30,
 		Paths: struct {
 			Bin1cv8  string `yaml:"bin1cv8"`
@@ -458,10 +458,10 @@ func getDefaultAppConfig() *AppConfig {
 			EdtCli   string `yaml:"edtCli"`
 			Rac      string `yaml:"rac"`
 		}{
-			Bin1cv8:  "/opt/1cv8/x86_64/8.3.27.1606/1cv8",
-			BinIbcmd: "/opt/1cv8/x86_64/8.3.27.1606/ibcmd",
-			EdtCli:   "/opt/1C/1CE/components/1c-edt-2024.2.6+7-x86_64/1cedtcli",
-			Rac:      "/opt/1cv8/x86_64/8.3.27.1606/rac",
+			Bin1cv8:  constants.OneCBinPath(constants.Default1CVersion),
+			BinIbcmd: constants.OneCIbcmdPath(constants.Default1CVersion),
+			EdtCli:   constants.DefaultEdtCliPath,
+			Rac:      constants.OneCRacPath(constants.Default1CVersion),
 		},
 		Rac: struct {
 			Port    int `yaml:"port"`

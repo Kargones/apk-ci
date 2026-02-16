@@ -1,6 +1,7 @@
 package config
 
 import (
+	"github.com/Kargones/apk-ci/internal/constants"
 	"log/slog"
 	"time"
 
@@ -79,7 +80,7 @@ func loadRacConfig(l *slog.Logger, cfg *Config) (*RacConfig, error) {
 // getDefaultRacConfig возвращает конфигурацию RAC по умолчанию
 func getDefaultRacConfig() *RacConfig {
 	return &RacConfig{
-		RacPath:     "/opt/1cv8/x86_64/8.3.25.1257/rac",
+		RacPath:     constants.OneCRacPath(constants.Default1CVersion),
 		RacServer:   "localhost",
 		RacPort:     1545,
 		RacUser:     "",

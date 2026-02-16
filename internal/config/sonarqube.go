@@ -82,7 +82,7 @@ func GetDefaultSonarQubeConfig() *SonarQubeConfig {
 		Timeout:               30 * time.Second,
 		RetryAttempts:         3,
 		RetryDelay:            5 * time.Second,
-		ProjectPrefix:         "benadis",
+		ProjectPrefix:         "apk-ci",
 		DefaultVisibility:     "private",
 		QualityGateTimeout:    300 * time.Second,
 		DisableBranchAnalysis: true, // Default to true for Community Edition compatibility
@@ -246,7 +246,7 @@ func GetDefaultScannerConfig() *ScannerConfig {
 		JavaOpts:       "-Xmx2g",
 		Properties:     make(map[string]string),
 		Timeout:        600 * time.Second,
-		WorkDir:        "/tmp/benadis",
-		TempDir:        "/tmp/benadis/scanner/temp",
+		WorkDir:        "/tmp/apk-ci",
+		TempDir:        "/tmp/apk-ci/scanner/temp",
 	}
 }

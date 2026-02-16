@@ -3,8 +3,8 @@
 # должен парситься без ошибок
 
 logLevel: Info
-workDir: /tmp/benadis
-tmpDir: /tmp/benadis/temp
+workDir: /tmp/apk-ci
+tmpDir: /tmp/apk-ci/temp
 timeout: 30
 
 paths:

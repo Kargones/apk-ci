@@ -55,7 +55,7 @@ func loadGitConfig(l *slog.Logger, cfg *Config) (*GitConfig, error) {
 func getDefaultGitConfig() *GitConfig {
 	return &GitConfig{
 		UserName:          "apk-ci",
-		UserEmail:         "runner@benadis.ru",
+		UserEmail:         "runner@apkholding.ru",
 		DefaultBranch:     "main",
 		Timeout:           60 * time.Minute,
 		CredentialHelper:  "store",

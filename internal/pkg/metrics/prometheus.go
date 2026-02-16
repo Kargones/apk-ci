@@ -32,9 +32,9 @@ type PrometheusCollector struct {
 
 // NewPrometheusCollector создаёт PrometheusCollector с указанной конфигурацией.
 // Регистрирует метрики:
-//   - benadis_command_duration_seconds (histogram)
-//   - benadis_command_success_total (counter)
-//   - benadis_command_error_total (counter)
+//   - apk_ci_command_duration_seconds (histogram)
+//   - apk_ci_command_success_total (counter)
+//   - apk_ci_command_error_total (counter)
 func NewPrometheusCollector(config Config, logger logging.Logger) (*PrometheusCollector, error) {
 	if err := config.Validate(); err != nil {
 		return nil, err
@@ -57,7 +57,7 @@ func NewPrometheusCollector(config Config, logger logging.Logger) (*PrometheusCo
 	// Buckets покрывают диапазон от быстрых команд (0.1s) до очень долгих (10 минут)
 	commandDuration := prometheus.NewHistogramVec(
 		prometheus.HistogramOpts{
-			Namespace: "benadis",
+			Namespace: "apk_ci",
 			Name:      "command_duration_seconds",
 			Help:      "Duration of command execution in seconds",
 			Buckets:   []float64{0.1, 0.5, 1, 5, 10, 30, 60, 120, 300, 600},
@@ -71,7 +71,7 @@ func NewPrometheusCollector(config Config, logger logging.Logger) (*PrometheusCo
 	// по histogram, и для case когда histogram buckets не нужны.
 	commandSuccess := prometheus.NewCounterVec(
 		prometheus.CounterOpts{
-			Namespace: "benadis",
+			Namespace: "apk_ci",
 			Name:      "command_success_total",
 			Help:      "Total number of successful command executions",
 		},
@@ -81,7 +81,7 @@ func NewPrometheusCollector(config Config, logger logging.Logger) (*PrometheusCo
 	// Counter для ошибок
 	commandError := prometheus.NewCounterVec(
 		prometheus.CounterOpts{
-			Namespace: "benadis",
+			Namespace: "apk_ci",
 			Name:      "command_error_total",
 			Help:      "Total number of failed command executions",
 		},

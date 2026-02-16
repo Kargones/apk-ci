@@ -76,11 +76,11 @@ func TestCreator1cv8_BuildConnectString(t *testing.T) {
 		{
 			name: "серверная база с точками в имени",
 			opts: CreateDBOptions{
-				Server:      "srv.benadis.ru",
+				Server:      "srv.apkholding.ru",
 				DbName:      "prod.main",
 				ServerBased: true,
 			},
-			expected: `Srvr="srv.benadis.ru";Ref="prod.main"`,
+			expected: `Srvr="srv.apkholding.ru";Ref="prod.main"`,
 		},
 	}
 
