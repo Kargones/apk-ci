@@ -4,16 +4,12 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"io"
 	"log/slog"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/Kargones/apk-ci/internal/command"
-	"github.com/Kargones/apk-ci/internal/command/shadowrun"
 	"github.com/Kargones/apk-ci/internal/config"
 	"github.com/Kargones/apk-ci/internal/constants"
 	"github.com/Kargones/apk-ci/internal/di"
@@ -52,103 +48,6 @@ import (
 func recordMetrics(collector metrics.Collector, ctx context.Context, command, infobase string, start time.Time, success bool) {
 	collector.RecordCommandEnd(command, infobase, time.Since(start), success)
 	_ = collector.Push(ctx) // Ошибки push логируются внутри, не критичны
-}
-
-// executeShadowRun выполняет shadow-run: NR-команду и legacy-версию, сравнивает результаты.
-// Возвращает exit code: 0 если результаты идентичны, 1 если есть различия.
-// NR-результат всегда используется как основной (AC5).
-func executeShadowRun(ctx context.Context, cfg *config.Config, l *slog.Logger,
-	handler command.Handler, metricsCollector metrics.Collector, start time.Time) int {
-
-	mapping := buildLegacyMapping()
-	runner := shadowrun.NewRunner(mapping, l)
-
-	l.Info("Shadow-run режим активирован", slog.String("command", cfg.Command))
-
-	result, nrOutput, nrErr := runner.Execute(ctx, cfg, handler)
-
-	// Записываем метрики
-	recordMetrics(metricsCollector, ctx, cfg.Command, cfg.InfobaseName, start, nrErr == nil)
-
-	// Выводим результат в зависимости от формата
-	outputFormat := os.Getenv("BR_OUTPUT_FORMAT")
-	if strings.EqualFold(outputFormat, "json") {
-		// AC6: JSON содержит секцию shadow_run, объединённую с основным выводом NR
-		fmt.Print(mergeShadowRunJSON(nrOutput, result))
-	} else {
-		// Текстовый вывод: NR output + shadow-run summary
-		if nrOutput != "" {
-			fmt.Print(nrOutput)
-		}
-		writeShadowRunTextSummary(os.Stdout, result)
-	}
-
-	// Приоритет exit code: NR-ошибка (8) > различия (1) > успех (0).
-	if nrErr != nil {
-		l.Error("Ошибка выполнения команды (shadow-run)",
-			slog.String("command", cfg.Command),
-			slog.String("error", nrErr.Error()),
-			slog.String(constants.MsgErrProcessing, constants.MsgAppExit),
-		)
-		return 8
-	}
-
-	// AC5: exit code = 0 если идентичны, 1 если различия
-	if !result.Match {
-		return 1
-	}
-	return 0
-}
-
-// mergeShadowRunJSON объединяет JSON-вывод NR-команды с секцией shadow_run.
-func mergeShadowRunJSON(nrOutput string, result *shadowrun.ShadowRunResult) string {
-	if result == nil {
-		return nrOutput
-	}
-
-	trimmed := strings.TrimSpace(nrOutput)
-	var base map[string]any
-	if err := json.Unmarshal([]byte(trimmed), &base); err != nil {
-		shadowJSON, marshalErr := json.MarshalIndent(map[string]any{
-			"shadow_run": result.ToJSON(),
-		}, "", "  ")
-		if marshalErr != nil {
-			return nrOutput
-		}
-		return nrOutput + string(shadowJSON) + "\n"
-	}
-
-	base["shadow_run"] = result.ToJSON()
-	merged, err := json.MarshalIndent(base, "", "  ")
-	if err != nil {
-		return nrOutput
-	}
-	return string(merged) + "\n"
-}
-
-// writeShadowRunTextSummary выводит текстовый summary shadow-run результата.
-func writeShadowRunTextSummary(w io.Writer, result *shadowrun.ShadowRunResult) {
-	if result == nil {
-		return
-	}
-
-	fmt.Fprintln(w)
-	fmt.Fprintln(w, "--- Shadow-run сравнение ---")
-	if result.Warning != "" {
-		fmt.Fprintf(w, "[WARNING] %s\n", result.Warning)
-	}
-	if result.Match {
-		fmt.Fprintln(w, "[OK] Результаты идентичны")
-	} else {
-		fmt.Fprintln(w, "[DIFF] Обнаружены различия:")
-		for _, d := range result.Differences {
-			fmt.Fprintf(w, "  [%s] NR: %s | Legacy: %s\n", d.Field, d.NRValue, d.LegacyValue)
-		}
-	}
-	fmt.Fprintf(w, "[TIME] NR: %s | Legacy: %s\n",
-		result.NRDuration.Round(time.Millisecond),
-		result.LegacyDuration.Round(time.Millisecond))
-	fmt.Fprintln(w, "----------------------------")
 }
 
 func main() {
@@ -225,11 +124,6 @@ func run() int {
 	}
 
 	l.Debug("Выполнение команды через registry", slog.String("command", cfg.Command))
-
-	// Shadow-run: если BR_SHADOW_RUN=true — выполняем обе версии и сравниваем
-	if shadowrun.IsEnabled() {
-		return executeShadowRun(ctx, cfg, l, handler, metricsCollector, start)
-	}
 
 	// Выполнение через registry
 	execErr := handler.Execute(ctx, cfg)
