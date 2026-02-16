@@ -4,7 +4,7 @@
 # Переменные
 APP_NAME := benadis-runner
 CMD_DIR := ./cmd/benadis-runner
-BUILD_DIR := ./build
+BUILD_DIR := ./bin/benadis-runner-bin
 DOCS_DIR := ./docs
 EXAMPLES_DIR := ./examples
 
@@ -24,8 +24,20 @@ GIT_COMMIT := $(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown")
 # Флаги сборки
 LDFLAGS := -ldflags "-X main.Version=$(VERSION) -X main.BuildTime=$(BUILD_TIME) -X main.GitCommit=$(GIT_COMMIT)"
 
+# Debug параметры (Delve)
+DEBUG_PORT ?= $(or $(BR_DEBUG_PORT),2345)
+DELVE_FLAGS := --headless --listen=:$(DEBUG_PORT) --api-version=2 --accept-multiclient
+DEBUG_GCFLAGS := -gcflags="all=-N -l"
+DOCKER_ARGS ?=
+
 # Цели по умолчанию
-.PHONY: all build clean test deps help
+.PHONY: all build clean test deps help generate-wire check-wire debug debug-run debug-attach debug-test debug-docker debug-docker-stop debug-clean \
+	build-all build-linux build-windows build-darwin \
+	test-smb test-smoke test-coverage test-integration test-nr-version \
+	lint lint-no-test fmt vet check \
+	setup-dev deps-update mod-graph install run demo docs release \
+	check-smb-deps install-smb-deps-ubuntu install-smb-deps-centos \
+	service-enable service-disable service-status
 .DEFAULT_GOAL := help
 
 ## help: Показать справку
@@ -56,6 +68,11 @@ build-linux:
 test-smb:
 	@echo "Запуск тестов SMB модуля..."
 	$(GOTEST) -v -race -coverprofile=smb_coverage.out ./internal/smb/...
+
+## test-smoke: Запустить smoke-тесты системной целостности
+test-smoke:
+	@echo "Запуск smoke-тестов..."
+	$(GOTEST) -v -race -timeout 60s ./internal/smoketest/...
 
 ## check-smb-deps: Проверить системные зависимости для SMB
 check-smb-deps:
@@ -116,6 +133,22 @@ test-integration:
 	@echo "Запуск интеграционных тестов..."
 	@echo "Убедитесь, что настроены переменные окружения для тестирования"
 	$(GOTEST) -v -tags=integration ./internal/servicemode/
+
+## generate-wire: Сгенерировать wire_gen.go для DI
+generate-wire:
+	@echo "Генерация Wire DI..."
+	@if command -v wire >/dev/null 2>&1; then \
+		wire gen ./internal/di/...; \
+	else \
+		echo "wire не установлен. Установите: go install github.com/google/wire/cmd/wire@v0.6.0"; \
+		exit 1; \
+	fi
+
+## check-wire: Проверить актуальность wire_gen.go
+check-wire: generate-wire
+	@echo "Проверка актуальности wire_gen.go..."
+	@git diff --exit-code internal/di/wire_gen.go || (echo "ОШИБКА: wire_gen.go не актуален. Запустите 'make generate-wire' и закоммитьте изменения." && exit 1)
+	@echo "wire_gen.go актуален"
 
 ## deps: Установить зависимости
 deps:
@@ -208,7 +241,17 @@ version:
 	@echo "Время сборки: $(BUILD_TIME)"
 	@echo "Git коммит: $(GIT_COMMIT)"
 
+## test-nr-version: Тестирование nr-version на собранном бинарнике (требует Gitea API конфигурацию)
+test-nr-version: build
+	@echo "Тестирование nr-version на собранном бинарнике..."
+	@echo "ВНИМАНИЕ: требуется доступ к Gitea API (config.MustLoad)"
+	BR_COMMAND=nr-version BR_OUTPUT_FORMAT=json $(BUILD_DIR)/$(APP_NAME) > /tmp/nr-version-output.json
+	@python3 -c "import json,sys; d=json.load(open('/tmp/nr-version-output.json')); assert d.get('status')=='success', 'status != success'; assert d.get('command')=='nr-version', 'command != nr-version'; print('JSON валидация: OK')"
+	@rm -f /tmp/nr-version-output.json
+
 ## check: Выполнить все проверки (fmt, vet, lint, test)
+## Примечание: smoke-тесты включены в `make test` (go test ./... покрывает internal/smoketest/).
+## Для отдельного запуска smoke-тестов используйте `make test-smoke`.
 check: fmt vet lint test
 	@echo "Все проверки пройдены успешно"
 
@@ -217,8 +260,9 @@ setup-dev:
 	@echo "Настройка среды разработки..."
 	$(GOGET) -u golang.org/x/tools/cmd/godoc
 	$(GOGET) -u github.com/golangci/golangci-lint/cmd/golangci-lint
+	go install github.com/go-delve/delve/cmd/dlv@latest
 	@echo "Создание примера конфигурации..."
-	@if [ ! -f "$(EXAMPLES_DIR)/service-mode-config.env" ]; then \
+	@if [ -f "$(EXAMPLES_DIR)/service-mode-config.env" ]; then \
 		echo "Файл конфигурации уже существует: $(EXAMPLES_DIR)/service-mode-config.env"; \
 	else \
 		echo "Скопируйте и настройте $(EXAMPLES_DIR)/service-mode-config.env для вашей среды"; \
@@ -229,6 +273,58 @@ setup-dev:
 release: clean check build-all
 	@echo "Релиз готов в директории $(BUILD_DIR)/"
 	@ls -la $(BUILD_DIR)/
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Debug targets (Delve)
+# ═══════════════════════════════════════════════════════════════════════════
+
+## debug: Сборка с debug информацией для Delve
+debug:
+	@echo "Сборка $(APP_NAME) с debug информацией..."
+	@mkdir -p $(BUILD_DIR)
+	$(GOBUILD) $(LDFLAGS) $(DEBUG_GCFLAGS) -o $(BUILD_DIR)/$(APP_NAME)-debug $(CMD_DIR)
+	@echo "Debug сборка завершена: $(BUILD_DIR)/$(APP_NAME)-debug"
+
+## debug-run: Запуск под Delve (headless, порт $(DEBUG_PORT))
+debug-run: debug
+	@which dlv > /dev/null 2>&1 || { echo "Ошибка: dlv не установлен. Выполните: go install github.com/go-delve/delve/cmd/dlv@latest"; exit 1; }
+	@echo "Запуск Delve на порту $(DEBUG_PORT)..."
+	dlv exec $(BUILD_DIR)/$(APP_NAME)-debug $(DELVE_FLAGS)
+
+## debug-attach: Подключение Delve к запущенному процессу (PID=<pid>)
+debug-attach:
+	@which dlv > /dev/null 2>&1 || { echo "Ошибка: dlv не установлен. Выполните: go install github.com/go-delve/delve/cmd/dlv@latest"; exit 1; }
+	@if [ -z "$(PID)" ]; then echo "Ошибка: укажите PID. Использование: make debug-attach PID=12345"; exit 1; fi
+	@echo "Подключение Delve к процессу $(PID) на порту $(DEBUG_PORT)..."
+	dlv attach $(PID) $(DELVE_FLAGS)
+
+## debug-test: Отладка теста через Delve (PKG=./path TEST=TestName)
+debug-test:
+	@which dlv > /dev/null 2>&1 || { echo "Ошибка: dlv не установлен. Выполните: go install github.com/go-delve/delve/cmd/dlv@latest"; exit 1; }
+	@if [ -z "$(PKG)" ] || [ -z "$(TEST)" ]; then echo "Ошибка: укажите PKG и TEST. Использование: make debug-test PKG=./internal/pkg/tracing TEST=TestDefaultConfig"; exit 1; fi
+	@echo "Запуск теста $(TEST) из $(PKG) под Delve на порту $(DEBUG_PORT)..."
+	dlv test $(PKG) $(DELVE_FLAGS) -- -test.run $(TEST)
+
+## debug-docker: Запуск Docker контейнера с Delve
+debug-docker:
+	@echo "Сборка debug Docker образа..."
+	docker build -f Dockerfile.debug -t $(APP_NAME)-debug .
+	@echo "Запуск debug контейнера на порту $(DEBUG_PORT)..."
+	docker run --rm -d --name $(APP_NAME)-debug -p 127.0.0.1:$(DEBUG_PORT):2345 $(DOCKER_ARGS) $(APP_NAME)-debug
+	@echo "Debug контейнер запущен. Подключитесь к localhost:$(DEBUG_PORT)"
+	@echo "Передача env переменных: make debug-docker DOCKER_ARGS='-e BR_COMMAND=nr-version'"
+	@echo "Остановка: make debug-docker-stop"
+
+## debug-docker-stop: Остановка debug Docker контейнера
+debug-docker-stop:
+	@echo "Остановка debug контейнера..."
+	docker stop $(APP_NAME)-debug 2>/dev/null || echo "Контейнер не запущен"
+
+## debug-clean: Удаление debug бинарника
+debug-clean:
+	@echo "Удаление debug артефактов..."
+	@rm -f $(BUILD_DIR)/$(APP_NAME)-debug
+	@echo "Debug артефакты удалены"
 
 # Служебные цели
 .PHONY: _check-env

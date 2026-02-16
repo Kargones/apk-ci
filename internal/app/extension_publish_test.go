@@ -1382,33 +1382,44 @@ func TestBuildExtensionPRBody_EmptyExtName(t *testing.T) {
 }
 
 // TestExtensionPublish_MissingEnvVars проверяет валидацию переменных окружения (AC4)
+// Функция ExtensionPublish получает параметры из конфигурации (cfg.Owner, cfg.Repo, cfg.ReleaseTag),
+// которые заполняются из переменных окружения GITHUB_REPOSITORY и GITHUB_REF_NAME при загрузке.
 func TestExtensionPublish_MissingEnvVars(t *testing.T) {
 	tests := []struct {
 		name        string
-		envVars     map[string]string
+		cfg         *config.Config
 		expectError string
 	}{
 		{
 			name: "отсутствует GITHUB_REPOSITORY",
-			envVars: map[string]string{
-				"GITHUB_REPOSITORY": "",
-				"GITHUB_REF_NAME":   "v1.0.0",
+			cfg: &config.Config{
+				GiteaURL:    "https://gitea.example.com",
+				AccessToken: "test-token",
+				Owner:       "", // Пустой Owner (эквивалент GITHUB_REPOSITORY="")
+				Repo:        "",
+				ReleaseTag:  "v1.0.0",
 			},
 			expectError: "GITHUB_REPOSITORY не установлена",
 		},
 		{
 			name: "отсутствует GITHUB_REF_NAME",
-			envVars: map[string]string{
-				"GITHUB_REPOSITORY": "owner/repo",
-				"GITHUB_REF_NAME":   "",
+			cfg: &config.Config{
+				GiteaURL:    "https://gitea.example.com",
+				AccessToken: "test-token",
+				Owner:       "owner",
+				Repo:        "repo",
+				ReleaseTag:  "", // Пустой ReleaseTag (эквивалент GITHUB_REF_NAME="")
 			},
 			expectError: "GITHUB_REF_NAME не установлена",
 		},
 		{
 			name: "некорректный формат GITHUB_REPOSITORY - без слеша",
-			envVars: map[string]string{
-				"GITHUB_REPOSITORY": "invalidformat",
-				"GITHUB_REF_NAME":   "v1.0.0",
+			cfg: &config.Config{
+				GiteaURL:    "https://gitea.example.com",
+				AccessToken: "test-token",
+				Owner:       "invalidformat", // Только Owner, без Repo
+				Repo:        "",
+				ReleaseTag:  "v1.0.0",
 			},
 			expectError: "некорректный формат GITHUB_REPOSITORY",
 		},
@@ -1416,30 +1427,11 @@ func TestExtensionPublish_MissingEnvVars(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Сохраняем исходные значения
-			origRepo := os.Getenv("GITHUB_REPOSITORY")
-			origRef := os.Getenv("GITHUB_REF_NAME")
-			defer func() {
-				os.Setenv("GITHUB_REPOSITORY", origRepo)
-				os.Setenv("GITHUB_REF_NAME", origRef)
-			}()
-
-			// Устанавливаем тестовые значения
-			for k, v := range tt.envVars {
-				os.Setenv(k, v)
-			}
-
-			// Создаём минимальную конфигурацию
-			cfg := &config.Config{
-				GiteaURL:    "https://gitea.example.com",
-				AccessToken: "test-token",
-			}
-
 			// Создаём логгер
 			l := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 			// Вызываем функцию
-			err := ExtensionPublish(nil, l, cfg)
+			err := ExtensionPublish(nil, l, tt.cfg)
 
 			// Проверяем ошибку
 			if err == nil {
@@ -1464,6 +1456,9 @@ func TestExtensionPublish_MissingConfig(t *testing.T) {
 			cfg: &config.Config{
 				GiteaURL:    "",
 				AccessToken: "test-token",
+				Owner:       "owner",
+				Repo:        "repo",
+				ReleaseTag:  "v1.0.0",
 			},
 			expectError: "GiteaURL не настроен",
 		},
@@ -1472,6 +1467,9 @@ func TestExtensionPublish_MissingConfig(t *testing.T) {
 			cfg: &config.Config{
 				GiteaURL:    "https://gitea.example.com",
 				AccessToken: "",
+				Owner:       "owner",
+				Repo:        "repo",
+				ReleaseTag:  "v1.0.0",
 			},
 			expectError: "AccessToken не настроен",
 		},
@@ -1479,18 +1477,6 @@ func TestExtensionPublish_MissingConfig(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Сохраняем исходные значения
-			origRepo := os.Getenv("GITHUB_REPOSITORY")
-			origRef := os.Getenv("GITHUB_REF_NAME")
-			defer func() {
-				os.Setenv("GITHUB_REPOSITORY", origRepo)
-				os.Setenv("GITHUB_REF_NAME", origRef)
-			}()
-
-			// Устанавливаем корректные переменные окружения
-			os.Setenv("GITHUB_REPOSITORY", "owner/repo")
-			os.Setenv("GITHUB_REF_NAME", "v1.0.0")
-
 			// Создаём логгер
 			l := slog.New(slog.NewTextHandler(io.Discard, nil))
 
@@ -2102,18 +2088,6 @@ func TestReportResultsText_OnlySkipped(t *testing.T) {
 
 // TestExtensionPublish_DryRunMode проверяет dry-run режим команды (AC6)
 func TestExtensionPublish_DryRunMode(t *testing.T) {
-	// Сохраняем исходные значения
-	origRepo := os.Getenv("GITHUB_REPOSITORY")
-	origRef := os.Getenv("GITHUB_REF_NAME")
-	origExtDir := os.Getenv("BR_EXT_DIR")
-	origDryRun := os.Getenv("BR_DRY_RUN")
-	defer func() {
-		os.Setenv("GITHUB_REPOSITORY", origRepo)
-		os.Setenv("GITHUB_REF_NAME", origRef)
-		os.Setenv("BR_EXT_DIR", origExtDir)
-		os.Setenv("BR_DRY_RUN", origDryRun)
-	}()
-
 	// Создаём mock сервер
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
@@ -2155,16 +2129,14 @@ func TestExtensionPublish_DryRunMode(t *testing.T) {
 	}))
 	defer server.Close()
 
-	// Устанавливаем переменные окружения
-	os.Setenv("GITHUB_REPOSITORY", "SourceOrg/source-repo")
-	os.Setenv("GITHUB_REF_NAME", "v1.0.0")
-	os.Setenv("BR_EXT_DIR", "")
-	os.Setenv("BR_DRY_RUN", "true")
-
 	// Создаём конфигурацию
 	cfg := &config.Config{
 		GiteaURL:    server.URL,
 		AccessToken: "test-token",
+		Owner:       "SourceOrg",
+		Repo:        "source-repo",
+		ReleaseTag:  "v1.0.0",
+		DryRun:      true,
 	}
 
 	// Вызываем функцию
@@ -2178,13 +2150,6 @@ func TestExtensionPublish_DryRunMode(t *testing.T) {
 
 // TestExtensionPublish_NoSubscribers проверяет случай без подписчиков
 func TestExtensionPublish_NoSubscribers(t *testing.T) {
-	origRepo := os.Getenv("GITHUB_REPOSITORY")
-	origRef := os.Getenv("GITHUB_REF_NAME")
-	defer func() {
-		os.Setenv("GITHUB_REPOSITORY", origRepo)
-		os.Setenv("GITHUB_REF_NAME", origRef)
-	}()
-
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
 		case strings.Contains(r.URL.Path, "/releases/tags/"):
@@ -2213,12 +2178,12 @@ func TestExtensionPublish_NoSubscribers(t *testing.T) {
 	}))
 	defer server.Close()
 
-	os.Setenv("GITHUB_REPOSITORY", "SourceOrg/source-repo")
-	os.Setenv("GITHUB_REF_NAME", "v1.0.0")
-
 	cfg := &config.Config{
 		GiteaURL:    server.URL,
 		AccessToken: "test-token",
+		Owner:       "SourceOrg",
+		Repo:        "source-repo",
+		ReleaseTag:  "v1.0.0",
 	}
 
 	err := ExtensionPublish(nil, testLogger(), cfg)
@@ -2231,13 +2196,6 @@ func TestExtensionPublish_NoSubscribers(t *testing.T) {
 
 // TestExtensionPublish_ReleaseNotFound проверяет ошибку при несуществующем релизе
 func TestExtensionPublish_ReleaseNotFound(t *testing.T) {
-	origRepo := os.Getenv("GITHUB_REPOSITORY")
-	origRef := os.Getenv("GITHUB_REF_NAME")
-	defer func() {
-		os.Setenv("GITHUB_REPOSITORY", origRepo)
-		os.Setenv("GITHUB_REF_NAME", origRef)
-	}()
-
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Релиз не найден
 		w.WriteHeader(http.StatusNotFound)
@@ -2245,12 +2203,12 @@ func TestExtensionPublish_ReleaseNotFound(t *testing.T) {
 	}))
 	defer server.Close()
 
-	os.Setenv("GITHUB_REPOSITORY", "SourceOrg/source-repo")
-	os.Setenv("GITHUB_REF_NAME", "v999.0.0")
-
 	cfg := &config.Config{
 		GiteaURL:    server.URL,
 		AccessToken: "test-token",
+		Owner:       "SourceOrg",
+		Repo:        "source-repo",
+		ReleaseTag:  "v999.0.0",
 	}
 
 	err := ExtensionPublish(nil, testLogger(), cfg)
@@ -2265,19 +2223,6 @@ func TestExtensionPublish_ReleaseNotFound(t *testing.T) {
 
 // TestExtensionPublish_FullFlow проверяет полный рабочий процесс с успешным созданием PR
 func TestExtensionPublish_FullFlow(t *testing.T) {
-	origRepo := os.Getenv("GITHUB_REPOSITORY")
-	origRef := os.Getenv("GITHUB_REF_NAME")
-	origExtDir := os.Getenv("BR_EXT_DIR")
-	origDryRun := os.Getenv("BR_DRY_RUN")
-	origJSON := os.Getenv("BR_OUTPUT_JSON")
-	defer func() {
-		os.Setenv("GITHUB_REPOSITORY", origRepo)
-		os.Setenv("GITHUB_REF_NAME", origRef)
-		os.Setenv("BR_EXT_DIR", origExtDir)
-		os.Setenv("BR_DRY_RUN", origDryRun)
-		os.Setenv("BR_OUTPUT_JSON", origJSON)
-	}()
-
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
 		// Запрос релиза
@@ -2356,15 +2301,12 @@ func TestExtensionPublish_FullFlow(t *testing.T) {
 	}))
 	defer server.Close()
 
-	os.Setenv("GITHUB_REPOSITORY", "SourceOrg/source-repo")
-	os.Setenv("GITHUB_REF_NAME", "v1.2.3")
-	os.Setenv("BR_EXT_DIR", "")
-	os.Setenv("BR_DRY_RUN", "")
-	os.Setenv("BR_OUTPUT_JSON", "")
-
 	cfg := &config.Config{
 		GiteaURL:    server.URL,
 		AccessToken: "test-token",
+		Owner:       "SourceOrg",
+		Repo:        "source-repo",
+		ReleaseTag:  "v1.2.3",
 	}
 
 	err := ExtensionPublish(nil, testLogger(), cfg)
@@ -2377,17 +2319,6 @@ func TestExtensionPublish_FullFlow(t *testing.T) {
 
 // TestExtensionPublish_WithExtDir проверяет публикацию из конкретного каталога
 func TestExtensionPublish_WithExtDir(t *testing.T) {
-	origRepo := os.Getenv("GITHUB_REPOSITORY")
-	origRef := os.Getenv("GITHUB_REF_NAME")
-	origExtDir := os.Getenv("BR_EXT_DIR")
-	origDryRun := os.Getenv("BR_DRY_RUN")
-	defer func() {
-		os.Setenv("GITHUB_REPOSITORY", origRepo)
-		os.Setenv("GITHUB_REF_NAME", origRef)
-		os.Setenv("BR_EXT_DIR", origExtDir)
-		os.Setenv("BR_DRY_RUN", origDryRun)
-	}()
-
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
 		case strings.Contains(r.URL.Path, "/releases/tags/"):
@@ -2424,14 +2355,14 @@ func TestExtensionPublish_WithExtDir(t *testing.T) {
 	}))
 	defer server.Close()
 
-	os.Setenv("GITHUB_REPOSITORY", "SourceOrg/source-repo")
-	os.Setenv("GITHUB_REF_NAME", "v1.0.0")
-	os.Setenv("BR_EXT_DIR", "extensions/MyExt")
-	os.Setenv("BR_DRY_RUN", "true")
-
 	cfg := &config.Config{
 		GiteaURL:    server.URL,
 		AccessToken: "test-token",
+		Owner:       "SourceOrg",
+		Repo:        "source-repo",
+		ReleaseTag:  "v1.0.0",
+		ExtDir:      "extensions/MyExt",
+		DryRun:      true,
 	}
 
 	err := ExtensionPublish(nil, testLogger(), cfg)
@@ -2443,15 +2374,6 @@ func TestExtensionPublish_WithExtDir(t *testing.T) {
 
 // TestExtensionPublish_SyncError проверяет обработку ошибки синхронизации (continue on error)
 func TestExtensionPublish_SyncError(t *testing.T) {
-	origRepo := os.Getenv("GITHUB_REPOSITORY")
-	origRef := os.Getenv("GITHUB_REF_NAME")
-	origDryRun := os.Getenv("BR_DRY_RUN")
-	defer func() {
-		os.Setenv("GITHUB_REPOSITORY", origRepo)
-		os.Setenv("GITHUB_REF_NAME", origRef)
-		os.Setenv("BR_DRY_RUN", origDryRun)
-	}()
-
 	// project.yaml с подпиской
 	projectYAML := `subscriptions:
   - SourceOrg_source-repo_cfe

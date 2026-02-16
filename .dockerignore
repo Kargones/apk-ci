@@ -1,0 +1,40 @@
+# Build артефакты
+build/
+dist/
+bin/
+
+# Документация и метаданные проекта
+_bmad*/
+_bmad-output/
+docs/
+*.md
+!go.md
+
+# Тесты и покрытие
+coverage.*
+*.out
+*.test
+
+# IDE и OS файлы
+.vscode/
+.idea/
+.cursor/
+.windsurf/
+.claude/
+.DS_Store
+
+# Логи и временные файлы
+*.log
+logs/
+*.tmp
+*.temp
+
+# Секреты
+*.secret
+*.key
+*.pem
+*.p12
+*.pfx
+secret.yaml
+.env
+.env.*

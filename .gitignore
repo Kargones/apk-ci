@@ -11,8 +11,8 @@ coverage.html
 *.dll
 *.so
 *.dylib
-# benadis-runner
-# benadis-runner-*
+/benadis-runner
+benadis-runner-*
 *.vsix
 
 # Debug files

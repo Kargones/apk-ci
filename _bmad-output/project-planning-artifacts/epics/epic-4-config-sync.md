@@ -1,10 +1,76 @@
 # Epic 4: Configuration Sync
 
-**Статус:** 🟡 В планировании
+**Статус:** 🟠 Legacy существует, NR не начат
 **Приоритет:** Высокий
 **Риск:** 🔴 Высокий
-**Stories:** 7
+**Stories:** 0/7 NR (legacy работает)
 **FRs:** FR14-21
+**Аудит:** 2026-01-26
+
+---
+
+## 📊 Gap Analysis (Аудит 2026-01-26)
+
+### Статус реализации: 🟠 Legacy существует, NR не начат
+
+| Компонент | План (NR) | Legacy реализация | Статус |
+|-----------|-----------|-------------------|--------|
+| 1C Operations Factory | `internal/adapter/onec/factory.go` | ❌ Нет фабрики | 🔴 |
+| nr-store2db | Command Registry | `main.go:31` (switch-case) | 🟠 Legacy |
+| nr-storebind | Command Registry | `main.go:154` (switch-case) | 🟠 Legacy |
+| nr-create-stores | Command Registry | `main.go:174` (switch-case) | 🟠 Legacy |
+| nr-convert | Command Registry | `main.go:40` (switch-case) | 🟠 Legacy |
+| nr-git2store | Command Registry | `main.go:50` (switch-case) | 🟠 Legacy |
+| nr-execute-epf | Command Registry | `main.go:184` (switch-case) | 🟠 Legacy |
+| Switchable implementations | config.implementations | ❌ Не реализовано | 🔴 |
+
+### Текущее состояние кода
+
+```
+LEGACY РЕАЛИЗАЦИЯ:
+├── internal/entity/one/convert/convert.go  ✅ Конвертация
+├── internal/entity/one/store/              ✅ Store операции
+├── internal/entity/one/designer/           ✅ Designer операции
+├── internal/entity/one/edt/edt.go          ✅ EDT операции
+├── internal/entity/one/enterprise/         ✅ Enterprise операции
+├── internal/app/app.go                     ✅ Оркестрация
+└── cmd/benadis-runner/main.go              ✅ switch-case
+
+NR АРХИТЕКТУРА (ОЖИДАЕТСЯ):
+├── internal/command/handlers/store/        ❌ НЕ СУЩЕСТВУЕТ
+├── internal/command/handlers/convert/      ❌ НЕ СУЩЕСТВУЕТ
+├── internal/adapter/onec/factory.go        ❌ НЕ СУЩЕСТВУЕТ
+└── Switchable 1cv8/ibcmd/native            ❌ НЕ СУЩЕСТВУЕТ
+```
+
+### 🔒 Prerequisite
+
+**Требует Epic 1 + Epic 2!**
+- Epic 1: Command Registry, Config Extensions (Story 1.6)
+- Epic 2: Service Mode (для git2store workflow)
+
+### Legacy команды в production
+
+| Команда | Статус | Сложность |
+|---------|--------|-----------|
+| store2db | ✅ Работает | M |
+| storebind | ✅ Работает | S |
+| create-stores | ✅ Работает | M |
+| convert | ✅ Работает | M |
+| git2store | ✅ Работает | XL |
+| execute-epf | ✅ Работает | S |
+
+### Stories Progress
+
+| Story | Название | Статус |
+|-------|----------|--------|
+| 4.1 | 1C Operations Factory | 🔴 Ждёт Epic 1 |
+| 4.2 | nr-store2db | 🟠 Legacy есть |
+| 4.3 | nr-storebind | 🟠 Legacy есть |
+| 4.4 | nr-create-stores | 🟠 Legacy есть |
+| 4.5 | nr-convert | 🟠 Legacy есть |
+| 4.6 | nr-git2store | 🟠 Legacy есть |
+| 4.7 | nr-execute-epf | 🟠 Legacy есть |
 
 ---
 
@@ -209,4 +275,5 @@
 
 ---
 
-_Последнее обновление: 2025-11-25_
+_Последнее обновление: 2026-01-26_
+_Аудит проведён: 2026-01-26 (BMAD Party Mode)_

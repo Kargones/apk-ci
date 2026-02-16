@@ -1,0 +1,86 @@
+@startuml Схема структур
+
+package .{
+annotation . {
+
+
++MustLoad(path string): *OneConf
++UpdateFromReport(path string, cd *ConfigData, sd *StoreData): error
++GetDbName(cfg *Config, oneConfName string): string
++GetStoreParam(storeRoot string, sd StoreData, dbPath string, cfg *Config): Runner
+}
+interface GitRunner{
++Clone( string,  string)
++Config( string)
+}
+class StoreData {
++MainConfig: bool
++Name: string
++SavedVersion: int
++MaxVersion: int
++StorePath: string
++StoreUser: string
++StorePass: string
++Records: []StoreRecord
++GetStoreRep(storeRoot string, dbPath string, cfg *Config): string, error
++SaveDump(repPath string, dbPath string, cfg *Config): string, error
+}
+class OtherSource {
++Name: string
++SourceType: string
++Path: string
++ConnectString: string
++Records: []SourceRecord
+
+}
+class OneConf {
++ConfList: []ConfigData
++Update(cfg *Config): error
++SaveToJson(path string): error
++Load(path string): error
++LoadConfig(b []byte): error
+}
+class ConfigData {
++Name: string
++RepURL: string
++StoreRoot: string
++NeedCopy: bool
++UserList: []User
++StoreData: []StoreData
++SaveChain: []SaveChain
++SaveToPath(dbPath string, cfg *Config, oc *OneConf, cdID int, confName string): string, error
++GetUser(name string): User
++SortVersion(): []SaveChain
++PrepareDB(cfg *Config): string
+}
+class StoreRecord {
++Version: int
++ConfVersion: string
++User: string
++Date: Time
++Comment: string
++GetComment(): string
+}
+class SourceRecord {
++Version: int
++ConfVersion: string
++User: string
++Date: Time
++Comment: string
+
+}
+class User {
++StoreUserName: string
++AccountName: string
++Email: string
+
+}
+class SaveChain {
++StoreDataID: int
++StoreRecordID: int
+
+}
+}
+
+
+@enduml

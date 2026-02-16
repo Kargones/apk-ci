@@ -1,0 +1,38 @@
+@startuml Диаграмма классов Git2Store
+skin rose
+
+title Classes - Class Diagram
+
+
+class База1с {
+    +string ConnectString
+    +string User
+    +string Pass
+    ==
+    +err Create()       /Создание базы/
+    +err Add()          /Добавление расширения/
+    +err Load()         /Загрузка конфигурации из файлов/
+    +err LoadAdd()      /Загрузка расширения из файлов/
+    +err Dump()         /Выгрузка конфигурации/
+    +err DumpAdd()      /Выгрузка расширения/
+    +err StoreLock()    /Захват всех объектов в хранилище/
+}
+class Store {
+
+}
+class ConvertConfig {
+    +OneDB
+    []ConvertPair
+}
+class ConvertPair{
+    +Store
+    +Source
+}
+class Source {
+
+}
+ConvertConfig::OneDB --> База1с
+ConvertConfig::ConvertPair --> ConvertPair
+ConvertPair::Store --> Store
+ConvertPair::Source --> Source
+@enduml

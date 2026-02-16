@@ -3,12 +3,24 @@
 <cite>
 **Referenced Files in This Document**
 - [app.yaml](file://config/app.yaml)
+- [app.yaml.example](file://config/app.yaml.example)
 - [dbconfig.yaml](file://config/dbconfig.yaml)
 - [action.yaml](file://config/action.yaml)
 - [menu_main.yaml](file://config/menu_main.yaml)
 - [menu_debug.yaml](file://config/menu_debug.yaml)
+- [secret.yaml.example](file://config/secret.yaml.example)
 - [config.go](file://internal/config/config.go)
+- [implementations_test.go](file://internal/config/implementations_test.go)
+- [production_config.yaml](file://internal/config/testdata/production_config.yaml)
 </cite>
+
+## Update Summary
+**Changes Made**
+- Added comprehensive documentation for the new ImplementationsConfig structure
+- Updated logging configuration section with new defaults (text format, stderr output)
+- Enhanced configuration loading process documentation with backward compatibility
+- Added examples of the new implementations section in YAML configuration
+- Updated configuration validation and environment variable handling
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -28,16 +40,17 @@
 
 The benadis-runner employs a sophisticated YAML-based configuration system that centralizes all application settings, database connections, and operational parameters. This system provides a unified approach to configuration management across all modules, ensuring consistency and maintainability while supporting multiple deployment environments.
 
-The configuration system is built around four primary configuration files, each serving a specific purpose in the application's operation:
+The configuration system is built around five primary configuration files, each serving a specific purpose in the application's operation:
 
 - **app.yaml**: Application-wide settings including logging, timeouts, executable paths, and service configurations
 - **dbconfig.yaml**: Database connection definitions with host, port, credentials, and database names
 - **action.yaml**: GitHub Actions workflow integration and parameter definitions
 - **Menu configuration files**: Dynamic workflow templates for different operational scenarios
+- **secret.yaml**: Sensitive configuration data including passwords and tokens
 
 ## Configuration Architecture
 
-The configuration system follows a hierarchical structure with multiple layers of precedence:
+The configuration system follows a hierarchical structure with multiple layers of precedence and enhanced modularity:
 
 ```mermaid
 graph TD
@@ -47,22 +60,25 @@ D["app.yaml<br/>Application Settings"] --> E["Central Config Struct"]
 F["dbconfig.yaml<br/>Database Definitions"] --> E
 G["action.yaml<br/>GitHub Actions"] --> E
 H["Menu Files<br/>Workflow Templates"] --> E
-E --> I["Runtime Configuration"]
-J["Validation Layer"] --> K["Error Handling"]
-K --> L["Fallback Mechanisms"]
+I["secret.yaml<br/>Secrets"] --> E
+J["ImplementationsConfig<br/>Operation Implementations"] --> E
+K["LoggingConfig<br/>Logging Settings"] --> E
+E --> L["Runtime Configuration"]
+M["Validation Layer"] --> N["Error Handling"]
+N --> O["Fallback Mechanisms"]
 ```
 
 **Diagram sources**
-- [config.go](file://internal/config/config.go#L138-L141)
-- [config.go](file://internal/config/config.go#L574-L577)
+- [config.go](file://internal/config/config.go#L131-L213)
+- [config.go](file://internal/config/config.go#L292-L326)
 
 **Section sources**
-- [config.go](file://internal/config/config.go#L138-L141)
-- [config.go](file://internal/config/config.go#L574-L577)
+- [config.go](file://internal/config/config.go#L131-L213)
+- [config.go](file://internal/config/config.go#L292-L326)
 
 ## Application Configuration (app.yaml)
 
-The `app.yaml` file serves as the central configuration hub for application-wide settings. It defines system-level parameters that control logging, timeouts, executable paths, and service integrations.
+The `app.yaml` file serves as the central configuration hub for application-wide settings. It defines system-level parameters that control logging, timeouts, executable paths, and service integrations, now enhanced with modular configuration sections.
 
 ### Core Structure
 
@@ -83,26 +99,49 @@ rac:
   port: 1545
   timeout: 30
   retries: 3
+
+users:
+  rac: "gitops"
+  db: "gitops"
+  mssql: "gitops"
+  storeAdmin: "gitops"
+
+dbrestore:
+  database: "master"
+  timeout: "3600s"
+  autotimeout: true
+
+implementations:
+  config_export: "1cv8"
+  db_create: "1cv8"
+
+logging:
+  level: "info"
+  format: "text"
+  output: "stderr"
+  filePath: "/var/log/benadis-runner.log"
+  maxSize: 100
+  maxBackups: 3
+  maxAge: 28
+  compress: true
 ```
 
-### Configuration Sections
+### Enhanced Configuration Sections
 
-#### System Settings
-- **logLevel**: Controls logging verbosity (`Debug`, `Info`, `Warn`, `Error`)
-- **workDir**: Primary working directory for application operations
-- **tmpDir**: Temporary directory for intermediate files
-- **timeout**: Default timeout for operations in seconds
+#### Implementations Configuration
+The new `implementations` section allows flexible selection of operation implementations:
 
-#### Executable Paths
-- **bin1cv8**: Path to 1C:Enterprise runtime executable
-- **binIbcmd**: Path to 1C:Enterprise database command-line tool
-- **edtCli**: Path to 1C:Enterprise Development Tools CLI
-- **rac**: Path to Remote Administration Console executable
+```yaml
+implementations:
+  config_export: "1cv8"  # Options: "1cv8", "ibcmd", "native"
+  db_create: "1cv8"      # Options: "1cv8", "ibcmd"
+```
 
-#### RAC Configuration
-- **port**: Port for RAC communication (default: 1545)
-- **timeout**: RAC operation timeout in seconds
-- **retries**: Number of retry attempts for failed operations
+#### Logging Configuration
+Enhanced logging with improved defaults:
+- **level**: "info" (was "debug")
+- **format**: "text" (was "json") - more readable output
+- **output**: "stderr" (was "stdout") - separates logs from application output
 
 ### SonarQube Integration
 
@@ -150,7 +189,8 @@ git:
 
 **Section sources**
 - [app.yaml](file://config/app.yaml#L1-L138)
-- [config.go](file://internal/config/config.go#L30-L60)
+- [app.yaml.example](file://config/app.yaml.example#L1-L127)
+- [config.go](file://internal/config/config.go#L27-L61)
 
 ## Database Configuration (dbconfig.yaml)
 
@@ -228,12 +268,12 @@ Config --> DatabaseInfo : "manages"
 ```
 
 **Diagram sources**
-- [config.go](file://internal/config/config.go#L80-L85)
-- [config.go](file://internal/config/config.go#L1250-L1270)
+- [config.go](file://internal/config/config.go#L94-L101)
+- [config.go](file://internal/config/config.go#L157-L158)
 
 **Section sources**
-- [dbconfig.yaml](file://config/dbconfig.yaml#L1-L799)
-- [config.go](file://internal/config/config.go#L80-L85)
+- [dbconfig.yaml](file://config/dbconfig.yaml#L1-L800)
+- [config.go](file://internal/config/config.go#L94-L101)
 
 ## GitHub Actions Integration (action.yaml)
 
@@ -327,7 +367,7 @@ steps:
 
 **Section sources**
 - [action.yaml](file://config/action.yaml#L1-L121)
-- [config.go](file://internal/config/config.go#L106-L114)
+- [config.go](file://internal/config/config.go#L106-L127)
 
 ## Menu Configuration Files
 
@@ -431,16 +471,16 @@ K["$ProdBaseReplaceAll$"] --> G
 ```
 
 **Diagram sources**
-- [menu_main.yaml](file://config/menu_main.yaml#L1-L50)
-- [menu_debug.yaml](file://config/menu_debug.yaml#L1-L50)
+- [menu_main.yaml](file://config/menu_main.yaml#L1-L367)
+- [menu_debug.yaml](file://config/menu_debug.yaml#L1-L257)
 
 **Section sources**
-- [menu_main.yaml](file://config/menu_main.yaml#L1-L324)
+- [menu_main.yaml](file://config/menu_main.yaml#L1-L367)
 - [menu_debug.yaml](file://config/menu_debug.yaml#L1-L257)
 
 ## Configuration Loading Process
 
-The configuration loading process follows a systematic approach with multiple fallback mechanisms and validation layers.
+The configuration loading process follows a systematic approach with multiple fallback mechanisms, validation layers, and enhanced backward compatibility.
 
 ### Loading Sequence
 
@@ -458,6 +498,8 @@ CFG->>GITEA : Load Config System (app.yaml)
 GITEA-->>CFG : YAML Data
 CFG->>YAML : Parse app.yaml
 YAML-->>CFG : AppConfig Struct
+CFG->>CFG : Extract ImplementationsConfig
+CFG->>CFG : Extract LoggingConfig
 CFG->>GITEA : Load Config Project (project.yaml)
 GITEA-->>CFG : YAML Data
 CFG->>YAML : Parse project.yaml
@@ -477,12 +519,12 @@ DEF-->>CFG : Final Configuration
 ```
 
 **Diagram sources**
-- [config.go](file://internal/config/config.go#L580-L620)
-- [config.go](file://internal/config/config.go#L852-L910)
+- [config.go](file://internal/config/config.go#L626-L793)
+- [config.go](file://internal/config/config.go#L482-L516)
 
-### Configuration Loading Functions
+### Enhanced Configuration Loading Functions
 
-Each configuration type has dedicated loading functions:
+Each configuration type has dedicated loading functions with improved error handling:
 
 #### Application Configuration Loading
 
@@ -503,44 +545,103 @@ func loadAppConfig(l *slog.Logger, cfg *Config) (*AppConfig, error) {
 }
 ```
 
-#### Database Configuration Loading
+#### Implementations Configuration Loading
 
 ```go
-func loadDbConfig(l *slog.Logger, cfg *Config) (map[string]*DatabaseInfo, error) {
-    giteaAPI := CreateGiteaAPI(cfg)
-    data, err := giteaAPI.GetConfigData(l, cfg.ConfigDbData)
-    if err != nil {
-        return nil, fmt.Errorf("ошибка получения данных %s: %w", cfg.ConfigDbData, err)
+func loadImplementationsConfig(l *slog.Logger, cfg *Config) (*ImplementationsConfig, error) {
+    // Check if implementations config exists in AppConfig
+    if cfg.AppConfig != nil && (cfg.AppConfig.Implementations != ImplementationsConfig{}) {
+        implConfig := &cfg.AppConfig.Implementations
+        // Apply environment variable overrides
+        if err := cleanenv.ReadEnv(implConfig); err != nil {
+            l.Warn("Ошибка загрузки Implementations конфигурации из переменных окружения",
+                slog.String("error", err.Error()),
+            )
+        }
+        l.Info("Implementations конфигурация загружена из AppConfig",
+            slog.String("config_export", implConfig.ConfigExport),
+            slog.String("db_create", implConfig.DBCreate),
+        )
+        return implConfig, nil
     }
 
-    var dbConfig map[string]*DatabaseInfo
-    if err = yaml.Unmarshal(data, &dbConfig); err != nil {
-        return nil, fmt.Errorf("ошибка парсинга %s: %w", cfg.ConfigDbData, err)
+    // If not found, use default values
+    implConfig := getDefaultImplementationsConfig()
+    
+    // Apply environment variable overrides
+    if err := cleanenv.ReadEnv(implConfig); err != nil {
+        l.Warn("Ошибка загрузки Implementations конфигурации из переменных окружения",
+            slog.String("error", err.Error()),
+        )
     }
 
-    return dbConfig, nil
+    l.Debug("Implementations конфигурация: используются значения по умолчанию",
+        slog.String("config_export", implConfig.ConfigExport),
+        slog.String("db_create", implConfig.DBCreate),
+    )
+
+    return implConfig, nil
 }
 ```
 
-### Error Handling and Recovery
-
-The configuration system implements robust error handling:
+#### Logging Configuration Loading
 
 ```go
-// If loading fails, use defaults and log warning
-if cfg.AppConfig, err = loadAppConfig(l, &cfg); err != nil {
-    l.Warn("ошибка загрузки конфигурации приложения", slog.String("error", err.Error()))
-    cfg.AppConfig = getDefaultAppConfig()
+func loadLoggingConfig(l *slog.Logger, cfg *Config) (*LoggingConfig, error) {
+    // Check if logging config exists in AppConfig
+    if cfg.AppConfig != nil && (cfg.AppConfig.Logging != LoggingConfig{}) {
+        return &cfg.AppConfig.Logging, nil
+    }
+
+    loggingConfig := getDefaultLoggingConfig()
+
+    if err := cleanenv.ReadEnv(loggingConfig); err != nil {
+        l.Warn("Ошибка загрузки Logging конфигурации из переменных окружения",
+            slog.String("error", err.Error()),
+        )
+    }
+
+    return loggingConfig, nil
+}
+```
+
+### Backward Compatibility Features
+
+The system maintains backward compatibility with existing configurations:
+
+```go
+// Test for backward compatibility - production configs without new sections
+func TestConfig_ProductionBackwardCompat(t *testing.T) {
+    // Read production-like config from testdata
+    data, err := os.ReadFile("testdata/production_config.yaml")
+    require.NoError(t, err, "Не удалось прочитать testdata/production_config.yaml")
+
+    // Parse config into AppConfig
+    var appConfig AppConfig
+    err = parseYAML(data, &appConfig)
+
+    // Verify successful parsing
+    require.NoError(t, err, "Production конфиг должен парситься без ошибок")
+
+    // Check that main fields parsed correctly
+    assert.Equal(t, "Info", appConfig.LogLevel)
+    assert.Equal(t, "/tmp/benadis", appConfig.WorkDir)
+    assert.Equal(t, 1545, appConfig.Rac.Port)
+
+    // Verify missing sections have zero values (no panic)
+    assert.Equal(t, ImplementationsConfig{}, appConfig.Implementations)
+    assert.Equal(t, LoggingConfig{}, appConfig.Logging)
 }
 ```
 
 **Section sources**
-- [config.go](file://internal/config/config.go#L852-L910)
-- [config.go](file://internal/config/config.go#L600-L620)
+- [config.go](file://internal/config/config.go#L482-L516)
+- [config.go](file://internal/config/config.go#L518-L534)
+- [implementations_test.go](file://internal/config/implementations_test.go#L123-L144)
 
 ## Environment Variables and Priority
 
-The configuration system supports environment variables with a clear priority hierarchy.
+The configuration system supports environment variables with a clear priority hierarchy and enhanced modular configuration.
 
 ### Variable Naming Convention
 
@@ -552,6 +653,7 @@ Each module uses specific prefixes:
 - **SERVICE**: Service mode operations
 - **GIT**: Git operations
 - **LOG**: Logging configuration
+- **IMPL**: Implementation configuration
 
 ### Priority Order
 
@@ -571,9 +673,9 @@ env:
   LOG_LEVEL: ${{ inputs.logLevel }}
 ```
 
-### Cleanenv Integration
+### Enhanced Environment Variable Integration
 
-The system uses the `cleanenv` package for environment variable parsing:
+The system uses the `cleanenv` package for environment variable parsing with enhanced support for nested structures:
 
 ```go
 func GetInputParams() *InputParams {
@@ -585,9 +687,28 @@ func GetInputParams() *InputParams {
 }
 ```
 
+### Implementation Configuration Environment Variables
+
+```yaml
+# Implementation configuration environment variables
+BR_IMPL_CONFIG_EXPORT: "1cv8"  # Override config_export
+BR_IMPL_DB_CREATE: "1cv8"      # Override db_create
+```
+
+### Logging Configuration Environment Variables
+
+```yaml
+# Logging configuration environment variables
+BR_LOG_LEVEL: "info"      # Override logging.level
+BR_LOG_FORMAT: "text"     # Override logging.format
+BR_LOG_OUTPUT: "stderr"   # Override logging.output
+BR_LOG_FILE_PATH: "/var/log/benadis-runner.log"  # Override logging.filePath
+```
+
 **Section sources**
-- [config.go](file://internal/config/config.go#L106-L114)
-- [config.go](file://internal/config/config.go#L470-L480)
+- [config.go](file://internal/config/config.go#L106-L127)
+- [config.go](file://internal/config/config.go#L409-L422)
+- [implementations_test.go](file://internal/config/implementations_test.go#L47-L64)
 
 ## Common Configuration Patterns
 
@@ -645,22 +766,31 @@ maxRetryDelay: "30s"
 ```yaml
 logging:
   level: "info"
-  format: "json"
-  output: "stdout"
+  format: "text"
+  output: "stderr"
   filePath: "/var/log/benadis-runner.log"
   maxSize: 100
   maxBackups: 3
-  maxAge: 7
+  maxAge: 28
   compress: true
 ```
 
+### Implementation Configuration Patterns
+
+```yaml
+implementations:
+  config_export: "1cv8"  # Default: "1cv8"
+  db_create: "1cv8"      # Default: "1cv8"
+```
+
 **Section sources**
-- [config.go](file://internal/config/config.go#L1250-L1300)
-- [app.yaml](file://config/app.yaml#L120-L138)
+- [config.go](file://internal/config/config.go#L94-L101)
+- [app.yaml](file://config/app.yaml#L122-L138)
+- [implementations_test.go](file://internal/config/implementations_test.go#L14-L34)
 
 ## Error Handling and Validation
 
-The configuration system implements comprehensive error handling and validation mechanisms.
+The configuration system implements comprehensive error handling, validation mechanisms, and enhanced backward compatibility.
 
 ### Required Parameter Validation
 
@@ -681,6 +811,9 @@ func validateRequiredParams(inputParams *InputParams, l *slog.Logger) error {
     if inputParams.GHAAccessToken == "" {
         missingParams = append(missingParams, "ACCESSTOKEN")
     }
+    if inputParams.GHAAccessToken == "" {
+        missingParams = append(missingParams, "ACCESSTOKEN")
+    }
     if inputParams.GHACommand == "" {
         missingParams = append(missingParams, "COMMAND")
     }
@@ -696,7 +829,32 @@ func validateRequiredParams(inputParams *InputParams, l *slog.Logger) error {
 }
 ```
 
-### Configuration Validation Patterns
+### Enhanced Configuration Validation
+
+#### Implementations Configuration Validation
+
+```go
+func (c *ImplementationsConfig) Validate() error {
+    // Apply defaults for empty values
+    if c.ConfigExport == "" {
+        c.ConfigExport = "1cv8"
+    }
+    if c.DBCreate == "" {
+        c.DBCreate = "1cv8"
+    }
+
+    validConfigExport := map[string]bool{"1cv8": true, "ibcmd": true, "native": true}
+    validDBCreate := map[string]bool{"1cv8": true, "ibcmd": true}
+
+    if !validConfigExport[c.ConfigExport] {
+        return fmt.Errorf("недопустимое значение ConfigExport: %q, допустимые: 1cv8, ibcmd, native", c.ConfigExport)
+    }
+    if !validDBCreate[c.DBCreate] {
+        return fmt.Errorf("недопустимое значение DBCreate: %q, допустимые: 1cv8, ibcmd", c.DBCreate)
+    }
+    return nil
+}
+```
 
 #### Database Configuration Validation
 
@@ -734,14 +892,16 @@ func (cfg *Config) ReloadConfig() error {
 2. **Logging**: Comprehensive error logging with context
 3. **Validation**: Early detection of configuration issues
 4. **Reload Capability**: Runtime configuration updates
+5. **Backward Compatibility**: Graceful handling of missing configuration sections
 
 **Section sources**
-- [config.go](file://internal/config/config.go#L400-L420)
-- [config.go](file://internal/config/config.go#L1200-L1250)
+- [config.go](file://internal/config/config.go#L424-L455)
+- [config.go](file://internal/config/config.go#L305-L326)
+- [implementations_test.go](file://internal/config/implementations_test.go#L151-L181)
 
 ## Environment-Specific Configuration
 
-The configuration system supports multiple deployment environments with environment-specific settings.
+The configuration system supports multiple deployment environments with environment-specific settings and enhanced modular configuration.
 
 ### Environment Detection
 
@@ -833,9 +993,40 @@ configSecret: './config/secret.yaml'
 configDbData: './config/dbconfig.yaml'
 ```
 
+### Modular Configuration Management
+
+The enhanced system supports modular configuration management:
+
+```yaml
+# Example of modular configuration structure
+app:
+  # Core application settings
+  logLevel: "Info"
+  workDir: "/var/lib/benadis"
+  tmpDir: "/var/tmp/benadis"
+  timeout: 300
+
+implementations:
+  # Operation implementation selection
+  config_export: "1cv8"
+  db_create: "1cv8"
+
+logging:
+  # Enhanced logging configuration
+  level: "info"
+  format: "text"
+  output: "stderr"
+  filePath: "/var/log/benadis-runner.log"
+  maxSize: 100
+  maxBackups: 3
+  maxAge: 28
+  compress: true
+```
+
 **Section sources**
-- [config.go](file://internal/config/config.go#L135-L137)
-- [action.yaml](file://config/action.yaml#L15-L35)
+- [config.go](file://internal/config/config.go#L134-L137)
+- [action.yaml](file://config/action.yaml#L22-L37)
+- [app.yaml](file://config/app.yaml#L1-L138)
 
 ## Best Practices
 
@@ -980,6 +1171,8 @@ cfg.Logger.Info("Configuration loaded",
     "app_config", cfg.AppConfig,
     "db_count", len(cfg.DbConfig),
     "project_name", cfg.ProjectName,
+    "implementations", cfg.ImplementationsConfig,
+    "logging", cfg.LoggingConfig,
 )
 ```
 
@@ -992,6 +1185,11 @@ cfg.Logger.Info("Configuration loaded",
 # logLevel: Debug | Info | Warn | Error
 # timeout: Integer value in seconds
 # prod: true | false
+# implementations.config_export: 1cv8 | ibcmd | native
+# implementations.db_create: 1cv8 | ibcmd
+# logging.level: debug | info | warn | error
+# logging.format: json | text
+# logging.output: stdout | stderr | file
 ```
 
 #### 2. Maintain Configuration Templates
@@ -1016,6 +1214,45 @@ func MigrateConfig(cfg *Config) error {
 }
 ```
 
+### Backward Compatibility Guidelines
+
+#### 1. Maintain Zero Value Behavior
+
+```go
+// Ensure missing sections have zero values, not panics
+assert.Equal(t, ImplementationsConfig{}, appConfig.Implementations)
+assert.Equal(t, LoggingConfig{}, appConfig.Logging)
+```
+
+#### 2. Provide Default Values
+
+```go
+// Default implementations configuration
+func getDefaultImplementationsConfig() *ImplementationsConfig {
+    return &ImplementationsConfig{
+        ConfigExport: "1cv8",
+        DBCreate:     "1cv8",
+    }
+}
+```
+
+#### 3. Validate Environment Variable Overrides
+
+```go
+// Validate environment variable overrides
+func (c *ImplementationsConfig) Validate() error {
+    // Apply defaults for empty values
+    if c.ConfigExport == "" {
+        c.ConfigExport = "1cv8"
+    }
+    if c.DBCreate == "" {
+        c.DBCreate = "1cv8"
+    }
+    // ... validation logic
+}
+```
+
 **Section sources**
-- [config.go](file://internal/config/config.go#L1200-L1250)
+- [config.go](file://internal/config/config.go#L589-L595)
+- [implementations_test.go](file://internal/config/implementations_test.go#L96-L105)
 - [app.yaml](file://config/app.yaml#L1-L138)

@@ -1,0 +1,33 @@
+// Package command предоставляет интерфейсы и реестр для команд приложения.
+// Пакет реализует паттерн self-registration, позволяющий командам
+// регистрироваться в реестре через init() без изменения main.go.
+package command
+
+import (
+	"context"
+
+	"github.com/Kargones/apk-ci/internal/config"
+)
+
+// Handler определяет интерфейс обработчика команды.
+// Каждая команда приложения должна реализовывать этот интерфейс.
+// Регистрация обработчиков происходит через функцию Register() в init().
+//
+// TODO (H-2/Review #17): Все handlers используют slog.Default() для логирования,
+// игнорируя LoggingConfig (format, output, file path). Необходим рефакторинг:
+// добавить logging.Logger в Handler interface или передавать через config.Config,
+// чтобы handlers использовали DI-инжектированный logger вместо глобального slog.Default().
+// Затрагивает 19 handlers (см. grep "slog.Default().With" в handlers/).
+type Handler interface {
+	// Name возвращает имя команды для регистрации в реестре.
+	// Должно соответствовать константам из internal/constants
+	// (например, "service-mode-status", "nr-version").
+	Name() string
+
+	// Description возвращает описание команды для вывода в help.
+	Description() string
+
+	// Execute выполняет команду с переданным контекстом и конфигурацией.
+	// Возвращает ошибку если выполнение завершилось неуспешно.
+	Execute(ctx context.Context, cfg *config.Config) error
+}

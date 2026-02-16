@@ -1,0 +1,175 @@
+@startuml Benadis Runner APK - Sequence Diagram
+' !theme plain
+title Benadis Runner APK - Диаграмма последовательности вызовов функций
+
+actor User as U
+participant "Main App" as MA
+participant "Config" as C
+participant "GiteaFactory" as GF
+participant "GiteaService" as GS
+participant "GiteaAPI" as GA
+participant "ConfigAnalyzer" as CA
+participant "Git" as G
+participant "ConvertConfig" as CC
+participant "ServiceMode" as SM
+participant "Designer" as D
+
+== Инициализация приложения ==
+U -> MA: Запуск приложения
+MA -> C: LoadConfig()
+C -> C: loadAppConfig()
+C -> GA: createGiteaAPI()
+GA -> GA: NewGiteaAPI(config)
+C -> GA: GetConfigData(filename)
+GA -> GA: sendReq(url, "", "GET")
+GA --> C: configData
+C -> C: loadProjectConfig()
+C -> C: loadSecretConfig()
+C -> C: loadDbConfig()
+C --> MA: config
+
+== Создание сервисов ==
+MA -> GF: NewGiteaFactory()
+GF --> MA: factory
+MA -> GF: CreateGiteaService(config)
+GF -> GA: NewGiteaAPI(giteaConfig)
+GA --> GF: api
+GF -> CA: NewConfigAnalyzer(config)
+CA --> GF: analyzer
+GF -> GS: NewGiteaService(api, config, analyzer)
+GS --> GF: service
+GF --> MA: service
+
+== Git операции ==
+MA -> MA: InitGit(ctx, logger, config)
+MA -> G: NewGit(config)
+G --> MA: git
+MA -> G: Clone(ctx, logger)
+G -> G: git clone operations
+G --> MA: success
+MA -> G: Switch(branch)
+G -> G: git checkout operations
+G --> MA: success
+
+== Анализ проекта ==
+MA -> C: AnalyzeProject(logger, branch)
+C -> GA: createGiteaAPI()
+GA --> C: giteaAPI
+C -> GA: AnalyzeProject(branch)
+GA -> GA: GetRepositoryContents(path, branch)
+GA -> GA: sendReq(url, "", "GET")
+GA --> GA: fileList
+GA -> GA: AnalyzeProjectStructure(branch)
+GA --> C: projectAnalysis
+C --> MA: analysis
+
+== Тестирование слияния ==
+MA -> GS: TestMerge(ctx, logger)
+GS -> GA: ActivePR()
+GA -> GA: sendReq(url, "", "GET")
+GA --> GS: activePRs
+GS -> GA: DeleteTestBranch()
+GA -> GA: sendReq(url, "", "DELETE")
+GA --> GS: success
+GS -> GA: CreateTestBranch()
+GA -> GA: sendReq(url, reqBody, "POST")
+GA --> GS: success
+loop for each PR
+    GS -> GA: CreatePR(head)
+    GA -> GA: sendReq(url, reqBody, "POST")
+    GA --> GS: newPR
+    GS -> GA: ConflictPR(prNumber)
+    GA -> GA: sendReq(url, "", "GET")
+    GA --> GS: isConflict
+    alt if conflict
+        GS -> GA: ClosePR(prNumber)
+        GA -> GA: sendReq(url, reqBody, "PATCH")
+        GA --> GS: success
+    else no conflict
+        GS -> GA: MergePR(prNumber, logger)
+        GA -> GA: sendReq(url, reqBody, "PUT")
+        GA --> GS: success
+    end
+end
+GS --> MA: result
+
+== Конвертация Git2Store ==
+MA -> MA: Git2Store(ctx, logger, config)
+MA -> CC: Load(ctx, logger, config, infobaseName)
+CC -> CC: 1C operations
+CC --> MA: success
+MA -> CC: InitDb(ctx, logger, config)
+CC -> D: CreateTempDb(logger, config, dbPath, addArray)
+D -> D: 1C Designer operations
+D --> CC: oneDb
+CC --> MA: success
+MA -> CC: LoadDb(ctx, logger, config)
+CC -> CC: 1C load operations
+CC --> MA: success
+MA -> CC: DbUpdate(ctx, logger, config)
+CC -> CC: 1C update operations
+CC --> MA: success
+MA -> CC: StoreBind(ctx, logger, config)
+CC -> CC: 1C store bind operations
+CC --> MA: success
+MA -> CC: StoreCommit(ctx, logger, config)
+CC -> CC: 1C store commit operations
+CC --> MA: success
+
+== Управление сервисным режимом ==
+MA -> MA: ServiceModeEnable(ctx, logger, config, infobaseName, terminateSessions)
+MA -> SM: ManageServiceMode(ctx, "enable", dbName, terminateSessions, config, logger)
+SM -> SM: 1C service mode operations
+SM --> MA: success
+
+MA -> MA: ServiceModeDisable(ctx, logger, config, infobaseName)
+MA -> SM: ManageServiceMode(ctx, "disable", dbName, false, config, logger)
+SM -> SM: 1C service mode operations
+SM --> MA: success
+
+MA -> MA: ServiceModeStatus(ctx, logger, config, infobaseName)
+MA -> SM: ManageServiceMode(ctx, "status", dbName, false, config, logger)
+SM -> SM: 1C service mode operations
+SM --> MA: status
+
+== Работа с Issues ==
+MA -> GA: GetIssue(issueNumber)
+GA -> GA: sendReq(url, "", "GET")
+GA --> MA: issue
+MA -> GA: AddIssueComment(issueNumber, commentText)
+GA -> GA: sendReq(url, reqBody, "POST")
+GA --> MA: success
+MA -> GA: CloseIssue(issueNumber)
+GA -> GA: sendReq(url, reqBody, "PATCH")
+GA --> MA: success
+
+== Работа с файлами ==
+MA -> GA: GetFileContent(fileName)
+GA -> GA: sendReq(url, "", "GET")
+GA -> GA: base64 decode operations
+GA --> MA: fileContent
+MA -> GA: SetRepositoryState(logger, operations, branch, commitMessage)
+GA -> GA: sendReq(url, reqBody, "POST")
+GA --> MA: success
+
+note over MA, GA
+  Все HTTP запросы к Gitea API
+  проходят через метод sendReq(),
+  который обеспечивает единообразную
+  обработку авторизации и ошибок
+end note
+
+note over C, GA
+  Конфигурация загружается из
+  Gitea репозитория через API,
+  обеспечивая централизованное
+  управление настройками
+end note
+
+note over GS, CA
+  Сервисный слой обеспечивает
+  разделение бизнес-логики и
+  API взаимодействий
+end note
+
+@enduml

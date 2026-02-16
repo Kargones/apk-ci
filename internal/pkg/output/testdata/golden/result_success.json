@@ -1,0 +1,11 @@
+{
+  "status": "success",
+  "command": "test-command",
+  "data": {
+    "version": "1.0.0"
+  },
+  "metadata": {
+    "duration_ms": 150,
+    "api_version": "v1"
+  }
+}

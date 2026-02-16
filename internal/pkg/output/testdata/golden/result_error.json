@@ -1,0 +1,12 @@
+{
+  "status": "error",
+  "command": "test-command",
+  "error": {
+    "code": "CONFIG.LOAD_FAILED",
+    "message": "не удалось загрузить конфигурацию"
+  },
+  "metadata": {
+    "duration_ms": 50,
+    "api_version": "v1"
+  }
+}

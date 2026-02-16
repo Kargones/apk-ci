@@ -1,10 +1,78 @@
 # Epic 5: Quality & Integration
 
-**Статус:** 🟡 В планировании
+**Статус:** 🟠 Legacy существует, NR не начат
 **Приоритет:** Средний
 **Риск:** 🟡 Средний
-**Stories:** 9
+**Stories:** 0/9 NR (legacy работает)
 **FRs:** FR22-28, FR68
+**Аудит:** 2026-01-26
+
+---
+
+## 📊 Gap Analysis (Аудит 2026-01-26)
+
+### Статус реализации: 🟠 Legacy существует, NR не начат
+
+| Компонент | План (NR) | Legacy реализация | Статус |
+|-----------|-----------|-------------------|--------|
+| SonarQube Adapter | `internal/adapter/sonarqube/` | `internal/entity/sonarqube/` | 🟠 Legacy |
+| Gitea Adapter | `internal/adapter/gitea/` | `internal/entity/gitea/` | 🟠 Legacy |
+| nr-sq-scan-branch | Command Registry | `main.go:194` (switch-case) | 🟠 Legacy |
+| nr-sq-scan-pr | Command Registry | `main.go:204` (switch-case) | 🟠 Legacy |
+| nr-sq-report-branch | Command Registry | `main.go:224` (switch-case) | 🟠 Legacy |
+| nr-sq-project-update | Command Registry | `main.go:214` (switch-case) | 🟠 Legacy |
+| nr-test-merge | Command Registry | `main.go:234` (switch-case) | 🟠 Legacy |
+| nr-action-menu-build | Command Registry | `main.go:144` (switch-case) | 🟠 Legacy |
+| Command Summary (FR68) | OutputWriter extension | ❌ Не реализовано | 🔴 |
+
+### Текущее состояние кода
+
+```
+LEGACY РЕАЛИЗАЦИЯ:
+├── internal/entity/sonarqube/              ✅ SonarQube client
+│   ├── service.go                          ✅ Service layer
+│   ├── scanner.go                          ✅ Scan logic
+│   └── branch_scanner.go                   ✅ Branch scanning
+├── internal/service/sonarqube/             ✅ Command handlers
+├── internal/entity/gitea/                  ✅ Gitea API client
+├── internal/app/app.go                     ✅ SQ* функции
+└── cmd/benadis-runner/main.go              ✅ switch-case
+
+NR АРХИТЕКТУРА (ОЖИДАЕТСЯ):
+├── internal/command/handlers/sonarqube/    ❌ НЕ СУЩЕСТВУЕТ
+├── internal/command/handlers/gitea/        ❌ НЕ СУЩЕСТВУЕТ
+├── internal/adapter/sonarqube/interfaces.go ❌ НЕ СУЩЕСТВУЕТ
+└── internal/adapter/gitea/interfaces.go    ❌ НЕ СУЩЕСТВУЕТ
+```
+
+### 🔒 Prerequisite
+
+**Требует Epic 1!** Без Command Registry невозможно создать NR-команды.
+
+### Legacy команды в production
+
+| Команда | Статус | Тестовое покрытие |
+|---------|--------|-------------------|
+| sq-scan-branch | ✅ Работает | Есть тесты |
+| sq-scan-pr | ✅ Работает | Есть тесты |
+| sq-report-branch | ✅ Работает | Есть тесты |
+| sq-project-update | ✅ Работает | Есть тесты |
+| test-merge | ✅ Работает | — |
+| action-menu-build | ✅ Работает | Есть тесты |
+
+### Stories Progress
+
+| Story | Название | Статус |
+|-------|----------|--------|
+| 5.1 | SonarQube Adapter Interface | 🟠 Legacy есть |
+| 5.2 | Gitea Adapter Interface | 🟠 Legacy есть |
+| 5.3 | nr-sq-scan-branch | 🟠 Legacy есть |
+| 5.4 | nr-sq-scan-pr | 🟠 Legacy есть |
+| 5.5 | nr-sq-report-branch | 🟠 Legacy есть |
+| 5.6 | nr-sq-project-update | 🟠 Legacy есть |
+| 5.7 | nr-test-merge | 🟠 Legacy есть |
+| 5.8 | nr-action-menu-build | 🟠 Legacy есть |
+| 5.9 | Command Summary (FR68) | 🔴 Ждёт Epic 1 |
 
 ---
 
@@ -233,4 +301,5 @@
 
 ---
 
-_Последнее обновление: 2025-11-25_
+_Последнее обновление: 2026-01-26_
+_Аудит проведён: 2026-01-26 (BMAD Party Mode)_

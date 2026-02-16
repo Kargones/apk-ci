@@ -1,10 +1,57 @@
 # Epic 0: Extension Publish
 
-**Статус:** 🟡 В планировании
-**Приоритет:** ★ ПЕРВЫЙ В ОЧЕРЕДИ
-**Риск:** 🟡 Средний
-**Stories:** 8
+**Статус:** ✅ Завершён (Legacy-архитектура)
+**Приоритет:** ★ ЗАВЕРШЁН
+**Риск:** 🟢 Низкий (реализован)
+**Stories:** 8/8 (100%)
 **FRs:** NEW (вне основной нумерации FR1-68)
+**Дата завершения:** 2025-12-08
+**Аудит:** 2026-01-26
+
+---
+
+## 📊 Gap Analysis (Аудит 2026-01-26)
+
+### Статус реализации: ✅ ЗАВЕРШЁН
+
+| Компонент | План | Реализация | Статус |
+|-----------|------|------------|--------|
+| GetLatestRelease() | Story 0.1 | `internal/entity/gitea/gitea.go` | ✅ |
+| SearchAllRepos() | Story 0.2 | `internal/entity/gitea/gitea.go` | ✅ |
+| GetProjectSubscriptions() | Story 0.3 | `internal/app/extension_publish.go:39` | ✅ |
+| SyncExtensionDirectory() | Story 0.4 | `internal/app/extension_publish.go` | ✅ |
+| CreatePR with release info | Story 0.5 | `internal/entity/gitea/gitea.go` | ✅ |
+| Команда extension-publish | Story 0.6 | `cmd/benadis-runner/main.go:244` | ✅ |
+| Error handling & reporting | Story 0.7 | `internal/app/extension_publish.go` | ✅ |
+| Unit & Integration тесты | Story 0.8 | `extension_publish_test.go` (92.9%) | ✅ |
+
+### ⚠️ Архитектурный GAP
+
+**Проблема:** Реализовано в **legacy-стиле** (switch-case в main.go), а не через Command Registry.
+
+```go
+// Текущая реализация (legacy):
+case constants.ActExtensionPublish:
+    err = app.ExtensionPublish(&ctx, l, cfg)
+
+// Ожидаемая архитектура (Epic 1):
+handler := command.Get("extension-publish")
+err = handler.Execute(ctx, cfg)
+```
+
+### TODO для полной архитектурной совместимости
+
+- [ ] Миграция на Command Registry после Epic 1
+- [ ] Добавить как Story 1.10 в Epic 1
+- [ ] Пометить legacy case как @deprecated
+
+### Метрики качества
+
+| Метрика | Значение | Требование |
+|---------|----------|------------|
+| Test Coverage | 92.9% | 80% ✅ |
+| Code Review Issues | 0 open | 0 ✅ |
+| Ретроспектива | Проведена | ✅ |
 
 ---
 
@@ -278,4 +325,5 @@ subscriptions:
 
 ---
 
-_Последнее обновление: 2026-01-16_
+_Последнее обновление: 2026-01-26_
+_Аудит проведён: 2026-01-26 (BMAD Party Mode)_

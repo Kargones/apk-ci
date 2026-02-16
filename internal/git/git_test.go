@@ -1079,7 +1079,7 @@ func TestGitCloneWithTokenError(t *testing.T) {
 	defer os.RemoveAll(tempDir)
 
 	git := &Git{
-		RepURL:  "https://invalid-url.com/repo.git",
+		RepURL:  "https://test.invalid/repo.git", // Домен .invalid гарантированно не резолвится (RFC 2606)
 		RepPath: tempDir + "/cloned",
 		Token:   "invalid-token",
 		WorkDir: tempDir,

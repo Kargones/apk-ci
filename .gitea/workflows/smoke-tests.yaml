@@ -1,0 +1,48 @@
+# Smoke-тесты для benadis-runner
+# Проверяют системную целостность: регистрацию команд, deprecated aliases, базовый pipeline
+#
+# Этот workflow запускается параллельно с ci.yaml при push на main.
+# Выделен в отдельный workflow для:
+#   - Сохранения результатов как CI artifacts (AC5)
+#   - Явной видимости статуса smoke-тестов в Gitea UI отдельно от основного CI
+#   - В ci.yaml smoke-тесты исключены из `go test ./...` и запускаются отдельным шагом
+name: Smoke Tests
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  smoke-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+          cache: true
+
+      - name: Install dependencies
+        run: go mod download
+
+      - name: Install Wire CLI
+        run: go install github.com/google/wire/cmd/wire@v0.6.0
+
+      - name: Generate Wire
+        run: make generate-wire
+
+      - name: Run smoke tests
+        run: make test-smoke 2>&1 | tee smoke-test-output.log
+
+      - name: Save smoke test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-test-results
+          path: smoke-test-output.log
+          retention-days: 30

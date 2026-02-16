@@ -21,6 +21,7 @@
 | [epics/epic-5-quality-integration.md](./epics/epic-5-quality-integration.md) | Epic 5: Quality & Integration |
 | [epics/epic-6-observability.md](./epics/epic-6-observability.md) | Epic 6: Advanced Observability |
 | [epics/epic-7-finalization.md](./epics/epic-7-finalization.md) | Epic 7: Finalization |
+| [epics/epic-8-tech-debt.md](./epics/epic-8-tech-debt.md) | Epic 8: Tech Debt Closure |
 | [epics/fr-coverage.md](./epics/fr-coverage.md) | FR Coverage Matrix |
 
 ---
@@ -29,8 +30,8 @@
 
 | Метрика | Значение |
 |---------|----------|
-| Эпиков | 8 |
-| Историй | 66 |
+| Эпиков | 9 (0-8) |
+| Историй | 75 |
 | Функциональных требований | 68 + NEW |
 
 ---

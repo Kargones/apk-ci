@@ -1,0 +1,49 @@
+# Тестовый production-like конфигурационный файл
+# Проверяет backward compatibility - конфиг БЕЗ секций implementations и logging
+# должен парситься без ошибок
+
+logLevel: Info
+workDir: /tmp/benadis
+tmpDir: /tmp/benadis/temp
+timeout: 30
+
+paths:
+  bin1cv8: /opt/1cv8/x86_64/8.3.27.1606/1cv8
+  binIbcmd: /opt/1cv8/x86_64/8.3.27.1606/ibcmd
+  edtCli: /opt/1C/1CE/components/1c-edt-2024.2.6+7-x86_64/1cedtcli
+  rac: /opt/1cv8/x86_64/8.3.27.1606/rac
+
+rac:
+  port: 1545
+  timeout: 30
+  retries: 3
+
+users:
+  rac: admin
+  db: db_user
+  mssql: mssql_user
+  storeAdmin: store_admin
+
+dbrestore:
+  database: master
+  timeout: 30m
+  autotimeout: true
+
+sonarqube:
+  url: http://sonarqube.example.com
+  project_key: test-project
+  timeout: 10m
+
+scanner:
+  url: http://scanner.example.com
+  version: 5.0.1
+
+git:
+  userName: test-user
+  userEmail: test@example.com
+  defaultBranch: main
+  timeout: 60m
+
+# НАМЕРЕННО ОТСУТСТВУЮТ секции:
+# - logging (должна использоваться default конфигурация)
+# - implementations (должна использоваться default конфигурация)
