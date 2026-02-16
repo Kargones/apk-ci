@@ -593,8 +593,8 @@ func TestGetDefaultConfigs(t *testing.T) {
 		if gitConfig == nil {
 			t.Fatal("Expected non-nil GitConfig")
 		}
-		if gitConfig.UserName != "benadis-runner" {
-			t.Errorf("Expected UserName = benadis-runner, got %s", gitConfig.UserName)
+		if gitConfig.UserName != "apk-ci" {
+			t.Errorf("Expected UserName = apk-ci, got %s", gitConfig.UserName)
 		}
 		if gitConfig.UserEmail != "runner@benadis.ru" {
 			t.Errorf("Expected UserEmail = runner@benadis.ru, got %s", gitConfig.UserEmail)

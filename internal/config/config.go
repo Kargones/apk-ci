@@ -501,7 +501,7 @@ func loadRacConfig(l *slog.Logger, cfg *Config) (*RacConfig, error) {
 // getDefaultGitConfig возвращает конфигурацию Git по умолчанию
 func getDefaultGitConfig() *GitConfig {
 	return &GitConfig{
-		UserName:          "benadis-runner",
+		UserName:          "apk-ci",
 		UserEmail:         "runner@benadis.ru",
 		DefaultBranch:     "main",
 		Timeout:           60 * time.Minute,
@@ -516,7 +516,7 @@ func getDefaultLoggingConfig() *LoggingConfig {
 		Level:      "info",
 		Format:     "json",
 		Output:     "stdout",
-		FilePath:   "/var/log/benadis-runner.log",
+		FilePath:   "/var/log/apk-ci.log",
 		MaxSize:    100,
 		MaxBackups: 3,
 		MaxAge:     7,

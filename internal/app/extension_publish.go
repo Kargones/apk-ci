@@ -675,7 +675,7 @@ func BuildExtensionPRBody(release *gitea.Release, sourceRepo, extName, releaseUR
 	}
 
 	sb.WriteString("\n\n---\n")
-	sb.WriteString("*This PR was automatically created by benadis-runner extension-publish*\n")
+	sb.WriteString("*This PR was automatically created by apk-ci extension-publish*\n")
 
 	return sb.String()
 }

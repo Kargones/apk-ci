@@ -132,7 +132,7 @@ func TestConfigLoadingWithGiteaActionParams(t *testing.T) {
 	os.Setenv("INPUT_DBNAME", "V8_DEV_TEST")
 	os.Setenv("INPUT_TERMINATESESSIONS", "false")
 
-	// Set benadis-runner environment variables
+	// Set apk-ci environment variables
 	os.Setenv("BR_ACTOR", "test-actor")
 	os.Setenv("BR_ENV", "dev")
 	os.Setenv("BR_COMMAND", "convert")

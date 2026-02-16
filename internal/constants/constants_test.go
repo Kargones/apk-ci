@@ -1,4 +1,4 @@
-// Package constants содержит тесты для констант проекта benadis-runner.
+// Package constants содержит тесты для констант проекта apk-ci.
 package constants
 
 import (

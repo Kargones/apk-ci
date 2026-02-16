@@ -20,7 +20,7 @@ vars:
   TERMINATE_SESSIONS: "true"
   FORCE_UPDATE: "true"
   DEBUG_PORT: "2345"
-  BUILD_DIR: "./bin/benadis-runner-bin"
+  BUILD_DIR: "./bin/apk-ci-bin"
   DEBUG_PORT_INPUT: "0"
   WAIT: "false"
   START_EPF: "https://regdv.apkholding.ru/api/v1/repos/gitops-tools/gitops_congif/contents/start.epf?ref=main"
@@ -70,7 +70,7 @@ tasks:
       INPUT_STARTEPF: "{{.START_EPF}}"
     cmds:
       - |
-        dlv debug ./cmd/benadis-runner \
+        dlv debug ./cmd/apk-ci \
           --headless --listen=127.0.0.1:{{.DEBUG_PORT}} --api-version=2 --accept-multiclient \
           --allow-non-terminal-interactive=true
 
@@ -88,7 +88,7 @@ tasks:
         echo "Генерация version.go..."
         ./scripts/generate-version.sh --version-go-only
         mkdir -p {{.BUILD_DIR}}
-        go build -o {{.BUILD_DIR}}/benadis-runner ./cmd/benadis-runner
+        go build -o {{.BUILD_DIR}}/apk-ci ./cmd/apk-ci
         ./scripts/generate-version.sh --version-md-only {{.BUILD_DIR}}
 
   build-debug:
@@ -98,7 +98,7 @@ tasks:
         echo "Генерация version.go..."
         ./scripts/generate-version.sh --version-go-debug
         mkdir -p {{.BUILD_DIR}}
-        go build -gcflags="-N -l" -o {{.BUILD_DIR}}/benadis-runner ./cmd/benadis-runner
+        go build -gcflags="-N -l" -o {{.BUILD_DIR}}/apk-ci ./cmd/apk-ci
         ./scripts/generate-version.sh --version-md-only --debug {{.BUILD_DIR}}
 
   debug-binary:
@@ -126,8 +126,8 @@ tasks:
       INPUT_STARTEPF: "{{.START_EPF}}"
     cmds:
       - |
-        echo "Запуск отладки бинарного файла {{.BUILD_DIR}}/benadis-runner..."
-        dlv exec {{.BUILD_DIR}}/benadis-runner \
+        echo "Запуск отладки бинарного файла {{.BUILD_DIR}}/apk-ci..."
+        dlv exec {{.BUILD_DIR}}/apk-ci \
           --headless --listen=127.0.0.1:{{.DEBUG_PORT}} --api-version=2 --accept-multiclient \
           --allow-non-terminal-interactive=true
   run:
@@ -154,4 +154,4 @@ tasks:
       INPUT_STARTEPF: "{{.START_EPF}}"
     cmds:
       - |
-        {{.BUILD_DIR}}/benadis-runner
+        {{.BUILD_DIR}}/apk-ci

@@ -22,7 +22,7 @@ func main() {
 
 	// Создание конфигурации сканера
 	cfg := &config.ScannerConfig{
-		WorkDir: "/root/r/benadis-runner/test",
+		WorkDir: "/root/r/apk-ci/test",
 		Timeout: 30 * time.Second,
 	}
 
@@ -61,10 +61,10 @@ func main() {
 	// Тест ExtractProblematicBSLFiles
 	testErrorOutput := `
 ERROR: Error during SonarQube Scanner execution
-org.sonar.api.utils.SonarException: Unable to parse file: /root/r/benadis-runner/test/problematic_test.bsl
+org.sonar.api.utils.SonarException: Unable to parse file: /root/r/apk-ci/test/problematic_test.bsl
 	at org.sonar.plugins.bsl.BSLTokenizer.tokenize(BSLTokenizer.java:45)
 	at org.sonar.plugins.bsl.BSLSensor.execute(BSLSensor.java:78)
-Caused by: BSL tokenization error in file: /root/r/benadis-runner/test/another_problematic.bsl
+Caused by: BSL tokenization error in file: /root/r/apk-ci/test/another_problematic.bsl
 	at line 5: Unexpected token
 `
 

@@ -1076,7 +1076,7 @@ func TestBuildExtensionPRBody_FullRelease(t *testing.T) {
 	if !strings.Contains(body, "Added new feature") {
 		t.Error("Body должен содержать release notes")
 	}
-	if !strings.Contains(body, "benadis-runner extension-publish") {
+	if !strings.Contains(body, "apk-ci extension-publish") {
 		t.Error("Body должен содержать подпись автоматического создания")
 	}
 }
