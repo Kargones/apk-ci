@@ -1,6 +1,6 @@
 // Package app содержит логику для публикации расширений 1C.
 // Реализует механизм поиска подписанных репозиториев через файл project.yaml.
-package app
+package extensionpublishhandler
 
 import (
 	"context"

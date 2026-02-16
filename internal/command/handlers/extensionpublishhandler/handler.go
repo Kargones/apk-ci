@@ -1,11 +1,9 @@
-// Package extensionpublishhandler — тонкий адаптер для legacy app.ExtensionPublish.
-// TODO: Полноценная миграция логики из internal/app/extension_publish.go в этот handler.
+// Package extensionpublishhandler — handler для публикации расширений 1C.
 package extensionpublishhandler
 
 import (
 	"context"
 
-	"github.com/Kargones/apk-ci/internal/app"
 	"github.com/Kargones/apk-ci/internal/command"
 	"github.com/Kargones/apk-ci/internal/config"
 	"github.com/Kargones/apk-ci/internal/constants"
@@ -15,7 +13,7 @@ func init() {
 	command.RegisterWithAlias(&ExtensionPublishHandler{}, constants.ActExtensionPublish)
 }
 
-// ExtensionPublishHandler — адаптер, делегирующий выполнение в legacy app.ExtensionPublish.
+// ExtensionPublishHandler — handler для публикации расширений 1C.
 type ExtensionPublishHandler struct{}
 
 // Name возвращает имя команды.
@@ -28,7 +26,7 @@ func (h *ExtensionPublishHandler) Description() string {
 	return "Публикация расширения 1C"
 }
 
-// Execute делегирует выполнение в legacy app.ExtensionPublish.
+// Execute выполняет публикацию расширения.
 func (h *ExtensionPublishHandler) Execute(ctx context.Context, cfg *config.Config) error {
-	return app.ExtensionPublish(&ctx, cfg.Logger, cfg)
+	return ExtensionPublish(&ctx, cfg.Logger, cfg)
 }
