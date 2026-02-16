@@ -619,7 +619,7 @@ func (cc *Config) Merge(ctx *context.Context, l *slog.Logger, cfg *config.Config
 		l.Error("ошибка создания файла настроек слияния",
 			slog.String("Error", err.Error()),
 		)
-		os.Exit(11)
+		return fmt.Errorf("ошибка создания файла настроек слияния: %w", err)
 	}
 	defer func() {
 		if removeErr := os.Remove(mergeSettingFileName); removeErr != nil {
