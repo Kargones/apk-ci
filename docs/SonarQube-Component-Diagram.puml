@@ -1,0 +1,105 @@
+@startuml Диаграмма компонентов интеграции с SonarQube для benadis-runner
+' Диаграмма компонентов интеграции с SonarQube для benadis-runner
+
+' Интерфейсы
+interface "GiteaAPIInterface" as GiteaAPIInterface
+interface "SonarQubeAPIInterface" as SonarQubeAPIInterface
+interface "SonarScannerInterface" as SonarScannerInterface
+
+' Основное приложение
+component "benadis-runner" as BenadisRunner {
+    component "main" as Main
+    component "app" as App
+    component "config" as Config
+    component "entity" as Entity {
+        component "gitea" as GiteaEntity
+    }
+    component "service" as Service {
+        component "gitea_factory" as GiteaFactory
+        component "gitea_service" as GiteaService
+        component "sonarqube_factory" as SonarQubeFactory
+        component "sonarqube_service" as SonarQubeService
+        component "sonar_scanner_manager" as SonarScannerManager
+        component "configuration_manager" as ConfigurationManager
+        component "sq_command_handler" as SQCommandHandler {
+            component "sq_scan_branch" as SQScanBranch
+            component "sq_scan_pr" as SQScanPR
+            component "sq_project_update" as SQProjectUpdate
+            component "sq_repo_sync" as SQRepoSync
+            component "sq_repo_clear" as SQRepoClear
+            component "sq_report_pr" as SQReportPR
+            component "sq_report_branch" as SQReportBranch
+            component "sq_report_project" as SQReportProject
+        }
+    }
+    component "util" as Util
+}
+
+' Внешние зависимости
+component "Gitea API" as GiteaAPI
+component "SonarQube API" as SonarQubeAPI
+component "Sonar Scanner" as SonarScanner
+
+' Реализации интерфейсов
+GiteaAPI .up.|> GiteaAPIInterface
+SonarQubeAPI .up.|> SonarQubeAPIInterface
+SonarScanner .up.|> SonarScannerInterface
+
+' Связи между компонентами
+Main --> App : использует
+App --> Config : использует
+App --> Entity : использует
+App --> Service : использует
+App --> Util : использует
+
+' Gitea интеграция (уже существует)
+GiteaEntity --> GiteaAPIInterface : взаимодействует с
+GiteaFactory --> GiteaEntity : создает
+GiteaService --> GiteaEntity : использует
+Service --> GiteaService : использует
+GiteaService --> GiteaAPIInterface : взаимодействует с
+
+' SonarQube интеграция (планируется)
+SonarQubeFactory --> SonarQubeAPIInterface : создает клиент
+SonarQubeService --> SonarQubeAPIInterface : взаимодействует с
+Service --> SonarQubeService : использует
+SonarScannerManager --> SonarScannerInterface : управляет
+ConfigurationManager --> Config : читает конфигурацию
+Service --> ConfigurationManager : использует
+
+' Обработчики команд SQ
+Service --> SQCommandHandler : использует
+SQCommandHandler --> SQScanBranch : содержит
+SQCommandHandler --> SQScanPR : содержит
+SQCommandHandler --> SQProjectUpdate : содержит
+SQCommandHandler --> SQRepoSync : содержит
+SQCommandHandler --> SQRepoClear : содержит
+SQCommandHandler --> SQReportPR : содержит
+SQCommandHandler --> SQReportBranch : содержит
+SQCommandHandler --> SQReportProject : содержит
+
+' Взаимодействия между обработчиками команд
+SQScanPR --> SQScanBranch : вызывает
+SQRepoSync --> SQProjectUpdate : вызывает
+SQRepoSync --> SQScanBranch : вызывает
+SQRepoSync --> SQRepoClear : вызывает
+SQReportPR --> SQReportBranch : вызывает
+SQReportProject --> SQReportBranch : вызывает
+
+' Взаимодействия с внешними зависимостями через интерфейсы
+SQScanBranch --> GiteaAPIInterface : получает данные о ветке
+SQScanBranch --> SonarQubeAPIInterface : получает/создает проект
+SQScanBranch --> SonarScannerInterface : запускает сканирование
+SQScanPR --> GiteaAPIInterface : получает данные PR
+SQProjectUpdate --> GiteaAPIInterface : получает данные о репозитории
+SQProjectUpdate --> SonarQubeAPIInterface : обновляет проект
+SQRepoSync --> GiteaAPIInterface : получает список веток
+SQRepoSync --> SonarQubeAPIInterface : получает список проектов
+SQRepoClear --> GiteaAPIInterface : получает список веток
+SQRepoClear --> SonarQubeAPIInterface : получает список проектов
+SQRepoClear --> SonarQubeAPIInterface : удаляет проекты
+SQReportPR --> GiteaAPIInterface : получает данные PR
+SQReportBranch --> SonarQubeAPIInterface : получает ошибки
+SQReportProject --> GiteaAPIInterface : получает данные о ветках
+
+@enduml

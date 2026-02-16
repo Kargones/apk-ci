@@ -1,0 +1,3452 @@
+TEST_DNAVOLOTSKY_SURV:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+TEST_DNAVOLOTSKY_ZUP:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+TEST_IKHRISTENZEN_SURV:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+TEST_MBELOUSOVA_SURV:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+TEST_MBELOUSOVA_ZUP:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+TEST_NPOSADOVA_ZUP:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+TEST_OABDUSHEV_ZUP:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+TEST_RLAPTEVA_ZUP:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+TEST_VBEZIK_PR_APKKURSK_BUH:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_ARCH_2_APK_UH:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_2_TD_APKKURSK_BUH:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_2_TD_APKKURSK_UT:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_2018_TD_NORDWEST_BUH:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_AC_BUH:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_AC_ZUP:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_AGROLIDER_BUH:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_AGROLIDER_REP:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_AGROPROMSTROY_BUHSTR_2015:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_AGROPROMSTROY_BUHSTR_2021:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_AGROPROMSTROY_DOC:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_AGROSTROY_BUHSTR:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_APK_CENTER_2IS:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_APK_CENTER_UT_REN2025:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_APK_DIT_REESTR:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_APK_DO:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_APK_FINANCE:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_APK_FINANCE_2014_2023:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_APK_GARANT_BUH:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_APK_GARANTPLUS_BUH:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_APK_MOSCOW:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_APK_NED:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_APK_PRODINVEST:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_APK_TOIR:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_APK_UAT:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_APK_ZUP:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_APKKURSK_REP:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_APKR_BUH:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_ATI_ZUP:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_DO_PSK_KURSK:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_GORLOVSKIY_BCHP:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_GORLOVSKIY_ZUP:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_ITIL_CORP:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_KNOWLEDGE_OPP:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_M_ZUP:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_N_ZUP:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_OLD_PR_DMPZ_ERP:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_PR_AGRARY_BUH:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_PR_AGRARY_ZIK:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_PR_AGRARY_ZUP:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_PR_AGROFIRMA_ZUP:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_PR_AGROFIRMA_ZUP3:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_PR_APK_ZUP:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_PR_APKKURSK_BUH_2_3:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_PR_APKKURSK_BUH_2007_2009:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_PR_APKKURSK_BUH_2011_2021:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_PR_APKKURSK_BUH_202201:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_PR_APKKURSK_KKZ_OTR:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_PR_APKKURSK_VETIS:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_PR_APKKURSK_ZUP:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_PR_APKKURSK_ZUP3:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_PR_APKRYAZAN_ZUP:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_PR_APKTVER_BUH:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_PR_AVTO_ZUP:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_PR_AVTO_ZUP3:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_PR_BELOK_BUH:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_PR_BELOK_ZUP:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_PR_BELOK_ZUP3:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_PR_CHERNOZEM_ZUP:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_PR_CHERNOZEM_ZUP3:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_PR_DME_AGRO:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_PR_DME_BUH:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_PR_DME_ZUP:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_PR_DME_ZUP_2:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_PR_DMPZ_ERP_1409:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_PR_KMPZ_MES:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_PR_KMPZ_UT_REN2025:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_PR_KURSK_BSO_PCK_SKSTROITEL:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_PR_KURSK_BUH_OTRASLEVAY:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_PR_KURSK_BUH_OTRASLEVAY_OLD:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_PR_KURSKZERNO_BUH:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_PR_KURSKZERNO_ZUP:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_PR_KURSKZERNO_ZUP3:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_PR_LINETS_ZUP:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_PR_LINETS_ZUP3:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_PR_MPZ_APK_ZUP:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_PR_MPZ_OHRANA_TRUDA:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_PR_MPZ_ZUP:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_PR_MZ_ERP_24:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_PR_MZ_ERP_1409:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_PR_MZ_XTREK:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_PR_MZ_ZUP:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_PR_MZ_ZUP3:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_PR_PB_BUH:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_PR_PB_ZUP:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_PR_PROGRESS_ZUP:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_PR_PROGRESS_ZUP3:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_PR_TD_DG_UT_REN2025:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_PR_WEB_KON_OTCHET:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_PROVANCE_ERP:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_PROVANCE_MES:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_R_BG_UT:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_R_FL_BUH:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_R_FL_UT:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_R_KP_BUH:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_R_KP_UT:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_R_KP2_BUH:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_R_KP2_UT:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_R_SM_BUH:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_R_SM_ZUP3:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_R_TG_BUH:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_R_TG_UT:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_R_TG2_BUH:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_R_TG2_UT:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_R_TK_BUH:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_REG_LOG_BASE:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_RZHAVKI_DG_ZUP3:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_RZHAVKI_FL_ZUP3:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_RZHAVKI_UNION_BUH:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_RZHAVKI_ZUP:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_RZHAVKI_ZUP3_REN2025:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_SH_AGROFIRMA_OTCHET_OLD:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_SH_DG_BUH:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_SH_DG_OHRANA_TRUDA:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_SH_RUCHYI_BUH:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_SH_RUCHYI_DG_BUH:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_SH_RUCHYI_OTCHET_OLD:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_TD_APKKURSK_BUH_2011_2021:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_TD_APKKURSK_ZUP:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_TD_BG_BUH:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_TD_DG_UT:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_TD_DPVOSTOK_ZUP:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_TD_KP_ZUP:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_TD_KP2_ZUP:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_TD_NORD_BUH:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_TD_NORD_UT:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_TD_NORD_ZUP:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_TD_NORDWEST_UT:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_TD_NORDWEST_UT_UTIL:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_TD_NORDWEST_ZUP:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_TD_TG_ZUP:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_TD_TG2_ZUP:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_TD_VLADIMIR_MES:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_TD_ZEL_BUH_2013_2023:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_TD_ZEL_BUH_REN2025:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_TD_ZEL_EDO_BUH:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_TD_ZEL_UT_REN2025:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_TD_ZEL_UT_UTIL:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_TERMINAL:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_UNION_UT_REN2025:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_USLUGI_AF_RZHEV_BUH:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_USLUGI_AF_RZHEV_ZUP:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_USLUGI_AF_RZHEV_ZUP3:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_USLUGI_AGROPROMSTROY_ZUP:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_USLUGI_AGROPROMSTROY_ZUP3:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_USLUGI_AGROPROMTRANS_BUH:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_USLUGI_AGROPROMTRANS_ZUP:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_USLUGI_AGROPROMTRANS_ZUP3:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_USLUGI_APKKONAKOVO_BUH:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_USLUGI_KOROVINO_BUH:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_USLUGI_KOROVINO_BUH_2025:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_USLUGI_PSKSTROITEL_DO:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_USLUGI_SKSTROITEL_BUH:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_USLUGI_TOROPA_BUH:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_ARCH_USLUGI_TOROPA_BUH_2021:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_CHANGELOG_APK_CENTER_UT:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_CHANGELOG_PR_KMPZ_UT:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_CHANGELOG_PR_TD_DG_UT:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_CHANGELOG_TD_ZEL_UT:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_CHANGELOG_UNION_UT:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_CICD_PR_DMPZ_MES:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_CICD_PR_DMPZ_MES_1:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_CICD_ZUP:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_CICF_HR_SURV:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_CICF_HR_SURV_TEST:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_CICF_HR_ZUP:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_CICF_ISS_LIS:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_CICF_ISS_OBSHEPIT:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_CICF_ISS_OT:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_CICF_ISS_SCUD:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_CICF_ISS_TOIR3:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_DEMO_ABYKANOVA_APK_MOSCOW_BUH:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_APK_EDO:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_BOYNYA_KON_MES:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_CHARKINA_RZHAVKI_ZUP3:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_CONS-2_RZHAVKI_ZUP3:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_CONS_PR_DMPZ_ERP:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_CONS_PR_MZ_ERP:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_CONS_RZHAVKI_ZUP3:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_CONS_SH_DG_BUH:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_CONS_SURV:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_CONS_UH:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_CONS_UNION_TVER_BUH:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_DLYAIZMENENII_DMPZ_MES:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_EGRISHPAK_RZHAVKI_ZUP3:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_EGRISHPAK_RZHAVKI_ZUP3_2:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_FEDOTOV_APK_CENTER_DO:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_FEDOTOV_APK_CENTER_DO3:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_GONCHAROVA_USLUGI_AGROPROMTRANS_BUH:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_IBELSKAYA_PR_LINETS_BUH:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_IDM_PR_TD_DG_UT:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_IKALUTSKAYA_UNION_TVER_BUH:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_KASHTUEVA_TD_DG_UT:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_KASHTUEVA_TD_ZEL_UT:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_KRAPIVIN_APPLICATION:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_KURUKINA_PR_AVTO_BUH:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_LTAZINA_APK_MOSCOW_BUH:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_MAKUZNETSOVA_PR_LINETS_BUH:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_MALAKHOVA_RZHAVKI_ZUP3:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_MALAKHOVA_RZHAVKI_ZUP3_2:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_OCO:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_OPP_2_APK_UH:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_OPP_APK_CENTER_UT:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_OPP_PR_APKKURSK_BUH:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_OPP_PR_APKRYAZAN_BUH:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_OPP_PR_AVTO_BUH:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_OPP_PR_DMPZ_ERP:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_OPP_PR_DMPZ_MES:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_OPP_PR_DMPZ_WMS:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_OPP_PR_KAP_ERP:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_OPP_PR_KMPZ_UT:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_OPP_PR_LINETS_BUH:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_OPP_PR_MZ_ERP:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_OPP_PR_MZ_XTREK:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_OPP_PR_TD_DG_UT:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_OPP_RYAZAN_AGRO_BUH:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_OPP_SH_DG_BUH:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_OPP_TD_ZEL_BUH:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_OPP_TD_ZEL_UT:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_OPP_UNION_UT:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_OPP_USLUGI_AGROPROMTRANS_BUH:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_PR_DMPZ_OBSHEPIT_ERP:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_PR_MZ_XTREK2:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_PR_TD_DG_UT:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_PULS_CSS:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_SDUNDUKOVA_PR_APKKURSK_BUH:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_SDUNDUKOVA_PR_APKRYAZAN_BUH:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_SHVORNEVA_PR_APKKURSK_BUH:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_SNAGORNAYA_TD_ZEL_BUH:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_TOIR3:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_YUDINA_PR_DMPZ_MES:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_YUSHIRKOVA_PR_APKKURSK_BUH:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_ZELENTSOV_APK_CENTER_DO3:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_ZINOVEVA_PR_APKKURSK_BUH:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEMO_ZINOVEVA_PR_APKRYAZAN_BUH:
+    one-server: DEMO-16-AS-001
+    prod: false
+    dbserver: DEMO-16-DB-001
+V8_DEV_1CAN_RZHAVKI_ZUP3:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_DEV_AANOSOV_PR_APKKURSK_BUH:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_AANOSOV_PR_DMPZ_ERP:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_AANOSOV_TMS:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ABONDARENKO_APK_EDO:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ABONDARENKO_PR_TD_DG_UT:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ABONDARENKO_TD_ZEL_UT:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ABONDARENKO_UNION_UT:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_AGANGVANI_APK_CENTER_DO:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_AGANGVANI_APK_CENTER_DO3:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_AGANGVANI_APK_CENTER_DO3_1:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_AGENTPLUS_APK_CENTER_UT:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_AGENTPLUS_PR_TD_DIST:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_AGENTPLUS_TD_ZEL_UT:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_AKRASNYJ_DEMOERP:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_AKRASNYJ_PR_KAP_ERP:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_AKRASNYJ_PR_KAP_ERP_1:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ALGERASKIN_APK_CENTER_UT:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ALGERASKIN_APK_EDO:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ANALYTICS_CD:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ANNOVIKOV_APK_CENTER_DO:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ANNOVIKOV_APK_CENTER_DO3:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ANNOVIKOV_APK_CENTER_DO3_2:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_AOSIPOV_PR_KAP_ERP:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_AOSIPOV_TD_ZEL_UT:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_AOSIPOV_TD_ZEL_UT_1:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_APK_EDO:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_APUSTOVITOV_PR_KMPZ_UT:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_APUSTOVITOV_PR_TD_DG_UT:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_APUSTOVITOV_TD_ZEL_BUH:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_APUSTOVITOV_TD_ZEL_UT:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_APUSTOVITOV_UNION_UT:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ARODIONOV_APK_CENTER_DO:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ARODIONOV_APK_CENTER_DO_2:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ARODIONOV_APK_CENTER_DO_4:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ARODIONOV_APK_CENTER_DO3:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ARODIONOV_APK_CENTER_UT:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ARODIONOV_APK_DO_V3:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ASOZONOV_TD_ZEL_UT:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_BAYGUSHKIN_JOBIT:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_DEV_DATAREON_API_GATEWAY:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_DAVOEVODIN_PR_DMPZ_ERP:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_DAVOEVODIN_PR_DMPZ_ERP_2:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_DAVOEVODIN_PR_DMPZ_ERP_IN1:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_DAVOEVODIN_PR_DMPZ_ERP_IN2:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_DAVOEVODIN_PR_DMPZ_ERP_OUT:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_DBORODULIN_GORLOVSKIY_BUH:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_DBORODULIN_PR_APKKURSK_BUH:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_DBORODULIN_PR_APKRYAZAN_BUH:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_DBORODULIN_SH_DG_BUH:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_DBORODULIN_USLUGI_AGROPROMTRANS_BUH:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_DESNOL_APK_TOIR3:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_DESNOL_APK_TOIR3_1:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_DESNOL_PR_APKKURSK_BUH:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_DESNOL_PR_APKRYAZAN_BUH:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_DESNOL_PR_AVTO_BUH:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_DESNOL_PR_DMPZ_ERP:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_DESNOL_PR_KAP_ERP:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_DESNOL_PR_LINETS_BUH:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_DESNOL_PR_MZ_ERP:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_DESNOL_SH_DG_BUH:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_DESNOL_USLUGI_AGROPROMTRANS_BUH:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_DMBIRYUKOV_APK_CENTER_UT:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_DMBIRYUKOV_APK_EDO:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_DMBIRYUKOV_PR_KMPZ_UT:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_DMBIRYUKOV_PR_TD_DG_UT:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_DMBIRYUKOV_TD_ZEL_BUH:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_DMBIRYUKOV_TD_ZEL_UT:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_DMBIRYUKOV_UNION_UT:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_DNAVOLOTSKY_RZHAVKI_ZUP3_SURV:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_DNAVOLOTSKY_RZHAVKI_ZUP3_SURV_2:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_DNAVOLOTSKY_STEST:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_DNAVOLOTSKY_SURV:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_DNAVOLOTSKY_SURV_2:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_DPL_DATAREON_DO:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_DSBEKETOV_APK_TOIR3:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_DSBEKETOV_APK_TOIR3_1:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_DSBEKETOV_PR_DMPZ_ERP:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_DSBEKETOV_PR_LINETS_BUH:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_DSBEKETOV_STORE_ERP:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_DSEROVA_RZHAVKI_ZUP3:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_DSEROVA_RZHAVKI_ZUP3_INT:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_DTKACHEV_APK_KURSK_DT_1:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_DTKACHEV_APK_KURSK_DT_2:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_DTKACHEV_APKKURSK_BUH:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_DTKACHEV_PR_APKKURSK_BUH_2:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_DTKACHEV_USLUGI_AGROPROMTRANS_BUH:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_EDO_APK_CENTER_DO2:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_EDO_APK_CENTER_DO3:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_EDO_PR_KMPZ_UT:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_EDO_PR_TD_DG_UT:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_EDO_TD_ZEL_UT:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_EDO_UNION_UT:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_EGORODETSKII_APK_OT:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_EGORODETSKII_RZHAVKI_ZUP3:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_EMALYJ_2_APK_UH:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ERPKAP_2_APK_UH:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ERPKAP_2_APK_UH_1:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ERPKAP_MERCURY_UT:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ERPKAP_PR_KAP_ERP:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ERPKAP_PR_KAP_ERP_01:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ERPKAP_PR_KAP_ERP_02:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ERPKAP_PR_KAP_ERP_03:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ERPKAP_PR_KAP_ERP_04:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ERPKAP_PR_KAP_ERP_05:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ERPKAP_PR_KAP_ERP_06:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ERPKAP_PR_KAP_ERP_07:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ERPKAP_PR_KAP_ERP_08:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ERPKAP_PR_KAP_ERP_09:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ERPKAP_PR_KAP_ERP_10:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ERPKAP_PR_KAP_ERP_11:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ERPKAP_PR_KMPZ_UT:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ERYABINSKAYA_MERCURY_UT:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ERYABINSKAYA_PR_APKKURSK_BUH:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ERYABINSKAYA_PR_MZ_XTREK2:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ERYABINSKAYA_PR_TD_DG_UT:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ERYABINSKAYA_SH_DG_BUH:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ERYABINSKAYA_TD_ZEL_UT:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ESHABROV_APK_CENTER_DO:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ESHABROV_APK_CENTER_DO3:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ETOROPKIN:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ETOROPKIN_CUBE:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ETRN_PR_TD_DG_UT:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_EZHULPA_2_APK_UH:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_EZHULPA_2_APK_UH_1:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_GZELINSKII_RZHAVKI_ZUP3:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_HORRIOT_PR_APKKURSK_BUH:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_HORRIOT_SH_DG_BUH:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_HORRIOT_SH_DG_BUH_1:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_IDM_2_APK_UH:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_IDM_APK_CENTER_DO:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_IDM_APK_CENTER_DO3:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_IDM_APK_CENTER_UT:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_IDM_PR_DMPZ_ERP:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_IDM_PR_KMPZ_UT:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_IDM_PR_MZ_ERP:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_IDM_PR_TD_DG_UT:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_IDM_PR_TD_DG_UT_2:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_IDM_RZHAVKI_ZUP3:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_IDM_TD_ZEL_UT:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_IDM_UNION_UT:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_IKHRISTENZEN_RZHAVKI_ZUP3:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_IKHRISTENZEN_SURV:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_IKHRISTENZEN_UNION_UT:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_IKONEV_APK_CENTER_UT:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_IKONEV_PR_KMPZ_UT:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_IKONEV_PR_TD_DG_UT:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_IKONEV_TD_ZEL_UT:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_IKONEV_UNION_UT:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_IKONEV_UT:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_IKRUGLOV_PR_DMPZ_ERP:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_IKRUGLOV_PR_DMPZ_MES:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_IKRUGLOV_PR_MZ_ERP:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_IKULESHOV_2_APK_UH:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_IKULESHOV_2_APK_UH_1:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_IKULESHOV_2_APK_UH_2:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_IKULESHOV_2_APK_UH_3:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_IKULESHOV_2_APK_UH_4:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ILUBNEVSKAYA_RZHAVKI_ZUP3:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_IRIKUZNETSOVA_APK_CENTER_UT:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_IRIKUZNETSOVA_APK_EDO:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_IRIKUZNETSOVA_TD_ZEL_UT:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_IRIKUZNETSOVA_UNION_UT:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ISAMOYLOV_APK_TOIR:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ISAMOYLOV_APK_TOIR3:
+    one-server: MSK-DV-AS-004
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ISAMOYLOV_APK_TPM_TOIR3:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ISAMOYLOV_ERP_LIS:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ISAMOYLOV_PEST:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ISAMOYLOV_PR_APKKURSK_BUH:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ISAMOYLOV_PR_LINETS_BUH:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ISAMOYLOV_PR_SCUD_ANALYTICS:
+    one-server: MSK-DV-AS-004
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ISIDORENKO_APK_CENTER_DO:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ISIDORENKO_APK_CENTER_DO3:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ISIDORENKO_APK_CENTER_DO3_2:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ITERYAEV_APK_CENTER_DO3:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ITERYAEV_APK_CENTER_UT:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_IYANBULATOV_APK_CENTER_DO:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_IYANBULATOV_APK_DO_V3:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_IYANBULATOV_APK_DO_V3_1:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_KD2ESB_PR_APKKURSK_BUH:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_KD2ESB_PR_APKRYAZAN_BUH:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_KD2ESB_PR_AVTO_BUH:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_KD2ESB_PR_LINETS_BUH:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_KD2ESB_RZHAVKI_ZUP3:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_KD2ESB_RZHAVKI_ZUP3_INT:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_KD2ESB_SH_DG_BUH:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_KKUZNETSOV_CONS:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_KSARABEEV_TD_DG_UT:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_KSARABEEV_TD_NW_KON_MES:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_KSARABEEV_TD_ZEL_MES:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_KSARABEEV_TD_ZEL_UT:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_KSARABEEV_UNION_UT:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_KVATAGINA_CUBE:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_LAMOROZOVA_2_APK_UH:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_LAMOROZOVA_2_APK_UH_2:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_LKAMENSKAYA_PR_DMPZ_ERP:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_LKAMENSKAYA_PR_KAP_ERP:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_LKAMENSKAYA_PR_KMPZ_UT:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_LKAMENSKAYA_PR_MZ_ERP:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_LKAMENSKAYA_PR_TD_DG_UT:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_MBELOUSOVA_RZHAVKI_ZUP3:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_MBELOUSOVA_SURV:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_MDM:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_MDM_DATAREON_01:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_MDM_DATAREON_03:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_MDM_DATAREON_04:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_MDM_DPL_APK:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_MDULICH_APK_STOKTAKING_MOBILE:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_MDULICH_ERP_LIS:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_MEFIMOV_TD_ZEL_UT:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_MEFIMOV_UNION_UT:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_MKOCHANZHI_CENTER_XTREK:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_MKOCHANZHI_MERCURY_UT:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_MKOCHANZHI_PR_APKKURSK_BUH:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_MKOCHANZHI_PR_TD_DG_UT:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_MKOCHANZHI_SH_DG_BUH:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_MKOCHANZHI_TD_ZEL_UT:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_MNADEIN_APK_OT:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_MNADEIN_APK_TOIR3:
+    one-server: MSK-DV-AS-004
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_MNADEIN_APK_TPM_TOIR3:
+    one-server: MSK-DV-AS-004
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_MNADEIN_ERP_LIS:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_MNADEIN_PEST:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_MNADEIN_PR_DMPZ_OBSHEPIT_ERP:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_MNADEIN_PR_LINETS_BUH:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_MNADEIN_PR_SCUD_ANALYTICS:
+    one-server: MSK-DV-AS-004
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_MNOVIKOV_PR_DMPZ_ERP:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_MNOVIKOV_PR_DMPZ_MES:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_MNOVIKOV_PR_KAP_ERP:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_MNOVIKOV_PR_MZ_ERP:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_MRECHKUNOV_PR_APKKURSK_BUH:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_MRECHKUNOV_PR_APKRYAZAN_BUH:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_MRECHKUNOV_SH_DG_BUH:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_MRECHKUNOV_SH_RUCHYI_DG_BUH:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_MSHULGA_2_APK_UH:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_MSHULGA_2_APK_UH_2:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_MSHULGA_ATI_BUH:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_MSHULGA_PR_KURSK_BSO_PCK_SKSTROITEL:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_MSHULGA_PR_PROGRESS_BUH:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_MSHULGA_TD_ZEL_BUH:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_MSHULGA_USLUGI_SKSTROITEL_BUH:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_MSHULGA_USLUGI_SNAB_BUH:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_MSTESHIN_ITIL:
+    one-server: MSK-DV-AS-004
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_MSTESHIN_ITIL_DEMO:
+    one-server: MSK-DV-AS-004
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_NBAGREEV_APK_CENTER_DO3:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_NPAKHOMOVA_PR_APKKURSK_BUH:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_NPAKHOMOVA_SH_DG_BUH:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_NROSHCHUPKINA_APK_OT:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_NROSHCHUPKINA_APK_TOIR3:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_NROSHCHUPKINA_ERP_LIS:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_NROSHCHUPKINA_PR_KAP_ERP:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_NROSHCHUPKINA_PR_OBSHEPIT_ERP:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_NROSHCHUPKINA_PR_SCUD_ANALYTICS:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_NSAVITSKIJ_PR_DMPZ_MES:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_OABDUSHEV_PR_MZ_ERP:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_OABDUSHEV_RZHAVKI_ZUP3:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_OABDUSHEV_RZHAVKI_ZUP3_2:
+    one-server: MSK-DV-AS-004
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_OABDUSHEV_SURV:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_OBAKAEV_APK_CENTER_UT:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_OBAKAEV_BOYNYA_KON_MES:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_OBAKAEV_PR_KAP_ERP:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_OBAKAEV_PR_KMPZ_UT:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_OBAKAEV_PR_TD_DG_UT:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_OBAKAEV_TD_NORDWEST_MES:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_OBAKAEV_TD_ZEL_UT:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_OBAKAEV_TMS:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_OBAKAEV_UNION_UT:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_OKUZNETSOV_2_APK_UH:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_OKUZNETSOV_2_APK_UH_1:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_OKUZNETSOV_PR_KAP_ERP:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_OLZOTOVA_PR_DMPZ_ERP:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_OlZotova_PR_KAP_ERP:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_PEP_APK_CENTER_DO3:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_PEP_PR_APKKURSK_BUH:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_PEP_PR_LINETS_BUH:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_PEP_PR_MZ_ERP:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_PEP_TD_ZEL_UT:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_PEP_UNION_UT:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_PROZUM_DEMO1C_ERP:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_PRYAMIEX5_APK_CENTER_UT:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_PRYAMIEX5_PR_KMPZ_UT:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_PRYAMIEX5_PR_TD_DG_UT:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_PRYAMIEX5_TD_KURSK_MES:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_PRYAMIEX5_TD_ZEL_UT:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_PSHEENKOV_APK_CENTER_DO:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_PSHEENKOV_APK_CENTER_DO_2:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_PSHEENKOV_APK_DO_V3:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_PSHEENKOV_APK_DO_V3_1:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_PSHEENKOV_APK_DO_V3_2:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_PULS_CSS:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_PULS_CSS_PILOT:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_PULS_CSS_PR_APKKURSK_BUH:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_PULS_CSS_PR_APKKURSK_BUH_1:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_PULS_CSS_PR_APKRYAZAN_BUH:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_PULS_CSS_PR_APKRYAZAN_BUH_1:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_PULS_CSS_SH_DG_BUH:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_PULS_CSS_SH_DG_BUH_2:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_RARSLANOV_CENTER_XTREK:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_RARSLANOV_MERCURY_UT:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_RARSLANOV_PR_KAP_ERP:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_RARSLANOV_PR_TD_DG_UT:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_RARSLANOV_UNION_UT:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_REPOT_APK_OT:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_RLAPTEVA_BOYNYA_KPI_ZUP:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_RLAPTEVA_RZHAVKI_ZUP3:
+    one-server: MSK-DV-AS-004
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_RLAPTEVA_RZHAVKI_ZUP3_1:
+    one-server: MSK-DV-AS-004
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_RVAGABOV_RZHAVKI_ZUP3:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_SHABROV_DO3DEMO:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_SIPOLITOV_PR_KAP_ERP:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_SKHLEBNIKOV_MERCURY_UT:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_SKHLEBNIKOV_PR_APKKURSK_BUH:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_SKHLEBNIKOV_TD_ZEL_UT:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_SKOROLEV_PR_AGRARY_BUH:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_SKOROLEV_PR_APKKURSK_BUH:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_SKOROLEV_PR_APKKURSK_BUH_2:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_SKOROLEV_PR_AVTO_BUH:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_SKOROLEV_PR_LINETS_BUH:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_SKOROLEV_SH_RUCHYI_DG_BUH:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_SKOROLEV_USLUGI_AGROPROMTRANS_BUH:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_SKOVALYOV_BOYNYA_KON_MES:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_SKOVALYOV_PR_DMPZ_ERP:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_SKOVALYOV_PR_DMPZ_MES:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_SKOVALYOV_PR_DMPZ_WMS:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_SKOVALYOV_PR_MZ_ERP:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_SKOVALYOV_PR_TD_DG_UT:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_SKOVALYOV_STOLOVAYA_KON_MES:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_SNAGIH_PR_DMPZ_WMS:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_SNAGIH_PR_MZ_WMS:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_SNAGIH_PR_NH_WMS:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_SNAGIH_PR_TD_DG_UT:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_SNAGIH_TD_NW_KON_MES:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_SPRINTSEV_2_APK_UH:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_SPRINTSEV_APK_TOIR:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_SPRINTSEV_PR_AVTO_BUH:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_SPRINTSEV_PR_LINETS_BUH:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_SPRINTSEV_PR_PROGRESS_BUH:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_SPRINTSEV_TD_ZEL_BUH:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_SROMANCHUK_PR_DMPZ_MES:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_SSAYAPIN_CD2:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_SSAYAPIN_MDM_NSI:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_SSAYAPIN_PR_DMPZ_ERP:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_SSAYAPIN_PR_MZ_ERP:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_SSAYAPIN_PR_OBSHEPIT_ERP:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_SSAYAPIN_PR_TD_DG_UT:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_SSMOLIN_APK_CENTER_UT:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_SSMOLIN_PR_KMPZ_UT:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_SSMOLIN_PR_TD_DG_UT:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_SSMOLIN_TD_ZEL_UT:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_SSMOLIN_TMS:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_SSMOLIN_UNION_UT:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_STARAN_APK_MOSCOW_BUH:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_STARAN_PR_APKKURSK_BUH:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_STARAN_PR_APKKURSK_BUH_2:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_STARAN_PR_AVTO_BUH:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_STARAN_PR_CHERNOZEM_BUH:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_STARAN_PR_LINETS_BUH:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_STARAN_TD_ZEL_BUH:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_STARAN_TYPE_BUH:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_STARAN_USLUGI_APKKONAKOVO_BUH:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_STPOPOV_PR_APKKURSK_BUH:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_STPOPOV_SH_DG_BUH:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_STPOPOV_USLUGI_AGROPROMTRANS_BUH:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_TALARIX_PR_DMPZ_ERP:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_TALARIX_PR_DMPZ_MES:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_TALARIX_PR_DMPZ_MES_1:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_TALARIX_PR_DMPZ_MES_2:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_TALARIX_PR_DMPZ_MES_3:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_TALARIX_PR_DMPZ_MES_4:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_TALARIX_PR_DMPZ_MES_5:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_TALARIX_PR_TD_DG_UT:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_TLS_APK_CENTER_UT:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_TLS_PR_KMPZ_UT:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_TLS_PR_TD_DG_UT:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_TLS_TD_ZEL_UT:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_TLS_UNION_UT:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_TREKMARK_CENTER_XTREK:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VAZAJTSEV_APK_CENTER_UT:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VBESCHASTNOV_CENTER_XTREK:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VBESCHASTNOV_CENTER_XTREK_1:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VBESCHASTNOV_MERCURY_UT:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VBESCHASTNOV_PR_APKKURSK_BUH:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VBESCHASTNOV_PR_MZ_XTREK:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VBESCHASTNOV_PR_TD_DG_UT:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VBESCHASTNOV_SH_DG_BUH:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VBESCHASTNOV_TD_ZEL_UT:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VBESCHASTNOV_UNION_UT:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VBEZIK_PR_APKKURSK_BUH:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VBEZIK_PR_APKKURSK_BUH_1:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VBEZIK_PR_APKKURSK_BUH_2:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VBEZIK_PR_APKRYAZAN_BUH:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VBEZIK_PR_AVTO_BUH:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VBEZIK_PR_CHERNOZEM_BUH:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VBEZIK_PULS_CSS:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VBEZIK_SH_DG_BUH:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VBEZIK_SH_DG_BUH_1:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VBEZIK_SH_DG_BUH_2:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VBEZIK_SH_RUCHYI_DG_BUH:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VBEZIK_USLUGI_AGROPROMTRANS_BUH:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VDIVAK_PR_DMPZ_ERP:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VDIVAK_PR_DMPZ_MES:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VETPREPCHZ_CENTER_XTREK:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VETPREPCHZ_PR_APKKURSK_BUH:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VFEDOSEEVA_2_APK_UH:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VFEDOSEEVA_APK_CENTER_DO:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VFEDOSEEVA_APK_CENTER_DO3:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VFEDOSEEVA_APK_OT:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VFEDOSEEVA_APK_TOIR3:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VFEDOSEEVA_PR_KAP_ERP:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VFEDOSEEVA_PR_OBSHEPIT_ERP:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VGLUKHOV_TD_BG_BUH:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VGLUKHOV_TD_ZEL_BUH:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VGLUKHOV_USLUGI_SNAB_BUH:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VGORYAINOV_PR_DMPZ_ERP:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VGORYAINOV_PR_LINETS_BUH:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VGORYAINOV_PR_MZ_ERP:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VILAVITSKY_KD3:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VILAVITSKY_PR_DMPZ_ERP:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VILAVITSKY_PR_KAP_ERP:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VILAVITSKY_PR_MZ_ERP:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VILAVITSKY_SH_DG_BUH:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VKABANOV_PR_TD_DG_UT:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VKHASPIEV_PR_APKKURSK_BUH:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VKHASPIEV_PR_APKRYAZAN_BUH:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VKHASPIEV_SH_DG_BUH:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VKHASPIEV_USLUGI_AGROPROMTRANS_BUH:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VOSOKIN_APK_CENTER_UT:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VOSOKIN_PR_KMPZ_UT:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VPANCHENKO_APK_CENTER_DO:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VPANCHENKO_PR_APKKURSK_BUH:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VPANCHENKO_PR_AVTO_BUH:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VPANCHENKO_SH_DG_BUH:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VPANCHENKO_USLUGI_AGROPROMTRANS_BUH:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VSEMILETOV_APK_OT:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VSEMILETOV_APK_TOIR:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VSEMILETOV_APK_TOIR3:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VSEMILETOV_APK_TPM_TOIR3:
+    one-server: MSK-DV-AS-004
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VSEMILETOV_DMPZ_OBSHEPIT_ERP:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VSEMILETOV_ERP_LIS:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VSEMILETOV_PEST:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VSEMILETOV_PR_KMPZ_UT:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VSEMILETOV_PR_MPZ_OHRANA_TRUDA:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VSEMILETOV_SCUD_ANALYTICS:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VSEMILETOV_SCUD_ANALYTICS_1:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VSOLOVEV_APK_CENTER_UT:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VSOLOVEV_DRIVERTERMINAL_UT:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VSOLOVEV_PR_DMPZ_MES:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VSOLOVEV_PR_MZ_WMS:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VSOLOVEV_TD_ZEL_MES:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VSOLOVEV_TD_ZEL_UT:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VYASHHENKO_APK_CENTER_DO:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VYASHHENKO_APK_DO_V3:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_VYASHHENKO_APK_DO_V3_1:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_YBELIKOV_MERCURY_UT:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_YBELIKOV_PR_APKKURSK_BUH:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_YBELIKOV_PR_MZ_XTREK2:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ZERNOSATURN_PR_APKKURSK_BUH:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ZERNOSATURN_PR_APKRYAZAN_BUH:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ZERNOSATURN_PR_CHERNOZEM_BUH:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ZERNOSATURN_RYAZAN_AGRO_BUH:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ZERNOSATURN_SH_DG_BUH:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ZERNOSATURN_SH_RUCHYI_DG_BUH:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ZERNOSATURN_SNAB_ZERNOTORG_BUH:
+    one-server: DEV-16-AS-002
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ZHIVOK_APK_CENTER_DO:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ZHIVOK_APK_CENTER_UT:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ZHIVOK_PR_APKKURSK_BUH:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ZHIVOK_PR_APKRYAZAN_BUH:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_DEV_ZHIVOK_SH_DG_BUH:
+    one-server: DEV-16-AS-003
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1
+V8_LOG_TJRNL_APK:
+    one-server: MSK-AS-ARCH-001
+    prod: false
+    dbserver: MSK-SQL-ARCH-01
+V8_OPER_2_APK_UH:
+    one-server: MSK-AS-004
+    prod: true
+    dbserver: MSK-SQL-01
+V8_OPER_APK_CENTER_DO:
+    one-server: 36-AS-010
+    prod: true
+    dbserver: MSK-SQL-01
+V8_OPER_APK_CENTER_DO3:
+    one-server: MSK-AS-017
+    prod: true
+    dbserver: MSK-SQL-01
+V8_OPER_APK_CENTER_UT:
+    one-server: MSK-AS-006
+    prod: true
+    dbserver: MSK-SQL-01
+V8_OPER_APK_EDO:
+    one-server: MSK-AS-005
+    prod: true
+    dbserver: MSK-SQL-01
+V8_OPER_APK_MOSCOW_BUH:
+    one-server: MSK-AS-002
+    prod: true
+    dbserver: MSK-SQL-01
+V8_OPER_APK_OT:
+    one-server: MSK-AS-001
+    prod: true
+    dbserver: MSK-SQL-01
+V8_OPER_APK_TOIR3:
+    one-server: MSK-AS-010
+    prod: true
+    dbserver: MSK-SQL-02
+V8_OPER_APK_TRAIDING_BUH:
+    one-server: MSK-AS-012
+    prod: true
+    dbserver: MSK-SQL-01
+V8_OPER_APKKURSK_REP:
+    one-server: MSK-AS-013
+    prod: true
+    dbserver: MSK-SQL-02
+V8_OPER_APKRYAZAN_REP:
+    one-server: MSK-AS-013
+    prod: true
+    dbserver: MSK-SQL-02
+V8_OPER_ATI_BUH:
+    one-server: MSK-AS-002
+    prod: true
+    dbserver: MSK-SQL-01
+V8_OPER_BOYNYA_KPI_ZUP:
+    one-server: MSK-AS-014
+    prod: true
+    dbserver: MSK-SQL-01
+V8_OPER_CD:
+    one-server: MSK-AS-007
+    prod: true
+    dbserver: MSK-SQL-02
+V8_OPER_CENTER_XTREK:
+    one-server: MSK-AS-003
+    prod: true
+    dbserver: MSK-SQL-01
+V8_OPER_CHERNOZEM_REP:
+    one-server: MSK-AS-013
+    prod: true
+    dbserver: MSK-SQL-02
+V8_OPER_CICF_EMPTY_DT:
+    one-server: MSK-AS-010
+    prod: false
+    dbserver: MSK-SQL-02
+V8_OPER_CONS:
+    one-server: MSK-AS-004
+    prod: true
+    dbserver: MSK-SQL-01
+V8_OPER_CONS_SNAB:
+    one-server: MSK-AS-004
+    prod: true
+    dbserver: MSK-SQL-01
+V8_OPER_CUBE:
+    one-server: MSK-AS-015
+    prod: true
+    dbserver: MSK-SQL-01
+V8_OPER_DATAREON_API_GATEWAY:
+    one-server: MSK-AS-007
+    prod: true
+    dbserver: MSK-SQL-02
+V8_OPER_ERP_LIS:
+    one-server: MSK-AS-010
+    prod: true
+    dbserver: MSK-SQL-02
+V8_OPER_KIP_ADM_CENTR:
+    one-server: MSK-AS-008
+    prod: true
+    dbserver: MSK-SQL-01
+V8_OPER_KIP_QMC:
+    one-server: MSK-AS-008
+    prod: true
+    dbserver: MSK-SQL-01
+V8_OPER_KIP_STEST:
+    one-server: MSK-AS-008
+    prod: true
+    dbserver: MSK-SQL-01
+V8_OPER_MDM_NSI:
+    one-server: MSK-AS-007
+    prod: true
+    dbserver: MSK-SQL-01
+V8_OPER_MERCURY_UT:
+    one-server: 36-AS-009
+    prod: true
+    dbserver: MSK-SQL-01
+V8_OPER_OHOTA_NKO_BUH:
+    one-server: MSK-AS-011
+    prod: true
+    dbserver: MSK-SQL-02
+V8_OPER_PLAN:
+    one-server: MSK-AS-004
+    prod: true
+    dbserver: MSK-SQL-01
+V8_OPER_PR_APKKURSK_BUH:
+    one-server: MSK-AS-009
+    prod: true
+    dbserver: MSK-SQL-02
+V8_OPER_PR_APKKURSK_DOC:
+    one-server: 36-AS-010
+    prod: true
+    dbserver: MSK-SQL-02
+V8_OPER_PR_APKRYAZAN_BUH:
+    one-server: MSK-AS-009
+    prod: true
+    dbserver: MSK-SQL-02
+V8_OPER_PR_AVTO_BUH:
+    one-server: MSK-AS-009
+    prod: true
+    dbserver: MSK-SQL-02
+V8_OPER_PR_CHERNOZEM_BUH:
+    one-server: MSK-AS-009
+    prod: true
+    dbserver: MSK-SQL-02
+V8_OPER_PR_DMPZ_ERP:
+    one-server: MSK-AS-014
+    prod: true
+    dbserver: MSK-SQL-02
+V8_OPER_PR_DMPZ_MES:
+    one-server: 01-AS-016
+    prod: true
+    dbserver: DMG-SQL-01
+V8_OPER_PR_DMPZ_WMS:
+    one-server: 01-AS-011
+    prod: true
+    dbserver: DMG-SQL-01
+V8_OPER_PR_DO:
+    one-server: 36-AS-010
+    prod: true
+    dbserver: MSK-SQL-01
+V8_OPER_PR_KAP_ERP:
+    one-server: MSK-AS-014
+    prod: true
+    dbserver: MSK-SQL-02
+V8_OPER_PR_KMPZ_UT:
+    one-server: MSK-AS-016
+    prod: true
+    dbserver: MSK-SQL-02
+V8_OPER_PR_KURSKAGROPRODUKT_REP:
+    one-server: MSK-AS-013
+    prod: true
+    dbserver: MSK-SQL-02
+V8_OPER_PR_LINETS_BUH:
+    one-server: MSK-AS-011
+    prod: true
+    dbserver: MSK-SQL-02
+V8_OPER_PR_LINETS_REP:
+    one-server: MSK-AS-013
+    prod: true
+    dbserver: MSK-SQL-02
+V8_OPER_PR_MONITOR_MES:
+    one-server: 01-AS-011
+    prod: true
+    dbserver: DMG-SQL-01
+V8_OPER_PR_MZ_ERP:
+    one-server: MSK-AS-014
+    prod: true
+    dbserver: MSK-SQL-02
+V8_OPER_PR_MZ_OTCHET:
+    one-server: MSK-AS-013
+    prod: true
+    dbserver: MSK-SQL-02
+V8_OPER_PR_MZ_WMS:
+    one-server: 01-AS-011
+    prod: true
+    dbserver: DMG-SQL-01
+V8_OPER_PR_MZ_XTREK2:
+    one-server: 01-AS-014
+    prod: true
+    dbserver: DMG-SQL-01
+V8_OPER_PR_NH_WMS:
+    one-server: 01-AS-011
+    prod: true
+    dbserver: DMG-SQL-01
+V8_OPER_PR_OBSHEPIT_ERP:
+    one-server: MSK-AS-013
+    prod: true
+    dbserver: MSK-SQL-02
+V8_OPER_PR_PROGRESS_BUH:
+    one-server: MSK-AS-011
+    prod: true
+    dbserver: MSK-SQL-02
+V8_OPER_PR_SCUD_ANALYTICS:
+    one-server: MSK-AS-010
+    prod: true
+    dbserver: MSK-SQL-02
+V8_OPER_PR_TD_DG_UT:
+    one-server: MSK-AS-016
+    prod: true
+    dbserver: MSK-SQL-02
+V8_OPER_PULS_CSS:
+    one-server: MSK-AS-012
+    prod: true
+    dbserver: MSK-SQL-02
+V8_OPER_R_MERCURY_UT:
+    one-server: 36-AS-009
+    prod: true
+    dbserver: MSK-SQL-01
+V8_OPER_RYAZAN_AGRO_BUH:
+    one-server: MSK-AS-009
+    prod: true
+    dbserver: MSK-SQL-02
+V8_OPER_RYAZAN_AGRO_OTCHET:
+    one-server: MSK-AS-013
+    prod: true
+    dbserver: MSK-SQL-02
+V8_OPER_RZHAVKI_ZUP3:
+    one-server: MSK-AS-001
+    prod: true
+    dbserver: MSK-SQL-01
+V8_OPER_SH_AGROFIRMA_OTCHET:
+    one-server: MSK-AS-013
+    prod: true
+    dbserver: MSK-SQL-02
+V8_OPER_SH_DG_BUH:
+    one-server: MSK-AS-009
+    prod: true
+    dbserver: MSK-SQL-02
+V8_OPER_SH_GORLOVSKIY_OTCHET:
+    one-server: MSK-AS-013
+    prod: false
+    dbserver: MSK-SQL-02
+V8_OPER_SH_RUCHYI_DG_BUH:
+    one-server: MSK-AS-009
+    prod: true
+    dbserver: MSK-SQL-02
+V8_OPER_SH_RUCHYI_OTCHET:
+    one-server: MSK-AS-013
+    prod: true
+    dbserver: MSK-SQL-02
+V8_OPER_SNAB_ZERNOTORG_BUH:
+    one-server: MSK-AS-002
+    prod: true
+    dbserver: MSK-SQL-01
+V8_OPER_SURV:
+    one-server: MSK-AS-001
+    prod: true
+    dbserver: MSK-SQL-01
+V8_OPER_TD_KURSK_MES:
+    one-server: MSK-AS-005
+    prod: true
+    dbserver: MSK-SQL-02
+V8_OPER_TD_NORD_MES:
+    one-server: MSK-AS-005
+    prod: true
+    dbserver: MSK-SQL-01
+V8_OPER_TD_NORDWEST_MES:
+    one-server: MSK-AS-005
+    prod: true
+    dbserver: MSK-SQL-02
+V8_OPER_TD_NW_KON_MES:
+    one-server: 01-AS-011
+    prod: true
+    dbserver: DMG-SQL-01
+V8_OPER_TD_PAYTERMINAL_UT:
+    one-server: MSK-AS-005
+    prod: true
+    dbserver: MSK-SQL-02
+V8_OPER_TD_ZEL_BUH:
+    one-server: MSK-AS-002
+    prod: true
+    dbserver: MSK-SQL-01
+V8_OPER_TD_ZEL_MES:
+    one-server: MSK-AS-005
+    prod: true
+    dbserver: MSK-SQL-01
+V8_OPER_TD_ZEL_UT:
+    one-server: MSK-AS-003
+    prod: true
+    dbserver: MSK-SQL-01
+V8_OPER_TELEGRAM_BOT:
+    one-server: MSK-AS-013
+    prod: true
+    dbserver: MSK-SQL-01
+V8_OPER_TMS:
+    one-server: MSK-AS-005
+    prod: true
+    dbserver: MSK-SQL-01
+V8_OPER_UNION_TVER_BUH:
+    one-server: MSK-AS-011
+    prod: true
+    dbserver: MSK-SQL-02
+V8_OPER_UNION_UT:
+    one-server: MSK-AS-003
+    prod: true
+    dbserver: MSK-SQL-01
+V8_OPER_USLUGI_AGROPROMTRANS_BUH:
+    one-server: MSK-AS-009
+    prod: true
+    dbserver: MSK-SQL-02
+V8_OPER_USLUGI_SNAB_BUH:
+    one-server: MSK-AS-002
+    prod: true
+    dbserver: MSK-SQL-01
+V8_TEST_AEC_APK_CENTER_DO3_1:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_AEC_APK_CENTER_DO3_2:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_2_APK_UH:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_AC_BUH:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_AGROLIDER_BUH:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_APK_CENTER_DO:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_APK_CENTER_UT:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_APK_DO3:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_APK_EDO:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_APK_MOSCOW:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_APK_OT:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_APK_TOIR3:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_APK_TRAIDING_BUH:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_ATI_BUH:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_BOYNYA_KON_MES:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_BOYNYA_KPI_ZUP:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_CENTER_XTREK:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_CONS:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_DATAREON_API_GATEWAY:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_DO_PSK_KURSK:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_ERP_LIS:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_MDM_NSI:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_MERCURY_UT:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_OHOTA_NKO_BUH:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_PR_AGRARY_BUH:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_PR_APKKURSK_BUH:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_PR_APKKURSK_DOC:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_PR_APKRYAZAN_BUH:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_PR_APKTVER_BUH:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_PR_AVTO_BUH:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_PR_CHERNOZEM_BUH:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_PR_DMPZ_ERP:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_PR_DMPZ_MES:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_PR_DMPZ_OBSHEPIT_ERP:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_PR_DMPZ_WMS:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_PR_DO:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_PR_KAP_ERP:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_PR_KMPZ_UT:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_PR_KURSK_BSO_PCK_SKSTROITEL:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_PR_LINETS_BUH:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_PR_MONITOR_MES:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_PR_MZ_ERP:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_PR_MZ_WMS:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_PR_MZ_XTREK:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_PR_NH_WMS:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_PR_PROGRESS_BUH:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_PR_SCUD_ANALYTICS:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_PR_TD_DG_UT:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_PR_WMS_TSD:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_RYAZAN_AGRO_BUH:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_RZHAVKI_ZUP3:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_RZHAVKI_ZUP3_INT:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_SH_DG_BUH:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_SH_RUCHYI_DG_BUH:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_SNAB_ZERNOTORG_BUH:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_SURV:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_TD_KURSK_MES:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_TD_NORD_MES:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_TD_NORDWEST_MES:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_TD_NW_KON_MES:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_TD_ZEL_BUH:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_TD_ZEL_MES:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_TD_ZEL_UT:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_TMS:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_UNION_TVER_BUH:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_UNION_UT:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_USLUGI_AF_RZHEV_BUH:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_USLUGI_AGROPROMTRANS_BUH:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_USLUGI_KOROVINO_BUH:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_USLUGI_PSKSTROITEL_DO:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_USLUGI_SKSTROITEL_BUH:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_KONTUR_USLUGI_SNAB_BUH:
+    one-server: MSK-TS-AS-001
+    prod: false
+    dbserver: TEST-16-DB-001
+V8_TEST_VSEMILETOV_ERP_LIS:
+    one-server: MSK-DV-AS-001
+    prod: false
+    dbserver: DEV-RZHAVKI-DB1

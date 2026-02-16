@@ -1,0 +1,272 @@
+@startuml SQ Commands Sequence
+title SQ Commands Sequence
+
+actor "Пользователь/Инициатор" as User
+participant "Обработчик команд SQ" as SQHandler
+participant "Gitea API" as GiteaAPI
+participant "SonarQube API" as SonarQubeAPI
+database "README.md" as README
+database "config" as Config
+
+' === Сценарий sq-scan-branch ===
+User -> SQHandler : Вызов sq-scan-branch\n(owner, repo, branch, [commit_hash])
+activate SQHandler
+
+SQHandler -> GiteaAPI : Получить данные о ветке\n(owner, repo, branch)
+activate GiteaAPI
+GiteaAPI --> SQHandler : Данные о ветке
+deactivate GiteaAPI
+
+alt Ветка != main
+    SQHandler -> GiteaAPI : Получить первый коммит ветки\n(owner, repo, branch)
+    activate GiteaAPI
+    GiteaAPI --> SQHandler : Первый коммит ветки
+    deactivate GiteaAPI
+end
+
+SQHandler -> SonarQubeAPI : Получить данные о проекте\n(owner, repo, branch)
+activate SonarQubeAPI
+SonarQubeAPI --> SQHandler : Данные о проекте
+deactivate SonarQubeAPI
+
+alt Проект не существует
+    SQHandler -> SonarQubeAPI : Создать новый проект\n(owner, repo, branch)
+    activate SonarQubeAPI
+    SonarQubeAPI --> SQHandler : Ключ проекта
+    deactivate SonarQubeAPI
+end
+
+alt commit_hash не передан
+    alt Ветка == main
+        SQHandler -> SQHandler : Сканировать последний коммит ветки
+    else Ветка != main
+        SQHandler -> SQHandler : Проверить наличие сканирования\nбазового коммита
+        alt Сканирование есть
+            SQHandler -> SQHandler : Сканировать текущий коммит
+        else Сканирования нет
+            SQHandler -> SQHandler : Сканировать базовый коммит
+            SQHandler -> SQHandler : Сканировать текущий коммит
+        end
+    end
+else commit_hash передан
+    SQHandler -> SQHandler : Сканировать состояние репозитория\nна указанный коммит
+end
+
+SQHandler --> User : Результат выполнения команды
+deactivate SQHandler
+' === Конец сценария sq-scan-branch ===
+
+' === Сценарий sq-scan-pr ===
+User -> SQHandler : Вызов sq-scan-pr\n(owner, repo, pr)
+activate SQHandler
+
+SQHandler -> GiteaAPI : Получить данные PR\n(owner, repo, pr)
+activate GiteaAPI
+GiteaAPI --> SQHandler : Данные PR\n(имя ветки источника, первый коммит,\nпоследний коммит)
+deactivate GiteaAPI
+
+SQHandler -> SQHandler : Получить имя ветки источника\nиз данных PR
+
+SQHandler -> SQHandler : Вызвать sq-scan-branch\n(owner, repo, ветка источника,\nпустой commit_hash)
+
+SQHandler --> User : Результат выполнения команды
+deactivate SQHandler
+' === Конец сценария sq-scan-pr ===
+
+' === Сценарий sq-project-update ===
+User -> SQHandler : Вызов sq-project-update\n(owner, repo)
+activate SQHandler
+
+SQHandler -> README : Получить содержимое README.md\n(owner, repo)
+activate README
+README --> SQHandler : Содержимое README.md
+deactivate README
+
+SQHandler -> SonarQubeAPI : Обновить описание проекта\n(owner, repo, содержимое README.md)
+activate SonarQubeAPI
+SonarQubeAPI --> SQHandler : Результат обновления описания
+deactivate SonarQubeAPI
+
+SQHandler -> GiteaAPI : Синхронизировать список администраторов\n(owner, repo)
+activate GiteaAPI
+GiteaAPI --> SQHandler : Обновленный список администраторов
+deactivate GiteaAPI
+
+SQHandler --> User : Результат выполнения команды
+deactivate SQHandler
+' === Конец сценария sq-project-update ===
+
+' === Сценарий sq-repo-sync ===
+User -> SQHandler : Вызов sq-repo-sync\n(owner, repo)
+activate SQHandler
+
+SQHandler -> GiteaAPI : Получить список веток\n(owner, repo)
+activate GiteaAPI
+GiteaAPI --> SQHandler : Список веток
+deactivate GiteaAPI
+
+SQHandler -> SonarQubeAPI : Получить список проектов\n(owner, repo)
+activate SonarQubeAPI
+SonarQubeAPI --> SQHandler : Список проектов
+deactivate SonarQubeAPI
+
+' Параллельная обработка
+' fork
+    loop Для каждой ветки
+        activate SQHandler
+        alt Проект существует
+            SQHandler -> SQHandler : Вызвать sq-project-update\n(owner, repo, branch)
+        else Проект не существует
+            SQHandler -> SQHandler : Вызвать sq-scan-branch\n(owner, repo, branch,\nпустой commit_hash)
+        end
+        deactivate SQHandler
+    end
+' fork again
+    activate SQHandler
+    SQHandler -> SQHandler : Вызвать sq-repo-clear\n(owner, repo, force=false)
+    deactivate SQHandler
+' fork end
+
+SQHandler --> User : Результат выполнения команды
+deactivate SQHandler
+' === Конец сценария sq-repo-sync ===
+
+' === Сценарий sq-repo-clear ===
+User -> SQHandler : Вызов sq-repo-clear\n(owner, repo, force)
+activate SQHandler
+
+SQHandler -> Config : Получить sq_wait_for_delete
+activate Config
+Config --> SQHandler : sq_wait_for_delete (секунды)
+deactivate Config
+
+SQHandler -> GiteaAPI : Получить список веток\n(owner, repo)
+activate GiteaAPI
+GiteaAPI --> SQHandler : Список веток
+deactivate GiteaAPI
+
+SQHandler -> SonarQubeAPI : Получить список проектов\n(owner, repo)
+activate SonarQubeAPI
+SonarQubeAPI --> SQHandler : Список проектов
+deactivate SonarQubeAPI
+
+loop Для каждого проекта
+    activate SQHandler
+    SQHandler -> SQHandler : Проверить соответствие проекта ветке
+    
+    alt Проект не соответствует ветке
+        alt force == true
+            SQHandler -> SonarQubeAPI : Удалить проект\n(имя проекта)
+            activate SonarQubeAPI
+            SonarQubeAPI --> SQHandler : Результат удаления
+            deactivate SonarQubeAPI
+        else force == false
+            SQHandler -> SonarQubeAPI : Проверить время последнего\nсканирования проекта
+            activate SonarQubeAPI
+            SonarQubeAPI --> SQHandler : Время последнего сканирования
+            deactivate SonarQubeAPI
+            
+            alt Прошло > sq_wait_for_delete
+                SQHandler -> SonarQubeAPI : Удалить проект\n(имя проекта)
+                activate SonarQubeAPI
+                SonarQubeAPI --> SQHandler : Результат удаления
+                deactivate SonarQubeAPI
+            else Прошло <= sq_wait_for_delete
+                SQHandler -> SQHandler : Вывести сообщение о несоответствии
+            end
+        end
+    else Проект соответствует ветке
+        ' Ничего не делать
+    end
+    deactivate SQHandler
+end
+
+SQHandler --> User : Результат выполнения команды
+deactivate SQHandler
+' === Конец сценария sq-repo-clear ===
+
+' === Сценарий sq-report-pr ===
+User -> SQHandler : Вызов sq-report-pr\n(owner, repo, pr)
+activate SQHandler
+
+SQHandler -> GiteaAPI : Получить данные PR\n(owner, repo, pr)
+activate GiteaAPI
+GiteaAPI --> SQHandler : Данные PR\n(имя ветки источника, первый коммит,\nпоследний коммит)
+deactivate GiteaAPI
+
+SQHandler -> SQHandler : Получить имя ветки источника\nиз данных PR
+
+SQHandler -> SQHandler : Получить первый коммит ветки\n(из данных PR или отдельный запрос?)
+
+SQHandler -> SQHandler : Получить последний коммит PR\n(из данных PR)
+
+SQHandler -> SQHandler : Вызвать sq-report-branch\n(owner, repo, ветка источника,\nпервый коммит, последний коммит)
+
+SQHandler -> SQHandler : Сформировать отчет по PR\n(на основе отчета по ветке)
+
+SQHandler -> GiteaAPI : Создать задачу и поместить в нее отчет по PR\n(owner, repo, pr, отчет по PR)
+activate GiteaAPI
+GiteaAPI --> SQHandler : Результат создания задачи
+deactivate GiteaAPI
+
+SQHandler --> User : Результат выполнения команды
+deactivate SQHandler
+' === Конец сценария sq-report-pr ===
+
+' === Сценарий sq-report-branch ===
+User -> SQHandler : Вызов sq-report-branch\n(owner, repo, branch,\nfirst_commit_hash, last_commit_hash)
+activate SQHandler
+
+SQHandler -> SonarQubeAPI : Получить ошибки между коммитами\n(owner, repo, branch,\nfirst_commit_hash, last_commit_hash)
+activate SonarQubeAPI
+SonarQubeAPI --> SQHandler : Ошибки между коммитами
+deactivate SonarQubeAPI
+
+SQHandler -> SQHandler : Вернуть отчет в формате JSON\n(ошибки между коммитами)
+
+SQHandler --> User : Отчет в формате JSON
+deactivate SQHandler
+' === Конец сценария sq-report-branch ===
+
+' === Сценарий sq-report-project ===
+User -> SQHandler : Вызов sq-report-project\n(owner, repo)
+activate SQHandler
+
+SQHandler -> GiteaAPI : Получить данные о ветках\n(owner, repo)
+activate GiteaAPI
+GiteaAPI --> SQHandler : Данные о ветках
+deactivate GiteaAPI
+
+loop Для каждой ветки
+    activate SQHandler
+    alt Ветка == main
+        SQHandler -> GiteaAPI : Получить второй коммит ветки\n(ветка)
+        activate GiteaAPI
+        GiteaAPI --> SQHandler : Второй коммит ветки
+        deactivate GiteaAPI
+        
+        SQHandler -> GiteaAPI : Получить последний коммит ветки\n(ветка)
+        activate GiteaAPI
+        GiteaAPI --> SQHandler : Последний коммит ветки
+        deactivate GiteaAPI
+    else Ветка != main
+        SQHandler -> GiteaAPI : Получить первый коммит ветки\n(ветка)
+        activate GiteaAPI
+        GiteaAPI --> SQHandler : Первый коммит ветки
+        deactivate GiteaAPI
+        
+        SQHandler -> GiteaAPI : Получить последний коммит ветки\n(ветка)
+        activate GiteaAPI
+        GiteaAPI --> SQHandler : Последний коммит ветки
+        deactivate GiteaAPI
+    end
+    
+    SQHandler -> SQHandler : Вызвать sq-report-branch\n(owner, repo, branch,\nпервый/второй коммит, последний коммит)
+    deactivate SQHandler
+end
+
+SQHandler --> User : Результат выполнения команды
+deactivate SQHandler
+' === Конец сценария sq-report-project ===
+
+@enduml

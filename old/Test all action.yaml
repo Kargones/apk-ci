@@ -1,0 +1,256 @@
+name: Test All Actions
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version of benadis-runner'
+        required: true
+        default: 'v121'
+        type: string
+      # Action 1: Service Mode Enable DB
+      action_1:
+        description: 'Enable service mode for database'
+        required: false
+        default: true
+        type: boolean
+      action_1_dbName:
+        description: 'Database name for service mode enable'
+        required: false
+        default: 'V8_DEV_DSBEKETOV_APK_TOIR3'
+        type: string
+      
+      # Action 2: Service Mode Disable DB
+      action_2:
+        description: 'Disable service mode for database'
+        required: false
+        default: true
+        type: boolean
+      action_2_dbName:
+        description: 'Database name for service mode disable'
+        required: false
+        default: 'V8_DEV_DSBEKETOV_APK_TOIR3'
+        type: string
+      
+      # Action 3: Store to DB
+      action_3:
+        description: 'Load configuration from store to database'
+        required: false
+        default: false
+        type: boolean
+      action_3_dbName:
+        description: 'Database name for store2db'
+        required: false
+        default: ''
+        type: string
+      
+      # Action 4: DB Update
+      action_4:
+        description: 'Apply configuration in database'
+        required: false
+        default: false
+        type: boolean
+      action_4_dbName:
+        description: 'Database name for dbupdate'
+        required: true
+        default: 'V8_DEV_DSBEKETOV_APK_TOIR3'
+        type: string
+      
+      # Action 5: DB Restore
+      action_5:
+        description: 'Restore database'
+        required: false
+        default: true
+        type: boolean
+      action_5_dbName:
+        description: 'Database name for dbrestore'
+        required: false
+        default: 'V8_DEV_DSBEKETOV_APK_TOIR3'
+        type: string
+      
+      # Action 6: Analyze Project
+      action_6:
+        description: 'Analyze project'
+        required: false
+        default: false
+        type: boolean
+      action_6_repo_url:
+        description: 'Repository URL for analyze-project'
+        required: false
+        default: ''
+        type: string
+      
+      # Action 7: Convert EDT
+      action_7:
+        description: 'Convert EDT to XML'
+        required: false
+        default: false
+        type: boolean
+      action_7_path_in:
+        description: 'Input path for convertedt'
+        required: false
+        default: ''
+        type: string
+      action_7_path_out:
+        description: 'Output path for convertedt'
+        required: false
+        default: ''
+        type: string
+      
+      # Action 8: Convert
+      action_8:
+        description: 'Convert data'
+        required: false
+        default: false
+        type: boolean
+      action_8_config_name:
+        description: 'Config name for convert'
+        required: false
+        default: ''
+        type: string
+      
+      # Action 9: Git to Store
+      action_9:
+        description: 'Synchronize Git to 1C Store'
+        required: false
+        default: false
+        type: boolean
+      
+      # Action 10: Test Merge
+      action_10:
+        description: 'Test merge conflicts'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  test-all-actions:
+    runs-on: edt
+    steps:
+      # Step 1: Service Mode Enable DB
+      - name: Service Mode Enable DB
+        if: ${{ inputs.action_1 == true }}
+        uses: https://${{ secrets.READER_TOKEN }}:@git.benadis.ru/gitops/benadis-runner@${{ inputs.version }}
+        with:
+          giteaURL: ${{ gitea.server_url }}
+          repository: ${{ gitea.repository }}
+          accessToken: ${{ secrets.TOKEN_FULL }}
+          actor: ${{ gitea.actor }}
+          command: 'service-mode-enable-db'
+          dbName: ${{ inputs.action_1_dbName }}
+          logLevel: 'Debug'
+      
+      # Step 2: Service Mode Disable DB
+      - name: Service Mode Disable DB
+        if: ${{ inputs.action_2 == true }}
+        uses: https://${{ secrets.READER_TOKEN }}:@git.benadis.ru/gitops/benadis-runner@${{ inputs.version }}
+        with:
+          giteaURL: ${{ gitea.server_url }}
+          repository: ${{ gitea.repository }}
+          accessToken: ${{ secrets.TOKEN_FULL }}
+          actor: ${{ gitea.actor }}
+          command: 'service-mode-disable-db'
+          dbName: ${{ inputs.action_2_dbName }}
+          logLevel: 'Debug'
+      
+      # Step 3: Store to DB
+      - name: Store to DB
+        if: ${{ inputs.action_3 == true }}
+        uses: https://${{ secrets.READER_TOKEN }}:@git.benadis.ru/gitops/benadis-runner@${{ inputs.version }}
+        with:
+          giteaURL: ${{ gitea.server_url }}
+          repository: ${{ gitea.repository }}
+          accessToken: ${{ secrets.TOKEN_FULL }}
+          actor: ${{ gitea.actor }}
+          command: 'store2db'
+          dbName: ${{ inputs.action_3_dbName }}
+          logLevel: 'Debug'
+      
+      # Step 4: DB Update
+      - name: DB Update
+        if: ${{ inputs.action_4 == true }}
+        uses: https://${{ secrets.READER_TOKEN }}:@git.benadis.ru/gitops/benadis-runner@${{ inputs.version }}
+        with:
+          giteaURL: ${{ gitea.server_url }}
+          repository: ${{ gitea.repository }}
+          accessToken: ${{ secrets.TOKEN_FULL }}
+          actor: ${{ gitea.actor }}
+          command: 'dbupdate'
+          dbName: ${{ inputs.action_4_dbName }}
+          logLevel: 'Debug'
+      
+      # Step 5: DB Restore
+      - name: DB Restore
+        if: ${{ inputs.action_5 == true }}
+        uses: https://${{ secrets.READER_TOKEN }}:@git.benadis.ru/gitops/benadis-runner@${{ inputs.version }}
+        with:
+          giteaURL: ${{ gitea.server_url }}
+          repository: ${{ gitea.repository }}
+          accessToken: ${{ secrets.TOKEN_FULL }}
+          actor: ${{ gitea.actor }}
+          command: 'dbrestore'
+          dbName: ${{ inputs.action_5_dbName }}
+          logLevel: 'Debug'
+      
+      # Step 6: Analyze Project
+      - name: Analyze Project
+        if: ${{ inputs.action_6 == true }}
+        uses: https://${{ secrets.READER_TOKEN }}:@git.benadis.ru/gitops/benadis-runner@${{ inputs.version }}
+        with:
+          giteaURL: ${{ gitea.server_url }}
+          repository: ${{ gitea.repository }}
+          accessToken: ${{ secrets.TOKEN_FULL }}
+          actor: ${{ gitea.actor }}
+          command: 'analyze-project'
+          logLevel: 'Debug'
+      
+      # Step 7: Convert EDT
+      - name: Convert EDT
+        if: ${{ inputs.action_7 == true }}
+        uses: https://${{ secrets.READER_TOKEN }}:@git.benadis.ru/gitops/benadis-runner@${{ inputs.version }}
+        with:
+          giteaURL: ${{ gitea.server_url }}
+          repository: ${{ gitea.repository }}
+          accessToken: ${{ secrets.TOKEN_FULL }}
+          actor: ${{ gitea.actor }}
+          command: 'convert-edt'
+          logLevel: 'Debug'
+        env:
+          PATH_IN: ${{ inputs.action_7_path_in }}
+          PATH_OUT: ${{ inputs.action_7_path_out }}
+      
+      # Step 8: Convert
+      - name: Convert
+        if: ${{ inputs.action_8 == true }}
+        uses: https://${{ secrets.READER_TOKEN }}:@git.benadis.ru/gitops/benadis-runner@${{ inputs.version }}
+        with:
+          giteaURL: ${{ gitea.server_url }}
+          repository: ${{ gitea.repository }}
+          accessToken: ${{ secrets.TOKEN_FULL }}
+          actor: ${{ gitea.actor }}
+          command: 'convert'
+          logLevel: 'Debug'
+      
+      # Step 9: Git to Store
+      - name: Git to Store
+        if: ${{ inputs.action_9 == true }}
+        uses: https://${{ secrets.READER_TOKEN }}:@git.benadis.ru/gitops/benadis-runner@${{ inputs.version }}
+        with:
+          giteaURL: ${{ gitea.server_url }}
+          repository: ${{ gitea.repository }}
+          accessToken: ${{ secrets.TOKEN_FULL }}
+          actor: ${{ gitea.actor }}
+          command: 'git2store'
+          logLevel: 'Debug'
+      
+      # Step 10: Test Merge
+      - name: Test Merge
+        if: ${{ inputs.action_10 == true }}
+        uses: https://${{ secrets.READER_TOKEN }}:@git.benadis.ru/gitops/benadis-runner@${{ inputs.version }}
+        with:
+          giteaURL: ${{ gitea.server_url }}
+          repository: ${{ gitea.repository }}
+          accessToken: ${{ secrets.TOKEN_FULL }}
+          actor: ${{ gitea.actor }}
+          command: 'test-merge'
+          logLevel: 'Debug'

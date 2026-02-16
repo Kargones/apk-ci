@@ -1,0 +1,120 @@
+name: 'gitops commander'
+description: 'Запуск команд gitops'
+inputs:
+  giteaURL:
+    description: 'Адрес сервера gitea'
+    required: true
+  repository:
+    description: 'Полное имя репозитория'
+    required: true
+  accessToken:
+    description: 'Токен доступа'
+    required: true
+  command:
+    description: 'Выполняемая команда'
+    required: true
+  logLevel:
+    description: 'Уровень логгирования'
+    required: false
+  issueNumber:
+    description: 'Номер задачи в гите'
+    required: false
+  configSystem:
+    description: 'Имя файла с системной конфигурацией'
+    required: false
+    default: 'https://regdv.apkholding.ru/api/v1/repos/gitops-tools/gitops_congif/contents/app.yaml?ref=main'
+  configProject:
+    description: 'Имя файла с конфигурацией проекта'
+    required: false
+    default: 'project.yaml'
+  configSecret:
+    description: 'Имя файла с секретами'
+    required: false
+    default: 'https://regdv.apkholding.ru/api/v1/repos/gitops-tools/gitops_congif/contents/secret.yaml?ref=main'
+  configDbData:
+    description: 'Имя файла с конфигурацией базы данных'
+    required: false
+    default: 'https://regdv.apkholding.ru/api/v1/repos/gitops-tools/gitops_congif/contents/dbconfig.yaml?ref=main'
+  menuMain:
+    description: 'Имя файла с конфигурацией главного меню'
+    required: false
+    default: 'https://regdv.apkholding.ru/api/v1/repos/gitops-tools/gitops_congif/contents/menu_main.yaml?ref=main'
+  menuDebug:
+    description: 'Имя файла с конфигурацией меню отладки'
+    required: false
+    default: 'https://regdv.apkholding.ru/api/v1/repos/gitops-tools/gitops_congif/contents/menu_debug.yaml?ref=main'
+  actor:
+    description: 'Пользователь, который запускает действие'
+    required: true
+  dbName:
+    description: 'Имя базы данных для сервисного режима'
+    required: false
+  terminateSessions:
+    description: 'Завершить активные сеансы при включении сервисного режима'
+    required: false
+    # по умолчанию завершать сеансы при включении сервисного режима
+    default: 'true'
+  #  Принудительно выполнить операцию. Например обновление меню действий когда проект не изменился 
+  force_update:
+    description: 'Принудительно выполнить операцию'
+    required: false
+    default: 'false'
+  debug_port:
+    description: 'Порт для режима отладки (0 - обычный запуск)'
+    required: false
+    default: '0'
+  wait:
+    description: 'Ожидать подключения отладчика перед выполнением (true/false)'
+    required: false
+    default: 'false'
+  startEpf:
+    description: 'URL внешней обработки (.epf файла) для выполнения'
+    required: false
+    default: 'https://regdv.apkholding.ru/api/v1/repos/gitops-tools/gitops_congif/contents/start.epf?ref=main'
+  branchForScan:
+    description: 'Ветка для сканирования в SonarQube'
+    required: false
+    default: ''
+  commitHash:
+    description: 'Хеш коммита для сканирования'
+    required: false
+    default: ''
+
+runs:
+  using: 'composite'
+  steps:
+    - name: 'Run benadis-runner'
+      run: |
+        if [ "${{ inputs.debug_port }}" != "0" ]; then
+          if [ "${{ inputs.wait }}" = "false" ]; then
+            dlv --listen=:${{ inputs.debug_port }} --headless=true --api-version=2 --accept-multiclient --continue exec ${{ github.action_path }}/benadis-runner
+          else
+            dlv --listen=:${{ inputs.debug_port }} --headless=true --api-version=2 --accept-multiclient exec ${{ github.action_path }}/benadis-runner
+          fi
+        else
+          ${{ github.action_path }}/benadis-runner
+        fi
+      shell: bash
+      env:
+        GITEA_URL: ${{ inputs.giteaURL }}
+        REPOSITORY: ${{ inputs.repository }}
+        ACCESS_TOKEN: ${{ inputs.accessToken }}
+        COMMAND: ${{ inputs.command }}
+        LOG_LEVEL: ${{ inputs.logLevel }}
+        ISSUE_NUMBER: ${{ inputs.issueNumber }}
+        CONFIG_SYSTEM: ${{ inputs.configSystem }}
+        CONFIG_PROJECT: ${{ inputs.configProject }}
+        CONFIG_SECRET: ${{ inputs.configSecret }}
+        CONFIG_DB_DATA: ${{ inputs.configDbData }}
+        MENU_MAIN: ${{ inputs.menuMain }}
+        MENU_DEBUG: ${{ inputs.menuDebug }}
+        ACTOR: ${{ inputs.actor }}
+        DB_NAME: ${{ inputs.dbName }}
+        TERMINATE_SESSIONS: ${{ inputs.terminateSessions }}
+        FORCE_UPDATE: ${{ inputs.force_update }}
+        DEBUG_PORT: ${{ inputs.debug_port }}
+        WAIT: ${{ inputs.wait }}
+        STARTEPF: ${{ inputs.startEpf }}
+        INPUT_BRANCHFORSCAN: ${{ inputs.branchForScan }}
+        INPUT_COMMITHASH: ${{ inputs.commitHash }}
+

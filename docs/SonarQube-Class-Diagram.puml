@@ -1,0 +1,387 @@
+@startuml
+' Диаграмма классов интеграции с SonarQube для benadis-runner
+
+' Интерфейсы
+interface "GiteaAPIInterface" as GiteaAPIInterface {
+    +GetIssue(issueNumber: int64): Issue, error
+    +GetFileContent(fileName: string): []byte, error
+    +GetConfigData(l: *slog.Logger, filename: string): []byte, error
+    +AddIssueComment(issueNumber: int64, commentText: string): error
+    +CloseIssue(issueNumber: int64): error
+    +ConflictPR(prNumber: int64): bool, error
+    +ConflictFilesPR(prNumber: int64): []string, error
+    +GetRepositoryContents(filepath: string, branch: string): []FileInfo, error
+    +AnalyzeProjectStructure(branch: string): []string, error
+    +AnalyzeProject(branch: string): []string, error
+    +GetLatestCommit(branch: string): *Commit, error
+    +GetCommitFiles(commitSHA: string): []CommitFile, error
+    +IsUserInTeam(l: *slog.Logger, username: string, orgName: string, teamName: string): bool, error
+    +ActivePR(): []PR, error
+    +DeleteTestBranch(): error
+    +CreateTestBranch(): error
+    +CreatePR(head: string): PR, error
+    +MergePR(prNumber: int64, l: *slog.Logger): error
+    +ClosePR(prNumber: int64): error
+    +SetRepositoryState(l: *slog.Logger, operations: []BatchOperation, branch: string, commitMessage: string): error
+}
+
+interface "SonarQubeAPIInterface" as SonarQubeAPIInterface {
+    +CreateProject(owner: string, repo: string, branch: string): string, error
+    +GetProjectList(): []Project, error
+    +GetProjectToken(projectName: string): string, error
+    +GetScanList(projectName: string): []Scan, error
+    +Authenticate(token: string): error
+}
+
+interface "SonarScannerInterface" as SonarScannerInterface {
+    +DownloadScanner(giteaURL: string, scannerRepo: string): error
+    +ConfigureScanner(config: ScannerConfig): error
+    +ExecuteScan(): error
+}
+
+interface "ConfigurationManagerInterface" as ConfigurationManagerInterface {
+    +LoadAppConfig(): *AppConfig, error
+    +LoadSecretConfig(): *SecretConfig, error
+    +ValidateConfig(): error
+}
+
+' Компоненты системы
+package "benadis-runner" {
+    package "main" {
+        class "Main" as Main {
+            +main()
+        }
+    }
+
+    package "app" {
+        class "App" as App {
+            +InitGit(l: *slog.Logger, cfg: *Config): *Git, error
+            +Convert(ctx: *context.Context, l: *slog.Logger, cfg: *Config): error
+            +ServiceModeEnable(ctx: *context.Context, l: *slog.Logger, cfg: *Config, infobaseName: string, terminateSessions: bool): error
+            +ServiceModeDisable(ctx: *context.Context, l: *slog.Logger, cfg: *Config, infobaseName: string): error
+            +ServiceModeStatus(ctx: *context.Context, l: *slog.Logger, cfg: *Config, infobaseName: string): error
+            +Git2Store(ctx: *context.Context, l: *slog.Logger, cfg: *Config): error
+            +Store2Db(ctx: *context.Context, l: *slog.Logger, cfg: *Config): error
+            +Store2DbWithConfig(ctx: *context.Context, l: *slog.Logger, cfg: *Config): error
+            +StoreBind(ctx: *context.Context, l: *slog.Logger, cfg: *Config): error
+            +DbUpdate(ctx: *context.Context, l: *slog.Logger, cfg: *Config): error
+            +DbUpdateWithConfig(ctx: *context.Context, l: *slog.Logger, cfg: *Config): error
+            +ExecuteEpf(ctx: *context.Context, l: *slog.Logger, cfg: *Config): error
+            +DbRestoreWithConfig(ctx: *context.Context, l: *slog.Logger, cfg: *Config, dbname: string): error
+            +ActionMenuBuildWrapper(ctx: *context.Context, l: *slog.Logger, cfg: *Config): error
+            +CreateTempDbWrapper(ctx: *context.Context, l: *slog.Logger, cfg: *Config): string, error
+            +CreateStoresWrapper(ctx: *context.Context, l: *slog.Logger, cfg: *Config): error
+        }
+    }
+
+    package "config" {
+        class "Config" as Config {
+            -ProjectName: string
+            -AddArray: []string
+            -Actor: string
+            -Env: string
+            -Command: string
+            -Logger: *slog.Logger
+            -ConfigSystem: string
+            -ConfigProject: string
+            -ConfigSecret: string
+            -ConfigDbData: string
+            -ConfigMenuMain: string
+            -ConfigMenuDebug: string
+            -InfobaseName: string
+            -TerminateSessions: bool
+            -ForceUpdate: bool
+            -IssueNumber: int
+            -StartEpf: string
+            -GiteaURL: string
+            -Owner: string
+            -Repo: string
+            -BaseBranch: string
+            -NewBranch: string
+            -AppConfig: *AppConfig
+            -ProjectConfig: *ProjectConfig
+            -SecretConfig: *SecretConfig
+            -DbConfig: map[string]*DatabaseInfo
+            -MenuMain: []string
+            -MenuDebug: []string
+            +MustLoad(): *Config, error
+            +GetOneServer(dbName: string): string
+            +GetRacServerForDb(dbName: string): string
+            +IsProductionDb(dbName: string): bool
+            +GetDbServer(dbName: string): string
+            +GetDatabaseInfo(dbName: string): *DatabaseInfo
+            +GetAllDatabases(): []string
+            +GetProductionDatabases(): []string
+            +GetTestDatabases(): []string
+            +FindRelatedDatabase(dbName: string): string, error
+            +GetDatabaseServer(dbName: string): string, error
+            +DetermineSrcAndDstServers(dbName: string): string, string, string, string, error
+            +AnalyzeProject(l: *slog.Logger, branch: string): error
+        }
+
+        class "AppConfig" as AppConfig {
+            -LogLevel: string
+            -WorkDir: string
+            -TmpDir: string
+            -Timeout: int
+            -Paths: struct
+            -Rac: struct
+            -Users: struct
+            -Dbrestore: struct
+        }
+
+        class "ProjectConfig" as ProjectConfig {
+            -Debug: bool
+            -StoreDb: string
+            -Prod: map[string]struct
+        }
+
+        class "SecretConfig" as SecretConfig {
+            -Passwords: struct
+            -Gitea: struct
+        }
+
+        class "DatabaseInfo" as DatabaseInfo {
+            -OneServer: string
+            -Prod: bool
+            -DbServer: string
+        }
+    }
+
+    package "entity" {
+        package "gitea" {
+            class "GiteaEntity" as GiteaEntity {
+                -GiteaURL: string
+                -Owner: string
+                -Repo: string
+                -AccessToken: string
+                -BaseBranch: string
+                -NewBranch: string
+                -Command: string
+                +NewGiteaAPI(config: Config): *API
+                +GetIssue(issueNumber: int64): *Issue, error
+                +GetFileContent(fileName: string): []byte, error
+                +AddIssueComment(issueNumber: int64, commentText: string): error
+                +CloseIssue(issueNumber: int64): error
+                +ConflictPR(prNumber: int64): bool, error
+                +ConflictFilesPR(prNumber: int64): []string, error
+                +CreateTestBranch(): error
+                +DeleteTestBranch(): error
+                +MergePR(prNumber: int64, l: *slog.Logger): error
+                +ActivePR(): []PR, error
+                +CreatePR(head: string): PR, error
+                +ClosePR(prNumber: int64): error
+                +GetRepositoryContents(filepath: string, branch: string): []FileInfo, error
+                +AnalyzeProjectStructure(branch: string): []string, error
+                +GetLatestCommit(branch: string): *Commit, error
+                +GetCommitFiles(commitSHA: string): []CommitFile, error
+                +IsUserInTeam(l: *slog.Logger, username: string, orgName: string, teamName: string): bool, error
+                +SetRepositoryState(l: *slog.Logger, operations: []BatchOperation, branch: string, commitMessage: string): error
+                +GetConfigData(l: *slog.Logger, filename: string): []byte, error
+                +AnalyzeProject(branch: string): []string, error
+            }
+        }
+    }
+
+    package "service" {
+        class "GiteaFactory" as GiteaFactory {
+            +CreateGiteaAPI(config: Config): GiteaAPIInterface
+        }
+
+        class "GiteaService" as GiteaService {
+            -api: GiteaAPIInterface
+            -config: *Config
+            -projectAnalyzer: ProjectAnalyzer
+            +NewGiteaService(api: GiteaAPIInterface, cfg: *Config, analyzer: ProjectAnalyzer): *GiteaService
+            +TestMerge(ctx: context.Context, l: *slog.Logger): error
+            +AnalyzeProject(ctx: context.Context, l: *slog.Logger, branch: string): error
+            +GetAPI(): GiteaAPIInterface
+            +GetConfig(): *Config
+        }
+
+        class "SonarQubeFactory" as SonarQubeFactory {
+            +CreateSonarQubeAPI(config: SonarQubeConfig): SonarQubeAPIInterface
+        }
+
+        class "SonarQubeService" as SonarQubeService {
+            -api: SonarQubeAPIInterface
+            -config: *SonarQubeConfig
+            +NewSonarQubeService(api: SonarQubeAPIInterface, cfg: *SonarQubeConfig): *SonarQubeService
+            +CreateProject(owner: string, repo: string, branch: string): string, error
+            +GetProjectList(): []Project, error
+            +GetProjectToken(projectName: string): string, error
+            +GetScanList(projectName: string): []Scan, error
+            +Authenticate(): error
+        }
+
+        class "SonarScannerManager" as SonarScannerManager {
+            -scanner: SonarScannerInterface
+            -config: *SonarScannerConfig
+            +NewSonarScannerManager(scanner: SonarScannerInterface, cfg: *SonarScannerConfig): *SonarScannerManager
+            +DownloadScanner(): error
+            +ConfigureScanner(config: ScannerConfig): error
+            +ExecuteScan(): error
+        }
+
+        class "ConfigurationManager" as ConfigurationManager {
+            -config: *Config
+            +NewConfigurationManager(cfg: *Config): *ConfigurationManager
+            +LoadAppConfig(): *AppConfig, error
+            +LoadSecretConfig(): *SecretConfig, error
+            +ValidateConfig(): error
+        }
+
+        class "SQCommandHandler" as SQCommandHandler {
+            -giteaService: *GiteaService
+            -sonarQubeService: *SonarQubeService
+            -sonarScannerManager: *SonarScannerManager
+            -configManager: *ConfigurationManager
+            +NewSQCommandHandler(giteaService: *GiteaService, sonarQubeService: *SonarQubeService, sonarScannerManager: *SonarScannerManager, configManager: *ConfigurationManager): *SQCommandHandler
+            +HandleSQScanBranch(owner: string, repo: string, branch: string, commitHash: string): error
+            +HandleSQScanPR(owner: string, repo: string, pr: string): error
+            +HandleSQProjectUpdate(owner: string, repo: string): error
+            +HandleSQRepoSync(owner: string, repo: string): error
+            +HandleSQRepoClear(owner: string, repo: string, force: bool): error
+            +HandleSQReportPR(owner: string, repo: string, pr: string): error
+            +HandleSQReportBranch(owner: string, repo: string, branch: string, firstCommitHash: string, lastCommitHash: string): error
+            +HandleSQReportProject(owner: string, repo: string): error
+        }
+
+        class "SQScanBranch" as SQScanBranch {
+            -giteaService: *GiteaService
+            -sonarQubeService: *SonarQubeService
+            -sonarScannerManager: *SonarScannerManager
+            +NewSQScanBranch(giteaService: *GiteaService, sonarQubeService: *SonarQubeService, sonarScannerManager: *SonarScannerManager): *SQScanBranch
+            +Execute(owner: string, repo: string, branch: string, commitHash: string): error
+        }
+
+        class "SQScanPR" as SQScanPR {
+            -giteaService: *GiteaService
+            -sqScanBranch: *SQScanBranch
+            +NewSQScanPR(giteaService: *GiteaService, sqScanBranch: *SQScanBranch): *SQScanPR
+            +Execute(owner: string, repo: string, pr: string): error
+        }
+
+        class "SQProjectUpdate" as SQProjectUpdate {
+            -giteaService: *GiteaService
+            -sonarQubeService: *SonarQubeService
+            +NewSQProjectUpdate(giteaService: *GiteaService, sonarQubeService: *SonarQubeService): *SQProjectUpdate
+            +Execute(owner: string, repo: string): error
+        }
+
+        class "SQRepoSync" as SQRepoSync {
+            -giteaService: *GiteaService
+            -sqProjectUpdate: *SQProjectUpdate
+            -sqScanBranch: *SQScanBranch
+            -sqRepoClear: *SQRepoClear
+            +NewSQRepoSync(giteaService: *GiteaService, sqProjectUpdate: *SQProjectUpdate, sqScanBranch: *SQScanBranch, sqRepoClear: *SQRepoClear): *SQRepoSync
+            +Execute(owner: string, repo: string): error
+        }
+
+        class "SQRepoClear" as SQRepoClear {
+            -giteaService: *GiteaService
+            -sonarQubeService: *SonarQubeService
+            +NewSQRepoClear(giteaService: *GiteaService, sonarQubeService: *SonarQubeService): *SQRepoClear
+            +Execute(owner: string, repo: string, force: bool): error
+        }
+
+        class "SQReportPR" as SQReportPR {
+            -giteaService: *GiteaService
+            -sqReportBranch: *SQReportBranch
+            +NewSQReportPR(giteaService: *GiteaService, sqReportBranch: *SQReportBranch): *SQReportPR
+            +Execute(owner: string, repo: string, pr: string): error
+        }
+
+        class "SQReportBranch" as SQReportBranch {
+            -giteaService: *GiteaService
+            -sonarQubeService: *SonarQubeService
+            +NewSQReportBranch(giteaService: *GiteaService, sonarQubeService: *SonarQubeService): *SQReportBranch
+            +Execute(owner: string, repo: string, branch: string, firstCommitHash: string, lastCommitHash: string): error
+        }
+
+        class "SQReportProject" as SQReportProject {
+            -giteaService: *GiteaService
+            -sqReportBranch: *SQReportBranch
+            +NewSQReportProject(giteaService: *GiteaService, sqReportBranch: *SQReportBranch): *SQReportProject
+            +Execute(owner: string, repo: string): error
+        }
+    }
+
+    package "util" {
+        ' Утилиты могут быть добавлены здесь
+    }
+}
+
+' Внешние зависимости
+package "Внешние зависимости" {
+    class "Gitea API" as GiteaAPI {
+        +REST API для работы с репозиториями
+    }
+
+    class "SonarQube API" as SonarQubeAPI {
+        +REST API для работы с анализом кода
+    }
+
+    class "Sonar Scanner" as SonarScanner {
+        +Инструмент для сканирования кода
+    }
+}
+
+' Реализации интерфейсов
+GiteaAPI .up.|> GiteaAPIInterface
+SonarQubeAPI .up.|> SonarQubeAPIInterface
+SonarScanner .up.|> SonarScannerInterface
+
+' Связи между компонентами
+Main --> App : использует
+App --> Config : использует
+App --> GiteaService : использует
+App --> SQCommandHandler : использует
+
+' Gitea интеграция
+GiteaEntity --> GiteaAPIInterface : реализует
+GiteaFactory --> GiteaEntity : создает
+GiteaService --> GiteaEntity : использует
+GiteaService --> GiteaAPIInterface : взаимодействует с
+
+' SonarQube интеграция
+SonarQubeFactory --> SonarQubeAPIInterface : создает клиент
+SonarQubeService --> SonarQubeAPIInterface : взаимодействует с
+SonarScannerManager --> SonarScannerInterface : управляет
+ConfigurationManager --> Config : читает конфигурацию
+
+' Обработчики команд SQ
+SQCommandHandler --> SQScanBranch : содержит
+SQCommandHandler --> SQScanPR : содержит
+SQCommandHandler --> SQProjectUpdate : содержит
+SQCommandHandler --> SQRepoSync : содержит
+SQCommandHandler --> SQRepoClear : содержит
+SQCommandHandler --> SQReportPR : содержит
+SQCommandHandler --> SQReportBranch : содержит
+SQCommandHandler --> SQReportProject : содержит
+
+' Взаимодействия между обработчиками команд
+SQScanPR --> SQScanBranch : вызывает
+SQRepoSync --> SQProjectUpdate : вызывает
+SQRepoSync --> SQScanBranch : вызывает
+SQRepoSync --> SQRepoClear : вызывает
+SQReportPR --> SQReportBranch : вызывает
+SQReportProject --> SQReportBranch : вызывает
+
+' Взаимодействия с внешними зависимостями через интерфейсы
+SQScanBranch --> GiteaAPIInterface : получает данные о ветке
+SQScanBranch --> SonarQubeAPIInterface : получает/создает проект
+SQScanBranch --> SonarScannerInterface : запускает сканирование
+SQScanPR --> GiteaAPIInterface : получает данные PR
+SQProjectUpdate --> GiteaAPIInterface : получает данные о репозитории
+SQProjectUpdate --> SonarQubeAPIInterface : обновляет проект
+SQRepoSync --> GiteaAPIInterface : получает список веток
+SQRepoSync --> SonarQubeAPIInterface : получает список проектов
+SQRepoClear --> GiteaAPIInterface : получает список веток
+SQRepoClear --> SonarQubeAPIInterface : получает список проектов
+SQRepoClear --> SonarQubeAPIInterface : удаляет проекты
+SQReportPR --> GiteaAPIInterface : получает данные PR
+SQReportBranch --> SonarQubeAPIInterface : получает ошибки
+SQReportProject --> GiteaAPIInterface : получает данные о ветках
+
+@enduml

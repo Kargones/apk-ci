@@ -1,0 +1,586 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>1</storyId>
+    <title>Command Registry с self-registration</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-26</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>bdocs/sprint-artifacts/1-1-command-registry-with-self-registration.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>разработчик</asA>
+    <iWant>регистрировать новые команды через init() без изменения main.go</iWant>
+    <soThat>добавление команд соответствует Open/Closed Principle</soThat>
+    <tasks>
+      <task id="1" title="Создать Handler interface" acs="AC1">
+        <subtask id="1.1">Создать файл internal/command/handler.go</subtask>
+        <subtask id="1.2">Определить интерфейс Handler с методами Name() string и Execute(ctx context.Context, cfg *config.Config) error</subtask>
+        <subtask id="1.3">Написать unit test для интерфейса (compile check)</subtask>
+      </task>
+      <task id="2" title="Реализовать Command Registry" acs="AC1,AC2,AC3">
+        <subtask id="2.1">Создать файл internal/command/registry.go</subtask>
+        <subtask id="2.2">Реализовать var registry = make(map[string]Handler)</subtask>
+        <subtask id="2.3">Реализовать func Register(h Handler) с panic при дублировании</subtask>
+        <subtask id="2.4">Реализовать func Get(name string) (Handler, bool)</subtask>
+        <subtask id="2.5">Написать unit tests для Register и Get</subtask>
+      </task>
+      <task id="3" title="Интегрировать Registry в main.go" acs="AC4,AC5">
+        <subtask id="3.1">Добавить проверку Registry перед legacy switch</subtask>
+        <subtask id="3.2">Реализовать fallback логику на legacy switch</subtask>
+        <subtask id="3.3">Добавить логирование выбранного пути ("registry" / "legacy")</subtask>
+        <subtask id="3.4">Написать integration test для обоих путей</subtask>
+      </task>
+      <task id="4" title="Документация и CI">
+        <subtask id="4.1">Добавить godoc комментарии к публичным функциям</subtask>
+        <subtask id="4.2">Проверить что golangci-lint проходит</subtask>
+        <subtask id="4.3">Убедиться что go test ./internal/command/... проходит</subtask>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC1">Given новый handler реализующий interface Handler, When handler вызывает command.Register() в init(), Then команда доступна через command.Get(name)</criterion>
+    <criterion id="AC2">Registry возвращает (nil, false) для несуществующих команд</criterion>
+    <criterion id="AC3">Повторная регистрация с тем же именем вызывает panic (programming error)</criterion>
+    <criterion id="AC4">main.go: сначала проверяет Registry через command.Get(), потом fallback на legacy switch</criterion>
+    <criterion id="AC5">Логируется какой путь выбран ("registry" или "legacy") для диагностики</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc type="PRD" path="bdocs/prd.md">
+        <summary>
+          Требование FR-ARCH-01: Command Registry Pattern
+          - Глобальный реестр команд: создать internal/command/registry.go
+          - Интерфейс Handler: Name(), Execute(ctx, cfg)
+          - Регистрация через init() без изменения main.go
+          - Совместимость: legacy switch как fallback
+        </summary>
+      </doc>
+      <doc type="Architecture" path="bdocs/architecture.md">
+        <summary>
+          AD-01: Command Registry Pattern
+          - Новая структура: internal/command/ (handler.go, registry.go)
+          - Переходный период: dual-path execution
+          - Миграция: постепенный перенос с legacy switch
+
+          Ключевые интерфейсы:
+          - Handler interface { Name() string; Execute(ctx, cfg) error }
+          - Registry: Register(Handler), Get(name) (Handler, bool)
+        </summary>
+      </doc>
+      <doc type="Epics" path="bdocs/epics.md">
+        <summary>
+          Epic 1: Новая архитектура команд
+          Story 1.1: Command Registry с self-registration
+          - Приоритет: MUST (критический путь)
+          - Основа для всех последующих stories
+        </summary>
+      </doc>
+    </docs>
+
+    <code>
+      <file path="cmd/benadis-runner/main.go" relevance="critical">
+        <description>Точка входа приложения с legacy switch-выражением для команд</description>
+        <keyLines>
+          <line num="16-30">Инициализация: context, config.MustLoad(), logger</line>
+          <line num="30-250">Legacy switch по cfg.Command для выбора команды</line>
+          <line num="244-250">default case: логирование неизвестной команды, exit(2)</line>
+        </keyLines>
+        <integration>
+          Точка интеграции Registry:
+          - После загрузки config (строка 23)
+          - Перед legacy switch (строка 30)
+          - Паттерн: if handler, ok := command.Get(cfg.Command); ok { handler.Execute() } else { legacy switch }
+        </integration>
+      </file>
+
+      <file path="internal/constants/constants.go" relevance="high">
+        <description>Константы команд (имена действий)</description>
+        <keyConstants>
+          <const name="ActConvert" value="convert"/>
+          <const name="ActGit2store" value="git2store"/>
+          <const name="ActDbrestore" value="dbrestore"/>
+          <const name="ActServiceModeEnable" value="service-mode-enable"/>
+          <const name="ActServiceModeDisable" value="service-mode-disable"/>
+          <const name="ActServiceModeStatus" value="service-mode-status"/>
+          <const name="ActStore2db" value="store2db"/>
+          <const name="ActStoreBind" value="storebind"/>
+          <const name="ActDbupdate" value="dbupdate"/>
+          <const name="ActionMenuBuildName" value="action-menu-build"/>
+          <const name="ActCreateTempDb" value="create-temp-db"/>
+          <const name="ActCreateStores" value="create-stores"/>
+          <const name="ActExecuteEpf" value="execute-epf"/>
+          <const name="ActSQScanBranch" value="sq-scan-branch"/>
+          <const name="ActSQScanPR" value="sq-scan-pr"/>
+          <const name="ActSQProjectUpdate" value="sq-project-update"/>
+          <const name="ActSQReportBranch" value="sq-report-branch"/>
+          <const name="ActTestMerge" value="test-merge"/>
+        </keyConstants>
+        <usage>Handler.Name() должен возвращать соответствующую константу</usage>
+      </file>
+
+      <file path="internal/config/config.go" relevance="high">
+        <description>Структура Config и функция MustLoad</description>
+        <keyTypes>
+          <type name="Config">Главная структура конфигурации</type>
+          <field name="Command" type="string" tag="env:BR_COMMAND">Имя команды для выполнения</field>
+          <field name="Logger" type="*slog.Logger">Логгер для всего приложения</field>
+        </keyTypes>
+        <integration>Execute(ctx context.Context, cfg *config.Config) error - сигнатура метода Handler</integration>
+      </file>
+
+      <file path="internal/app/app.go" relevance="medium">
+        <description>Функции верхнего уровня для каждой команды</description>
+        <functions>
+          <func name="Store2DbWithConfig">Загрузка конфигурации из хранилища</func>
+          <func name="Convert">Конвертация EDT/XML</func>
+          <func name="Git2Store">Синхронизация Git → хранилище</func>
+          <func name="ServiceModeEnable">Включение сервисного режима</func>
+          <func name="ServiceModeDisable">Отключение сервисного режима</func>
+          <func name="ServiceModeStatus">Проверка статуса</func>
+          <func name="DbUpdateWithConfig">Обновление структуры БД</func>
+          <func name="DbRestoreWithConfig">Восстановление БД</func>
+        </functions>
+        <note>Эти функции будут вызываться из Handler.Execute()</note>
+      </file>
+    </code>
+
+    <dependencies>
+      <go_module>git.benadis.ru/kargones/benadis-runner</go_module>
+      <go_version>1.25.4</go_version>
+      <external>
+        <dep name="github.com/stretchr/testify" version="v1.11.1" usage="testing"/>
+        <dep name="github.com/ilyakaznacheev/cleanenv" version="v1.5.0" usage="config"/>
+        <dep name="gopkg.in/yaml.v3" version="v3.0.1" usage="config"/>
+      </external>
+      <internal>
+        <dep path="internal/config" usage="Config struct для Handler.Execute()"/>
+        <dep path="internal/constants" usage="Константы имён команд"/>
+        <dep path="internal/app" usage="Функции бизнес-логики команд"/>
+      </internal>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint type="backward-compatibility" priority="critical">
+      Legacy switch должен работать как fallback.
+      Никакая существующая команда не должна сломаться.
+    </constraint>
+    <constraint type="isolation" priority="medium" status="considered-rejected">
+      Альтернатива (рассмотрена и отклонена по DD-01):
+      - recover() в Register() с логированием вместо panic
+      - Trade-off: fail-fast (panic) vs graceful degradation (error)
+      Решение: panic выбран (score 66/85) — дублирование это programming error, не runtime.
+      См. designDecisions/DD-01 для полного анализа.
+    </constraint>
+    <constraint type="dependency" priority="critical">
+      internal/command должен зависеть ТОЛЬКО от internal/config и стандартной библиотеки.
+      Никаких зависимостей от internal/app, internal/entity, и т.д. — это вызовет import cycle.
+    </constraint>
+    <constraint type="init-safety" priority="high">
+      Handler НЕ должен логировать или использовать cfg в init()/Register().
+      cfg.Logger доступен только в Execute(). В init() конфигурация ещё не загружена.
+    </constraint>
+    <constraint type="validation" priority="high">
+      Register() должен валидировать входные данные:
+      - h != nil → panic("command: nil handler")
+      - h.Name() != "" → panic("command: empty handler name")
+      Информативные panic messages для быстрой диагностики.
+    </constraint>
+    <constraint type="code-style" priority="high">
+      Все публичные функции и типы должны иметь godoc комментарии на русском языке.
+      Логирование на русском языке.
+    </constraint>
+    <constraint type="testing" priority="high">
+      Покрытие unit tests для нового кода >= существующего уровня.
+      go test ./internal/command/... должен проходить без ошибок.
+    </constraint>
+    <constraint type="linting" priority="high">
+      golangci-lint (конфиг в .golangci.yml) должен проходить без ошибок.
+    </constraint>
+    <constraint type="architecture" priority="high">
+      Директория internal/command/ - новая, создаётся с нуля.
+      Не изменять существующие файлы кроме cmd/benadis-runner/main.go.
+    </constraint>
+  </constraints>
+
+  <interfaces>
+    <interface name="Handler" package="command" file="internal/command/handler.go">
+      <description>Интерфейс для обработчиков команд</description>
+      <method name="Name" returns="string">Возвращает имя команды (должно соответствовать constants.Act*)</method>
+      <method name="Execute" params="ctx context.Context, cfg *config.Config" returns="error">
+        Выполняет команду с переданными контекстом и конфигурацией
+      </method>
+      <example>
+        <![CDATA[
+// Package command предоставляет интерфейсы и реестр для команд приложения.
+package command
+
+import (
+    "context"
+    "git.benadis.ru/kargones/benadis-runner/internal/config"
+)
+
+// Handler определяет интерфейс обработчика команды.
+// Каждая команда приложения должна реализовывать этот интерфейс.
+type Handler interface {
+    // Name возвращает имя команды для регистрации в реестре.
+    Name() string
+    // Execute выполняет команду с переданным контекстом и конфигурацией.
+    Execute(ctx context.Context, cfg *config.Config) error
+}
+        ]]>
+      </example>
+    </interface>
+
+    <registry name="Registry" package="command" file="internal/command/registry.go">
+      <description>Глобальный реестр команд</description>
+      <function name="Register" params="h Handler">
+        Регистрирует handler в реестре. Panic при дублировании имени.
+      </function>
+      <function name="Get" params="name string" returns="(Handler, bool)">
+        Возвращает handler по имени или (nil, false) если не найден.
+      </function>
+      <example>
+        <![CDATA[
+// Package command предоставляет интерфейсы и реестр для команд приложения.
+package command
+
+import "sync"
+
+var (
+    registry = make(map[string]Handler)
+    mu       sync.RWMutex
+)
+
+// Register регистрирует обработчик команды в глобальном реестре.
+// Паникует при попытке регистрации команды с уже существующим именем.
+func Register(h Handler) {
+    mu.Lock()
+    defer mu.Unlock()
+    name := h.Name()
+    if _, exists := registry[name]; exists {
+        panic("command: duplicate handler registration for " + name)
+    }
+    registry[name] = h
+}
+
+// Get возвращает обработчик команды по имени.
+// Возвращает (nil, false) если команда не зарегистрирована.
+func Get(name string) (Handler, bool) {
+    mu.RLock()
+    defer mu.RUnlock()
+    h, ok := registry[name]
+    return h, ok
+}
+        ]]>
+      </example>
+    </registry>
+  </interfaces>
+
+  <tests>
+    <standards>
+      <standard type="testing-framework">testify/assert, testify/require</standard>
+      <standard type="pattern">Table-driven tests</standard>
+      <standard type="naming">Test{FunctionName}_{Scenario} или Test{FunctionName}</standard>
+      <standard type="location">*_test.go рядом с тестируемым файлом</standard>
+      <standard type="run">go test ./... или make test</standard>
+    </standards>
+
+    <locations>
+      <location>internal/command/handler_test.go - тесты интерфейса</location>
+      <location>internal/command/registry_test.go - тесты реестра</location>
+      <location>cmd/benadis-runner/main_test.go - integration тесты (опционально)</location>
+    </locations>
+
+    <ideas>
+      <test name="TestRegister_Success">
+        Регистрация нового handler успешна, Get возвращает его
+      </test>
+      <test name="TestRegister_Duplicate_Panics">
+        Повторная регистрация с тем же именем вызывает panic
+      </test>
+      <test name="TestGet_NotFound">
+        Get для несуществующей команды возвращает (nil, false)
+      </test>
+      <test name="TestGet_Found">
+        Get для зарегистрированной команды возвращает (handler, true)
+      </test>
+      <test name="TestConcurrentAccess">
+        Concurrent Register и Get не вызывают race condition
+      </test>
+      <test name="TestHandlerIsolation">
+        Каждый handler можно тестировать независимо без загрузки всего registry
+      </test>
+      <test name="TestRegistryNotEmpty_AfterImport">
+        После import handlers пакета, registry должен содержать хотя бы одну команду.
+        Защита от "забытого blank import".
+      </test>
+      <test name="TestNoRaceCondition">
+        go test -race ./internal/command/... должен проходить без ошибок.
+      </test>
+      <test name="TestRegister_NilHandler_Panics">
+        Register(nil) должен вызывать panic с сообщением "nil handler"
+      </test>
+      <test name="TestRegister_EmptyName_Panics">
+        Register с handler где Name()=="" должен вызывать panic с сообщением "empty handler name"
+      </test>
+      <example>
+        <![CDATA[
+// internal/command/registry_test.go
+package command
+
+import (
+    "context"
+    "testing"
+
+    "github.com/stretchr/testify/assert"
+    "github.com/stretchr/testify/require"
+
+    "git.benadis.ru/kargones/benadis-runner/internal/config"
+)
+
+// mockHandler - тестовый обработчик команды
+type mockHandler struct {
+    name string
+}
+
+func (m *mockHandler) Name() string { return m.name }
+func (m *mockHandler) Execute(_ context.Context, _ *config.Config) error { return nil }
+
+func TestRegister_Success(t *testing.T) {
+    // Очищаем реестр перед тестом
+    clearRegistry()
+
+    h := &mockHandler{name: "test-command"}
+    Register(h)
+
+    got, ok := Get("test-command")
+    require.True(t, ok)
+    assert.Equal(t, h, got)
+}
+
+func TestRegister_Duplicate_Panics(t *testing.T) {
+    clearRegistry()
+
+    h1 := &mockHandler{name: "dup-command"}
+    h2 := &mockHandler{name: "dup-command"}
+
+    Register(h1)
+
+    assert.Panics(t, func() {
+        Register(h2)
+    })
+}
+
+func TestGet_NotFound(t *testing.T) {
+    clearRegistry()
+
+    got, ok := Get("non-existent")
+    assert.False(t, ok)
+    assert.Nil(t, got)
+}
+        ]]>
+      </example>
+    </ideas>
+  </tests>
+
+  <implementationNotes>
+    <note priority="critical">
+      Создать новую директорию: internal/command/
+    </note>
+    <note priority="high">
+      Файлы: handler.go, registry.go, handler_test.go, registry_test.go
+    </note>
+    <note priority="high">
+      Изменение main.go: добавить import "internal/command" и проверку Registry перед switch
+    </note>
+    <note priority="medium">
+      sync.RWMutex для thread-safety Registry (init() может вызываться параллельно в тестах)
+    </note>
+    <note priority="medium">
+      Для тестов добавить unexported функцию clearRegistry() для очистки состояния между тестами
+    </note>
+    <note priority="medium">
+      Альтернатива panic: Register() возвращает error, main.go логирует и продолжает.
+      Обсудить trade-off: fail-fast (panic) vs graceful degradation (error).
+    </note>
+    <note priority="critical">
+      В main.go ОБЯЗАТЕЛЕН blank import для триггера init():
+      import _ "git.benadis.ru/kargones/benadis-runner/internal/command/handlers"
+      Без этого registry будет пустым и все команды пойдут в legacy switch!
+    </note>
+    <note priority="high">
+      Перед merge запустить ВСЕ существующие тесты: make test
+      CI должен проходить без изменений в существующих тестах.
+    </note>
+    <note priority="medium">
+      Dual-path (registry + legacy switch) — временное решение.
+      Дедлайн удаления legacy switch: завершение Epic 1.
+      После миграции всех команд switch должен быть удалён.
+    </note>
+    <note priority="low">
+      Future consideration: Options pattern для Execute() вместо God Object Config.
+      Не в scope этой story, но учесть при проектировании будущих команд.
+    </note>
+  </implementationNotes>
+
+  <designDecisions>
+    <decision id="DD-01" method="Decision Matrix">
+      <question>Как обрабатывать дублирование имён в Register()?</question>
+      <chosen>Panic</chosen>
+      <score>66/85</score>
+      <rationale>
+        Дублирование имени — programming error, не runtime error.
+        init() не может вернуть error (ограничение Go).
+        Fail-fast важнее изоляции на этапе инициализации.
+      </rationale>
+      <alternatives>
+        <alt name="Return error" score="62" rejected="init() не может обработать"/>
+        <alt name="Log+Skip" score="59" rejected="Скрывает programming errors"/>
+        <alt name="Log+Override" score="54" rejected="Непредсказуемое поведение"/>
+      </alternatives>
+      <criteria>
+        <criterion name="Fail-fast" weight="5"/>
+        <criterion name="Простота API" weight="4"/>
+        <criterion name="Диагностика" weight="3"/>
+        <criterion name="Изоляция" weight="3"/>
+        <criterion name="Тестируемость" weight="2"/>
+      </criteria>
+    </decision>
+  </designDecisions>
+
+  <riskMatrix>
+    <summary>
+      <totalRisks>7</totalRisks>
+      <criticalRisks>3</criticalRisks>
+      <mitigatedRisks>5</mitigatedRisks>
+      <acceptedRisks>2</acceptedRisks>
+      <residualRiskLevel>Low</residualRiskLevel>
+    </summary>
+    <scale>
+      <probability low="1" medium="2" high="3"/>
+      <impact low="1" medium="2" high="3"/>
+      <formula>Score = Probability × Impact (1-9)</formula>
+    </scale>
+    <risks>
+      <risk id="R1" probability="2" impact="3" score="6" residual="2" status="mitigated">
+        <name>Import cycle между command и config</name>
+        <mitigation>constraint: dependency — только config и stdlib</mitigation>
+      </risk>
+      <risk id="R2" probability="3" impact="2" score="6" residual="2" status="mitigated">
+        <name>Забыли blank import → registry пустой</name>
+        <mitigation>note: blank import + test: TestRegistryNotEmpty_AfterImport</mitigation>
+      </risk>
+      <risk id="R3" probability="3" impact="2" score="6" residual="2" status="mitigated">
+        <name>Flaky tests из-за shared registry state</name>
+        <mitigation>clearRegistry() + go test -race в CI</mitigation>
+      </risk>
+      <risk id="R4" probability="2" impact="2" score="4" residual="2" status="mitigated">
+        <name>Legacy switch не работает как fallback</name>
+        <mitigation>Integration test для обоих путей (registry и legacy)</mitigation>
+      </risk>
+      <risk id="R5" probability="2" impact="2" score="4" residual="1" status="mitigated">
+        <name>Неинформативный panic при ошибке</name>
+        <mitigation>constraint: validation с понятными сообщениями</mitigation>
+      </risk>
+      <risk id="R6" probability="2" impact="1" score="2" residual="2" status="accepted">
+        <name>Overhead от sync.RWMutex</name>
+        <rationale>Overhead минимален (наносекунды), нужен для тестов</rationale>
+      </risk>
+      <risk id="R7" probability="1" impact="1" score="1" residual="1" status="planned">
+        <name>Документация не обновлена</name>
+        <mitigation>Task 4: godoc комментарии к публичным функциям</mitigation>
+      </risk>
+    </risks>
+  </riskMatrix>
+
+  <devilsAdvocateAnalysis>
+    <attack id="DA-1" verdict="accepted">
+      <claim>Глобальный registry — это антипаттерн (Singleton)</claim>
+      <counterargument>
+        Registry инициализируется один раз и неизменяем в runtime.
+        Go stdlib использует аналогичный паттерн: http.DefaultServeMux, sql.Register(), flag.CommandLine.
+      </counterargument>
+    </attack>
+    <attack id="DA-2" verdict="noted">
+      <claim>Handler interface слишком жёсткий — Config как God Object</claim>
+      <counterargument>
+        Config уже существует и используется везде. Handler берёт только нужные поля.
+      </counterargument>
+      <futureConsideration>Options pattern для Execute() — рассмотреть в будущих stories</futureConsideration>
+    </attack>
+    <attack id="DA-3" verdict="accepted">
+      <claim>Dual-path execution удваивает сложность</claim>
+      <counterargument>
+        Это ПЕРЕХОДНЫЙ период. Без dual-path нельзя мигрировать постепенно.
+        Дедлайн удаления legacy switch: завершение Epic 1.
+      </counterargument>
+    </attack>
+    <attack id="DA-4" verdict="noted">
+      <claim>sync.RWMutex — overhead без пользы в production</claim>
+      <counterargument>
+        Нужен для тестов (clearRegistry). Overhead RLock минимален.
+      </counterargument>
+      <futureConsideration>Рассмотреть sync.Map или test-only mutex</futureConsideration>
+    </attack>
+    <attack id="DA-5" verdict="accepted-with-action">
+      <claim>Нет валидации Handler при регистрации</claim>
+      <counterargument>Валидно. Нужны проверки nil и empty name.</counterargument>
+      <action>Добавлен constraint: validation с проверками h != nil и h.Name() != ""</action>
+    </attack>
+  </devilsAdvocateAnalysis>
+
+  <premortemAnalysis>
+    <scenario>Story 1.1 "Command Registry" провалилась через 2 недели после начала</scenario>
+    <failureModes>
+      <failure id="F1" probability="medium" impact="critical">
+        <name>Import cycle</name>
+        <description>internal/command импортирует internal/config, который импортирует что-то зависящее от command</description>
+        <warningSign>Ошибка компиляции при первом же import</warningSign>
+        <prevention>constraint: dependency — только config и stdlib</prevention>
+      </failure>
+      <failure id="F2" probability="low" impact="critical">
+        <name>init() order</name>
+        <description>Handler регистрируется до инициализации registry map</description>
+        <warningSign>Panic при старте приложения</warningSign>
+        <prevention>Go гарантирует порядок init() в пределах пакета</prevention>
+      </failure>
+      <failure id="F3" probability="high" impact="high">
+        <name>Забыли blank import</name>
+        <description>В main.go не добавили import _ для триггера init()</description>
+        <warningSign>Registry пустой, все команды идут в legacy switch</warningSign>
+        <prevention>note: blank import + test: TestRegistryNotEmpty_AfterImport</prevention>
+      </failure>
+      <failure id="F4" probability="medium" impact="medium">
+        <name>Race condition в тестах</name>
+        <description>Параллельные тесты конфликтуют на глобальном registry</description>
+        <warningSign>Flaky tests, -race detector failures</warningSign>
+        <prevention>clearRegistry() + test: TestNoRaceCondition</prevention>
+      </failure>
+      <failure id="F5" probability="medium" impact="medium">
+        <name>Logger недоступен в init()</name>
+        <description>Handler хочет логировать при регистрации, но cfg.Logger ещё nil</description>
+        <warningSign>Panic или silent failure</warningSign>
+        <prevention>constraint: init-safety — логирование только в Execute()</prevention>
+      </failure>
+    </failureModes>
+  </premortemAnalysis>
+
+  <fiveWhysAnalysis>
+    <rootCause>
+      Монолитная структура main.go нарушает принципы модульности и изоляции,
+      создавая bottleneck для разработки и увеличивая риск регрессий в критической CI/CD системе.
+    </rootCause>
+    <whyChain>
+      <why n="1">switch в main.go требует изменения при каждой новой команде</why>
+      <why n="2">Нарушается Open/Closed Principle: main.go должен быть закрыт для модификации</why>
+      <why n="3">Нет изоляции между командами — ошибка в одном case затрагивает весь switch</why>
+      <why n="4">benadis-runner работает в CI/CD для 1C:Enterprise — критической бизнес-системы</why>
+      <why n="5">Все изменения сходятся в main.go, создавая merge conflicts</why>
+    </whyChain>
+  </fiveWhysAnalysis>
+</story-context>

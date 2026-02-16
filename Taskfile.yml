@@ -1,0 +1,157 @@
+version: '3'
+
+dotenv: ['.env']
+
+vars:
+  GITEA_URL: "https://regdv.apkholding.ru"
+  REPOSITORY: "test/SCUD"
+  ACCESS_TOKEN: "{{.ACCESS_TOKEN}}" # загружается из .env
+  COMMAND: "execute-epf"
+  LOG_LEVEL: "Debug"
+  ISSUE_NUMBER: "1"
+  CONFIG_SYSTEM: "https://regdv.apkholding.ru/api/v1/repos/gitops-tools/gitops_congif/contents/app.yaml?ref=main"
+  CONFIG_PROJECT: "project.yaml"
+  CONFIG_SECRET: "https://regdv.apkholding.ru/api/v1/repos/gitops-tools/gitops_congif/contents/secret.yaml?ref=main"
+  CONFIG_DB_DATA: "https://regdv.apkholding.ru/api/v1/repos/gitops-tools/gitops_congif/contents/dbconfig.yaml?ref=main"
+  MENU_MAIN: "https://regdv.apkholding.ru/api/v1/repos/gitops-tools/gitops_congif/contents/menu_main.yaml?ref=main"
+  MENU_DEBUG: "https://regdv.apkholding.ru/api/v1/repos/gitops-tools/gitops_congif/contents/menu_debug.yaml?ref=main"
+  ACTOR: "xor"
+  DB_NAME: "V8_DEV_DSBEKETOV_APK_TOIR3"
+  TERMINATE_SESSIONS: "true"
+  FORCE_UPDATE: "true"
+  DEBUG_PORT: "2345"
+  BUILD_DIR: "./bin/benadis-runner-bin"
+  DEBUG_PORT_INPUT: "0"
+  WAIT: "false"
+  START_EPF: "https://regdv.apkholding.ru/api/v1/repos/gitops-tools/gitops_congif/contents/start.epf?ref=main"
+
+tasks:
+  kill-debug-port:
+    desc: "Освобождение порта отладки"
+    cmds:
+      - |
+        echo "Освобождение порта {{.DEBUG_PORT}}..."
+        PID=$(netstat -tlnp 2>/dev/null | grep ":{{.DEBUG_PORT}}" | awk '{print $7}' | cut -d'/' -f1 | head -1)
+        if [ ! -z "$PID" ] && [ "$PID" != "-" ]; then
+          echo "Найден процесс $PID на порту {{.DEBUG_PORT}}, завершаем..."
+          kill $PID 2>/dev/null || echo "Не удалось завершить процесс $PID"
+          sleep 1
+          if netstat -tlnp 2>/dev/null | grep -q ":{{.DEBUG_PORT}}"; then
+            echo "Принудительное завершение процесса..."
+            kill -9 $PID 2>/dev/null || true
+          fi
+          echo "Порт {{.DEBUG_PORT}} освобожден"
+        else
+          echo "Порт {{.DEBUG_PORT}} свободен"
+        fi
+
+  debug:
+    desc: "Запуск dlv для отладки через VS Code"
+    deps: [kill-debug-port]
+    env:
+      INPUT_GITEAURL: "{{.GITEA_URL}}"
+      INPUT_REPOSITORY: "{{.REPOSITORY}}"
+      INPUT_ACCESSTOKEN: "{{.ACCESS_TOKEN}}"
+      INPUT_COMMAND: "{{.COMMAND}}"
+      INPUT_LOGLEVEL: "{{.LOG_LEVEL}}"
+      INPUT_ISSUENUMBER: "{{.ISSUE_NUMBER}}"
+      INPUT_CONFIGSYSTEM: "{{.CONFIG_SYSTEM}}"
+      INPUT_CONFIGPROJECT: "{{.CONFIG_PROJECT}}"
+      INPUT_CONFIGSECRET: "{{.CONFIG_SECRET}}"
+      INPUT_CONFIGDBDATA: "{{.CONFIG_DB_DATA}}"
+      INPUT_MENUMAIN: "{{.MENU_MAIN}}"
+      INPUT_MENUDEBUG: "{{.MENU_DEBUG}}"
+      INPUT_ACTOR: "{{.ACTOR}}"
+      INPUT_DBNAME: "{{.DB_NAME}}"
+      INPUT_TERMINATESESSIONS: "{{.TERMINATE_SESSIONS}}"
+      INPUT_FORCE_UPDATE: "{{.FORCE_UPDATE}}"
+      INPUT_DEBUG_PORT: "{{.DEBUG_PORT_INPUT}}"
+      INPUT_WAIT: "{{.WAIT}}"
+      INPUT_STARTEPF: "{{.START_EPF}}"
+    cmds:
+      - |
+        dlv debug ./cmd/benadis-runner \
+          --headless --listen=127.0.0.1:{{.DEBUG_PORT}} --api-version=2 --accept-multiclient \
+          --allow-non-terminal-interactive=true
+
+  generate-version:
+    desc: "Генерация файла version.go с автоматическими константами версии"
+    cmds:
+      - |
+        echo "Генерация файла version.go..."
+        ./scripts/generate-version.sh {{.BUILD_DIR}}
+
+  build:
+    desc: "Сборка бинарного файла для продакшена"
+    cmds:
+      - |
+        echo "Генерация version.go..."
+        ./scripts/generate-version.sh --version-go-only
+        mkdir -p {{.BUILD_DIR}}
+        go build -o {{.BUILD_DIR}}/benadis-runner ./cmd/benadis-runner
+        ./scripts/generate-version.sh --version-md-only {{.BUILD_DIR}}
+
+  build-debug:
+    desc: "Сборка бинарного файла для отладки с сохранением отладочной информации"
+    cmds:
+      - |
+        echo "Генерация version.go..."
+        ./scripts/generate-version.sh --version-go-debug
+        mkdir -p {{.BUILD_DIR}}
+        go build -gcflags="-N -l" -o {{.BUILD_DIR}}/benadis-runner ./cmd/benadis-runner
+        ./scripts/generate-version.sh --version-md-only --debug {{.BUILD_DIR}}
+
+  debug-binary:
+    desc: "Запуск отладки собранного отладочного бинарного файла с использованием dlv"
+    deps: [build-debug, kill-debug-port]
+    env:
+      INPUT_GITEAURL: "{{.GITEA_URL}}"
+      INPUT_REPOSITORY: "{{.REPOSITORY}}"
+      INPUT_ACCESSTOKEN: "{{.ACCESS_TOKEN}}"
+      INPUT_COMMAND: "{{.COMMAND}}"
+      INPUT_LOGLEVEL: "{{.LOG_LEVEL}}"
+      INPUT_ISSUENUMBER: "{{.ISSUE_NUMBER}}"
+      INPUT_CONFIGSYSTEM: "{{.CONFIG_SYSTEM}}"
+      INPUT_CONFIGPROJECT: "{{.CONFIG_PROJECT}}"
+      INPUT_CONFIGSECRET: "{{.CONFIG_SECRET}}"
+      INPUT_CONFIGDBDATA: "{{.CONFIG_DB_DATA}}"
+      INPUT_MENUMAIN: "{{.MENU_MAIN}}"
+      INPUT_MENUDEBUG: "{{.MENU_DEBUG}}"
+      INPUT_ACTOR: "{{.ACTOR}}"
+      INPUT_DBNAME: "{{.DB_NAME}}"
+      INPUT_TERMINATESESSIONS: "{{.TERMINATE_SESSIONS}}"
+      INPUT_FORCE_UPDATE: "{{.FORCE_UPDATE}}"
+      INPUT_DEBUG_PORT: "{{.DEBUG_PORT_INPUT}}"
+      INPUT_WAIT: "{{.WAIT}}"
+      INPUT_STARTEPF: "{{.START_EPF}}"
+    cmds:
+      - |
+        echo "Запуск отладки бинарного файла {{.BUILD_DIR}}/benadis-runner..."
+        dlv exec {{.BUILD_DIR}}/benadis-runner \
+          --headless --listen=127.0.0.1:{{.DEBUG_PORT}} --api-version=2 --accept-multiclient \
+          --allow-non-terminal-interactive=true
+  run:
+    desc: "Запуск скомпилированного приложения"
+    env:
+      INPUT_GITEAURL: "{{.GITEA_URL}}"
+      INPUT_REPOSITORY: "{{.REPOSITORY}}"
+      INPUT_ACCESSTOKEN: "{{.ACCESS_TOKEN}}"
+      INPUT_COMMAND: "{{.COMMAND}}"
+      INPUT_LOGLEVEL: "{{.LOG_LEVEL}}"
+      INPUT_ISSUENUMBER: "{{.ISSUE_NUMBER}}"
+      INPUT_CONFIGSYSTEM: "{{.CONFIG_SYSTEM}}"
+      INPUT_CONFIGPROJECT: "{{.CONFIG_PROJECT}}"
+      INPUT_CONFIGSECRET: "{{.CONFIG_SECRET}}"
+      INPUT_CONFIGDBDATA: "{{.CONFIG_DB_DATA}}"
+      INPUT_MENUMAIN: "{{.MENU_MAIN}}"
+      INPUT_MENUDEBUG: "{{.MENU_DEBUG}}"
+      INPUT_ACTOR: "{{.ACTOR}}"
+      INPUT_DBNAME: "{{.DB_NAME}}"
+      INPUT_TERMINATESESSIONS: "{{.TERMINATE_SESSIONS}}"
+      INPUT_FORCE_UPDATE: "{{.FORCE_UPDATE}}"
+      INPUT_DEBUG_PORT: "{{.DEBUG_PORT_INPUT}}"
+      INPUT_WAIT: "{{.WAIT}}"
+      INPUT_STARTEPF: "{{.START_EPF}}"
+    cmds:
+      - |
+        {{.BUILD_DIR}}/benadis-runner

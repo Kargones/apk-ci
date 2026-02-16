@@ -1,0 +1,163 @@
+# generated: 2025-12-08 (автоматически сгенерировано sprint-planning workflow)
+# project: benadis-runner
+# project_key: benadis-runner-v2
+# tracking_system: file-system
+# story_location: bdocs/stories
+
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+#
+# Epic Status Transitions:
+#   - backlog → in-progress: Automatically when first story is created (via create-story)
+#   - in-progress → done: Manually when all stories reach 'done' status
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - drafted: Story file created in stories folder
+#   - ready-for-dev: Draft approved and story context created
+#   - in-progress: Developer actively working on implementation
+#   - review: Ready for code review (via Dev's code-review workflow)
+#   - done: Story completed
+#
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - completed: Retrospective has been done
+#
+# WORKFLOW NOTES:
+# ===============
+# - Epic transitions to 'in-progress' automatically when first story is created
+# - Stories can be worked in parallel if team capacity allows
+# - SM typically drafts next story after previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+
+generated: 2025-12-08
+project: benadis-runner
+project_key: benadis-runner-v2
+tracking_system: file-system
+story_location: bdocs/stories
+
+development_status:
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Epic 0: Extension Publish (PRIORITY: Independent from refactoring)
+  # Stories have been drafted and are ready for development
+  # ═══════════════════════════════════════════════════════════════════════════
+  epic-0: done
+  0-1-gitea-api-releases: done
+  0-2-gitea-api-search-repos: done
+  0-3-find-subscribed-repos: done
+  0-4-sync-extension-directory: done
+  0-5-create-pr-with-info: done
+  0-6-integrate-extension-publish-cmd: done
+  0-7-error-handling-reporting: done
+  0-8-unit-integration-tests: done
+  epic-0-retrospective: completed
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Epic 1: Architectural Foundation
+  # DI + Registry + Output + Logging + Tracing + первая NR-команда
+  # ═══════════════════════════════════════════════════════════════════════════
+  epic-1: backlog
+  1-1-command-registry-self-registration: backlog
+  1-2-nr-migration-bridge-deprecatedbridge: backlog
+  1-3-outputwriter-structured-errors: backlog
+  1-4-logger-interface-slog-adapter: backlog
+  1-5-trace-id-generation: backlog
+  1-6-config-extensions: backlog
+  1-7-wire-di-setup-providers: backlog
+  1-8-first-nr-command-nr-version: backlog
+  1-9-auto-generated-help-from-registry: backlog
+  epic-1-retrospective: optional
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Epic 2: Service Mode Management (Proof of Concept)
+  # ═══════════════════════════════════════════════════════════════════════════
+  epic-2: backlog
+  2-1-rac-adapter-interface: backlog
+  2-2-rac-client-implementation: backlog
+  2-3-nr-service-mode-status: backlog
+  2-4-session-info-service-mode-status: backlog
+  2-5-nr-service-mode-enable: backlog
+  2-6-force-disconnect-sessions: backlog
+  2-7-nr-service-mode-disable: backlog
+  2-8-state-aware-execution: backlog
+  epic-2-retrospective: optional
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Epic 3: Database Operations
+  # Restore/update с progress bar и dry-run
+  # ═══════════════════════════════════════════════════════════════════════════
+  epic-3: backlog
+  3-1-mssql-adapter-interface: backlog
+  3-2-nr-dbrestore-auto-timeout: backlog
+  3-3-progress-bar-long-operations: backlog
+  3-4-nr-dbupdate: backlog
+  3-5-nr-create-temp-db: backlog
+  3-6-dry-run-mode: backlog
+  epic-3-retrospective: optional
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Epic 4: Configuration Sync
+  # EDT↔Store↔DB цикл с детальным reporting
+  # ═══════════════════════════════════════════════════════════════════════════
+  epic-4: backlog
+  4-1-1c-operations-factory: backlog
+  4-2-nr-store2db: backlog
+  4-3-nr-storebind: backlog
+  4-4-nr-create-stores: backlog
+  4-5-nr-convert: backlog
+  4-6-nr-git2store: backlog
+  4-7-nr-execute-epf: backlog
+  epic-4-retrospective: optional
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Epic 5: Quality & Integration
+  # SonarQube + Gitea интеграция
+  # ═══════════════════════════════════════════════════════════════════════════
+  epic-5: backlog
+  5-1-sonarqube-adapter-interface: backlog
+  5-2-gitea-adapter-interface: backlog
+  5-3-nr-sq-scan-branch: backlog
+  5-4-nr-sq-scan-pr: backlog
+  5-5-nr-sq-report-branch: backlog
+  5-6-nr-sq-project-update: backlog
+  5-7-nr-test-merge: backlog
+  5-8-nr-action-menu-build: backlog
+  5-9-command-summary: backlog
+  epic-5-retrospective: optional
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Epic 6: Advanced Observability
+  # Алерты, Prometheus, Delve
+  # ═══════════════════════════════════════════════════════════════════════════
+  epic-6: backlog
+  6-1-log-file-rotation: backlog
+  6-2-email-alerting: backlog
+  6-3-telegram-alerting: backlog
+  6-4-webhook-alerting: backlog
+  6-5-prometheus-metrics: backlog
+  6-6-alert-rules-configuration: backlog
+  6-7-opentelemetry-export: backlog
+  6-8-trace-sampling: backlog
+  6-9-delve-debugging: backlog
+  epic-6-retrospective: optional
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Epic 7: Finalization
+  # Shadow-run, cleanup, UX polish
+  # ═══════════════════════════════════════════════════════════════════════════
+  epic-7: backlog
+  7-1-shadow-run-mode: backlog
+  7-2-smoke-tests: backlog
+  7-3-operation-plan-display: backlog
+  7-4-rollback-support: backlog
+  7-5-migration-script: backlog
+  7-6-deprecated-code-audit: backlog
+  7-7-deprecated-code-removal: backlog
+  7-8-adr-management: backlog
+  7-9-data-masking: backlog
+  7-10-yaml-output-format: backlog
+  epic-7-retrospective: optional

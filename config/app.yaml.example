@@ -1,0 +1,127 @@
+# Example application configuration file
+# This file demonstrates the structure for app.yaml configuration
+
+# Logging configuration
+logLevel: "Debug"
+
+# Working directories
+workDir: "/tmp/benadis"
+tmpDir: "/tmp/benadis/temp"
+
+# General timeout in seconds
+timeout: 30
+
+# Paths to executables
+paths:
+  bin1cv8: "/opt/1cv8/x86_64/8.3.27.1606/1cv8"
+  binIbcmd: "/opt/1cv8/x86_64/8.3.27.1606/ibcmd"
+  edtCli: "/opt/1C/1CE/components/1c-edt-2024.2.6+7-x86_64/1cedtcli"
+  rac: "/opt/1cv8/x86_64/8.3.27.1606/rac"
+
+# RAC (Remote Administration Console) configuration
+rac:
+  port: 1545
+  timeout: 30
+  retries: 3
+
+# User accounts
+users:
+  rac: "admin"
+  db: "db_user"
+  mssql: "mssql_user"
+  storeAdmin: "store_admin"
+
+# Database restore configuration
+dbrestore:
+  database: "default_db"
+  timeout: "30m"
+  autotimeout: true
+
+# SonarQube integration configuration
+sonarqube:
+  # SonarQube server URL
+  url: "https://sonarqube.example.com"
+  
+  # API timeout for SonarQube requests
+  timeout: "30s"
+  
+  # Retry configuration for failed requests
+  retryAttempts: 3
+  retryDelay: "1s"
+  
+  # Project configuration
+  projectPrefix: "benadis-"
+  defaultVisibility: "private"
+  
+  # Quality gate timeout
+  qualityGateTimeout: "5m"
+
+# SonarQube Scanner configuration
+scanner:
+  # Scanner download URL and version
+  scannerUrl: "https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.8.0.2856-linux.zip"
+  scannerVersion: "4.8.0.2856"
+  
+  # JVM options for scanner execution
+  javaOpts: "-Xmx512m"
+  
+  # Scanner execution timeout
+  timeout: "10m"
+  
+  # Working and temporary directories for scanner
+  workDir: "/tmp/benadis/scanner"
+  tempDir: "/tmp/benadis/scanner/temp"
+  
+  # Additional scanner properties
+  properties:
+    sonar.sourceEncoding: "UTF-8"
+    sonar.exclusions: "**/*_test.go,**/vendor/**,**/node_modules/**"
+    sonar.coverage.exclusions: "**/*_test.go,**/vendor/**,**/node_modules/**"
+    sonar.test.inclusions: "**/*_test.go"
+    sonar.go.coverage.reportPaths: "coverage.out"
+
+# Git configuration
+git:
+  # Git user configuration
+  userName: "example-user"
+  userEmail: "user@example.com"
+  
+  # Default branch for new repositories
+  defaultBranch: "main"
+  
+  # Git operation timeout
+  timeout: "30s"
+  
+  # Credential helper configuration
+  credentialHelper: "store"
+  credentialTimeout: "300s"
+
+# Resilience configuration
+resilience:
+  # Retry configuration
+  retryAttempts: 3
+  retryDelay: "1s"
+  maxRetryDelay: "30s"
+  
+  # Circuit breaker configuration
+  circuitBreakerFailureThreshold: 5
+  circuitBreakerTimeout: "60s"
+  circuitBreakerRecoveryTimeout: "30s"
+
+# Logging configuration
+logging:
+  # Log level (debug, info, warn, error)
+  level: "info"
+  
+  # Log format (json, text)
+  format: "json"
+  
+  # Log output (stdout, stderr, file)
+  output: "stdout"
+  
+  # File logging configuration (when output is file)
+  filePath: "/var/log/benadis-runner.log"
+  maxSize: 100
+  maxBackups: 3
+  maxAge: 28
+  compress: true

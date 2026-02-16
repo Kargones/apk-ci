@@ -1,0 +1,66 @@
+# Конфигурация для тестирования функции main
+# Этот файл содержит переменные окружения, которые будут установлены перед запуском main()
+
+# Флаг включения тестирования
+test-enable: true
+
+# Основные параметры приложения
+env-vars:
+  # GitHub Actions параметры
+  INPUT_ACTOR: "xor"
+  INPUT_COMMAND: "extension-publish"
+  INPUT_LOGLEVEL: "Debug"
+  INPUT_DBNAME: "test-database"
+  INPUT_REPOSITORY: "test/apk-ssl"
+  INPUT_GITEAURL: "https://git.apkholding.ru"
+  INPUT_ACCESSTOKEN: "e0452e72c27392799fd34f88da9546a1af509947"
+  
+  # Конфигурационные файлы
+  INPUT_CONFIGSYSTEM: "https://git.apkholding.ru/api/v1/repos/gitops-tools/gitops_congif/contents/app.yaml?ref=main"
+  INPUT_CONFIGPROJECT: "project.yaml"
+  INPUT_CONFIGSECRET: "https://git.apkholding.ru/api/v1/repos/gitops-tools/gitops_congif/contents/secret.yaml?ref=main"
+  INPUT_CONFIGDBDATA: "https://git.apkholding.ru/api/v1/repos/gitops-tools/gitops_congif/contents/dbconfig.yaml?ref=main"
+  INPUT_MENUMAIN: "https://git.apkholding.ru/api/v1/repos/gitops-tools/gitops_congif/contents/menu_main.yaml?ref=main"
+  INPUT_MENUDEBUG: "https://git.apkholding.ru/api/v1/repos/gitops-tools/gitops_congif/contents/menu_debug.yaml?ref=main"
+  
+  # Дополнительные параметры
+  INPUT_TERMINATESESSIONS: "true"
+  INPUT_FORCE_UPDATE: "true"
+  INPUT_ISSUENUMBER: "1"
+  INPUT_STARTEPF: "https://git.apkholding.ru/api/v1/repos/gitops-tools/gitops_congif/contents/start.epf?ref=main"
+  INPUT_BRANCHFORSCAN: "main"
+  INPUT_COMMITHASH: "abc123def456"
+  
+  # Рабочие директории
+  WorkDir: "/tmp/4del/test-workdir"
+  TmpDir: "/tmp/4del/test-tmpdir"
+  RepPath: "/tmp/4del/test-rep"
+  
+  # Строка подключения
+  Connect_String: "File=/tmp/4del/test-db;Usr=test;Pwd=test;"
+  
+  # Git настройки
+  GIT_TIMEOUT: "6000s"  # 100 минут для клонирования больших репозиториев (10GB)
+
+  # Тег релиза для команды extension-publish
+  GITHUB_REF_NAME: "v07"
+  
+  # Дополнительные переменные для тестирования
+  BR_ACTOR: "xor"
+  BR_ENV: "test"
+  BR_COMMAND: "git2store
+  "
+  BR_INFOBASE_NAME: "test-database"
+  BR_TERMINATE_SESSIONS: "true"
+  BR_FORCE_UPDATE: "true"
+  BR_ISSUE_NUMBER: "1"
+  BR_START_EPF: "https://git.apkholding.ru/api/v1/repos/gitops-tools/gitops_congif/contents/start.epf?ref=main"
+  BR_ACCESS_TOKEN: "e0452e72c27392799fd34f88da9546a1af509947"
+  
+  # Конфигурационные пути
+  BR_CONFIG_SYSTEM: "https://git.apkholding.ru/api/v1/repos/gitops-tools/gitops_congif/contents/app.yaml?ref=main"
+  BR_CONFIG_PROJECT: "https://git.apkholding.ru/api/v1/repos/gitops-tools/gitops_congif/contents/project.yaml?ref=main"
+  BR_CONFIG_SECRET: "https://git.apkholding.ru/api/v1/repos/gitops-tools/gitops_congif/contents/secret.yaml?ref=main"
+  BR_CONFIG_DBDATA: "https://git.apkholding.ru/api/v1/repos/gitops-tools/gitops_congif/contents/dbconfig.yaml?ref=main"
+  BR_CONFIG_MENU_MAIN: "https://git.apkholding.ru/api/v1/repos/gitops-tools/gitops_congif/contents/menu_main.yaml?ref=main"
+  BR_CONFIG_MENU_DEBUG: "https://git.apkholding.ru/api/v1/repos/gitops-tools/gitops_congif/contents/menu_debug.yaml?ref=main"

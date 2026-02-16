@@ -1,0 +1,82 @@
+# Test files
+test.*
+*.test
+*.out
+coverage.out
+smb_coverage.out
+coverage.html
+
+# Binaries
+*.exe
+*.dll
+*.so
+*.dylib
+# benadis-runner
+# benadis-runner-*
+*.vsix
+
+# Debug files
+__debug*
+*.pprof
+
+# Build artifacts
+/build/
+/dist/
+/bin/
+
+# Temporary files
+/tmp/*
+*.tmp
+*.temp
+
+# IDE files
+# .vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Configuration files with secrets
+*.secret
+*.key
+*.pem
+
+# Auto-generated version file
+internal/constants/version.go
+*.p12
+*.pfx
+secret.yaml
+secret.yml
+.env.local
+.env.*.local
+
+# Kerberos files
+*.keytab
+krb5cc_*
+
+# SMB mount points
+/mnt/smb/
+/tmp/smb/
+
+# Logs
+*.log
+logs/
+
+# Vendor directory (if using vendor)
+# vendor/
+
+# Go workspace file
+go.work
+go.work.sum
+
+.env
+.scannerwork

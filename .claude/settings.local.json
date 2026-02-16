@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir:*)",
+      "Bash(wc:*)",
+      "Bash(go test:*)",
+      "Bash(go run:*)",
+      "Bash(go env:*)",
+      "Bash(make lint:*)",
+      "Bash(make test:*)",
+      "Bash(useradd:*)",
+      "Bash(chpasswd:*)",
+      "Bash(usermod:*)",
+      "Bash(chown:*)",
+      "Bash(chmod:*)",
+      "Bash(go build:*)",
+      "Bash(su - xor -c \"ls -la /root/r/ && touch /root/r/test_write && rm /root/r/test_write && echo ''Запись работает!''\")"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

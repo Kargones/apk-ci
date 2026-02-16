@@ -1,0 +1,138 @@
+# Конфигурация приложения benadis-runner
+# Системные настройки приложения
+app:
+  logLevel: "Debug"
+  workDir: "/tmp/benadis"
+  tmpDir: "/tmp/benadis/temp"
+  timeout: 30
+
+# Пути к исполняемым файлам 1С
+paths:
+  bin1cv8: "/opt/1cv8/x86_64/8.3.27.1606/1cv8"
+  binIbcmd: "/opt/1cv8/x86_64/8.3.27.1606/ibcmd"
+  edtCli: "/opt/1C/1CE/components/1c-edt-2024.2.6+7-x86_64/1cedtcli"
+  rac: "/opt/1cv8/x86_64/8.3.27.1606/rac"
+
+# Настройки RAC (Remote Administration Console)
+rac:
+  port: 1545
+  timeout: 30
+  retries: 3
+
+# Пользователи системы
+users:
+  rac: "gitops"
+  db: "gitops"
+  mssql: "gitops"
+  storeAdmin: "gitops"
+
+# Настройки для модуля dbrestore
+dbrestore:
+  database: "master"
+  timeout: "3600s"
+  autotimeout: true
+
+# SonarQube integration configuration
+sonarqube:
+  # SonarQube server URL
+  url: "http://sq.apkholding.ru:9000"
+  
+  # API timeout for SonarQube requests
+  timeout: "30s"
+  
+  # Retry configuration for failed requests
+  retryAttempts: 3
+  retryDelay: "1s"
+  
+  # Project configuration
+  projectPrefix: ""
+  defaultVisibility: "private"
+  
+  # Quality gate timeout
+  qualityGateTimeout: "5m"
+
+# SonarQube Scanner configuration
+scanner:
+  # Scanner download URL and version
+  scannerUrl: "https://regdv.apkholding.ru/gitops-tools/sonar-scanner-cli.git"
+  scannerVersion: "7.2.0.5079"
+  
+  # JVM options for scanner execution
+  javaOpts: "-Xmx8192m"
+  
+  # Scanner execution timeout
+  timeout: "240m"
+  
+  # Working and temporary directories for scanner
+  workDir: "/tmp/4del/scanner"
+  tempDir: "/tmp/4del/scanner/temp"
+  
+  # Additional scanner properties
+  properties:
+    sonar.sourceEncoding: "UTF-8"
+    
+    # 1C:Enterprise specific settings
+    sonar.sources: "."
+    sonar.inclusions: "**/*.bsl,**/*.os,**/*.epf,**/*.erf,**/*.cf,**/*.cfe,**/*.xml,**/*.mdo,**/*.mxl,**/*.dcr,**/*.dcs,**/*.xsd,**/*.go"
+    sonar.language: "bsl"
+    
+    # 1C file type associations
+    sonar.bsl.file.suffixes: ".bsl,.os"
+    sonar.bsl.languageserver.enabled: "true"
+    sonar.bsl.languageserver.diagnosticLanguage: "ru"
+    
+    # Exclude 1C system files and temporary directories
+    sonar.exclusions: "**/*_test.go,**/vendor/**,**/node_modules/**,**/Ext/**,**/bin/**,**/obj/**,**/*.dt,**/*.1cd,**/*.cf.bak,**/Backup/**,**/logs/**"
+    
+    # Include 1C configuration files for analysis
+    sonar.test.exclusions: "**/Forms/**,**/Templates/**,**/Pictures/**"
+    
+    # 1C specific quality profiles
+    sonar.profile: "1C (BSL) Community"
+    sonar.bsl.sqale.duplicationExclusions: "**/*.xml,**/*.mdo"
+
+# Git configuration
+git:
+  # Git user configuration
+  userName: "benadis-runner"
+  userEmail: "benadis-runner@benadis.ru"
+  
+  # Default branch for new repositories
+  defaultBranch: "main"
+  
+  # Git operation timeout
+  timeout: "30s"
+  
+  # Credential helper configuration
+  credentialHelper: "store"
+  credentialTimeout: "300s"
+
+# Resilience configuration
+resilience:
+  # Retry configuration
+  retryAttempts: 3
+  retryDelay: "1s"
+  maxRetryDelay: "30s"
+  
+  # Circuit breaker configuration
+  circuitBreakerFailureThreshold: 5
+  circuitBreakerTimeout: "60s"
+  circuitBreakerRecoveryTimeout: "30s"
+
+# Logging configuration
+logging:
+  # Log level (debug, info, warn, error)
+  level: "info"
+  
+  # Log format (json, text)
+  format: "json"
+  
+  # Log output (stdout, stderr, file)
+  output: "stdout"
+  
+  # File logging configuration (when output is file)
+  filePath: "/var/log/benadis-runner.log"
+  maxSize: 100
+  maxBackups: 3
+  maxAge: 28
+  compress: true
