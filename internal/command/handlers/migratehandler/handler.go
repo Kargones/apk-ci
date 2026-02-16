@@ -104,7 +104,7 @@ func (h *MigrateHandler) Execute(ctx context.Context, cfg *config.Config) error 
 		os.Getenv(constants.EnvMigrateNoBackup) == "1"
 
 	// Построение маппинга legacy → NR из реестра команд
-	// TODO (M-3/Review #26): buildLegacyToNRMapping вызывается при каждом Execute.
+	// TODO: buildLegacyToNRMapping вызывается при каждом Execute.
 	// Для утилиты однократного запуска это некритично, но можно оптимизировать через sync.Once.
 	legacyToNR := buildLegacyToNRMapping()
 

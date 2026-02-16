@@ -8,7 +8,7 @@ import (
 
 // LoggingConfig содержит настройки для логирования.
 //
-// TODO (M-10/Review #13): Dual source of truth — LoggingConfig здесь и logging.Config
+// TODO: Dual source of truth — LoggingConfig здесь и logging.Config
 // в internal/pkg/logging/config.go дублируют поля. При добавлении новых опций нужно
 // менять оба места и синхронизировать defaults. Рефакторинг: использовать одну структуру.
 type LoggingConfig struct {
@@ -34,7 +34,7 @@ type LoggingConfig struct {
 	MaxAge int `yaml:"maxAge" env:"BR_LOG_MAX_AGE" env-default:"7"`
 
 	// Compress - сжимать ли backup файлы
-	// TODO (M-4/Review #9): bool с env-default:"true" — в YAML yaml:"compress" false будет
+	// TODO: bool с env-default:"true" — в YAML yaml:"compress" false будет
 	// перезаписан env-default при cleanenv.ReadEnv. Поведение корректно только при чтении
 	// из env. Для YAML-source используется getDefaultLoggingConfig() где Compress=true.
 	Compress bool `yaml:"compress" env:"BR_LOG_COMPRESS" env-default:"true"`

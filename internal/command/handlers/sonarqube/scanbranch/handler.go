@@ -218,7 +218,7 @@ func (h *ScanBranchHandler) Execute(ctx context.Context, cfg *config.Config) err
 	log = log.With(slog.String("project_key", projectKey))
 
 	// Получение Gitea клиента
-	// TODO(H-6): Реализовать фабрику createGiteaClient(cfg) для создания реального клиента.
+	// TODO: Реализовать фабрику createGiteaClient(cfg) для создания реального клиента.
 	// Текущая реализация требует DI через поле giteaClient (используется в тестах).
 	// Для production необходимо создать реализацию gitea.Client на основе internal/entity/gitea
 	// или написать новую реализацию в internal/adapter/gitea/client.go.
@@ -232,7 +232,7 @@ func (h *ScanBranchHandler) Execute(ctx context.Context, cfg *config.Config) err
 	}
 
 	// Получение SonarQube клиента
-	// TODO(H-6): Реализовать фабрику createSonarQubeClient(cfg) для создания реального клиента.
+	// TODO: Реализовать фабрику createSonarQubeClient(cfg) для создания реального клиента.
 	// Текущая реализация требует DI через поле sonarqubeClient (используется в тестах).
 	// Для production необходимо создать реализацию sonarqube.Client на основе internal/entity/sonarqube
 	// или написать новую реализацию в internal/adapter/sonarqube/client.go.
@@ -356,7 +356,7 @@ func (h *ScanBranchHandler) Execute(ctx context.Context, cfg *config.Config) err
 		log.Info("Проект не найден в SonarQube, создаём",
 			slog.String("get_error", err.Error()))
 		projectName := fmt.Sprintf("%s/%s (%s)", owner, repo, branch)
-		// TODO(L-1): Visibility hardcoded как "private". Для некоторых организаций
+		// TODO: Visibility hardcoded как "private". Для некоторых организаций
 		// может требоваться "public". Добавить cfg.SonarQubeVisibility или cfg.DefaultVisibility.
 		_, err = sqClient.CreateProject(ctx, sonarqube.CreateProjectOptions{
 			Key:        projectKey,
@@ -383,7 +383,7 @@ func (h *ScanBranchHandler) Execute(ctx context.Context, cfg *config.Config) err
 		if len(sha) > 7 {
 			shortSHA = sha[:7]
 		}
-		// TODO(H-7): SourcePath не заполняется — требуется добавить cfg.WorkDir или cfg.SourcePath
+		// TODO: SourcePath не заполняется — требуется добавить cfg.WorkDir или cfg.SourcePath
 		// для указания пути к исходному коду. Без этого sonar-scanner не знает где искать файлы.
 		// См. sonarqube.RunAnalysisOptions.SourcePath в internal/adapter/sonarqube/interfaces.go:186
 		result, err := sqClient.RunAnalysis(ctx, sonarqube.RunAnalysisOptions{

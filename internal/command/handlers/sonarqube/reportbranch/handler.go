@@ -34,7 +34,7 @@ const (
 func init() {
 	// Deprecated alias: "sq-report-branch" -> "nr-sq-report-branch"
 	// Legacy команда сохраняется для обратной совместимости до полной миграции на NR.
-	// TODO(H-7): Удалить deprecated alias ActSQReportBranch после миграции всех workflows на NR-команды.
+	// TODO: Удалить deprecated alias ActSQReportBranch после миграции всех workflows на NR-команды.
 	// Планируемая версия удаления: v2.0.0 или после завершения Epic 7.
 	command.RegisterWithAlias(&ReportBranchHandler{}, constants.ActSQReportBranch)
 }
@@ -328,7 +328,7 @@ func (h *ReportBranchHandler) Execute(ctx context.Context, cfg *config.Config) e
 	log.Info("Запуск генерации отчёта о качестве ветки")
 
 	// 5. Получение SonarQube клиента
-	// TODO(H-6): Реализовать фабрику createSonarQubeClient(cfg) для создания реального клиента.
+	// TODO: Реализовать фабрику createSonarQubeClient(cfg) для создания реального клиента.
 	// Текущая реализация требует DI через поле sonarqubeClient (используется в тестах).
 	// Для production необходимо создать реализацию sonarqube.Client на основе internal/entity/sonarqube
 	// или написать новую реализацию в internal/adapter/sonarqube/client.go.
