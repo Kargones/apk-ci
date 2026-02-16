@@ -395,7 +395,8 @@ func (e *Cli) Convert(ctx context.Context, l *slog.Logger, cfg *config.Config) {
 	if e.WorkSpace == "" {
 		tDir, err := os.MkdirTemp(cfg.TmpDir, "ws")
 		if err != nil {
-			panic(err)
+			e.LastErr = fmt.Errorf("failed to create temp workspace dir: %w", err)
+			return
 		}
 		e.WorkSpace = tDir
 	}
