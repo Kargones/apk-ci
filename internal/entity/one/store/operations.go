@@ -208,7 +208,7 @@ func (s *Store) Check(ctx context.Context, l *slog.Logger, cfg *config.Config, d
 		// }
 	}
 	if !storeExists {
-		if err := s.Create(context.Background(), l, cfg, dbConnectString, isMain); err != nil {
+		if err := s.Create(ctx, l, cfg, dbConnectString, isMain); err != nil {
 			l.Error("Ошибка создания хранилища конфигурации",
 				slog.String("Путь", s.Path),
 				slog.String("Строка подключения", dbConnectString),
@@ -345,7 +345,7 @@ func (s *Store) BindAdd(ctx context.Context, l *slog.Logger, cfg *config.Config,
 	defer func() {
 		s.Path = tPath
 	}()
-	err := s.CheckAdd(context.Background(), l, cfg, dbConnectString, addName)
+	err := s.CheckAdd(ctx, l, cfg, dbConnectString, addName)
 	if err != nil {
 		l.Error("Невозможно подключиться к хранилищу конфигурации",
 			slog.String("Путь", s.Path),

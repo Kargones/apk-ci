@@ -2,6 +2,7 @@ package tracing
 
 import (
 	"context"
+	"time"
 	"net/url"
 
 	"github.com/Kargones/apk-ci/internal/pkg/logging"
@@ -32,7 +33,8 @@ func NewTracerProvider(cfg Config, logger logging.Logger) (func(context.Context)
 		return nil, err
 	}
 
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
 
 	// Создать resource с атрибутами сервиса.
 	// Используем NewSchemaless для избежания конфликта Schema URL

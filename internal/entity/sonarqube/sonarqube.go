@@ -6,6 +6,7 @@ package sonarqube
 import (
 	"bytes"
 	"context"
+	"time"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -71,7 +72,9 @@ func (s *Entity) Authenticate(token string) error {
 	}()
 
 	// Validate the token
-	return s.ValidateToken(context.Background())
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	return s.ValidateToken(ctx)
 }
 
 // authenticate adds authentication header to the request.
