@@ -24,7 +24,7 @@ func (g *API) CreateTestBranch() error {
 	statusCode, _, err := g.sendReq(urlString, reqBody, "POST")
 
 	if statusCode != http.StatusCreated {
-		return fmt.Errorf("ошибка при создании ветки: %v %v", statusCode, err)
+		return fmt.Errorf("ошибка при создании ветки: %v %w", statusCode, err)
 	}
 	return nil
 }
@@ -39,7 +39,7 @@ func (g *API) DeleteTestBranch() error {
 
 	statusCode, _, err := g.sendReq(urlString, "", "DELETE")
 	if statusCode != http.StatusNoContent {
-		return fmt.Errorf("ошибка при создании ветки: %v %v", statusCode, err)
+		return fmt.Errorf("ошибка при создании ветки: %v %w", statusCode, err)
 	}
 	return nil
 }
@@ -57,7 +57,7 @@ func (g *API) GetBranches(repo string) ([]Branch, error) {
 
 	statusCode, body, err := g.sendReq(urlString, "", "GET")
 	if err != nil {
-		return nil, fmt.Errorf("ошибка при выполнении запроса: %v", err)
+		return nil, fmt.Errorf("ошибка при выполнении запроса: %w", err)
 	}
 
 	if statusCode != http.StatusOK {
@@ -67,7 +67,7 @@ func (g *API) GetBranches(repo string) ([]Branch, error) {
 	var branches []Branch
 	err = json.Unmarshal([]byte(body), &branches)
 	if err != nil {
-		return nil, fmt.Errorf("ошибка при разборе JSON: %v", err)
+		return nil, fmt.Errorf("ошибка при разборе JSON: %w", err)
 	}
 
 	return branches, nil
@@ -90,7 +90,7 @@ func (g *API) HasBranch(owner, repo, branchName string) (bool, error) {
 
 	statusCode, _, err := g.sendReq(urlString, "", "GET")
 	if err != nil {
-		return false, fmt.Errorf("ошибка при проверке ветки %s в %s/%s: %v", branchName, owner, repo, err)
+		return false, fmt.Errorf("ошибка при проверке ветки %s в %s/%s: %w", branchName, owner, repo, err)
 	}
 
 	// Ветка существует

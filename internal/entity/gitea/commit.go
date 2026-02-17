@@ -22,7 +22,7 @@ func (g *API) GetLatestCommit(branch string) (*Commit, error) {
 
 	statusCode, body, err := g.sendReq(urlString, "", "GET")
 	if err != nil {
-		return nil, fmt.Errorf("ошибка при выполнении запроса: %v", err)
+		return nil, fmt.Errorf("ошибка при выполнении запроса: %w", err)
 	}
 
 	if statusCode != http.StatusOK {
@@ -32,7 +32,7 @@ func (g *API) GetLatestCommit(branch string) (*Commit, error) {
 	var commits []Commit
 	err = json.Unmarshal([]byte(body), &commits)
 	if err != nil {
-		return nil, fmt.Errorf("ошибка при разборе JSON: %v", err)
+		return nil, fmt.Errorf("ошибка при разборе JSON: %w", err)
 	}
 
 	if len(commits) == 0 {
@@ -59,7 +59,7 @@ func (g *API) GetCommits(branch string, limit int) ([]Commit, error) {
 
 	statusCode, body, err := g.sendReq(urlString, "", "GET")
 	if err != nil {
-		return nil, fmt.Errorf("ошибка при выполнении запроса: %v", err)
+		return nil, fmt.Errorf("ошибка при выполнении запроса: %w", err)
 	}
 
 	if statusCode != http.StatusOK {
@@ -69,7 +69,7 @@ func (g *API) GetCommits(branch string, limit int) ([]Commit, error) {
 	var commits []Commit
 	err = json.Unmarshal([]byte(body), &commits)
 	if err != nil {
-		return nil, fmt.Errorf("ошибка при разборе JSON: %v", err)
+		return nil, fmt.Errorf("ошибка при разборе JSON: %w", err)
 	}
 
 	return commits, nil
@@ -91,7 +91,7 @@ func (g *API) GetFirstCommitOfBranch(branch string, _ string) (*Commit, error) {
 
 	statusCode, body, err := g.sendReq(urlString, "", "GET")
 	if err != nil {
-		return nil, fmt.Errorf("ошибка при выполнении запроса: %v", err)
+		return nil, fmt.Errorf("ошибка при выполнении запроса: %w", err)
 	}
 
 	if statusCode != http.StatusOK {
@@ -101,7 +101,7 @@ func (g *API) GetFirstCommitOfBranch(branch string, _ string) (*Commit, error) {
 	var commits []Commit
 	err = json.Unmarshal([]byte(body), &commits)
 	if err != nil {
-		return nil, fmt.Errorf("ошибка при разборе JSON: %v", err)
+		return nil, fmt.Errorf("ошибка при разборе JSON: %w", err)
 	}
 
 	if len(commits) == 0 {
@@ -133,7 +133,7 @@ func (g *API) GetCommitsBetween(baseCommitSHA, headCommitSHA string) ([]Commit, 
 
 	statusCode, body, err := g.sendReq(urlString, "", "GET")
 	if err != nil {
-		return nil, fmt.Errorf("ошибка при выполнении запроса: %v", err)
+		return nil, fmt.Errorf("ошибка при выполнении запроса: %w", err)
 	}
 
 	if statusCode != http.StatusOK {
@@ -143,7 +143,7 @@ func (g *API) GetCommitsBetween(baseCommitSHA, headCommitSHA string) ([]Commit, 
 	var commits []Commit
 	err = json.Unmarshal([]byte(body), &commits)
 	if err != nil {
-		return nil, fmt.Errorf("ошибка при разборе JSON: %v", err)
+		return nil, fmt.Errorf("ошибка при разборе JSON: %w", err)
 	}
 
 	// Фильтруем коммиты до baseCommitSHA
@@ -182,7 +182,7 @@ func (g *API) GetCommitFiles(commitSHA string) ([]CommitFile, error) {
 
 	statusCode, body, err := g.sendReq(urlString, "", "GET")
 	if err != nil {
-		return nil, fmt.Errorf("ошибка при выполнении запроса: %v", err)
+		return nil, fmt.Errorf("ошибка при выполнении запроса: %w", err)
 	}
 
 	if statusCode != http.StatusOK {
@@ -194,7 +194,7 @@ func (g *API) GetCommitFiles(commitSHA string) ([]CommitFile, error) {
 	}
 	err = json.Unmarshal([]byte(body), &commitData)
 	if err != nil {
-		return nil, fmt.Errorf("ошибка при разборе JSON: %v", err)
+		return nil, fmt.Errorf("ошибка при разборе JSON: %w", err)
 	}
 
 	return commitData.Files, nil
@@ -228,7 +228,7 @@ func (g *API) getMainBranchCommitRange(branch string) (*BranchCommitRange, error
 	// Получаем последний коммит
 	lastCommit, err := g.GetLatestCommit(branch)
 	if err != nil {
-		return nil, fmt.Errorf("ошибка получения последнего коммита: %v", err)
+		return nil, fmt.Errorf("ошибка получения последнего коммита: %w", err)
 	}
 
 	// Ищем коммит с тегом "sq-start"
@@ -237,7 +237,7 @@ func (g *API) getMainBranchCommitRange(branch string) (*BranchCommitRange, error
 		// Если коммит с тегом не найден, берем первый коммит в истории
 		firstCommit, err = g.getFirstCommitInHistory(branch)
 		if err != nil {
-			return nil, fmt.Errorf("ошибка получения первого коммита: %v", err)
+			return nil, fmt.Errorf("ошибка получения первого коммита: %w", err)
 		}
 	}
 
@@ -253,7 +253,7 @@ func (g *API) getFeatureBranchCommitRange(branch string) (*BranchCommitRange, er
 	// Получаем последний коммит ветки
 	lastCommit, err := g.GetLatestCommit(branch)
 	if err != nil {
-		return nil, fmt.Errorf("ошибка получения последнего коммита: %v", err)
+		return nil, fmt.Errorf("ошибка получения последнего коммита: %w", err)
 	}
 
 	// Сравниваем с базовой веткой для получения merge base
@@ -264,7 +264,7 @@ func (g *API) getFeatureBranchCommitRange(branch string) (*BranchCommitRange, er
 
 	compareResult, err := g.compareBranches(baseBranch, branch)
 	if err != nil {
-		return nil, fmt.Errorf("ошибка сравнения веток: %v", err)
+		return nil, fmt.Errorf("ошибка сравнения веток: %w", err)
 	}
 
 	// Если общий предок не найден, используем первый коммит базовой ветки
@@ -273,7 +273,7 @@ func (g *API) getFeatureBranchCommitRange(branch string) (*BranchCommitRange, er
 		// Fallback: используем первый коммит базовой ветки
 		firstCommit, err = g.getFirstCommitInHistory(baseBranch)
 		if err != nil {
-			return nil, fmt.Errorf("не удалось получить первый коммит базовой ветки %s: %v", baseBranch, err)
+			return nil, fmt.Errorf("не удалось получить первый коммит базовой ветки %s: %w", baseBranch, err)
 		}
 	} else {
 		firstCommit = compareResult.MergeBaseCommit
@@ -293,7 +293,7 @@ func (g *API) findCommitWithTag(_, tag string) (*Commit, error) {
 
 	statusCode, body, err := g.sendReq(urlString, "", "GET")
 	if err != nil {
-		return nil, fmt.Errorf("ошибка при выполнении запроса тегов: %v", err)
+		return nil, fmt.Errorf("ошибка при выполнении запроса тегов: %w", err)
 	}
 
 	if statusCode != http.StatusOK {
@@ -309,7 +309,7 @@ func (g *API) findCommitWithTag(_, tag string) (*Commit, error) {
 
 	err = json.Unmarshal([]byte(body), &tags)
 	if err != nil {
-		return nil, fmt.Errorf("ошибка при разборе JSON тегов: %v", err)
+		return nil, fmt.Errorf("ошибка при разборе JSON тегов: %w", err)
 	}
 
 	// Ищем тег "sq-start"
@@ -330,7 +330,7 @@ func (g *API) getFirstCommitInHistory(branch string) (*Commit, error) {
 
 	statusCode, body, err := g.sendReq(urlString, "", "GET")
 	if err != nil {
-		return nil, fmt.Errorf("ошибка при выполнении запроса: %v", err)
+		return nil, fmt.Errorf("ошибка при выполнении запроса: %w", err)
 	}
 
 	if statusCode != http.StatusOK {
@@ -340,7 +340,7 @@ func (g *API) getFirstCommitInHistory(branch string) (*Commit, error) {
 	var commits []Commit
 	err = json.Unmarshal([]byte(body), &commits)
 	if err != nil {
-		return nil, fmt.Errorf("ошибка при разборе JSON: %v", err)
+		return nil, fmt.Errorf("ошибка при разборе JSON: %w", err)
 	}
 
 	if len(commits) == 0 {
@@ -359,7 +359,7 @@ func (g *API) compareBranches(base, head string) (*CompareResult, error) {
 
 	statusCode, body, err := g.sendReq(urlString, "", "GET")
 	if err != nil {
-		return nil, fmt.Errorf("ошибка при выполнении запроса сравнения: %v", err)
+		return nil, fmt.Errorf("ошибка при выполнении запроса сравнения: %w", err)
 	}
 
 	if statusCode != http.StatusOK {
@@ -369,14 +369,14 @@ func (g *API) compareBranches(base, head string) (*CompareResult, error) {
 	var result CompareResult
 	err = json.Unmarshal([]byte(body), &result)
 	if err != nil {
-		return nil, fmt.Errorf("ошибка при разборе JSON результата сравнения: %v", err)
+		return nil, fmt.Errorf("ошибка при разборе JSON результата сравнения: %w", err)
 	}
 
 	// Если общий предок не найден через API сравнения, попробуем найти его вручную
 	if result.MergeBaseCommit == nil {
 		mergeBase, err := g.findMergeBase(base, head)
 		if err != nil {
-			return nil, fmt.Errorf("не удалось найти общего предка веток %s и %s: %v", base, head, err)
+			return nil, fmt.Errorf("не удалось найти общего предка веток %s и %s: %w", base, head, err)
 		}
 		result.MergeBaseCommit = mergeBase
 	}
@@ -391,7 +391,7 @@ func (g *API) findMergeBase(base, head string) (*Commit, error) {
 	// Получаем историю коммитов целевой ветки (head)
 	headCommits, err := g.getAllCommits(head)
 	if err != nil {
-		return nil, fmt.Errorf("не удалось получить коммиты ветки head %s: %v", head, err)
+		return nil, fmt.Errorf("не удалось получить коммиты ветки head %s: %w", head, err)
 	}
 
 	if len(headCommits) == 0 {
@@ -405,7 +405,7 @@ func (g *API) findMergeBase(base, head string) (*Commit, error) {
 	// Получаем историю коммитов базовой ветки
 	baseCommits, err := g.getAllCommits(base)
 	if err != nil {
-		return nil, fmt.Errorf("не удалось получить коммиты базовой ветки %s: %v", base, err)
+		return nil, fmt.Errorf("не удалось получить коммиты базовой ветки %s: %w", base, err)
 	}
 
 	if len(baseCommits) == 0 {
@@ -443,7 +443,7 @@ func (g *API) getAllCommits(branch string) ([]Commit, error) {
 
 	statusCode, body, err := g.sendReq(urlString, "", "GET")
 	if err != nil {
-		return nil, fmt.Errorf("ошибка при выполнении запроса коммитов: %v", err)
+		return nil, fmt.Errorf("ошибка при выполнении запроса коммитов: %w", err)
 	}
 
 	if statusCode != http.StatusOK {
@@ -453,7 +453,7 @@ func (g *API) getAllCommits(branch string) ([]Commit, error) {
 	var commits []Commit
 	err = json.Unmarshal([]byte(body), &commits)
 	if err != nil {
-		return nil, fmt.Errorf("ошибка при разборе JSON коммитов: %v", err)
+		return nil, fmt.Errorf("ошибка при разборе JSON коммитов: %w", err)
 	}
 
 	return commits, nil
@@ -465,7 +465,7 @@ func (g *API) getCommitBySHA(sha string) (*Commit, error) {
 
 	statusCode, body, err := g.sendReq(urlString, "", "GET")
 	if err != nil {
-		return nil, fmt.Errorf("ошибка при выполнении запроса коммита: %v", err)
+		return nil, fmt.Errorf("ошибка при выполнении запроса коммита: %w", err)
 	}
 
 	if statusCode != http.StatusOK {
@@ -475,7 +475,7 @@ func (g *API) getCommitBySHA(sha string) (*Commit, error) {
 	var commits []Commit
 	err = json.Unmarshal([]byte(body), &commits)
 	if err != nil {
-		return nil, fmt.Errorf("ошибка при разборе JSON коммита: %v", err)
+		return nil, fmt.Errorf("ошибка при разборе JSON коммита: %w", err)
 	}
 
 	if len(commits) == 0 {

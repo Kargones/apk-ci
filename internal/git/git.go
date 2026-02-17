@@ -289,7 +289,7 @@ func (g *Git) Switch(ctx context.Context, l *slog.Logger) error {
 			slog.String("error", err.Error()),
 			slog.String("branch", g.Branch),
 			slog.String("repo_path", g.RepPath))
-		return fmt.Errorf("branch switch failed: %v", err)
+		return fmt.Errorf("branch switch failed: %w", err)
 	}
 
 	l.Info("Branch switch operation completed successfully", slog.String("branch", g.Branch))

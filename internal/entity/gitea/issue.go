@@ -23,7 +23,7 @@ func (g *API) GetIssue(issueNumber int64) (*Issue, error) {
 
 	statusCode, body, err := g.sendReq(urlString, "", "GET")
 	if err != nil {
-		return nil, fmt.Errorf("ошибка при выполнении запроса: %v", err)
+		return nil, fmt.Errorf("ошибка при выполнении запроса: %w", err)
 	}
 
 	if statusCode != http.StatusOK {
@@ -33,7 +33,7 @@ func (g *API) GetIssue(issueNumber int64) (*Issue, error) {
 	r := strings.NewReader(body)
 	var issue Issue
 	if err := json.NewDecoder(r).Decode(&issue); err != nil {
-		return nil, fmt.Errorf("ошибка при декодировании ответа: %v", err)
+		return nil, fmt.Errorf("ошибка при декодировании ответа: %w", err)
 	}
 
 	return &issue, nil
@@ -54,7 +54,7 @@ func (g *API) AddIssueComment(issueNumber int64, commentText string) error {
 
 	statusCode, _, err := g.sendReq(urlString, reqBody, "POST")
 	if err != nil {
-		return fmt.Errorf("ошибка при выполнении запроса: %v", err)
+		return fmt.Errorf("ошибка при выполнении запроса: %w", err)
 	}
 
 	if statusCode != http.StatusCreated {
@@ -78,7 +78,7 @@ func (g *API) CloseIssue(issueNumber int64) error {
 
 	statusCode, _, err := g.sendReq(urlString, reqBody, "PATCH")
 	if err != nil {
-		return fmt.Errorf("ошибка при выполнении запроса: %v", err)
+		return fmt.Errorf("ошибка при выполнении запроса: %w", err)
 	}
 
 	if statusCode != http.StatusCreated {

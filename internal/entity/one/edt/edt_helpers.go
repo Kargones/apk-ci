@@ -22,7 +22,7 @@ func MoveDirContents(src, dst string) error {
 	// Получаем список элементов в исходном каталоге
 	entries, err := os.ReadDir(src)
 	if err != nil {
-		return fmt.Errorf("не удалось прочитать исходный каталог: %v", err)
+		return fmt.Errorf("не удалось прочитать исходный каталог: %w", err)
 	}
 
 	for _, entry := range entries {
@@ -31,7 +31,7 @@ func MoveDirContents(src, dst string) error {
 
 		// Просто переименовываем (перемещаем) каждый элемент
 		if err := os.Rename(srcPath, dstPath); err != nil {
-			return fmt.Errorf("не удалось переместить %s: %v", srcPath, err)
+			return fmt.Errorf("не удалось переместить %s: %w", srcPath, err)
 		}
 	}
 

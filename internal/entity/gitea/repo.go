@@ -30,7 +30,7 @@ func (g *API) SearchOrgRepos(orgName string) ([]Repository, error) {
 
 		statusCode, body, err := g.sendReq(urlString, "", "GET")
 		if err != nil {
-			return nil, fmt.Errorf("ошибка при запросе репозиториев организации %s: %v", orgName, err)
+			return nil, fmt.Errorf("ошибка при запросе репозиториев организации %s: %w", orgName, err)
 		}
 
 		// Организация не найдена — возвращаем пустой slice
@@ -44,7 +44,7 @@ func (g *API) SearchOrgRepos(orgName string) ([]Repository, error) {
 
 		var repos []Repository
 		if err := json.Unmarshal([]byte(body), &repos); err != nil {
-			return nil, fmt.Errorf("ошибка при разборе JSON репозиториев: %v", err)
+			return nil, fmt.Errorf("ошибка при разборе JSON репозиториев: %w", err)
 		}
 
 		// Пустой ответ — достигли конца списка
@@ -77,7 +77,7 @@ func (g *API) GetUserOrganizations() ([]Organization, error) {
 
 		statusCode, body, err := g.sendReq(urlString, "", "GET")
 		if err != nil {
-			return nil, fmt.Errorf("ошибка при запросе организаций пользователя: %v", err)
+			return nil, fmt.Errorf("ошибка при запросе организаций пользователя: %w", err)
 		}
 
 		if statusCode != http.StatusOK {
@@ -86,7 +86,7 @@ func (g *API) GetUserOrganizations() ([]Organization, error) {
 
 		var orgs []Organization
 		if err := json.Unmarshal([]byte(body), &orgs); err != nil {
-			return nil, fmt.Errorf("ошибка при разборе JSON организаций: %v", err)
+			return nil, fmt.Errorf("ошибка при разборе JSON организаций: %w", err)
 		}
 
 		// Пустой ответ — достигли конца списка

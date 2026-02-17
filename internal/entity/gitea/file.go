@@ -33,7 +33,7 @@ func (g *API) GetFileContent(fileName string) ([]byte, error) {
 
 	statusCode, body, err := g.sendReq(urlString, "", "GET")
 	if err != nil {
-		return nil, fmt.Errorf("ошибка при выполнении запроса: %v", err)
+		return nil, fmt.Errorf("ошибка при выполнении запроса: %w", err)
 	}
 
 	if statusCode != http.StatusOK {
@@ -46,7 +46,7 @@ func (g *API) GetFileContent(fileName string) ([]byte, error) {
 		Encoding string `json:"encoding"`
 	}
 	if err := json.NewDecoder(r).Decode(&fileData); err != nil {
-		return nil, fmt.Errorf("ошибка при декодировании ответа: %v", err)
+		return nil, fmt.Errorf("ошибка при декодировании ответа: %w", err)
 	}
 
 	// Декодируем base64 содержимое
@@ -54,7 +54,7 @@ func (g *API) GetFileContent(fileName string) ([]byte, error) {
 		content := strings.ReplaceAll(fileData.Content, "\n", "")
 		decodedBytes, err := base64.StdEncoding.DecodeString(content)
 		if err != nil {
-			return nil, fmt.Errorf("ошибка при декодировании base64: %v", err)
+			return nil, fmt.Errorf("ошибка при декодировании base64: %w", err)
 		}
 		return decodedBytes, nil
 	}
@@ -77,7 +77,7 @@ func (g *API) GetRepositoryContents(filepath, branch string) ([]FileInfo, error)
 
 	statusCode, body, err := g.sendReq(urlString, "", "GET")
 	if err != nil {
-		return nil, fmt.Errorf("ошибка при выполнении запроса: %v", err)
+		return nil, fmt.Errorf("ошибка при выполнении запроса: %w", err)
 	}
 
 	if statusCode != http.StatusOK {
@@ -87,7 +87,7 @@ func (g *API) GetRepositoryContents(filepath, branch string) ([]FileInfo, error)
 	var files []FileInfo
 	err = json.Unmarshal([]byte(body), &files)
 	if err != nil {
-		return nil, fmt.Errorf("ошибка при разборе JSON: %v", err)
+		return nil, fmt.Errorf("ошибка при разборе JSON: %w", err)
 	}
 
 	return files, nil
@@ -127,7 +127,7 @@ func (g *API) SetRepositoryState(l *slog.Logger, operations []ChangeFileOperatio
 	// Сериализуем запрос в JSON
 	requestBody, err := json.Marshal(request)
 	if err != nil {
-		return fmt.Errorf("ошибка при сериализации запроса: %v", err)
+		return fmt.Errorf("ошибка при сериализации запроса: %w", err)
 	}
 
 	// Формируем URL для batch API
@@ -137,7 +137,7 @@ func (g *API) SetRepositoryState(l *slog.Logger, operations []ChangeFileOperatio
 	// Выполняем POST запрос
 	statusCode, responseBody, err := g.sendReq(urlString, string(requestBody), "POST")
 	if err != nil {
-		return fmt.Errorf("ошибка при выполнении batch запроса: %v", err)
+		return fmt.Errorf("ошибка при выполнении batch запроса: %w", err)
 	}
 
 	// Проверяем статус ответа
@@ -204,7 +204,7 @@ func (g *API) SetRepositoryStateWithNewBranch(l *slog.Logger, operations []Chang
 	// Сериализуем запрос в JSON
 	requestBody, err := json.Marshal(request)
 	if err != nil {
-		return "", fmt.Errorf("ошибка при сериализации запроса: %v", err)
+		return "", fmt.Errorf("ошибка при сериализации запроса: %w", err)
 	}
 
 	// Формируем URL для batch API
@@ -223,7 +223,7 @@ func (g *API) SetRepositoryStateWithNewBranch(l *slog.Logger, operations []Chang
 	// Выполняем POST запрос
 	statusCode, responseBody, err := g.sendReq(urlString, string(requestBody), "POST")
 	if err != nil {
-		return "", fmt.Errorf("ошибка при выполнении batch запроса: %v", err)
+		return "", fmt.Errorf("ошибка при выполнении batch запроса: %w", err)
 	}
 
 	// Проверяем статус ответа
@@ -374,7 +374,7 @@ func (g *API) GetConfigDataBad(filenamePrefix string) ([]byte, error) {
 		statusCode, body, err := g.sendReq(filenamePrefix, "", "GET")
 
 		if err != nil {
-			return nil, fmt.Errorf("ошибка загрузки по URL %s: %v", filenamePrefix, err)
+			return nil, fmt.Errorf("ошибка загрузки по URL %s: %w", filenamePrefix, err)
 		}
 
 		if statusCode != http.StatusOK {
@@ -387,7 +387,7 @@ func (g *API) GetConfigDataBad(filenamePrefix string) ([]byte, error) {
 	// Получаем содержимое корневой директории репозитория
 	contents, err := g.GetRepositoryContents("", g.BaseBranch)
 	if err != nil {
-		return nil, fmt.Errorf("ошибка получения содержимого репозитория: %v", err)
+		return nil, fmt.Errorf("ошибка получения содержимого репозитория: %w", err)
 	}
 
 	// Ищем файл с нужным префиксом
@@ -399,7 +399,7 @@ func (g *API) GetConfigDataBad(filenamePrefix string) ([]byte, error) {
 
 			statusCode, body, err := g.sendReq(urlString, "", "GET")
 			if err != nil {
-				return nil, fmt.Errorf("ошибка выполнения запроса: %v", err)
+				return nil, fmt.Errorf("ошибка выполнения запроса: %w", err)
 			}
 
 			if statusCode != http.StatusOK {
@@ -409,7 +409,7 @@ func (g *API) GetConfigDataBad(filenamePrefix string) ([]byte, error) {
 			r := strings.NewReader(body)
 			var fileInfo FileInfo
 			if err := json.NewDecoder(r).Decode(&fileInfo); err != nil {
-				return nil, fmt.Errorf("ошибка декодирования JSON: %v", err)
+				return nil, fmt.Errorf("ошибка декодирования JSON: %w", err)
 			}
 
 			// Декодируем содержимое из base64
@@ -417,7 +417,7 @@ func (g *API) GetConfigDataBad(filenamePrefix string) ([]byte, error) {
 				content := strings.ReplaceAll(fileInfo.Content, "\n", "")
 				decodedBytes, err := base64.StdEncoding.DecodeString(content)
 				if err != nil {
-					return nil, fmt.Errorf("ошибка декодирования base64: %v", err)
+					return nil, fmt.Errorf("ошибка декодирования base64: %w", err)
 				}
 				return decodedBytes, nil
 			}

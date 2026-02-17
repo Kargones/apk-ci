@@ -19,7 +19,7 @@ func (g *API) GetLatestRelease() (*Release, error) {
 
 	statusCode, body, err := g.sendReq(urlString, "", "GET")
 	if err != nil {
-		return nil, fmt.Errorf("ошибка при выполнении запроса: %v", err)
+		return nil, fmt.Errorf("ошибка при выполнении запроса: %w", err)
 	}
 
 	if statusCode == http.StatusNotFound {
@@ -33,7 +33,7 @@ func (g *API) GetLatestRelease() (*Release, error) {
 	var release Release
 	err = json.Unmarshal([]byte(body), &release)
 	if err != nil {
-		return nil, fmt.Errorf("ошибка при разборе JSON: %v", err)
+		return nil, fmt.Errorf("ошибка при разборе JSON: %w", err)
 	}
 
 	return &release, nil
@@ -55,7 +55,7 @@ func (g *API) GetReleaseByTag(tag string) (*Release, error) {
 
 	statusCode, body, err := g.sendReq(urlString, "", "GET")
 	if err != nil {
-		return nil, fmt.Errorf("ошибка при выполнении запроса: %v", err)
+		return nil, fmt.Errorf("ошибка при выполнении запроса: %w", err)
 	}
 
 	if statusCode == http.StatusNotFound {
@@ -69,7 +69,7 @@ func (g *API) GetReleaseByTag(tag string) (*Release, error) {
 	var release Release
 	err = json.Unmarshal([]byte(body), &release)
 	if err != nil {
-		return nil, fmt.Errorf("ошибка при разборе JSON: %v", err)
+		return nil, fmt.Errorf("ошибка при разборе JSON: %w", err)
 	}
 
 	return &release, nil
