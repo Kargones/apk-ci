@@ -86,90 +86,78 @@ type FileInfo struct {
 	GitSHA  string // Git blob SHA для API операций (только для текущих файлов)
 }
 
+// fprintLines writes multiple formatted strings to a writer, stopping on first error.
+func fprintLines(w io.Writer, lines ...string) error {
+	for _, l := range lines {
+		if _, err := fmt.Fprint(w, l); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// boolStr returns "да" or "нет" for a boolean value.
+func boolStr(v bool) string {
+	if v {
+		return "да"
+	}
+	return "нет"
+}
+
+// writeProcessingSection writes the processing stats section.
+func (d *ActionMenuData) writeProcessingSection(w io.Writer) error {
+	return fprintLines(w,
+		"📊 Обработка:\n",
+		fmt.Sprintf("  Баз данных обработано: %d\n", d.DatabasesProcessed),
+		fmt.Sprintf("  Файлов сгенерировано: %d\n", d.TotalGenerated),
+		fmt.Sprintf("  Файлов существовало: %d\n\n", d.TotalCurrent),
+	)
+}
+
+// writeSyncSection writes the sync results section.
+func (d *ActionMenuData) writeSyncSection(w io.Writer) error {
+	return fprintLines(w,
+		"📁 Синхронизация:\n",
+		fmt.Sprintf("  ✅ Добавлено: %d\n", d.AddedFiles),
+		fmt.Sprintf("  🔄 Обновлено: %d\n", d.UpdatedFiles),
+		fmt.Sprintf("  🗑️ Удалено: %d\n\n", d.DeletedFiles),
+	)
+}
+
 // writeText выводит результаты построения меню в человекочитаемом формате.
 func (d *ActionMenuData) writeText(w io.Writer) error {
-	if _, err := fmt.Fprintf(w, "══════════════════════════════════════════════════════\n"); err != nil {
-		return err
-	}
-	if _, err := fmt.Fprintf(w, "📋 Построение меню действий\n"); err != nil {
-		return err
-	}
-	if _, err := fmt.Fprintf(w, "══════════════════════════════════════════════════════\n"); err != nil {
+	sep := "══════════════════════════════════════════════════════\n"
+	if err := fprintLines(w, sep, "📋 Построение меню действий\n", sep); err != nil {
 		return err
 	}
 
 	if !d.StateChanged && !d.ProjectYamlChanged && !d.ForceUpdate {
-		if _, err := fmt.Fprintf(w, "\nℹ️ Изменения в project.yaml не обнаружены.\n"); err != nil {
-			return err
-		}
-		if _, err := fmt.Fprintf(w, "   Построение меню не требуется.\n"); err != nil {
-			return err
-		}
-		if _, err := fmt.Fprintf(w, "══════════════════════════════════════════════════════\n"); err != nil {
-			return err
-		}
-		return nil
+		return fprintLines(w,
+			"\nℹ️ Изменения в project.yaml не обнаружены.\n",
+			"   Построение меню не требуется.\n",
+			sep,
+		)
 	}
 
-	forceStr := "нет"
-	if d.ForceUpdate {
-		forceStr = "да"
-	}
-	changedStr := "нет"
-	if d.ProjectYamlChanged {
-		changedStr = "да"
-	}
-
-	if _, err := fmt.Fprintf(w, "Принудительное обновление: %s\n", forceStr); err != nil {
-		return err
-	}
-	if _, err := fmt.Fprintf(w, "Изменения в project.yaml: %s\n\n", changedStr); err != nil {
+	if err := fprintLines(w,
+		fmt.Sprintf("Принудительное обновление: %s\n", boolStr(d.ForceUpdate)),
+		fmt.Sprintf("Изменения в project.yaml: %s\n\n", boolStr(d.ProjectYamlChanged)),
+	); err != nil {
 		return err
 	}
 
-	if _, err := fmt.Fprintf(w, "📊 Обработка:\n"); err != nil {
+	if err := d.writeProcessingSection(w); err != nil {
 		return err
 	}
-	if _, err := fmt.Fprintf(w, "  Баз данных обработано: %d\n", d.DatabasesProcessed); err != nil {
-		return err
-	}
-	if _, err := fmt.Fprintf(w, "  Файлов сгенерировано: %d\n", d.TotalGenerated); err != nil {
-		return err
-	}
-	if _, err := fmt.Fprintf(w, "  Файлов существовало: %d\n\n", d.TotalCurrent); err != nil {
+	if err := d.writeSyncSection(w); err != nil {
 		return err
 	}
 
-	if _, err := fmt.Fprintf(w, "📁 Синхронизация:\n"); err != nil {
-		return err
-	}
-	if _, err := fmt.Fprintf(w, "  ✅ Добавлено: %d\n", d.AddedFiles); err != nil {
-		return err
-	}
-	if _, err := fmt.Fprintf(w, "  🔄 Обновлено: %d\n", d.UpdatedFiles); err != nil {
-		return err
-	}
-	if _, err := fmt.Fprintf(w, "  🗑️ Удалено: %d\n\n", d.DeletedFiles); err != nil {
-		return err
-	}
-
-	if _, err := fmt.Fprintf(w, "══════════════════════════════════════════════════════\n"); err != nil {
-		return err
-	}
+	statusLine := "ℹ️ Меню действий актуально, изменений нет\n"
 	if d.StateChanged {
-		if _, err := fmt.Fprintf(w, "✅ Меню действий обновлено успешно\n"); err != nil {
-			return err
-		}
-	} else {
-		if _, err := fmt.Fprintf(w, "ℹ️ Меню действий актуально, изменений нет\n"); err != nil {
-			return err
-		}
+		statusLine = "✅ Меню действий обновлено успешно\n"
 	}
-	if _, err := fmt.Fprintf(w, "══════════════════════════════════════════════════════\n"); err != nil {
-		return err
-	}
-
-	return nil
+	return fprintLines(w, sep, statusLine, sep)
 }
 
 // ActionMenuHandler обрабатывает команду nr-action-menu-build.

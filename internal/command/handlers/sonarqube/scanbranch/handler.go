@@ -155,107 +155,92 @@ func (h *ScanBranchHandler) Description() string {
 	return "Сканирование ветки на качество кода через SonarQube"
 }
 
-// Execute выполняет команду nr-sq-scan-branch.
-func (h *ScanBranchHandler) Execute(ctx context.Context, cfg *config.Config) error {
-	start := time.Now()
+// executeContext holds shared state for a single Execute invocation.
+type executeContext struct {
+	start      time.Time
+	traceID    string
+	format     string
+	log        *slog.Logger
+	branch     string
+	owner      string
+	repo       string
+	projectKey string
+}
 
-	traceID := tracing.TraceIDFromContext(ctx)
-	if traceID == "" {
-		traceID = tracing.GenerateTraceID()
+// validateAndSetup validates config and sets up the execution context.
+// Returns nil executeContext and an error to return if validation fails.
+func (h *ScanBranchHandler) validateAndSetup(cfg *config.Config) (*executeContext, error) {
+	ec := &executeContext{start: time.Now()}
+
+	ec.traceID = tracing.TraceIDFromContext(context.Background())
+	if ec.traceID == "" {
+		ec.traceID = tracing.GenerateTraceID()
 	}
+	ec.format = os.Getenv("BR_OUTPUT_FORMAT")
 
-	format := os.Getenv("BR_OUTPUT_FORMAT")
-
-	// Story 7.3 AC-8: plan-only для команд без поддержки плана
-	// Review #36: !IsDryRun() — dry-run имеет приоритет над plan-only (AC-11).
 	if !dryrun.IsDryRun() && dryrun.IsPlanOnly() {
-		return dryrun.WritePlanOnlyUnsupported(os.Stdout, constants.ActNRSQScanBranch)
+		return nil, dryrun.WritePlanOnlyUnsupported(os.Stdout, constants.ActNRSQScanBranch)
 	}
 
-	log := slog.Default().With(slog.String("trace_id", traceID), slog.String("command", constants.ActNRSQScanBranch))
+	ec.log = slog.Default().With(slog.String("trace_id", ec.traceID), slog.String("command", constants.ActNRSQScanBranch))
 
-	// Валидация конфигурации
 	if cfg == nil {
-		log.Error("Конфигурация не загружена")
-		return h.writeError(format, traceID, start,
-			errConfigMissing,
-			"Конфигурация не загружена")
+		ec.log.Error("Конфигурация не загружена")
+		return nil, h.writeError(ec.format, ec.traceID, ec.start, errConfigMissing, "Конфигурация не загружена")
 	}
 
-	// Получение ветки для сканирования
-	branch := cfg.BranchForScan
-	if branch == "" {
-		log.Error("Не указана ветка для сканирования")
-		return h.writeError(format, traceID, start,
-			errBranchMissing,
-			"Не указана ветка для сканирования (BR_BRANCH)")
+	ec.branch = cfg.BranchForScan
+	if ec.branch == "" {
+		ec.log.Error("Не указана ветка для сканирования")
+		return nil, h.writeError(ec.format, ec.traceID, ec.start, errBranchMissing, "Не указана ветка для сканирования (BR_BRANCH)")
+	}
+	ec.log = ec.log.With(slog.String("branch", ec.branch))
+
+	if !shared.IsValidBranchForScanning(ec.branch) {
+		ec.log.Error("Ветка не соответствует критериям сканирования")
+		return nil, h.writeError(ec.format, ec.traceID, ec.start, errBranchInvalidFormat,
+			fmt.Sprintf("Ветка '%s' не соответствует критериям: допустимы только 'main' или 't' + 6-7 цифр", ec.branch))
 	}
 
-	log = log.With(slog.String("branch", branch))
-
-	// Валидация формата ветки (AC: #2)
-	// L-2 fix: используем shared.IsValidBranchForScanning вместо локальной функции
-	if !shared.IsValidBranchForScanning(branch) {
-		// M-3 fix: branch уже добавлен в log context выше, не дублируем
-		log.Error("Ветка не соответствует критериям сканирования")
-		return h.writeError(format, traceID, start,
-			errBranchInvalidFormat,
-			fmt.Sprintf("Ветка '%s' не соответствует критериям: допустимы только 'main' или 't' + 6-7 цифр", branch))
+	ec.owner = cfg.Owner
+	ec.repo = cfg.Repo
+	if ec.owner == "" || ec.repo == "" {
+		ec.log.Error("Не указаны owner или repo")
+		return nil, h.writeError(ec.format, ec.traceID, ec.start, errConfigMissing, "Не указаны владелец (BR_OWNER) или репозиторий (BR_REPO)")
 	}
 
-	log.Info("Запуск сканирования ветки")
+	ec.projectKey = fmt.Sprintf("%s_%s_%s", ec.owner, ec.repo, ec.branch)
+	ec.log = ec.log.With(slog.String("project_key", ec.projectKey))
+	ec.log.Info("Запуск сканирования ветки")
 
-	// Получение owner и repo из конфигурации
-	owner := cfg.Owner
-	repo := cfg.Repo
-	if owner == "" || repo == "" {
-		log.Error("Не указаны owner или repo")
-		return h.writeError(format, traceID, start,
-			errConfigMissing,
-			"Не указаны владелец (BR_OWNER) или репозиторий (BR_REPO)")
-	}
+	return ec, nil
+}
 
-	// Формирование ключа проекта SonarQube
-	projectKey := fmt.Sprintf("%s_%s_%s", owner, repo, branch)
-	log = log.With(slog.String("project_key", projectKey))
-
-	// Получение Gitea клиента
+// getClients returns Gitea and SonarQube clients (from handler or newly created).
+func (h *ScanBranchHandler) getClients(ec *executeContext, cfg *config.Config) (gitea.Client, sonarqube.Client, error) {
 	giteaClient := h.giteaClient
 	if giteaClient == nil {
-		var clientErr error
-		giteaClient, clientErr = errhandler.CreateGiteaClient(cfg)
-		if clientErr != nil {
-			log.Error("Не удалось создать Gitea клиент", slog.String("error", clientErr.Error()))
-			return h.writeError(format, traceID, start,
-				errConfigMissing,
-				"Не удалось создать Gitea клиент: "+clientErr.Error())
+		var err error
+		giteaClient, err = errhandler.CreateGiteaClient(cfg)
+		if err != nil {
+			ec.log.Error("Не удалось создать Gitea клиент", slog.String("error", err.Error()))
+			return nil, nil, h.writeError(ec.format, ec.traceID, ec.start, errConfigMissing, "Не удалось создать Gitea клиент: "+err.Error())
 		}
 	}
-
-	// Получение SonarQube клиента
 	sqClient := h.sonarqubeClient
 	if sqClient == nil {
-		var clientErr error
-		sqClient, clientErr = errhandler.CreateSonarQubeClient(cfg)
-		if clientErr != nil {
-			log.Error("Не удалось создать SonarQube клиент", slog.String("error", clientErr.Error()))
-			return h.writeError(format, traceID, start,
-				errConfigMissing,
-				"Не удалось создать SonarQube клиент: "+clientErr.Error())
+		var err error
+		sqClient, err = errhandler.CreateSonarQubeClient(cfg)
+		if err != nil {
+			ec.log.Error("Не удалось создать SonarQube клиент", slog.String("error", err.Error()))
+			return nil, nil, h.writeError(ec.format, ec.traceID, ec.start, errConfigMissing, "Не удалось создать SonarQube клиент: "+err.Error())
 		}
 	}
+	return giteaClient, sqClient, nil
+}
 
-	// Получение диапазона коммитов ветки (AC: #4)
-	commitRange, err := giteaClient.GetBranchCommitRange(ctx, branch)
-	if err != nil {
-		log.Error("Не удалось получить диапазон коммитов", slog.String("error", err.Error()))
-		return h.writeError(format, traceID, start,
-			errGiteaAPI,
-			fmt.Sprintf("Не удалось получить диапазон коммитов: %v", err))
-	}
-
-	// Формирование списка кандидатов для сканирования
-	// H-2 fix: проверяем что SHA не пустой перед добавлением в candidates
+// buildCandidates extracts candidate commit SHAs from the branch commit range.
+func buildCandidates(commitRange *gitea.BranchCommitRange) []string {
 	var candidates []string
 	if commitRange.FirstCommit != nil && commitRange.FirstCommit.SHA != "" {
 		candidates = append(candidates, commitRange.FirstCommit.SHA)
@@ -264,30 +249,17 @@ func (h *ScanBranchHandler) Execute(ctx context.Context, cfg *config.Config) err
 		(commitRange.FirstCommit == nil || commitRange.FirstCommit.SHA != commitRange.LastCommit.SHA) {
 		candidates = append(candidates, commitRange.LastCommit.SHA)
 	}
+	return candidates
+}
 
-	if len(candidates) == 0 {
-		log.Info("Нет коммитов для сканирования")
-		data := &ScanBranchData{
-			Branch:         branch,
-			ProjectKey:     projectKey,
-			CommitsScanned: 0,
-			SkippedCount:   0,
-			NoChanges:      true,
-		}
-		return h.writeSuccess(format, traceID, start, data)
-	}
-
-	// Проверка наличия изменений в каталогах конфигурации (AC: #3)
-	// M-2 fix: подсчитываем коммиты без релевантных изменений даже в смешанном сценарии
+// filterRelevantChanges splits candidates into those with changes and counts those without.
+func filterRelevantChanges(ctx context.Context, giteaClient gitea.Client, branch string, candidates []string, log *slog.Logger) ([]string, int) {
 	var commitsWithChanges []string
 	noRelevantChangesCount := 0
 	for _, sha := range candidates {
 		hasChanges, err := shared.HasRelevantChangesInCommit(ctx, giteaClient, branch, sha)
 		if err != nil {
-			log.Warn("Ошибка проверки изменений в коммите",
-				slog.String("commit", sha),
-				slog.String("error", err.Error()))
-			// Продолжаем с этим коммитом, т.к. ошибка API не означает отсутствие изменений
+			log.Warn("Ошибка проверки изменений в коммите", slog.String("commit", sha), slog.String("error", err.Error()))
 			commitsWithChanges = append(commitsWithChanges, sha)
 			continue
 		}
@@ -297,38 +269,23 @@ func (h *ScanBranchHandler) Execute(ctx context.Context, cfg *config.Config) err
 			noRelevantChangesCount++
 		}
 	}
+	return commitsWithChanges, noRelevantChangesCount
+}
 
-	if len(commitsWithChanges) == 0 {
-		log.Info("Нет изменений в каталогах конфигурации")
-		data := &ScanBranchData{
-			Branch:                 branch,
-			ProjectKey:             projectKey,
-			CommitsScanned:         0,
-			SkippedCount:           0,
-			NoRelevantChangesCount: noRelevantChangesCount,
-			NoChanges:              true,
-		}
-		return h.writeSuccess(format, traceID, start, data)
-	}
-
-	// Получение уже отсканированных анализов (AC: #4)
+// filterAlreadyScanned removes already-scanned commits and returns the rest with skip count.
+func filterAlreadyScanned(ctx context.Context, sqClient sonarqube.Client, projectKey string, commits []string, log *slog.Logger) ([]string, int) {
 	analyses, err := sqClient.GetAnalyses(ctx, projectKey)
 	if err != nil {
 		log.Warn("Не удалось получить список анализов", slog.String("error", err.Error()))
-		// Продолжаем, считаем что ни один коммит не был отсканирован
-		analyses = nil
+		return commits, 0
 	}
-
-	// Формирование map отсканированных ревизий
 	scannedRevisions := make(map[string]bool)
 	for _, a := range analyses {
 		scannedRevisions[a.Revision] = true
 	}
-
-	// Фильтрация уже отсканированных коммитов
 	var toScan []string
 	skippedCount := 0
-	for _, sha := range commitsWithChanges {
+	for _, sha := range commits {
 		if scannedRevisions[sha] {
 			skippedCount++
 			log.Debug("Коммит уже отсканирован, пропускаем", slog.String("commit", sha))
@@ -336,112 +293,123 @@ func (h *ScanBranchHandler) Execute(ctx context.Context, cfg *config.Config) err
 		}
 		toScan = append(toScan, sha)
 	}
+	return toScan, skippedCount
+}
 
-	if len(toScan) == 0 {
-		log.Info("Все коммиты уже отсканированы")
-		data := &ScanBranchData{
-			Branch:         branch,
-			ProjectKey:     projectKey,
-			CommitsScanned: 0,
-			SkippedCount:   skippedCount,
-		}
-		return h.writeSuccess(format, traceID, start, data)
-	}
-
-	// Получение или создание проекта в SonarQube (AC: #5)
-	// M-2 fix: логируем ошибку GetProject для диагностики (может быть не только "not found")
-	// L-2 fix: убрано дублирование project_key (уже в log.With выше)
-	_, err = sqClient.GetProject(ctx, projectKey)
+// ensureProject creates the SonarQube project if it does not exist.
+func (h *ScanBranchHandler) ensureProject(ctx context.Context, ec *executeContext, sqClient sonarqube.Client) error {
+	_, err := sqClient.GetProject(ctx, ec.projectKey)
 	if err != nil {
-		// Предполагаем что проект не найден, но логируем ошибку для диагностики
-		log.Info("Проект не найден в SonarQube, создаём",
-			slog.String("get_error", err.Error()))
-		projectName := fmt.Sprintf("%s/%s (%s)", owner, repo, branch)
+		ec.log.Info("Проект не найден в SonarQube, создаём", slog.String("get_error", err.Error()))
+		projectName := fmt.Sprintf("%s/%s (%s)", ec.owner, ec.repo, ec.branch)
 		_, err = sqClient.CreateProject(ctx, sonarqube.CreateProjectOptions{
-			Key:        projectKey,
-			Name:       projectName,
-			Visibility: "private",
+			Key: ec.projectKey, Name: projectName, Visibility: "private",
 		})
 		if err != nil {
-			log.Error("Не удалось создать проект в SonarQube", slog.String("error", err.Error()))
-			return h.writeError(format, traceID, start,
-				errSonarQubeAPI,
+			ec.log.Error("Не удалось создать проект в SonarQube", slog.String("error", err.Error()))
+			return h.writeError(ec.format, ec.traceID, ec.start, errSonarQubeAPI,
 				fmt.Sprintf("Не удалось создать проект в SonarQube: %v", err))
 		}
 	}
+	return nil
+}
 
-	// Запуск сканирования для каждого коммита (AC: #5, #7)
+// scanCommits runs analysis for each commit and collects results.
+func (h *ScanBranchHandler) scanCommits(ctx context.Context, ec *executeContext, sqClient sonarqube.Client, toScan []string) []CommitScanResult {
 	var scanResults []CommitScanResult
 	for _, sha := range toScan {
-		log.Info("Сканирование коммита", slog.String("commit", sha))
-
-		// H-1 fix: передаём sonar.scm.revision с полным SHA для корректной фильтрации
-		// уже отсканированных коммитов через GetAnalyses (AC #4)
-		// Защита от короткого SHA (panic при sha[:7])
+		ec.log.Info("Сканирование коммита", slog.String("commit", sha))
 		shortSHA := sha
 		if len(sha) > 7 {
 			shortSHA = sha[:7]
 		}
 		result, err := sqClient.RunAnalysis(ctx, sonarqube.RunAnalysisOptions{
-			ProjectKey: projectKey,
-			Branch:     branch,
-			Properties: map[string]string{
-				"sonar.projectVersion": shortSHA,
-				"sonar.scm.revision":   sha, // Полный SHA для Revision в Analysis
-			},
+			ProjectKey: ec.projectKey, Branch: ec.branch,
+			Properties: map[string]string{"sonar.projectVersion": shortSHA, "sonar.scm.revision": sha},
 		})
 		if err != nil {
-			log.Error("Не удалось запустить анализ", slog.String("commit", sha), slog.String("error", err.Error()))
-			scanResults = append(scanResults, CommitScanResult{
-				CommitSHA:    sha,
-				Status:       "FAILED",
-				ErrorMessage: err.Error(),
-			})
+			ec.log.Error("Не удалось запустить анализ", slog.String("commit", sha), slog.String("error", err.Error()))
+			scanResults = append(scanResults, CommitScanResult{CommitSHA: sha, Status: "FAILED", ErrorMessage: err.Error()})
 			continue
 		}
-
-		// Ожидание завершения анализа (AC: #5)
-		status, err := shared.WaitForAnalysisCompletion(ctx, sqClient, result.TaskID, log)
+		status, err := shared.WaitForAnalysisCompletion(ctx, sqClient, result.TaskID, ec.log)
 		if err != nil {
-			log.Error("Ошибка ожидания завершения анализа", slog.String("commit", sha), slog.String("error", err.Error()))
-			scanResults = append(scanResults, CommitScanResult{
-				CommitSHA:    sha,
-				AnalysisID:   result.AnalysisID,
-				Status:       "FAILED",
-				ErrorMessage: err.Error(),
-			})
+			ec.log.Error("Ошибка ожидания завершения анализа", slog.String("commit", sha), slog.String("error", err.Error()))
+			scanResults = append(scanResults, CommitScanResult{CommitSHA: sha, AnalysisID: result.AnalysisID, Status: "FAILED", ErrorMessage: err.Error()})
 			continue
 		}
-
-		// L-2 fix: проверяем пустой AnalysisID после успешного анализа
 		if status.AnalysisID == "" && status.Status == "SUCCESS" {
-			log.Warn("Анализ завершён успешно, но AnalysisID пустой", slog.String("commit", sha))
+			ec.log.Warn("Анализ завершён успешно, но AnalysisID пустой", slog.String("commit", sha))
 		}
+		scanResults = append(scanResults, CommitScanResult{CommitSHA: sha, AnalysisID: status.AnalysisID, Status: status.Status, ErrorMessage: status.ErrorMessage})
+	}
+	return scanResults
+}
 
-		scanResults = append(scanResults, CommitScanResult{
-			CommitSHA:    sha,
-			AnalysisID:   status.AnalysisID,
-			Status:       status.Status,
-			ErrorMessage: status.ErrorMessage,
+// Execute выполняет команду nr-sq-scan-branch.
+func (h *ScanBranchHandler) Execute(ctx context.Context, cfg *config.Config) error {
+	ec, err := h.validateAndSetup(cfg)
+	if err != nil {
+		return err
+	}
+
+	giteaClient, sqClient, err := h.getClients(ec, cfg)
+	if err != nil {
+		return err
+	}
+
+	// Получение диапазона коммитов ветки (AC: #4)
+	commitRange, err := giteaClient.GetBranchCommitRange(ctx, ec.branch)
+	if err != nil {
+		ec.log.Error("Не удалось получить диапазон коммитов", slog.String("error", err.Error()))
+		return h.writeError(ec.format, ec.traceID, ec.start, errGiteaAPI,
+			fmt.Sprintf("Не удалось получить диапазон коммитов: %v", err))
+	}
+
+	candidates := buildCandidates(commitRange)
+	if len(candidates) == 0 {
+		ec.log.Info("Нет коммитов для сканирования")
+		return h.writeSuccess(ec.format, ec.traceID, ec.start, &ScanBranchData{
+			Branch: ec.branch, ProjectKey: ec.projectKey, NoChanges: true,
 		})
 	}
 
-	// Формирование результата (AC: #5, #6)
-	// M-2 fix: включаем NoRelevantChangesCount даже когда есть коммиты с изменениями
-	data := &ScanBranchData{
-		Branch:                 branch,
-		ProjectKey:             projectKey,
-		CommitsScanned:         len(scanResults),
-		SkippedCount:           skippedCount,
-		NoRelevantChangesCount: noRelevantChangesCount,
-		ScanResults:            scanResults,
+	// Проверка наличия изменений в каталогах конфигурации (AC: #3)
+	commitsWithChanges, noRelevantChangesCount := filterRelevantChanges(ctx, giteaClient, ec.branch, candidates, ec.log)
+
+	if len(commitsWithChanges) == 0 {
+		ec.log.Info("Нет изменений в каталогах конфигурации")
+		return h.writeSuccess(ec.format, ec.traceID, ec.start, &ScanBranchData{
+			Branch: ec.branch, ProjectKey: ec.projectKey,
+			NoRelevantChangesCount: noRelevantChangesCount, NoChanges: true,
+		})
 	}
 
-	log.Info("Сканирование завершено",
-		slog.Int("scanned", data.CommitsScanned),
-		slog.Int("skipped", data.SkippedCount))
+	toScan, skippedCount := filterAlreadyScanned(ctx, sqClient, ec.projectKey, commitsWithChanges, ec.log)
 
-	return h.writeSuccess(format, traceID, start, data)
+	if len(toScan) == 0 {
+		ec.log.Info("Все коммиты уже отсканированы")
+		return h.writeSuccess(ec.format, ec.traceID, ec.start, &ScanBranchData{
+			Branch: ec.branch, ProjectKey: ec.projectKey, SkippedCount: skippedCount,
+		})
+	}
+
+	if err := h.ensureProject(ctx, ec, sqClient); err != nil {
+		return err
+	}
+
+	scanResults := h.scanCommits(ctx, ec, sqClient, toScan)
+
+	data := &ScanBranchData{
+		Branch: ec.branch, ProjectKey: ec.projectKey,
+		CommitsScanned: len(scanResults), SkippedCount: skippedCount,
+		NoRelevantChangesCount: noRelevantChangesCount, ScanResults: scanResults,
+	}
+
+	ec.log.Info("Сканирование завершено",
+		slog.Int("scanned", data.CommitsScanned), slog.Int("skipped", data.SkippedCount))
+
+	return h.writeSuccess(ec.format, ec.traceID, ec.start, data)
 }
 
 // L-2 fix: isValidBranchForScanning перенесена в shared.IsValidBranchForScanning

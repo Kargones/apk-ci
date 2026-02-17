@@ -11,121 +11,138 @@ import (
 	"strings"
 )
 
+// metricMatcher extracts a metric value from a line using a regex.
+type metricMatcher struct {
+	regex   *regexp.Regexp
+	extract func(matches []string, result *ScanResult)
+}
+
+// Compiled regexes for parseOutput (allocated once).
+var (
+	reAnalysisID    = regexp.MustCompile(`task\?id=([A-Za-z0-9_-]+)`)
+	reIssues        = regexp.MustCompile(`(\d+)\s+issues?\s+found`)
+	reCoverage      = regexp.MustCompile(`Coverage\s+(\d+\.\d+)%`)
+	reDuplicated    = regexp.MustCompile(`Duplicated lines\s+(\d+\.\d+)%`)
+	reLines         = regexp.MustCompile(`Lines of code\s+(\d+)`)
+	reComplexity    = regexp.MustCompile(`Cyclomatic complexity\s+(\d+)`)
+	reTechnicalDebt = regexp.MustCompile(`Technical Debt\s+([0-9]+[dhm]+)`)
+	reExecutionTime = regexp.MustCompile(`Total time:\s*([0-9:.]+)\s*(s|min)`)
+	reMemory        = regexp.MustCompile(`Final Memory:\s*([0-9]+)M/([0-9]+)M`)
+	reTaskURL       = regexp.MustCompile(`(http[s]?://[^\s]+)`)
+	reProgress      = regexp.MustCompile(`(\d+)/(\d+)\s+files`)
+)
+
+// metricMatchers defines regex-based metric extraction rules.
+var metricMatchers = []metricMatcher{
+	{regex: reExecutionTime, extract: func(m []string, r *ScanResult) {
+		if len(m) > 2 { r.Metrics["execution_time"] = m[1] + m[2] }
+	}},
+	{regex: reMemory, extract: func(m []string, r *ScanResult) {
+		if len(m) > 2 { r.Metrics["memory_used"] = m[1] + "M"; r.Metrics["memory_total"] = m[2] + "M" }
+	}},
+	{regex: reIssues, extract: func(m []string, r *ScanResult) {
+		if len(m) > 1 { r.Metrics["issues_count"] = m[1] }
+	}},
+	{regex: reCoverage, extract: func(m []string, r *ScanResult) {
+		if len(m) > 1 { r.Metrics["coverage"] = m[1] }
+	}},
+	{regex: reDuplicated, extract: func(m []string, r *ScanResult) {
+		if len(m) > 1 { r.Metrics["duplicated_lines"] = m[1] }
+	}},
+	{regex: reLines, extract: func(m []string, r *ScanResult) {
+		if len(m) > 1 { r.Metrics["lines_of_code"] = m[1] }
+	}},
+	{regex: reComplexity, extract: func(m []string, r *ScanResult) {
+		if len(m) > 1 { r.Metrics["cyclomatic_complexity"] = m[1] }
+	}},
+	{regex: reTechnicalDebt, extract: func(m []string, r *ScanResult) {
+		if len(m) > 1 { r.Metrics["technical_debt"] = m[1] }
+	}},
+}
+
+// parseLineMetrics extracts regex-based metrics from a single line.
+func parseLineMetrics(line string, result *ScanResult) {
+	for _, m := range metricMatchers {
+		if matches := m.regex.FindStringSubmatch(line); matches != nil {
+			m.extract(matches, result)
+		}
+	}
+}
+
+// parseLineSpecial handles special (non-regex) line parsing.
+func (s *SonarScannerEntity) parseLineSpecial(line string, result *ScanResult) {
+	if strings.Contains(line, "ANALYSIS SUCCESSFUL") {
+		if matches := reAnalysisID.FindStringSubmatch(line); len(matches) > 1 {
+			result.AnalysisID = matches[1]
+		}
+	}
+
+	if strings.HasPrefix(line, "INFO: Project key:") {
+		result.ProjectKey = strings.TrimSpace(strings.TrimPrefix(line, "INFO: Project key:"))
+	}
+
+	if strings.Contains(line, "Quality gate") {
+		if strings.Contains(line, "PASSED") {
+			result.Metrics["quality_gate"] = "PASSED"
+		} else if strings.Contains(line, "FAILED") {
+			result.Metrics["quality_gate"] = "FAILED"
+		}
+	}
+
+	if strings.HasPrefix(line, "INFO: More about the report processing at") {
+		url := strings.TrimSpace(strings.TrimPrefix(line, "INFO: More about the report processing at"))
+		result.Metrics["report_url"] = url
+	}
+
+	if strings.Contains(line, "http") && strings.Contains(line, "api/ce/task") {
+		if matches := reTaskURL.FindStringSubmatch(line); len(matches) > 1 {
+			result.Metrics["task_url"] = matches[1]
+		}
+	}
+
+	if (strings.Contains(line, "Analyzing") || strings.Contains(line, "Processed")) {
+		if matches := reProgress.FindStringSubmatch(line); len(matches) > 2 {
+			result.Metrics["files_processed"] = matches[1]
+			result.Metrics["files_total"] = matches[2]
+		}
+	}
+}
+
+// parseLineLogEntries handles ERROR, WARN, and INFO prefix lines.
+func (s *SonarScannerEntity) parseLineLogEntries(line string, result *ScanResult) {
+	if strings.HasPrefix(line, "ERROR:") {
+		if msg := strings.TrimSpace(strings.TrimPrefix(line, "ERROR:")); msg != "" {
+			result.Errors = append(result.Errors, msg)
+		}
+	}
+
+	if strings.HasPrefix(line, "WARN:") {
+		if msg := strings.TrimSpace(strings.TrimPrefix(line, "WARN:")); msg != "" {
+			if result.Metrics["warnings"] == "" {
+				result.Metrics["warnings"] = "1"
+			} else if count, err := strconv.Atoi(result.Metrics["warnings"]); err == nil {
+				result.Metrics["warnings"] = strconv.Itoa(count + 1)
+			}
+			result.Errors = append(result.Errors, "Warning: "+msg)
+		}
+	}
+
+	if strings.HasPrefix(line, "INFO:") && s.logger.Enabled(context.TODO(), slog.LevelDebug) {
+		if msg := strings.TrimSpace(strings.TrimPrefix(line, "INFO:")); msg != "" {
+			s.logger.Debug("Scanner info", "message", msg)
+		}
+	}
+}
+
 // parseOutput parses the scanner output to extract structured information.
 func (s *SonarScannerEntity) parseOutput(output string, result *ScanResult) error {
 	lines := strings.Split(output, "\n")
 
-	analysisIDRegex := regexp.MustCompile(`task\?id=([A-Za-z0-9_-]+)`)
-	issuesRegex := regexp.MustCompile(`(\d+)\s+issues?\s+found`)
-	coverageRegex := regexp.MustCompile(`Coverage\s+(\d+\.\d+)%`)
-	duplicatedRegex := regexp.MustCompile(`Duplicated lines\s+(\d+\.\d+)%`)
-	linesRegex := regexp.MustCompile(`Lines of code\s+(\d+)`)
-	complexityRegex := regexp.MustCompile(`Cyclomatic complexity\s+(\d+)`)
-	technicalDebtRegex := regexp.MustCompile(`Technical Debt\s+([0-9]+[dhm]+)`)
-	executionTimeRegex := regexp.MustCompile(`Total time:\s*([0-9:.]+)\s*(s|min)`)
-	memoryRegex := regexp.MustCompile(`Final Memory:\s*([0-9]+)M/([0-9]+)M`)
-
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
-
-		if strings.Contains(line, "ANALYSIS SUCCESSFUL") {
-			if matches := analysisIDRegex.FindStringSubmatch(line); len(matches) > 1 {
-				result.AnalysisID = matches[1]
-			}
-		}
-
-		if strings.HasPrefix(line, "INFO: Project key:") {
-			result.ProjectKey = strings.TrimSpace(strings.TrimPrefix(line, "INFO: Project key:"))
-		}
-
-		if matches := executionTimeRegex.FindStringSubmatch(line); len(matches) > 2 {
-			result.Metrics["execution_time"] = matches[1] + matches[2]
-		}
-
-		if matches := memoryRegex.FindStringSubmatch(line); len(matches) > 2 {
-			result.Metrics["memory_used"] = matches[1] + "M"
-			result.Metrics["memory_total"] = matches[2] + "M"
-		}
-
-		if matches := issuesRegex.FindStringSubmatch(line); len(matches) > 1 {
-			result.Metrics["issues_count"] = matches[1]
-		}
-
-		if matches := coverageRegex.FindStringSubmatch(line); len(matches) > 1 {
-			result.Metrics["coverage"] = matches[1]
-		}
-
-		if matches := duplicatedRegex.FindStringSubmatch(line); len(matches) > 1 {
-			result.Metrics["duplicated_lines"] = matches[1]
-		}
-
-		if matches := linesRegex.FindStringSubmatch(line); len(matches) > 1 {
-			result.Metrics["lines_of_code"] = matches[1]
-		}
-
-		if matches := complexityRegex.FindStringSubmatch(line); len(matches) > 1 {
-			result.Metrics["cyclomatic_complexity"] = matches[1]
-		}
-
-		if matches := technicalDebtRegex.FindStringSubmatch(line); len(matches) > 1 {
-			result.Metrics["technical_debt"] = matches[1]
-		}
-
-		if strings.Contains(line, "Quality gate") {
-			if strings.Contains(line, "PASSED") {
-				result.Metrics["quality_gate"] = "PASSED"
-			} else if strings.Contains(line, "FAILED") {
-				result.Metrics["quality_gate"] = "FAILED"
-			}
-		}
-
-		if strings.HasPrefix(line, "INFO: More about the report processing at") {
-			url := strings.TrimSpace(strings.TrimPrefix(line, "INFO: More about the report processing at"))
-			result.Metrics["report_url"] = url
-		}
-
-		if strings.Contains(line, "http") && strings.Contains(line, "api/ce/task") {
-			taskURLRegex := regexp.MustCompile(`(http[s]?://[^\s]+)`)
-			if matches := taskURLRegex.FindStringSubmatch(line); len(matches) > 1 {
-				result.Metrics["task_url"] = matches[1]
-			}
-		}
-
-		if strings.HasPrefix(line, "ERROR:") {
-			errorMsg := strings.TrimSpace(strings.TrimPrefix(line, "ERROR:"))
-			if errorMsg != "" {
-				result.Errors = append(result.Errors, errorMsg)
-			}
-		}
-
-		if strings.HasPrefix(line, "WARN:") {
-			warnMsg := strings.TrimSpace(strings.TrimPrefix(line, "WARN:"))
-			if warnMsg != "" {
-				if result.Metrics["warnings"] == "" {
-					result.Metrics["warnings"] = "1"
-				} else {
-					if count, err := strconv.Atoi(result.Metrics["warnings"]); err == nil {
-						result.Metrics["warnings"] = strconv.Itoa(count + 1)
-					}
-				}
-				result.Errors = append(result.Errors, "Warning: "+warnMsg)
-			}
-		}
-
-		if strings.HasPrefix(line, "INFO:") && s.logger.Enabled(context.TODO(), slog.LevelDebug) {
-			infoMsg := strings.TrimSpace(strings.TrimPrefix(line, "INFO:"))
-			if infoMsg != "" {
-				s.logger.Debug("Scanner info", "message", infoMsg)
-			}
-		}
-
-		if strings.Contains(line, "Analyzing") || strings.Contains(line, "Processed") {
-			progressRegex := regexp.MustCompile(`(\d+)/(\d+)\s+files`)
-			if matches := progressRegex.FindStringSubmatch(line); len(matches) > 2 {
-				result.Metrics["files_processed"] = matches[1]
-				result.Metrics["files_total"] = matches[2]
-			}
-		}
+		parseLineMetrics(line, result)
+		s.parseLineSpecial(line, result)
+		s.parseLineLogEntries(line, result)
 	}
 
 	s.logger.Debug("Parsing completed",
@@ -258,6 +275,90 @@ func (s *SonarScannerEntity) handleExecutionError(err error, output string, resu
 	return result, fmt.Errorf("scanner execution failed: %w", err)
 }
 
+// errorPattern defines a pattern-based error detection rule.
+type errorPattern struct {
+	// match returns true if the line matches this pattern.
+	match func(line string) bool
+	// message returns the error message for the matched line.
+	// If nil, a static message from staticMsg is used.
+	message func(line string) string
+	// staticMsg is used when message is nil.
+	staticMsg string
+}
+
+// containsAll returns true if line contains all specified substrings.
+func containsAll(line string, subs ...string) bool {
+	for _, s := range subs {
+		if !strings.Contains(line, s) {
+			return false
+		}
+	}
+	return true
+}
+
+// containsAny returns true if line contains at least one of the specified substrings.
+func containsAny(line string, subs ...string) bool {
+	for _, s := range subs {
+		if strings.Contains(line, s) {
+			return true
+		}
+	}
+	return false
+}
+
+// errorPatterns defines all known error patterns for scanner output analysis.
+// Order matters: patterns are checked sequentially for each line.
+var errorPatterns = []errorPattern{
+	{match: func(l string) bool { return containsAny(l, "Unauthorized", "401") }, staticMsg: "Authentication failed: Invalid token or credentials"},
+	{match: func(l string) bool { return containsAny(l, "Connection refused", "ConnectException") }, staticMsg: "Network error: Cannot connect to SonarQube server"},
+	{match: func(l string) bool { return containsAll(l, "Project key", "invalid") }, staticMsg: "Invalid project key configuration"},
+	{match: func(l string) bool { return containsAny(l, "No sources found", "No files to analyze") }, staticMsg: "No source files found for analysis"},
+	{match: func(l string) bool { return strings.Contains(l, "OutOfMemoryError") }, staticMsg: "Insufficient memory: Increase JAVA_OPTS heap size"},
+	{match: func(l string) bool { return containsAny(l, "Permission denied", "Access denied") }, staticMsg: "File system permission error"},
+	{match: func(l string) bool { return containsAll(l, "Quality gate", "FAILED") }, staticMsg: "Quality gate failed: Code quality standards not met"},
+	{match: func(l string) bool { return containsAll(l, "version", "not supported") }, staticMsg: "SonarQube server version compatibility issue"},
+	{match: func(l string) bool { return containsAll(l, "plugin", "failed") }, staticMsg: "Scanner plugin error"},
+	{match: func(l string) bool { return strings.Contains(l, "EXECUTION FAILURE") }, staticMsg: "Scanner execution failure detected"},
+	{match: func(l string) bool { return containsAny(l, "timeout", "timed out") }, message: func(l string) string { return "Timeout error: " + l }},
+	{match: func(l string) bool { return containsAny(l, "SSL", "TLS", "certificate") }, message: func(l string) string { return "SSL/TLS connection error: " + l }},
+	{match: func(l string) bool { return containsAny(l, "No space left", "disk full") }, message: func(l string) string { return "Disk space error: " + l }},
+	{match: func(l string) bool { return containsAny(l, "ClassNotFoundException", "NoClassDefFoundError") }, message: func(l string) string { return "Java classpath error: " + l }},
+	{match: func(l string) bool { return containsAll(l, "sonar-project.properties") && containsAny(l, "not found", "missing") }, message: func(l string) string { return "Configuration file error: " + l }},
+	{match: func(l string) bool { return strings.Contains(l, "git") && containsAny(l, "not found", "failed") }, message: func(l string) string { return "Git-related error: " + l }},
+	{match: func(l string) bool { return containsAny(l, "Analysis failed", "analysis error") }, message: func(l string) string { return "Analysis error: " + l }},
+	{match: func(l string) bool { return containsAny(l, "500", "502", "503", "504") }, message: func(l string) string { return "Server error: " + l }},
+	{match: func(l string) bool { return containsAll(l, "java.lang.IllegalStateException", "Tokens of file", ".bsl") }, staticMsg: "BSL tokenization error: File contains invalid token sequence - check file encoding and syntax"},
+	{match: func(l string) bool { return strings.Contains(l, "com.github._1c_syntax.bsl") }, message: func(l string) string { return "BSL plugin error: " + l }},
+	{match: func(l string) bool { return strings.Contains(l, ".bsl") && containsAny(l, "encoding", "charset") }, message: func(l string) string { return "BSL encoding error: " + l }},
+	{match: func(l string) bool { return strings.Contains(l, ".bsl") && strings.Contains(l, "syntax") }, message: func(l string) string { return "BSL syntax error: " + l }},
+}
+
+// checkPrefixErrors checks for ERROR: and WARN: prefixed lines.
+func checkPrefixErrors(line string) []string {
+	var errs []string
+	if strings.HasPrefix(line, "ERROR:") {
+		if msg := strings.TrimSpace(strings.TrimPrefix(line, "ERROR:")); msg != "" {
+			errs = append(errs, "Scanner error: "+msg)
+		}
+	}
+	if strings.HasPrefix(line, "WARN:") {
+		if msg := strings.TrimSpace(strings.TrimPrefix(line, "WARN:")); msg != "" {
+			if containsAny(msg, "fail", "error", "invalid") {
+				errs = append(errs, "Scanner warning: "+msg)
+			}
+		}
+	}
+	return errs
+}
+
+// check1CErrors checks for 1C platform-related errors.
+func check1CErrors(line string) []string {
+	if containsAny(line, "1C", "1c") && containsAny(line, "error", "ERROR", "failed") {
+		return []string{"1C platform error: " + line}
+	}
+	return nil
+}
+
 // analyzeErrorOutput analyzes scanner output to extract specific error information.
 func (s *SonarScannerEntity) analyzeErrorOutput(output string) []string {
 	var errs []string
@@ -265,92 +366,26 @@ func (s *SonarScannerEntity) analyzeErrorOutput(output string) []string {
 
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
+		errs = append(errs, matchErrorPatterns(line)...)
+		errs = append(errs, checkPrefixErrors(line)...)
+		errs = append(errs, check1CErrors(line)...)
+	}
 
-		if strings.Contains(line, "Unauthorized") || strings.Contains(line, "401") {
-			errs = append(errs, "Authentication failed: Invalid token or credentials")
-		}
-		if strings.Contains(line, "Connection refused") || strings.Contains(line, "ConnectException") {
-			errs = append(errs, "Network error: Cannot connect to SonarQube server")
-		}
-		if strings.Contains(line, "Project key") && strings.Contains(line, "invalid") {
-			errs = append(errs, "Invalid project key configuration")
-		}
-		if strings.Contains(line, "No sources found") || strings.Contains(line, "No files to analyze") {
-			errs = append(errs, "No source files found for analysis")
-		}
-		if strings.Contains(line, "OutOfMemoryError") {
-			errs = append(errs, "Insufficient memory: Increase JAVA_OPTS heap size")
-		}
-		if strings.Contains(line, "Permission denied") || strings.Contains(line, "Access denied") {
-			errs = append(errs, "File system permission error")
-		}
-		if strings.Contains(line, "Quality gate") && strings.Contains(line, "FAILED") {
-			errs = append(errs, "Quality gate failed: Code quality standards not met")
-		}
-		if strings.Contains(line, "version") && strings.Contains(line, "not supported") {
-			errs = append(errs, "SonarQube server version compatibility issue")
-		}
-		if strings.Contains(line, "plugin") && strings.Contains(line, "failed") {
-			errs = append(errs, "Scanner plugin error")
-		}
-		if strings.HasPrefix(line, "ERROR:") {
-			errorMsg := strings.TrimSpace(strings.TrimPrefix(line, "ERROR:"))
-			if errorMsg != "" {
-				errs = append(errs, "Scanner error: "+errorMsg)
-			}
-		}
-		if strings.HasPrefix(line, "WARN:") {
-			warnMsg := strings.TrimSpace(strings.TrimPrefix(line, "WARN:"))
-			if warnMsg != "" && (strings.Contains(warnMsg, "fail") || strings.Contains(warnMsg, "error") || strings.Contains(warnMsg, "invalid")) {
-				errs = append(errs, "Scanner warning: "+warnMsg)
-			}
-		}
-		if strings.Contains(line, "EXECUTION FAILURE") {
-			errs = append(errs, "Scanner execution failure detected")
-		}
-		if strings.Contains(line, "timeout") || strings.Contains(line, "timed out") {
-			errs = append(errs, "Timeout error: "+line)
-		}
-		if strings.Contains(line, "SSL") || strings.Contains(line, "TLS") || strings.Contains(line, "certificate") {
-			errs = append(errs, "SSL/TLS connection error: "+line)
-		}
-		if strings.Contains(line, "No space left") || strings.Contains(line, "disk full") {
-			errs = append(errs, "Disk space error: "+line)
-		}
-		if strings.Contains(line, "ClassNotFoundException") || strings.Contains(line, "NoClassDefFoundError") {
-			errs = append(errs, "Java classpath error: "+line)
-		}
-		if strings.Contains(line, "sonar-project.properties") && (strings.Contains(line, "not found") || strings.Contains(line, "missing")) {
-			errs = append(errs, "Configuration file error: "+line)
-		}
-		if strings.Contains(line, "git") && (strings.Contains(line, "not found") || strings.Contains(line, "failed")) {
-			errs = append(errs, "Git-related error: "+line)
-		}
-		if strings.Contains(line, "Analysis failed") || strings.Contains(line, "analysis error") {
-			errs = append(errs, "Analysis error: "+line)
-		}
-		if strings.Contains(line, "500") || strings.Contains(line, "502") || strings.Contains(line, "503") || strings.Contains(line, "504") {
-			errs = append(errs, "Server error: "+line)
-		}
-		if strings.Contains(line, "java.lang.IllegalStateException") && strings.Contains(line, "Tokens of file") && strings.Contains(line, ".bsl") {
-			errs = append(errs, "BSL tokenization error: File contains invalid token sequence - check file encoding and syntax")
-		}
-		if strings.Contains(line, "com.github._1c_syntax.bsl") {
-			errs = append(errs, "BSL plugin error: "+line)
-		}
-		if strings.Contains(line, ".bsl") && (strings.Contains(line, "encoding") || strings.Contains(line, "charset")) {
-			errs = append(errs, "BSL encoding error: "+line)
-		}
-		if strings.Contains(line, ".bsl") && strings.Contains(line, "syntax") {
-			errs = append(errs, "BSL syntax error: "+line)
-		}
-		if strings.Contains(line, "1C") || strings.Contains(line, "1c") {
-			if strings.Contains(line, "error") || strings.Contains(line, "ERROR") || strings.Contains(line, "failed") {
-				errs = append(errs, "1C platform error: "+line)
+	return errs
+}
+
+// matchErrorPatterns checks a line against all known error patterns.
+func matchErrorPatterns(line string) []string {
+	var errs []string
+	for _, p := range errorPatterns {
+		if p.match(line) {
+			if p.message != nil {
+				errs = append(errs, p.message(line))
+			} else {
+				errs = append(errs, p.staticMsg)
 			}
 		}
 	}
-
 	return errs
 }
 

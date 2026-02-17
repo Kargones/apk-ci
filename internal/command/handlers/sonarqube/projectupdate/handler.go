@@ -74,101 +74,110 @@ type AdminSyncResult struct {
 	Error string `json:"error,omitempty"`
 }
 
-// writeText выводит результат в человекочитаемом формате.
-func (d *ProjectUpdateData) writeText(w io.Writer) error {
-	if _, err := fmt.Fprintf(w, "══════════════════════════════════════════════════════\n"); err != nil {
-		return err
-	}
-	if _, err := fmt.Fprintf(w, "Обновление проекта: %s\n", d.ProjectKey); err != nil {
-		return err
-	}
-	if _, err := fmt.Fprintf(w, "══════════════════════════════════════════════════════\n"); err != nil {
-		return err
-	}
-	if _, err := fmt.Fprintf(w, "Владелец: %s\n", d.Owner); err != nil {
-		return err
-	}
-	if _, err := fmt.Fprintf(w, "Репозиторий: %s\n\n", d.Repo); err != nil {
-		return err
-	}
+// writeLine is a helper that writes a string and returns any error.
+func writeLine(w io.Writer, s string) error {
+	_, err := fmt.Fprint(w, s)
+	return err
+}
 
-	// Описание
-	if _, err := fmt.Fprintln(w, "Описание:"); err != nil {
+// writeLinef is a helper that writes a formatted line and returns any error.
+func writeLinef(w io.Writer, format string, args ...any) error {
+	_, err := fmt.Fprintf(w, format, args...)
+	return err
+}
+
+// writeDescriptionSection writes the description section of the report.
+func (d *ProjectUpdateData) writeDescriptionSection(w io.Writer) error {
+	if err := writeLine(w, "Описание:\n"); err != nil {
 		return err
 	}
 	if d.DescriptionUpdated {
-		if _, err := fmt.Fprintln(w, "  Обновлено: Да"); err != nil {
+		if err := writeLine(w, "  Обновлено: Да\n"); err != nil {
 			return err
 		}
-		if _, err := fmt.Fprintf(w, "  Источник: %s\n", d.DescriptionSource); err != nil {
+		if err := writeLinef(w, "  Источник: %s\n", d.DescriptionSource); err != nil {
 			return err
 		}
-		if _, err := fmt.Fprintf(w, "  Длина: %d символов\n\n", d.DescriptionLength); err != nil {
-			return err
-		}
-	} else {
-		if _, err := fmt.Fprintln(w, "  Обновлено: Нет"); err != nil {
-			return err
-		}
-		if _, err := fmt.Fprintln(w); err != nil {
-			return err
-		}
+		return writeLinef(w, "  Длина: %d символов\n\n", d.DescriptionLength)
 	}
+	if err := writeLine(w, "  Обновлено: Нет\n"); err != nil {
+		return err
+	}
+	return writeLine(w, "\n")
+}
 
-	// Администраторы
-	if _, err := fmt.Fprintln(w, "Администраторы:"); err != nil {
+// writeAdminSection writes the administrators section of the report.
+func (d *ProjectUpdateData) writeAdminSection(w io.Writer) error {
+	if err := writeLine(w, "Администраторы:\n"); err != nil {
 		return err
 	}
 	if d.AdministratorsSync != nil && d.AdministratorsSync.Synced {
-		if _, err := fmt.Fprintln(w, "  Синхронизировано: Да"); err != nil {
+		if err := writeLine(w, "  Синхронизировано: Да\n"); err != nil {
 			return err
 		}
-		if _, err := fmt.Fprintf(w, "  Количество: %d\n", d.AdministratorsSync.Count); err != nil {
+		if err := writeLinef(w, "  Количество: %d\n", d.AdministratorsSync.Count); err != nil {
 			return err
 		}
 		if len(d.AdministratorsSync.Teams) > 0 {
-			if _, err := fmt.Fprintf(w, "  Teams: %s\n\n", strings.Join(d.AdministratorsSync.Teams, ", ")); err != nil {
-				return err
-			}
-		} else {
-			if _, err := fmt.Fprintln(w); err != nil {
-				return err
-			}
+			return writeLinef(w, "  Teams: %s\n\n", strings.Join(d.AdministratorsSync.Teams, ", "))
 		}
-	} else {
-		if _, err := fmt.Fprintln(w, "  Синхронизировано: Нет"); err != nil {
-			return err
-		}
-		if d.AdministratorsSync != nil && d.AdministratorsSync.Error != "" {
-			if _, err := fmt.Fprintf(w, "  Ошибка: %s\n", d.AdministratorsSync.Error); err != nil {
-				return err
-			}
-		}
-		if _, err := fmt.Fprintln(w); err != nil {
+		return writeLine(w, "\n")
+	}
+	if err := writeLine(w, "  Синхронизировано: Нет\n"); err != nil {
+		return err
+	}
+	if d.AdministratorsSync != nil && d.AdministratorsSync.Error != "" {
+		if err := writeLinef(w, "  Ошибка: %s\n", d.AdministratorsSync.Error); err != nil {
 			return err
 		}
 	}
+	return writeLine(w, "\n")
+}
 
-	// Предупреждения
-	if _, err := fmt.Fprintln(w, "Предупреждения:"); err != nil {
+// writeWarningsSection writes the warnings section of the report.
+func (d *ProjectUpdateData) writeWarningsSection(w io.Writer) error {
+	if err := writeLine(w, "Предупреждения:\n"); err != nil {
 		return err
 	}
 	if len(d.Warnings) == 0 {
-		if _, err := fmt.Fprintln(w, "  (нет)"); err != nil {
+		return writeLine(w, "  (нет)\n")
+	}
+	for _, warn := range d.Warnings {
+		if err := writeLinef(w, "  - %s\n", warn); err != nil {
 			return err
 		}
-	} else {
-		for _, warn := range d.Warnings {
-			if _, err := fmt.Fprintf(w, "  - %s\n", warn); err != nil {
-				return err
-			}
-		}
 	}
-	if _, err := fmt.Fprintf(w, "══════════════════════════════════════════════════════\n"); err != nil {
+	return nil
+}
+
+// writeText выводит результат в человекочитаемом формате.
+func (d *ProjectUpdateData) writeText(w io.Writer) error {
+	separator := "══════════════════════════════════════════════════════\n"
+	if err := writeLine(w, separator); err != nil {
 		return err
 	}
-
-	return nil
+	if err := writeLinef(w, "Обновление проекта: %s\n", d.ProjectKey); err != nil {
+		return err
+	}
+	if err := writeLine(w, separator); err != nil {
+		return err
+	}
+	if err := writeLinef(w, "Владелец: %s\n", d.Owner); err != nil {
+		return err
+	}
+	if err := writeLinef(w, "Репозиторий: %s\n\n", d.Repo); err != nil {
+		return err
+	}
+	if err := d.writeDescriptionSection(w); err != nil {
+		return err
+	}
+	if err := d.writeAdminSection(w); err != nil {
+		return err
+	}
+	if err := d.writeWarningsSection(w); err != nil {
+		return err
+	}
+	return writeLine(w, separator)
 }
 
 // ProjectUpdateHandler обрабатывает команду nr-sq-project-update.
