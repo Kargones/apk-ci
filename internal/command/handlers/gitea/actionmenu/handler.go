@@ -239,14 +239,16 @@ func (h *ActionMenuHandler) Execute(ctx context.Context, cfg *config.Config) err
 		slog.Bool("force_update", cfg.ForceUpdate))
 
 	// Получение Gitea клиента (AC: #8)
-	// TODO(#58): Реализовать фабрику createGiteaClient(cfg) для создания реального клиента.
-	// Текущая реализация требует DI через поле giteaClient (используется в тестах).
 	client := h.giteaClient
 	if client == nil {
-		log.Error("Gitea клиент не настроен")
-		return h.writeError(format, traceID, start,
-			errConfigMissing,
-			"Gitea клиент не настроен — требуется реализация фабрики createGiteaClient()")
+		var clientErr error
+		client, clientErr = errhandler.CreateGiteaClient(cfg)
+		if clientErr != nil {
+			log.Error("Не удалось создать Gitea клиент", slog.String("error", clientErr.Error()))
+			return h.writeError(format, traceID, start,
+				errConfigMissing,
+				"Не удалось создать Gitea клиент: "+clientErr.Error())
+		}
 	}
 
 	// 3. Проверка изменений project.yaml (если не ForceUpdate) (AC: #4)
