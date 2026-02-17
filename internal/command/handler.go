@@ -12,12 +12,6 @@ import (
 // Handler определяет интерфейс обработчика команды.
 // Каждая команда приложения должна реализовывать этот интерфейс.
 // Регистрация обработчиков происходит через функцию Register() в init().
-//
-// TODO(#59): Все handlers используют slog.Default() для логирования,
-// игнорируя LoggingConfig (format, output, file path). Необходим рефакторинг:
-// добавить logging.Logger в Handler interface или передавать через config.Config,
-// чтобы handlers использовали DI-инжектированный logger вместо глобального slog.Default().
-// Затрагивает 19 handlers (см. grep "slog.Default().With" в handlers/).
 type Handler interface {
 	// Name возвращает имя команды для регистрации в реестре.
 	// Должно соответствовать константам из internal/constants

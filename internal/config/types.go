@@ -3,6 +3,8 @@ package config
 import (
 	"log/slog"
 	"time"
+
+	"github.com/Kargones/apk-ci/internal/pkg/alerting"
 )
 
 // Все константы перенесены в пакет constants
@@ -177,6 +179,9 @@ type Config struct {
 
 	// Tracing настройки (OpenTelemetry)
 	TracingConfig *TracingConfig
+
+	// Alerter для отправки алертов из handlers (DI-injected, #59)
+	Alerter alerting.Alerter
 
 	// MenuMain содержит шаблон главного меню как массив строк
 	MenuMain []string

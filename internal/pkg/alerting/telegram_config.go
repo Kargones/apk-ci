@@ -2,10 +2,6 @@ package alerting
 
 import "time"
 
-// TODO(#59): Дублирование — TelegramConfig здесь и TelegramChannelConfig
-// в config.go практически идентичны. Рефакторинг: объединить в общий пакет internal/alerting/config
-// или использовать alerting.TelegramConfig напрямую в config.AppConfig.
-// См. также TODO(#59) в providers.go:128 для EmailConfig.
 
 // Значения по умолчанию для Telegram конфигурации.
 const (
