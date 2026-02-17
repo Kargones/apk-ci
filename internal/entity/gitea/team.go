@@ -1,6 +1,7 @@
 package gitea
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log/slog"
@@ -25,7 +26,7 @@ func (g *API) IsUserInTeam(l *slog.Logger, username string, orgName string, team
 	// Сначала найдем команду по имени
 	searchURL := fmt.Sprintf("%s/api/%s/orgs/%s/teams/search?q=%s", g.GiteaURL, constants.APIVersion, orgName, teamName)
 
-	statusCode, body, err := g.sendReq(searchURL, "", "GET")
+	statusCode, body, err := g.sendReq(context.Background(), searchURL, "", "GET")
 	if err != nil {
 		return false, fmt.Errorf("ошибка при поиске команды: %w", err)
 	}
@@ -69,7 +70,7 @@ func (g *API) IsUserInTeam(l *slog.Logger, username string, orgName string, team
 	// Проверяем членство пользователя в команде
 	memberURL := fmt.Sprintf("%s/api/%s/teams/%d/members/%s", g.GiteaURL, constants.APIVersion, teamID, username)
 
-	statusCode, _, err = g.sendReq(memberURL, "", "GET")
+	statusCode, _, err = g.sendReq(context.Background(), memberURL, "", "GET")
 	if err != nil {
 		return false, fmt.Errorf("ошибка при проверке членства: %w", err)
 	}
@@ -98,7 +99,7 @@ func (g *API) GetTeamMembers(orgName, teamName string) ([]string, error) {
 	// Сначала найдем команду по имени
 	searchURL := fmt.Sprintf("%s/api/%s/orgs/%s/teams/search?q=%s", g.GiteaURL, constants.APIVersion, orgName, teamName)
 
-	statusCode, body, err := g.sendReq(searchURL, "", "GET")
+	statusCode, body, err := g.sendReq(context.Background(), searchURL, "", "GET")
 	if err != nil {
 		return nil, fmt.Errorf("ошибка при поиске команды: %w", err)
 	}
@@ -138,7 +139,7 @@ func (g *API) GetTeamMembers(orgName, teamName string) ([]string, error) {
 	// Получаем членов команды
 	membersURL := fmt.Sprintf("%s/api/%s/teams/%d/members", g.GiteaURL, constants.APIVersion, teamID)
 
-	statusCode, body, err = g.sendReq(membersURL, "", "GET")
+	statusCode, body, err = g.sendReq(context.Background(), membersURL, "", "GET")
 	if err != nil {
 		return nil, fmt.Errorf("ошибка при получении членов команды: %w", err)
 	}

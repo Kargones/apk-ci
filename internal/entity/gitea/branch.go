@@ -1,6 +1,7 @@
 package gitea
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -21,7 +22,7 @@ func (g *API) CreateTestBranch() error {
 "old_ref_name": "refs/heads/%s"
 }`, g.NewBranch, g.BaseBranch, g.BaseBranch)
 
-	statusCode, _, err := g.sendReq(urlString, reqBody, "POST")
+	statusCode, _, err := g.sendReq(context.Background(), urlString, reqBody, "POST")
 
 	if statusCode != http.StatusCreated {
 		return fmt.Errorf("ошибка при создании ветки: %v %w", statusCode, err)
@@ -37,7 +38,7 @@ func (g *API) CreateTestBranch() error {
 func (g *API) DeleteTestBranch() error {
 	urlString := fmt.Sprintf("%s/api/%s/repos/%s/%s/branches/%s", g.GiteaURL, constants.APIVersion, g.Owner, g.Repo, g.NewBranch)
 
-	statusCode, _, err := g.sendReq(urlString, "", "DELETE")
+	statusCode, _, err := g.sendReq(context.Background(), urlString, "", "DELETE")
 	if statusCode != http.StatusNoContent {
 		return fmt.Errorf("ошибка при создании ветки: %v %w", statusCode, err)
 	}
@@ -55,7 +56,7 @@ func (g *API) DeleteTestBranch() error {
 func (g *API) GetBranches(repo string) ([]Branch, error) {
 	urlString := fmt.Sprintf("%s/api/%s/repos/%s/%s/branches", g.GiteaURL, constants.APIVersion, g.Owner, repo)
 
-	statusCode, body, err := g.sendReq(urlString, "", "GET")
+	statusCode, body, err := g.sendReq(context.Background(), urlString, "", "GET")
 	if err != nil {
 		return nil, fmt.Errorf("ошибка при выполнении запроса: %w", err)
 	}
@@ -88,7 +89,7 @@ func (g *API) HasBranch(owner, repo, branchName string) (bool, error) {
 	urlString := fmt.Sprintf("%s/api/%s/repos/%s/%s/branches/%s",
 		g.GiteaURL, constants.APIVersion, owner, repo, branchName)
 
-	statusCode, _, err := g.sendReq(urlString, "", "GET")
+	statusCode, _, err := g.sendReq(context.Background(), urlString, "", "GET")
 	if err != nil {
 		return false, fmt.Errorf("ошибка при проверке ветки %s в %s/%s: %w", branchName, owner, repo, err)
 	}

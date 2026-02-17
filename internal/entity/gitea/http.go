@@ -2,20 +2,21 @@ package gitea
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
-	"log"
+	"log/slog"
 	"net/http"
+	"time"
 )
 
-func (g *API) sendReq(urlString, reqBody, respType string) (int, string, error) {
-	var client *http.Client
+func (g *API) sendReq(ctx context.Context, urlString, reqBody, respType string) (int, string, error) {
 	var req *http.Request
 	var err error
 	if reqBody == "" {
-		req, err = http.NewRequest(respType, urlString, nil)
+		req, err = http.NewRequestWithContext(ctx, respType, urlString, nil)
 	} else {
-		req, err = http.NewRequest(respType, urlString, bytes.NewBuffer([]byte(reqBody)))
+		req, err = http.NewRequestWithContext(ctx, respType, urlString, bytes.NewBuffer([]byte(reqBody)))
 	}
 	if err != nil {
 		return -1, "", err
@@ -23,23 +24,21 @@ func (g *API) sendReq(urlString, reqBody, respType string) (int, string, error) 
 	req.Header.Set("Authorization", fmt.Sprintf("token %s", g.AccessToken))
 	req.Header.Set("Content-Type", "application/json")
 
-	client = &http.Client{}
-
+	client := &http.Client{Timeout: 30 * time.Second}
 	resp, err := client.Do(req)
 	if err != nil {
 		return -1, "", err
 	}
-	bodyBytes, err := io.ReadAll(resp.Body)
-	if err != nil {
-		log.Printf("Failed to read response body: %v", err)
-		return -1, "", err
-	}
-	bodyString := string(bodyBytes)
 	defer func() {
 		if closeErr := resp.Body.Close(); closeErr != nil {
-			log.Printf("Failed to close response body: %v", closeErr)
+			slog.Warn("Failed to close response body", "error", closeErr)
 		}
 	}()
 
-	return resp.StatusCode, bodyString, err
+	bodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		slog.Warn("Failed to read response body", "error", err)
+		return -1, "", err
+	}
+	return resp.StatusCode, string(bodyBytes), nil
 }

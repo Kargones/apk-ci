@@ -7,79 +7,58 @@ import (
 	"os"
 )
 
+// FileReader defines read-only file system operations.
+type FileReader interface {
+	ReadFile(filename string) ([]byte, error)
+	ReadDir(dirname string) ([]os.DirEntry, error)
+	Open(name string) (File, error)
+	Stat(name string) (os.FileInfo, error)
+	IsNotExist(err error) bool
+}
+
+// FileWriter defines write/mutate file system operations.
+type FileWriter interface {
+	WriteFile(filename string, data []byte, perm os.FileMode) error
+	Create(name string) (File, error)
+	OpenFile(name string, flag int, perm os.FileMode) (File, error)
+	Rename(oldpath, newpath string) error
+	Remove(name string) error
+	RemoveAll(path string) error
+}
+
+// DirManager defines directory management operations.
+type DirManager interface {
+	MkdirAll(path string, perm os.FileMode) error
+	MkdirTemp(dir, pattern string) (string, error)
+}
+
+// TempFileManager defines temporary file operations.
+type TempFileManager interface {
+	CreateTemp(dir, pattern string) (File, error)
+}
+
+// PermissionManager defines file permission operations.
+type PermissionManager interface {
+	Chmod(name string, mode os.FileMode) error
+	Chown(name string, uid, gid int) error
+}
+
+// WorkDirManager defines working directory operations.
+type WorkDirManager interface {
+	Getwd() (string, error)
+	Chdir(dir string) error
+}
+
 // FileSystem определяет контракт для всех файловых операций.
 // Интерфейс обеспечивает абстракцию над различными типами файловых систем
 // и предоставляет единый API для файловых операций.
 type FileSystem interface {
-	// Операции с директориями
-	
-	// MkdirTemp создает новую временную директорию в указанной директории
-	// с именем, начинающимся с pattern, и возвращает путь к новой директории.
-	MkdirTemp(dir, pattern string) (string, error)
-	
-	// MkdirAll создает директорию с именем path вместе со всеми необходимыми
-	// родительскими директориями и возвращает nil или первую встреченную ошибку.
-	MkdirAll(path string, perm os.FileMode) error
-	
-	// RemoveAll удаляет path и все содержимое, которое он содержит.
-	RemoveAll(path string) error
-	
-	// ReadDir читает именованную директорию и возвращает список записей директории,
-	// отсортированных по имени файла.
-	ReadDir(dirname string) ([]os.DirEntry, error)
-	
-	// Getwd возвращает корневое имя пути, соответствующее текущей директории.
-	Getwd() (string, error)
-	
-	// Chdir изменяет текущую рабочую директорию на именованную директорию.
-	Chdir(dir string) error
-	
-	// Операции с файлами
-	
-	// Create создает или обрезает именованный файл.
-	Create(name string) (File, error)
-	
-	// CreateTemp создает новый временный файл в директории dir с именем,
-	// начинающимся с pattern, открывает файл для чтения и записи.
-	CreateTemp(dir, pattern string) (File, error)
-	
-	// Open открывает именованный файл для чтения.
-	Open(name string) (File, error)
-	
-	// OpenFile является обобщенной функцией открытия; большинство пользователей
-	// будут использовать Open или Create вместо этого.
-	OpenFile(name string, flag int, perm os.FileMode) (File, error)
-	
-	// Remove удаляет именованный файл или (пустую) директорию.
-	Remove(name string) error
-	
-	// Rename переименовывает (перемещает) oldpath в newpath.
-	Rename(oldpath, newpath string) error
-	
-	// Операции чтения/записи
-	
-	// ReadFile читает именованный файл и возвращает содержимое.
-	ReadFile(filename string) ([]byte, error)
-	
-	// WriteFile записывает данные в именованный файл, создавая его при необходимости.
-	WriteFile(filename string, data []byte, perm os.FileMode) error
-	
-	// Информационные операции
-	
-	// Stat возвращает FileInfo, описывающий именованный файл.
-	Stat(name string) (os.FileInfo, error)
-	
-	// IsNotExist возвращает булево значение, указывающее, известно ли,
-	// что ошибка сообщает о том, что файл или директория не существует.
-	IsNotExist(err error) bool
-	
-	// Операции с правами доступа
-	
-	// Chmod изменяет режим именованного файла на mode.
-	Chmod(name string, mode os.FileMode) error
-	
-	// Chown изменяет числовые uid и gid именованного файла.
-	Chown(name string, uid, gid int) error
+	FileReader
+	FileWriter
+	DirManager
+	TempFileManager
+	PermissionManager
+	WorkDirManager
 }
 
 // File представляет интерфейс для работы с файловыми дескрипторами.
