@@ -12,7 +12,7 @@ import (
 	"github.com/Kargones/apk-ci/internal/command/handlers"
 )
 
-// allNRCommands — полный список NR-команд и help (23 шт.: 22 NR + help).
+// allNRCommands — полный список NR-команд и help (24 шт.: 23 NR + help).
 // Каждый элемент: {константа из constants.go, ожидаемое строковое значение}.
 func init() {
 	if err := handlers.RegisterAll(); err != nil {
@@ -46,6 +46,7 @@ var allNRCommands = []struct {
 	{constants.ActNRActionMenuBuild, "nr-action-menu-build"},
 	{constants.ActNRMigrate, "nr-migrate"},
 	{constants.ActNRDeprecatedAudit, "nr-deprecated-audit"},
+	{constants.ActNRExtensionPublish, "nr-extension-publish"},
 	{constants.ActHelp, "help"},
 }
 
@@ -74,6 +75,7 @@ var deprecatedAliases = []struct {
 	{constants.ActSQProjectUpdate, constants.ActNRSQProjectUpdate},
 	{constants.ActTestMerge, constants.ActNRTestMerge},
 	{constants.ActionMenuBuildName, constants.ActNRActionMenuBuild},
+	{constants.ActExtensionPublish, constants.ActNRExtensionPublish},
 }
 
 // TestSmoke_AllNRCommandsRegistered проверяет что все 22 NR-команд + help
@@ -90,7 +92,7 @@ func TestSmoke_AllNRCommandsRegistered(t *testing.T) {
 	}
 }
 
-// TestSmoke_DeprecatedAliasesRegistered проверяет что все 18 deprecated aliases
+// TestSmoke_DeprecatedAliasesRegistered проверяет что все 19 deprecated aliases
 // зарегистрированы и реализуют интерфейс command.Deprecatable.
 func TestSmoke_DeprecatedAliasesRegistered(t *testing.T) {
 	for _, tc := range deprecatedAliases {
@@ -242,9 +244,9 @@ func TestSmoke_TotalCommandCount(t *testing.T) {
 	// Количества должны совпадать
 	assert.Equal(t, len(all), len(names), "All() и Names() должны возвращать одинаковое количество")
 
-	// Точное количество: 23 основных + 18 deprecated = 41
+	// Точное количество: 24 основных + 19 deprecated = 41
 	expected := len(allNRCommands) + len(deprecatedAliases)
 	assert.Equal(t, expected, len(all),
-		"ожидается %d команд (23 основных + 18 deprecated), получено %d",
+		"ожидается %d команд (24 основных + 19 deprecated), получено %d",
 		expected, len(all))
 }
