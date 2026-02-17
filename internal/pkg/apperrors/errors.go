@@ -67,3 +67,16 @@ func NewAppError(code, message string, cause error) *AppError {
 		Cause:   cause,
 	}
 }
+
+// Coded — интерфейс для ошибок с машиночитаемым кодом.
+// Все пакетные ошибки должны реализовывать этот интерфейс.
+type Coded interface {
+	error
+	ErrorCode() string
+}
+
+// ErrorCode возвращает машиночитаемый код ошибки.
+// Реализует интерфейс Coded.
+func (e *AppError) ErrorCode() string {
+	return e.Code
+}

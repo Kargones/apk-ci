@@ -3,6 +3,8 @@ package gitea
 import (
 	"errors"
 	"fmt"
+
+	"github.com/Kargones/apk-ci/internal/pkg/apperrors"
 )
 
 // Коды ошибок для Gitea операций.
@@ -160,4 +162,42 @@ func IsAPIError(err error) bool {
 func IsValidationError(err error) bool {
 	var valErr *ValidationError
 	return errors.As(err, &valErr)
+}
+
+// ErrorCode возвращает машиночитаемый код ошибки.
+// Реализует интерфейс apperrors.Coded.
+func (e *GiteaError) ErrorCode() string {
+	return e.Code
+}
+
+// As поддерживает преобразование GiteaError в apperrors.AppError через errors.As.
+func (e *GiteaError) As(target interface{}) bool {
+	if t, ok := target.(**apperrors.AppError); ok {
+		*t = &apperrors.AppError{
+			Code:    e.Code,
+			Message: e.Message,
+			Cause:   e.Cause,
+		}
+		return true
+	}
+	return false
+}
+
+// As поддерживает преобразование ValidationError в apperrors.AppError через errors.As.
+func (e *ValidationError) As(target interface{}) bool {
+	if t, ok := target.(**apperrors.AppError); ok {
+		*t = &apperrors.AppError{
+			Code:    ErrGiteaValidation,
+			Message: fmt.Sprintf("поле '%s': %s", e.Field, e.Message),
+			Cause:   e.Cause,
+		}
+		return true
+	}
+	return false
+}
+
+// ErrorCode возвращает машиночитаемый код ошибки валидации.
+// Реализует интерфейс apperrors.Coded.
+func (e *ValidationError) ErrorCode() string {
+	return ErrGiteaValidation
 }
