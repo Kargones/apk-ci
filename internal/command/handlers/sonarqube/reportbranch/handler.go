@@ -107,113 +107,109 @@ type BranchComparison struct {
 	BaseNotFound bool `json:"base_not_found,omitempty"`
 }
 
+// writeMetricsSection writes the metrics section.
+func (d *BranchReportData) writeMetricsSection(w io.Writer) error {
+	if d.Metrics == nil {
+		return nil
+	}
+	lines := []string{
+		"📈 Метрики:\n",
+		fmt.Sprintf("  Баги:          %d\n", d.Metrics.Bugs),
+		fmt.Sprintf("  Уязвимости:    %d\n", d.Metrics.Vulnerabilities),
+		fmt.Sprintf("  Code Smells:   %d\n", d.Metrics.CodeSmells),
+		fmt.Sprintf("  Покрытие:      %.1f%%\n", d.Metrics.Coverage),
+		fmt.Sprintf("  Дублирование:  %.1f%%\n", d.Metrics.DuplicatedLinesDensity),
+		fmt.Sprintf("  Строк кода:    %d\n\n", d.Metrics.Ncloc),
+	}
+	for _, l := range lines {
+		if _, err := fmt.Fprint(w, l); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// writeIssuesSection writes the issues summary section.
+func (d *BranchReportData) writeIssuesSection(w io.Writer) error {
+	if d.IssuesSummary == nil {
+		return nil
+	}
+	byType := d.IssuesSummary.ByType
+	if byType == nil {
+		byType = make(map[string]int)
+	}
+	bySeverity := d.IssuesSummary.BySeverity
+	if bySeverity == nil {
+		bySeverity = make(map[string]int)
+	}
+	if _, err := fmt.Fprintf(w, "📋 Проблемы (всего: %d):\n", d.IssuesSummary.Total); err != nil {
+		return err
+	}
+	if _, err := fmt.Fprintf(w, "  По типу:       BUG=%d, VULNERABILITY=%d, CODE_SMELL=%d\n",
+		byType["BUG"], byType["VULNERABILITY"], byType["CODE_SMELL"]); err != nil {
+		return err
+	}
+	_, err := fmt.Fprintf(w, "  По важности:   BLOCKER=%d, CRITICAL=%d, MAJOR=%d, MINOR=%d, INFO=%d\n\n",
+		bySeverity["BLOCKER"], bySeverity["CRITICAL"], bySeverity["MAJOR"], bySeverity["MINOR"], bySeverity["INFO"])
+	return err
+}
+
+// writeComparisonSection writes the branch comparison section.
+func (d *BranchReportData) writeComparisonSection(w io.Writer) error {
+	if d.Comparison == nil {
+		return nil
+	}
+	if _, err := fmt.Fprintf(w, "📊 Сравнение с %s:\n", d.Comparison.BaseBranch); err != nil {
+		return err
+	}
+	if d.Comparison.BaseNotFound {
+		_, err := fmt.Fprintln(w, "  ⚠️  Base-проект не найден в SonarQube")
+		return err
+	}
+	lines := []string{
+		fmt.Sprintf("  Новые баги:         %s\n", formatDelta(d.Comparison.NewBugs)),
+		fmt.Sprintf("  Новые уязвимости:   %s\n", formatDelta(d.Comparison.NewVulnerabilities)),
+		fmt.Sprintf("  Новые code smells:  %s\n", formatDelta(d.Comparison.NewCodeSmells)),
+		fmt.Sprintf("  Изменение покрытия: %s\n", formatCoverageDelta(d.Comparison.CoverageDelta)),
+	}
+	for _, l := range lines {
+		if _, err := fmt.Fprint(w, l); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // writeText выводит отчёт в человекочитаемом формате с цветовой индикацией.
 func (d *BranchReportData) writeText(w io.Writer) error {
-	// Заголовок
-	if _, err := fmt.Fprintf(w, "══════════════════════════════════════════════════════\n"); err != nil {
+	sep := "══════════════════════════════════════════════════════\n"
+	if _, err := fmt.Fprint(w, sep); err != nil {
 		return err
 	}
 	if _, err := fmt.Fprintf(w, "📊 Отчёт о качестве ветки: %s\n", d.Branch); err != nil {
 		return err
 	}
-	if _, err := fmt.Fprintf(w, "══════════════════════════════════════════════════════\n"); err != nil {
+	if _, err := fmt.Fprint(w, sep); err != nil {
 		return err
 	}
 	if _, err := fmt.Fprintf(w, "Проект: %s\n", d.ProjectKey); err != nil {
 		return err
 	}
-
-	// Quality Gate с индикацией
 	qgIcon := qualityGateIcon(d.QualityGateStatus)
 	if _, err := fmt.Fprintf(w, "Quality Gate: %s %s\n\n", qgIcon, d.QualityGateStatus); err != nil {
 		return err
 	}
-
-	// Метрики
-	if d.Metrics != nil {
-		if _, err := fmt.Fprintln(w, "📈 Метрики:"); err != nil {
-			return err
-		}
-		if _, err := fmt.Fprintf(w, "  Баги:          %d\n", d.Metrics.Bugs); err != nil {
-			return err
-		}
-		if _, err := fmt.Fprintf(w, "  Уязвимости:    %d\n", d.Metrics.Vulnerabilities); err != nil {
-			return err
-		}
-		if _, err := fmt.Fprintf(w, "  Code Smells:   %d\n", d.Metrics.CodeSmells); err != nil {
-			return err
-		}
-		if _, err := fmt.Fprintf(w, "  Покрытие:      %.1f%%\n", d.Metrics.Coverage); err != nil {
-			return err
-		}
-		if _, err := fmt.Fprintf(w, "  Дублирование:  %.1f%%\n", d.Metrics.DuplicatedLinesDensity); err != nil {
-			return err
-		}
-		if _, err := fmt.Fprintf(w, "  Строк кода:    %d\n\n", d.Metrics.Ncloc); err != nil {
-			return err
-		}
-	}
-
-	// Issues summary
-	if d.IssuesSummary != nil {
-		if _, err := fmt.Fprintf(w, "📋 Проблемы (всего: %d):\n", d.IssuesSummary.Total); err != nil {
-			return err
-		}
-		// M-3 fix: defensive nil checks для maps
-		byType := d.IssuesSummary.ByType
-		if byType == nil {
-			byType = make(map[string]int)
-		}
-		bySeverity := d.IssuesSummary.BySeverity
-		if bySeverity == nil {
-			bySeverity = make(map[string]int)
-		}
-		if _, err := fmt.Fprintf(w, "  По типу:       BUG=%d, VULNERABILITY=%d, CODE_SMELL=%d\n",
-			byType["BUG"],
-			byType["VULNERABILITY"],
-			byType["CODE_SMELL"]); err != nil {
-			return err
-		}
-		if _, err := fmt.Fprintf(w, "  По важности:   BLOCKER=%d, CRITICAL=%d, MAJOR=%d, MINOR=%d, INFO=%d\n\n",
-			bySeverity["BLOCKER"],
-			bySeverity["CRITICAL"],
-			bySeverity["MAJOR"],
-			bySeverity["MINOR"],
-			bySeverity["INFO"]); err != nil {
-			return err
-		}
-	}
-
-	// Сравнение с base-веткой
-	if d.Comparison != nil {
-		if _, err := fmt.Fprintf(w, "📊 Сравнение с %s:\n", d.Comparison.BaseBranch); err != nil {
-			return err
-		}
-		if d.Comparison.BaseNotFound {
-			if _, err := fmt.Fprintln(w, "  ⚠️  Base-проект не найден в SonarQube"); err != nil {
-				return err
-			}
-		} else {
-			if _, err := fmt.Fprintf(w, "  Новые баги:         %s\n", formatDelta(d.Comparison.NewBugs)); err != nil {
-				return err
-			}
-			if _, err := fmt.Fprintf(w, "  Новые уязвимости:   %s\n", formatDelta(d.Comparison.NewVulnerabilities)); err != nil {
-				return err
-			}
-			if _, err := fmt.Fprintf(w, "  Новые code smells:  %s\n", formatDelta(d.Comparison.NewCodeSmells)); err != nil {
-				return err
-			}
-			if _, err := fmt.Fprintf(w, "  Изменение покрытия: %s\n", formatCoverageDelta(d.Comparison.CoverageDelta)); err != nil {
-				return err
-			}
-		}
-	}
-
-	if _, err := fmt.Fprintf(w, "══════════════════════════════════════════════════════\n"); err != nil {
+	if err := d.writeMetricsSection(w); err != nil {
 		return err
 	}
-
-	return nil
+	if err := d.writeIssuesSection(w); err != nil {
+		return err
+	}
+	if err := d.writeComparisonSection(w); err != nil {
+		return err
+	}
+	_, err := fmt.Fprint(w, sep)
+	return err
 }
 
 // qualityGateIcon возвращает иконку для статуса Quality Gate.

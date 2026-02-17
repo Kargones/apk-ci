@@ -136,200 +136,189 @@ func (h *CreateTempDbHandler) Description() string {
 		"Переменная BR_DRY_RUN=true выводит план операций без выполнения"
 }
 
-// Execute выполняет команду nr-create-temp-db.
-func (h *CreateTempDbHandler) Execute(ctx context.Context, cfg *config.Config) error {
-	start := time.Now()
+// tempDbExecContext holds shared state for Execute.
+type tempDbExecContext struct {
+	start      time.Time
+	traceID    string
+	format     string
+	log        *slog.Logger
+	dbPath     string
+	extensions []string
+	timeout    time.Duration
+	ttlHours   int
+}
 
-	traceID := tracing.TraceIDFromContext(ctx)
-	if traceID == "" {
-		traceID = tracing.GenerateTraceID()
+// validateTempDbConfig validates config and ibcmd binary, returning execution context.
+func (h *CreateTempDbHandler) validateTempDbConfig(ctx context.Context, cfg *config.Config) (*tempDbExecContext, error) {
+	ec := &tempDbExecContext{start: time.Now()}
+	ec.traceID = tracing.TraceIDFromContext(ctx)
+	if ec.traceID == "" {
+		ec.traceID = tracing.GenerateTraceID()
 	}
+	ec.format = os.Getenv("BR_OUTPUT_FORMAT")
+	ec.log = slog.Default().With(slog.String("trace_id", ec.traceID), slog.String("command", constants.ActNRCreateTempDb))
 
-	format := os.Getenv("BR_OUTPUT_FORMAT")
-	log := slog.Default().With(
-		slog.String("trace_id", traceID),
-		slog.String("command", constants.ActNRCreateTempDb),
-	)
-
-	// H3 fix: проверка отмены context перед началом работы
 	if err := ctx.Err(); err != nil {
-		log.Warn("Context отменён до начала выполнения", slog.String("error", err.Error()))
-		return h.writeError(format, traceID, start, ErrContextCancelled,
-			"операция отменена: "+err.Error())
+		ec.log.Warn("Context отменён до начала выполнения", slog.String("error", err.Error()))
+		return nil, h.writeError(ec.format, ec.traceID, ec.start, ErrContextCancelled, "операция отменена: "+err.Error())
 	}
 
-	// 1. Валидация конфигурации
 	if cfg == nil {
-		log.Error("Конфигурация не указана")
-		return h.writeError(format, traceID, start, ErrCreateTempDbValidation,
-			"конфигурация приложения не указана")
+		ec.log.Error("Конфигурация не указана")
+		return nil, h.writeError(ec.format, ec.traceID, ec.start, ErrCreateTempDbValidation, "конфигурация приложения не указана")
 	}
-
-	// Проверка путей к ibcmd
 	if cfg.AppConfig == nil || cfg.AppConfig.Paths.BinIbcmd == "" {
-		log.Error("Путь к ibcmd не указан в конфигурации")
-		return h.writeError(format, traceID, start, ErrCreateTempDbValidation,
-			"путь к ibcmd не указан в конфигурации (app.yaml:paths.binIbcmd)")
+		ec.log.Error("Путь к ibcmd не указан в конфигурации")
+		return nil, h.writeError(ec.format, ec.traceID, ec.start, ErrCreateTempDbValidation, "путь к ibcmd не указан в конфигурации (app.yaml:paths.binIbcmd)")
 	}
 
-	// Проверка существования и прав на выполнение ibcmd
-	ibcmdInfo, err := os.Stat(cfg.AppConfig.Paths.BinIbcmd)
-	if os.IsNotExist(err) {
-		log.Error("Файл ibcmd не найден", slog.String("path", cfg.AppConfig.Paths.BinIbcmd))
-		return h.writeError(format, traceID, start, ErrCreateTempDbValidation,
-			fmt.Sprintf("файл ibcmd не найден: %s", cfg.AppConfig.Paths.BinIbcmd))
-	}
-	if err != nil {
-		log.Error("Ошибка проверки файла ibcmd", slog.String("path", cfg.AppConfig.Paths.BinIbcmd), slog.String("error", err.Error()))
-		return h.writeError(format, traceID, start, ErrCreateTempDbValidation,
-			fmt.Sprintf("ошибка проверки файла ibcmd: %s", err.Error()))
-	}
-	// Проверка что файл исполняемый (хотя бы один execute bit)
-	if ibcmdInfo.Mode()&0111 == 0 {
-		log.Error("Файл ibcmd не является исполняемым", slog.String("path", cfg.AppConfig.Paths.BinIbcmd), slog.String("mode", ibcmdInfo.Mode().String()))
-		return h.writeError(format, traceID, start, ErrCreateTempDbValidation,
-			fmt.Sprintf("файл ibcmd не является исполняемым: %s (mode: %s)", cfg.AppConfig.Paths.BinIbcmd, ibcmdInfo.Mode().String()))
+	if err := h.validateIbcmdBinary(ec, cfg.AppConfig.Paths.BinIbcmd); err != nil {
+		return nil, err
 	}
 
-	// 2. Генерация пути к БД (с H2 валидацией)
-	dbPath, err := h.generateDbPath(cfg)
-	if err != nil {
-		log.Error("Небезопасный путь для временной БД", slog.String("error", err.Error()))
-		return h.writeError(format, traceID, start, ErrCreateTempDbValidation, err.Error())
+	var pathErr error
+	ec.dbPath, pathErr = h.generateDbPath(cfg)
+	if pathErr != nil {
+		ec.log.Error("Небезопасный путь для временной БД", slog.String("error", pathErr.Error()))
+		return nil, h.writeError(ec.format, ec.traceID, ec.start, ErrCreateTempDbValidation, pathErr.Error())
 	}
-	log.Info("Генерация пути к временной БД", slog.String("path", dbPath))
+	ec.log.Info("Генерация пути к временной БД", slog.String("path", ec.dbPath))
 
-	// M3 fix: создание родительской директории если не существует
-	parentDir := filepath.Dir(dbPath)
+	parentDir := filepath.Dir(ec.dbPath)
 	if err := os.MkdirAll(parentDir, constants.DirPermExec); err != nil {
-		log.Error("Не удалось создать директорию для БД", slog.String("path", parentDir), slog.String("error", err.Error()))
-		return h.writeError(format, traceID, start, ErrCreateTempDbValidation,
+		ec.log.Error("Не удалось создать директорию для БД", slog.String("path", parentDir), slog.String("error", err.Error()))
+		return nil, h.writeError(ec.format, ec.traceID, ec.start, ErrCreateTempDbValidation,
 			fmt.Sprintf("не удалось создать директорию %s: %s", parentDir, err.Error()))
 	}
 
-	// 3. Парсинг расширений
-	extensions := h.parseExtensions(cfg)
-	log.Info("Расширения для добавления", slog.Any("extensions", extensions))
+	ec.extensions = h.parseExtensions(cfg)
+	ec.log.Info("Расширения для добавления", slog.Any("extensions", ec.extensions))
+	ec.timeout = h.getTimeout()
+	ec.ttlHours = h.getTTLHours()
 
-	// 4. Получение таймаута
-	timeout := h.getTimeout()
+	return ec, nil
+}
 
-	// 5. Получение TTL
-	ttlHours := h.getTTLHours()
+// validateIbcmdBinary checks that ibcmd exists and is executable.
+func (h *CreateTempDbHandler) validateIbcmdBinary(ec *tempDbExecContext, binPath string) error {
+	info, err := os.Stat(binPath)
+	if os.IsNotExist(err) {
+		ec.log.Error("Файл ibcmd не найден", slog.String("path", binPath))
+		return h.writeError(ec.format, ec.traceID, ec.start, ErrCreateTempDbValidation,
+			fmt.Sprintf("файл ibcmd не найден: %s", binPath))
+	}
+	if err != nil {
+		ec.log.Error("Ошибка проверки файла ibcmd", slog.String("path", binPath), slog.String("error", err.Error()))
+		return h.writeError(ec.format, ec.traceID, ec.start, ErrCreateTempDbValidation,
+			fmt.Sprintf("ошибка проверки файла ibcmd: %s", err.Error()))
+	}
+	if info.Mode()&0111 == 0 {
+		ec.log.Error("Файл ibcmd не является исполняемым", slog.String("path", binPath))
+		return h.writeError(ec.format, ec.traceID, ec.start, ErrCreateTempDbValidation,
+			fmt.Sprintf("файл ibcmd не является исполняемым: %s (mode: %s)", binPath, info.Mode().String()))
+	}
+	return nil
+}
 
-	// === РЕЖИМЫ ПРЕДПРОСМОТРА (порядок приоритетов!) ===
-
-	// 1. Dry-run: план без выполнения (высший приоритет)
+// handleTempDbPreviewModes handles dry-run, plan-only, verbose.
+func (h *CreateTempDbHandler) handleTempDbPreviewModes(ec *tempDbExecContext, cfg *config.Config) (bool, error) {
 	if dryrun.IsDryRun() {
-		log.Info("Dry-run режим: построение плана")
-		return h.executeDryRun(cfg, dbPath, extensions, timeout, ttlHours, format, traceID, start)
+		ec.log.Info("Dry-run режим: построение плана")
+		return true, h.executeDryRun(cfg, ec.dbPath, ec.extensions, ec.timeout, ec.ttlHours, ec.format, ec.traceID, ec.start)
 	}
-
-	// 2. Plan-only: показать план, не выполнять (Story 7.3 AC-1)
 	if dryrun.IsPlanOnly() {
-		log.Info("Plan-only режим: отображение плана операций")
-		plan := h.buildPlan(cfg, dbPath, extensions, timeout, ttlHours)
-		return output.WritePlanOnlyResult(os.Stdout, format, constants.ActNRCreateTempDb, traceID, constants.APIVersion, start, plan)
+		ec.log.Info("Plan-only режим: отображение плана операций")
+		plan := h.buildPlan(cfg, ec.dbPath, ec.extensions, ec.timeout, ec.ttlHours)
+		return true, output.WritePlanOnlyResult(os.Stdout, ec.format, constants.ActNRCreateTempDb, ec.traceID, constants.APIVersion, ec.start, plan)
 	}
-
-	// 3. Verbose: показать план, ПОТОМ выполнить (Story 7.3 AC-4)
 	if dryrun.IsVerbose() {
-		log.Info("Verbose режим: отображение плана перед выполнением")
-		plan := h.buildPlan(cfg, dbPath, extensions, timeout, ttlHours)
-		if format != output.FormatJSON {
+		ec.log.Info("Verbose режим: отображение плана перед выполнением")
+		plan := h.buildPlan(cfg, ec.dbPath, ec.extensions, ec.timeout, ec.ttlHours)
+		if ec.format != output.FormatJSON {
 			if err := plan.WritePlanText(os.Stdout); err != nil {
-				log.Warn("Не удалось вывести план операций", slog.String("error", err.Error()))
+				ec.log.Warn("Не удалось вывести план операций", slog.String("error", err.Error()))
 			}
 			fmt.Fprintln(os.Stdout)
 		}
 		h.verbosePlan = plan
 	}
-	// Verbose fall-through by design: план отображён, продолжаем реальное выполнение
+	return false, nil
+}
 
-	// 6. Создание клиента (или использование mock)
+// classifyCreateError maps a creation error to the appropriate error code.
+func classifyCreateError(err error) string {
+	switch {
+	case errors.Is(err, onec.ErrExtensionAdd):
+		return ErrExtensionAddFailed
+	case errors.Is(err, onec.ErrContextCancelled):
+		return ErrContextCancelled
+	case errors.Is(err, onec.ErrInfobaseCreate):
+		return ErrCreateTempDbFailed
+	case strings.Contains(err.Error(), "расширения") || strings.Contains(err.Error(), "extension"):
+		return ErrExtensionAddFailed
+	default:
+		return ErrCreateTempDbFailed
+	}
+}
+
+// Execute выполняет команду nr-create-temp-db.
+func (h *CreateTempDbHandler) Execute(ctx context.Context, cfg *config.Config) error {
+	ec, err := h.validateTempDbConfig(ctx, cfg)
+	if err != nil {
+		return err
+	}
+
+	if handled, pErr := h.handleTempDbPreviewModes(ec, cfg); handled {
+		return pErr
+	}
+
 	client := h.getOrCreateClient(cfg)
 
-	// 7. Progress bar для долгих операций (M4 fix)
 	prog := h.createProgress()
 	prog.Start("Создание временной базы данных...")
 	defer prog.Finish()
 
-	// 8. Проверка отмены context перед длительной операцией (H3 fix)
 	if err := ctx.Err(); err != nil {
-		log.Warn("Context отменён перед созданием БД", slog.String("error", err.Error()))
-		return h.writeError(format, traceID, start, ErrContextCancelled,
-			"операция отменена: "+err.Error())
+		ec.log.Warn("Context отменён перед созданием БД", slog.String("error", err.Error()))
+		return h.writeError(ec.format, ec.traceID, ec.start, ErrContextCancelled, "операция отменена: "+err.Error())
 	}
 
-	// 9. Выполнение создания БД
 	opts := onec.CreateTempDBOptions{
-		DbPath:     dbPath,
-		Extensions: extensions,
-		Timeout:    timeout,
-		BinIbcmd:   cfg.AppConfig.Paths.BinIbcmd,
+		DbPath: ec.dbPath, Extensions: ec.extensions,
+		Timeout: ec.timeout, BinIbcmd: cfg.AppConfig.Paths.BinIbcmd,
 	}
 
 	result, err := client.CreateTempDB(ctx, opts)
 	if err != nil {
-		log.Error("Ошибка создания временной БД", slog.String("error", err.Error()))
-		// Используем errors.Is с fallback на строковую проверку для обратной совместимости
-		errCode := ErrCreateTempDbFailed
-		switch {
-		case errors.Is(err, onec.ErrExtensionAdd):
-			errCode = ErrExtensionAddFailed
-		case errors.Is(err, onec.ErrContextCancelled):
-			errCode = ErrContextCancelled
-		case errors.Is(err, onec.ErrInfobaseCreate):
-			errCode = ErrCreateTempDbFailed
-		// Fallback на строковую проверку для обратной совместимости
-		case strings.Contains(err.Error(), "расширения") || strings.Contains(err.Error(), "extension"):
-			errCode = ErrExtensionAddFailed
-		}
-		return h.writeError(format, traceID, start, errCode, err.Error())
+		ec.log.Error("Ошибка создания временной БД", slog.String("error", err.Error()))
+		return h.writeError(ec.format, ec.traceID, ec.start, classifyCreateError(err), err.Error())
 	}
 
-	// 10. Создание TTL metadata (если указан)
-	if ttlHours > 0 {
-		if err := h.writeTTLMetadata(dbPath, ttlHours, result.CreatedAt); err != nil {
-			log.Warn("Не удалось записать TTL metadata", slog.String("error", err.Error()))
-			// Не прерываем выполнение — БД создана, TTL необязателен
+	if ec.ttlHours > 0 {
+		if ttlErr := h.writeTTLMetadata(ec.dbPath, ec.ttlHours, result.CreatedAt); ttlErr != nil {
+			ec.log.Warn("Не удалось записать TTL metadata", slog.String("error", ttlErr.Error()))
 		}
 	}
 
-	duration := time.Since(start)
-	log.Info("Временная база данных создана",
-		slog.String("path", result.DbPath),
-		slog.Duration("duration", duration))
+	duration := time.Since(ec.start)
+	ec.log.Info("Временная база данных создана", slog.String("path", result.DbPath), slog.Duration("duration", duration))
 
-	// 11. Формирование данных ответа
 	data := &CreateTempDbData{
-		ConnectString: result.ConnectString,
-		DbPath:        result.DbPath,
-		Extensions:    result.Extensions,
-		TTLHours:      ttlHours,
-		CreatedAt:     result.CreatedAt.Format(time.RFC3339),
-		DurationMs:    duration.Milliseconds(),
+		ConnectString: result.ConnectString, DbPath: result.DbPath,
+		Extensions: result.Extensions, TTLHours: ec.ttlHours,
+		CreatedAt: result.CreatedAt.Format(time.RFC3339), DurationMs: duration.Milliseconds(),
 	}
 
-	// Текстовый формат
-	if format != output.FormatJSON {
+	if ec.format != output.FormatJSON {
 		return data.writeText(os.Stdout)
 	}
 
-	// JSON формат
 	resultOutput := &output.Result{
-		Status:  output.StatusSuccess,
-		Command: constants.ActNRCreateTempDb,
-		Data:    data,
-		Plan:    h.verbosePlan, // Story 7.3 AC-7: verbose JSON включает план
-		Metadata: &output.Metadata{
-			DurationMs: duration.Milliseconds(),
-			TraceID:    traceID,
-			APIVersion: constants.APIVersion,
-		},
+		Status: output.StatusSuccess, Command: constants.ActNRCreateTempDb,
+		Data: data, Plan: h.verbosePlan,
+		Metadata: &output.Metadata{DurationMs: duration.Milliseconds(), TraceID: ec.traceID, APIVersion: constants.APIVersion},
 	}
-
-	writer := output.NewWriter(format)
+	writer := output.NewWriter(ec.format)
 	return writer.Write(os.Stdout, resultOutput)
 }
 

@@ -190,24 +190,78 @@ func (h *Git2StoreHandler) Description() string {
 // Операции clone, update DB и commit могут занимать значительное время.
 const defaultGit2StoreTimeout = 2 * time.Hour
 
-// Execute выполняет команду nr-git2store (AC-1, AC-2).
-func (h *Git2StoreHandler) Execute(ctx context.Context, cfg *config.Config) error {
-	start := time.Now()
-
-	// Устанавливаем timeout для всей операции
+// getTimeout parses BR_GIT2STORE_TIMEOUT or returns default.
+func (h *Git2StoreHandler) getGit2StoreTimeout() time.Duration {
 	timeout := defaultGit2StoreTimeout
 	if envTimeout := os.Getenv("BR_GIT2STORE_TIMEOUT"); envTimeout != "" {
 		if parsed, err := time.ParseDuration(envTimeout); err == nil {
 			timeout = parsed
 		} else {
-			// Используем slog.Default() так как локальный log ещё не инициализирован
 			slog.Default().Warn("Невалидный формат BR_GIT2STORE_TIMEOUT, используется значение по умолчанию",
 				slog.String("value", envTimeout),
 				slog.String("default", defaultGit2StoreTimeout.String()),
 				slog.String("error", err.Error()))
 		}
 	}
-	ctx, cancel := context.WithTimeout(ctx, timeout)
+	return timeout
+}
+
+// handlePreviewModes handles dry-run, plan-only, and verbose modes.
+// Returns true if a preview mode was handled (caller should return).
+func (h *Git2StoreHandler) handlePreviewModes(cfg *config.Config, format, traceID string, start time.Time, log *slog.Logger) (bool, error) {
+	if dryrun.IsDryRun() {
+		return true, h.executeDryRun(cfg, format, traceID, start, log)
+	}
+	if dryrun.IsPlanOnly() {
+		log.Info("Plan-only режим: отображение плана операций")
+		plan := h.buildPlan(cfg)
+		return true, output.WritePlanOnlyResult(os.Stdout, format, constants.ActNRGit2store, traceID, constants.APIVersion, start, plan)
+	}
+	if dryrun.IsVerbose() {
+		log.Info("Verbose режим: отображение плана перед выполнением")
+		plan := h.buildPlan(cfg)
+		if format != output.FormatJSON {
+			if err := plan.WritePlanText(os.Stdout); err != nil {
+				log.Warn("Не удалось вывести план операций", slog.String("error", err.Error()))
+			}
+			fmt.Fprintln(os.Stdout)
+		}
+		h.verbosePlan = plan
+	}
+	return false, nil
+}
+
+// executeConversionStages runs the conversion pipeline stages (loading_config through committing).
+func (h *Git2StoreHandler) executeConversionStages(ctx context.Context, cfg *config.Config, log *slog.Logger, data *Git2StoreData, gitOp GitOperator, ccOp ConvertConfigOperator, format, traceID string, start time.Time) error {
+	type stageFunc func() error
+	stages := []stageFunc{
+		func() error { return h.executeStageLoadingConfig(ctx, cfg, log, data, ccOp) },
+		func() error { return h.executeStageCheckoutXml(ctx, cfg, log, data, gitOp) },
+		func() error { return h.executeStageInitDb(ctx, cfg, log, data, ccOp) },
+		func() error { return h.executeStageUnbinding(ctx, cfg, log, data, ccOp) },
+		func() error { return h.executeStageLoadingDb(ctx, cfg, log, data, ccOp) },
+		func() error { return h.executeStageUpdatingDb(ctx, cfg, log, data, ccOp, StageUpdatingDb1) },
+		func() error { return h.executeStageDumpingDb(ctx, cfg, log, data, ccOp) },
+		func() error { return h.executeStageBinding(ctx, cfg, log, data, ccOp) },
+		func() error { return h.executeStageUpdatingDb(ctx, cfg, log, data, ccOp, StageUpdatingDb2) },
+		func() error { return h.executeStageLocking(ctx, cfg, log, data, ccOp) },
+		func() error { return h.executeStageMerging(ctx, cfg, log, data, ccOp) },
+		func() error { return h.executeStageUpdatingDb(ctx, cfg, log, data, ccOp, StageUpdatingDb3) },
+		func() error { return h.executeStageCommitting(ctx, cfg, log, data, ccOp) },
+	}
+	for _, fn := range stages {
+		if err := fn(); err != nil {
+			return h.writeStageError(format, traceID, start, data, err)
+		}
+	}
+	return nil
+}
+
+// Execute выполняет команду nr-git2store (AC-1, AC-2).
+func (h *Git2StoreHandler) Execute(ctx context.Context, cfg *config.Config) error {
+	start := time.Now()
+
+	ctx, cancel := context.WithTimeout(ctx, h.getGit2StoreTimeout())
 	defer cancel()
 
 	traceID := tracing.TraceIDFromContext(ctx)
@@ -226,40 +280,16 @@ func (h *Git2StoreHandler) Execute(ctx context.Context, cfg *config.Config) erro
 		Errors:          make([]string, 0),
 	}
 
-	// === РЕЖИМЫ ПРЕДПРОСМОТРА (порядок приоритетов!) ===
-
-	// 1. Dry-run: план без выполнения (высший приоритет)
-	if dryrun.IsDryRun() {
-		return h.executeDryRun(cfg, format, traceID, start, log)
+	// === РЕЖИМЫ ПРЕДПРОСМОТРА ===
+	if handled, err := h.handlePreviewModes(cfg, format, traceID, start, log); handled {
+		return err
 	}
-
-	// 2. Plan-only: показать план, не выполнять (Story 7.3 AC-1)
-	if dryrun.IsPlanOnly() {
-		log.Info("Plan-only режим: отображение плана операций")
-		plan := h.buildPlan(cfg)
-		return output.WritePlanOnlyResult(os.Stdout, format, constants.ActNRGit2store, traceID, constants.APIVersion, start, plan)
-	}
-
-	// 3. Verbose: показать план, ПОТОМ выполнить (Story 7.3 AC-4)
-	if dryrun.IsVerbose() {
-		log.Info("Verbose режим: отображение плана перед выполнением")
-		plan := h.buildPlan(cfg)
-		if format != output.FormatJSON {
-			if err := plan.WritePlanText(os.Stdout); err != nil {
-				log.Warn("Не удалось вывести план операций", slog.String("error", err.Error()))
-			}
-			fmt.Fprintln(os.Stdout)
-		}
-		h.verbosePlan = plan
-	}
-	// Verbose fall-through by design: план отображён, продолжаем реальное выполнение
 
 	// Stage: validating (AC-2)
 	if err := h.executeStageValidating(cfg, log, data); err != nil {
 		return h.writeStageError(format, traceID, start, data, err)
 	}
 
-	// Генерируем storeRoot
 	storeRoot := constants.StoreRoot + cfg.Owner + "/" + cfg.Repo
 
 	// Stage: creating_backup (AC-8, MANDATORY!)
@@ -274,13 +304,11 @@ func (h *Git2StoreHandler) Execute(ctx context.Context, cfg *config.Config) erro
 	if err != nil {
 		return h.writeStageError(format, traceID, start, data, err)
 	}
-	// Очистка временной директории репозитория после завершения (успех или ошибка)
 	defer func() {
 		if cfg.RepPath != "" {
 			if removeErr := os.RemoveAll(cfg.RepPath); removeErr != nil {
 				log.Warn("Не удалось удалить временную директорию репозитория",
-					slog.String("path", cfg.RepPath),
-					slog.String("error", removeErr.Error()))
+					slog.String("path", cfg.RepPath), slog.String("error", removeErr.Error()))
 			} else {
 				log.Debug("Временная директория репозитория удалена", slog.String("path", cfg.RepPath))
 			}
@@ -292,23 +320,20 @@ func (h *Git2StoreHandler) Execute(ctx context.Context, cfg *config.Config) erro
 		return h.writeStageError(format, traceID, start, data, err)
 	}
 
-	// Stage: creating_temp_db (optional, если StoreDb == LocalBase)
+	// Stage: creating_temp_db (optional)
 	ccOp := h.createConvertConfig()
-	var tempDbPath string // H-1: Путь для cleanup временной БД
-	// H-1 fix: Проверка cfg.ProjectConfig на nil перед доступом к StoreDb
+	var tempDbPath string
 	if cfg.ProjectConfig != nil && cfg.ProjectConfig.StoreDb == constants.LocalBase {
 		var tempErr error
 		tempDbPath, tempErr = h.executeStageCreatingTempDb(ctx, cfg, log, data, ccOp)
 		if tempErr != nil {
 			return h.writeStageError(format, traceID, start, data, tempErr)
 		}
-		// H-1: Cleanup временной БД после завершения (успех или ошибка)
 		defer func() {
 			if tempDbPath != "" {
 				if removeErr := os.RemoveAll(tempDbPath); removeErr != nil {
 					log.Warn("Не удалось удалить временную БД",
-						slog.String("path", tempDbPath),
-						slog.String("error", removeErr.Error()))
+						slog.String("path", tempDbPath), slog.String("error", removeErr.Error()))
 				} else {
 					log.Debug("Временная БД удалена", slog.String("path", tempDbPath))
 				}
@@ -316,76 +341,15 @@ func (h *Git2StoreHandler) Execute(ctx context.Context, cfg *config.Config) erro
 		}()
 	}
 
-	// Stage: loading_config (AC-2)
-	if err := h.executeStageLoadingConfig(ctx, cfg, log, data, ccOp); err != nil {
-		return h.writeStageError(format, traceID, start, data, err)
-	}
-
-	// Stage: checkout_xml (AC-2)
-	if err := h.executeStageCheckoutXml(ctx, cfg, log, data, gitOp); err != nil {
-		return h.writeStageError(format, traceID, start, data, err)
-	}
-
-	// Stage: init_db (AC-2)
-	if err := h.executeStageInitDb(ctx, cfg, log, data, ccOp); err != nil {
-		return h.writeStageError(format, traceID, start, data, err)
-	}
-
-	// Stage: unbinding (AC-2)
-	if err := h.executeStageUnbinding(ctx, cfg, log, data, ccOp); err != nil {
-		return h.writeStageError(format, traceID, start, data, err)
-	}
-
-	// Stage: loading_db (AC-2)
-	if err := h.executeStageLoadingDb(ctx, cfg, log, data, ccOp); err != nil {
-		return h.writeStageError(format, traceID, start, data, err)
-	}
-
-	// Stage: updating_db_1 (AC-2)
-	if err := h.executeStageUpdatingDb(ctx, cfg, log, data, ccOp, StageUpdatingDb1); err != nil {
-		return h.writeStageError(format, traceID, start, data, err)
-	}
-
-	// Stage: dumping_db (AC-2)
-	if err := h.executeStageDumpingDb(ctx, cfg, log, data, ccOp); err != nil {
-		return h.writeStageError(format, traceID, start, data, err)
-	}
-
-	// Stage: binding (AC-2)
-	if err := h.executeStageBinding(ctx, cfg, log, data, ccOp); err != nil {
-		return h.writeStageError(format, traceID, start, data, err)
-	}
-
-	// Stage: updating_db_2 (AC-2)
-	if err := h.executeStageUpdatingDb(ctx, cfg, log, data, ccOp, StageUpdatingDb2); err != nil {
-		return h.writeStageError(format, traceID, start, data, err)
-	}
-
-	// Stage: locking (AC-2)
-	if err := h.executeStageLocking(ctx, cfg, log, data, ccOp); err != nil {
-		return h.writeStageError(format, traceID, start, data, err)
-	}
-
-	// Stage: merging (AC-2)
-	if err := h.executeStageMerging(ctx, cfg, log, data, ccOp); err != nil {
-		return h.writeStageError(format, traceID, start, data, err)
-	}
-
-	// Stage: updating_db_3 (AC-2, AC-13 для расширений)
-	if err := h.executeStageUpdatingDb(ctx, cfg, log, data, ccOp, StageUpdatingDb3); err != nil {
-		return h.writeStageError(format, traceID, start, data, err)
-	}
-
-	// Stage: committing (AC-2)
-	if err := h.executeStageCommitting(ctx, cfg, log, data, ccOp); err != nil {
-		return h.writeStageError(format, traceID, start, data, err)
+	// Stages: loading_config through committing
+	if err := h.executeConversionStages(ctx, cfg, log, data, gitOp, ccOp, format, traceID, start); err != nil {
+		return err
 	}
 
 	// Формирование результата (AC-4, AC-12)
 	data.DurationMs = time.Since(start).Milliseconds()
-	data.StateChanged = true           // AC-12: успешная синхронизация всегда меняет состояние
-	data.StageCurrent = "completed"    // M-2: Устанавливаем финальный статус
-	// data.Errors уже инициализирован как пустой срез в начале Execute (AC-4)
+	data.StateChanged = true
+	data.StageCurrent = "completed"
 
 	log.Info("Синхронизация Git → хранилище 1C успешно завершена",
 		slog.String("backup_path", data.BackupPath),

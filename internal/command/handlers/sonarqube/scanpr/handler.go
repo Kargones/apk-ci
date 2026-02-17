@@ -175,250 +175,202 @@ func (h *ScanPRHandler) Description() string {
 	return "Сканирование pull request на качество кода через SonarQube"
 }
 
-// Execute выполняет команду nr-sq-scan-pr.
-func (h *ScanPRHandler) Execute(ctx context.Context, cfg *config.Config) error {
-	start := time.Now()
+// prExecContext holds shared state for a single PR scan invocation.
+type prExecContext struct {
+	start   time.Time
+	traceID string
+	format  string
+	log     *slog.Logger
+}
 
-	traceID := tracing.TraceIDFromContext(ctx)
-	if traceID == "" {
-		traceID = tracing.GenerateTraceID()
+// validatePRConfig validates configuration and PR parameters.
+func (h *ScanPRHandler) validatePRConfig(cfg *config.Config) (*prExecContext, error) {
+	ec := &prExecContext{start: time.Now()}
+	ec.traceID = tracing.TraceIDFromContext(context.Background())
+	if ec.traceID == "" {
+		ec.traceID = tracing.GenerateTraceID()
 	}
+	ec.format = os.Getenv("BR_OUTPUT_FORMAT")
 
-	format := os.Getenv("BR_OUTPUT_FORMAT")
-
-	// Story 7.3 AC-8: plan-only для команд без поддержки плана
-	// Review #36: !IsDryRun() — dry-run имеет приоритет над plan-only (AC-11).
 	if !dryrun.IsDryRun() && dryrun.IsPlanOnly() {
-		return dryrun.WritePlanOnlyUnsupported(os.Stdout, constants.ActNRSQScanPR)
+		return nil, dryrun.WritePlanOnlyUnsupported(os.Stdout, constants.ActNRSQScanPR)
 	}
 
-	log := slog.Default().With(slog.String("trace_id", traceID), slog.String("command", constants.ActNRSQScanPR))
+	ec.log = slog.Default().With(slog.String("trace_id", ec.traceID), slog.String("command", constants.ActNRSQScanPR))
 
-	// Валидация конфигурации (AC: #2)
 	if cfg == nil {
-		log.Error("Конфигурация не загружена")
-		return h.writeError(format, traceID, start,
-			errConfigMissing,
-			"Конфигурация не загружена")
+		ec.log.Error("Конфигурация не загружена")
+		return nil, h.writeError(ec.format, ec.traceID, ec.start, errConfigMissing, "Конфигурация не загружена")
 	}
 
-	// Получение и валидация номера PR (AC: #2)
-	prNumber := cfg.PRNumber
-	if prNumber == 0 {
-		log.Error("Не указан номер PR")
-		return h.writeError(format, traceID, start,
-			errPRMissing,
-			"Не указан номер PR (BR_PR_NUMBER)")
+	if cfg.PRNumber == 0 {
+		ec.log.Error("Не указан номер PR")
+		return nil, h.writeError(ec.format, ec.traceID, ec.start, errPRMissing, "Не указан номер PR (BR_PR_NUMBER)")
 	}
-	if prNumber < 0 {
-		log.Error("Некорректный номер PR", slog.Int64("pr_number", prNumber))
-		return h.writeError(format, traceID, start,
-			errPRInvalid,
-			fmt.Sprintf("Некорректный номер PR: %d (должен быть положительным)", prNumber))
+	if cfg.PRNumber < 0 {
+		ec.log.Error("Некорректный номер PR", slog.Int64("pr_number", cfg.PRNumber))
+		return nil, h.writeError(ec.format, ec.traceID, ec.start, errPRInvalid,
+			fmt.Sprintf("Некорректный номер PR: %d (должен быть положительным)", cfg.PRNumber))
 	}
 
-	log = log.With(slog.Int64("pr_number", prNumber))
-	log.Info("Запуск сканирования PR")
+	ec.log = ec.log.With(slog.Int64("pr_number", cfg.PRNumber))
 
-	// Получение owner и repo из конфигурации
-	owner := cfg.Owner
-	repo := cfg.Repo
-	if owner == "" || repo == "" {
-		log.Error("Не указаны owner или repo")
-		return h.writeError(format, traceID, start,
-			errConfigMissing,
-			"Не указаны владелец (BR_OWNER) или репозиторий (BR_REPO)")
+	if cfg.Owner == "" || cfg.Repo == "" {
+		ec.log.Error("Не указаны owner или repo")
+		return nil, h.writeError(ec.format, ec.traceID, ec.start, errConfigMissing, "Не указаны владелец (BR_OWNER) или репозиторий (BR_REPO)")
 	}
 
-	// Получение Gitea клиента
-	giteaClient := h.giteaClient
-	if giteaClient == nil {
-		var clientErr error
-		giteaClient, clientErr = errhandler.CreateGiteaClient(cfg)
-		if clientErr != nil {
-			log.Error("Не удалось создать Gitea клиент", slog.String("error", clientErr.Error()))
-			return h.writeError(format, traceID, start,
-				errConfigMissing,
-				"Не удалось создать Gitea клиент: "+clientErr.Error())
-		}
-	}
+	return ec, nil
+}
 
-	// Получение SonarQube клиента
-	sqClient := h.sonarqubeClient
-	if sqClient == nil {
-		var clientErr error
-		sqClient, clientErr = errhandler.CreateSonarQubeClient(cfg)
-		if clientErr != nil {
-			log.Error("Не удалось создать SonarQube клиент", slog.String("error", clientErr.Error()))
-			return h.writeError(format, traceID, start,
-				errConfigMissing,
-				"Не удалось создать SonarQube клиент: "+clientErr.Error())
-		}
-	}
-
-	// Получение информации о PR из Gitea (AC: #3)
-	pr, err := giteaClient.GetPR(ctx, prNumber)
-	if err != nil {
-		log.Error("Не удалось получить информацию о PR", slog.String("error", err.Error()))
-		// Определяем тип ошибки: not found или API error
-		if strings.Contains(err.Error(), "not found") || strings.Contains(err.Error(), "404") {
-			return h.writeError(format, traceID, start,
-				errPRNotFound,
-				fmt.Sprintf("PR #%d не найден в репозитории", prNumber))
-		}
-		return h.writeError(format, traceID, start,
-			errGiteaAPI,
-			fmt.Sprintf("Не удалось получить информацию о PR: %v", err))
-	}
-
-	// Проверка состояния PR (AC: #3)
-	if pr.State != "open" {
-		log.Error("PR не в состоянии open", slog.String("state", pr.State))
-		return h.writeError(format, traceID, start,
-			errPRNotOpen,
-			fmt.Sprintf("PR #%d имеет статус '%s', требуется 'open'", prNumber, pr.State))
-	}
-
-	// Извлечение параметров из PR (AC: #4)
-	headBranch := pr.Head.Name
-	baseBranch := pr.Base.Name
-	commitSHA := pr.Head.Commit.ID
-	prTitle := pr.Title
-
-	log = log.With(
-		slog.String("head_branch", headBranch),
-		slog.String("base_branch", baseBranch),
-		slog.String("commit_sha", commitSHA),
-	)
-
-	// Формирование ключа проекта SonarQube (AC: #4)
-	projectKey := fmt.Sprintf("%s_%s_%s", owner, repo, headBranch)
-	log = log.With(slog.String("project_key", projectKey))
-
-	// Базовая структура результата
-	data := &ScanPRData{
-		PRNumber:   prNumber,
-		PRTitle:    prTitle,
-		HeadBranch: headBranch,
-		BaseBranch: baseBranch,
-		ProjectKey: projectKey,
-		CommitSHA:  commitSHA,
-	}
-
-	// Проверка изменений в конфигурации (AC: #5)
-	hasChanges, err := shared.HasRelevantChangesInCommit(ctx, giteaClient, headBranch, commitSHA)
-	if err != nil {
-		log.Warn("Ошибка проверки изменений в коммите", slog.String("error", err.Error()))
-		// Продолжаем с этим коммитом, т.к. ошибка API не означает отсутствие изменений
-		hasChanges = true
-	}
-
-	if !hasChanges {
-		log.Info("Нет изменений в каталогах конфигурации")
-		data.NoRelevantChanges = true
-		return h.writeSuccess(format, traceID, start, data)
-	}
-
-	// Получение уже отсканированных анализов (AC: #5)
-	analyses, err := sqClient.GetAnalyses(ctx, projectKey)
-	if err != nil {
-		log.Warn("Не удалось получить список анализов", slog.String("error", err.Error()))
-		// Продолжаем, считаем что ни один коммит не был отсканирован
-		analyses = nil
-	}
-
-	// Проверка, был ли коммит уже отсканирован
-	for _, a := range analyses {
-		if a.Revision == commitSHA {
-			log.Info("Коммит уже отсканирован")
-			data.AlreadyScanned = true
-			return h.writeSuccess(format, traceID, start, data)
-		}
-	}
-
-	// Получение или создание проекта в SonarQube (AC: #5)
-	_, err = sqClient.GetProject(ctx, projectKey)
-	if err != nil {
-		log.Info("Проект не найден в SonarQube, создаём",
-			slog.String("get_error", err.Error()))
-		projectName := fmt.Sprintf("%s/%s (%s)", owner, repo, headBranch)
-		_, err = sqClient.CreateProject(ctx, sonarqube.CreateProjectOptions{
-			Key:        projectKey,
-			Name:       projectName,
-			Visibility: "private",
-		})
+// getPRClients returns Gitea and SonarQube clients.
+func (h *ScanPRHandler) getPRClients(ec *prExecContext, cfg *config.Config) (gitea.Client, sonarqube.Client, error) {
+	gc := h.giteaClient
+	if gc == nil {
+		var err error
+		gc, err = errhandler.CreateGiteaClient(cfg)
 		if err != nil {
-			log.Error("Не удалось создать проект в SonarQube", slog.String("error", err.Error()))
-			return h.writeError(format, traceID, start,
-				errSonarQubeAPI,
+			ec.log.Error("Не удалось создать Gitea клиент", slog.String("error", err.Error()))
+			return nil, nil, h.writeError(ec.format, ec.traceID, ec.start, errConfigMissing, "Не удалось создать Gitea клиент: "+err.Error())
+		}
+	}
+	sc := h.sonarqubeClient
+	if sc == nil {
+		var err error
+		sc, err = errhandler.CreateSonarQubeClient(cfg)
+		if err != nil {
+			ec.log.Error("Не удалось создать SonarQube клиент", slog.String("error", err.Error()))
+			return nil, nil, h.writeError(ec.format, ec.traceID, ec.start, errConfigMissing, "Не удалось создать SonarQube клиент: "+err.Error())
+		}
+	}
+	return gc, sc, nil
+}
+
+// ensurePRProject creates the SonarQube project if it does not exist.
+func (h *ScanPRHandler) ensurePRProject(ctx context.Context, ec *prExecContext, sqClient sonarqube.Client, projectKey, owner, repo, branch string) error {
+	_, err := sqClient.GetProject(ctx, projectKey)
+	if err != nil {
+		ec.log.Info("Проект не найден в SonarQube, создаём", slog.String("get_error", err.Error()))
+		projectName := fmt.Sprintf("%s/%s (%s)", owner, repo, branch)
+		_, err = sqClient.CreateProject(ctx, sonarqube.CreateProjectOptions{Key: projectKey, Name: projectName, Visibility: "private"})
+		if err != nil {
+			ec.log.Error("Не удалось создать проект в SonarQube", slog.String("error", err.Error()))
+			return h.writeError(ec.format, ec.traceID, ec.start, errSonarQubeAPI,
 				fmt.Sprintf("Не удалось создать проект в SonarQube: %v", err))
 		}
 	}
+	return nil
+}
 
-	// Запуск сканирования (AC: #5)
-	log.Info("Сканирование коммита", slog.String("commit", commitSHA))
-
-	shortSHA := commitSHA
-	if len(commitSHA) > 7 {
-		shortSHA = commitSHA[:7]
+// runPRScan runs the analysis and waits for completion, populating data with results.
+func (h *ScanPRHandler) runPRScan(ctx context.Context, ec *prExecContext, sqClient sonarqube.Client, data *ScanPRData) {
+	ec.log.Info("Сканирование коммита", slog.String("commit", data.CommitSHA))
+	shortSHA := data.CommitSHA
+	if len(data.CommitSHA) > 7 {
+		shortSHA = data.CommitSHA[:7]
 	}
 	result, err := sqClient.RunAnalysis(ctx, sonarqube.RunAnalysisOptions{
-		ProjectKey: projectKey,
-		Branch:     headBranch,
-		Properties: map[string]string{
-			"sonar.projectVersion": shortSHA,
-			"sonar.scm.revision":   commitSHA,
-		},
+		ProjectKey: data.ProjectKey, Branch: data.HeadBranch,
+		Properties: map[string]string{"sonar.projectVersion": shortSHA, "sonar.scm.revision": data.CommitSHA},
 	})
 	if err != nil {
-		log.Error("Не удалось запустить анализ", slog.String("error", err.Error()))
-		data.Scanned = true
-		data.CommitsScanned = 1
-		data.ScanResult = &ScanResult{
-			Status:       "FAILED",
-			ErrorMessage: err.Error(),
-		}
-		return h.writeSuccess(format, traceID, start, data)
+		ec.log.Error("Не удалось запустить анализ", slog.String("error", err.Error()))
+		data.Scanned, data.CommitsScanned = true, 1
+		data.ScanResult = &ScanResult{Status: "FAILED", ErrorMessage: err.Error()}
+		return
 	}
 
-	// Ожидание завершения анализа (AC: #5)
-	status, err := shared.WaitForAnalysisCompletion(ctx, sqClient, result.TaskID, log)
+	status, err := shared.WaitForAnalysisCompletion(ctx, sqClient, result.TaskID, ec.log)
 	if err != nil {
-		log.Error("Ошибка ожидания завершения анализа", slog.String("error", err.Error()))
-		data.Scanned = true
-		data.CommitsScanned = 1
-		data.ScanResult = &ScanResult{
-			AnalysisID:   result.AnalysisID,
-			Status:       "FAILED",
-			ErrorMessage: err.Error(),
-		}
-		return h.writeSuccess(format, traceID, start, data)
+		ec.log.Error("Ошибка ожидания завершения анализа", slog.String("error", err.Error()))
+		data.Scanned, data.CommitsScanned = true, 1
+		data.ScanResult = &ScanResult{AnalysisID: result.AnalysisID, Status: "FAILED", ErrorMessage: err.Error()}
+		return
 	}
 
-	// Формирование результата сканирования
-	data.Scanned = true
-	data.CommitsScanned = 1
-	data.ScanResult = &ScanResult{
-		AnalysisID:   status.AnalysisID,
-		Status:       status.Status,
-		ErrorMessage: status.ErrorMessage,
-	}
+	data.Scanned, data.CommitsScanned = true, 1
+	data.ScanResult = &ScanResult{AnalysisID: status.AnalysisID, Status: status.Status, ErrorMessage: status.ErrorMessage}
 
-	// Получение quality gate status если анализ успешен (AC: #6)
 	if status.Status == "SUCCESS" {
-		qgStatus, qgErr := sqClient.GetQualityGateStatus(ctx, projectKey)
+		qgStatus, qgErr := sqClient.GetQualityGateStatus(ctx, data.ProjectKey)
 		if qgErr != nil {
-			log.Warn("Не удалось получить статус Quality Gate", slog.String("error", qgErr.Error()))
+			ec.log.Warn("Не удалось получить статус Quality Gate", slog.String("error", qgErr.Error()))
 		} else if qgStatus != nil {
 			data.ScanResult.QualityGateStatus = qgStatus.Status
 		}
 	}
+}
 
-	log.Info("Сканирование PR завершено",
-		slog.String("status", status.Status),
-		slog.String("analysis_id", status.AnalysisID))
+// Execute выполняет команду nr-sq-scan-pr.
+func (h *ScanPRHandler) Execute(ctx context.Context, cfg *config.Config) error {
+	ec, err := h.validatePRConfig(cfg)
+	if err != nil {
+		return err
+	}
+	ec.log.Info("Запуск сканирования PR")
 
-	return h.writeSuccess(format, traceID, start, data)
+	giteaClient, sqClient, err := h.getPRClients(ec, cfg)
+	if err != nil {
+		return err
+	}
+
+	// Получение информации о PR из Gitea (AC: #3)
+	pr, err := giteaClient.GetPR(ctx, cfg.PRNumber)
+	if err != nil {
+		ec.log.Error("Не удалось получить информацию о PR", slog.String("error", err.Error()))
+		if strings.Contains(err.Error(), "not found") || strings.Contains(err.Error(), "404") {
+			return h.writeError(ec.format, ec.traceID, ec.start, errPRNotFound,
+				fmt.Sprintf("PR #%d не найден в репозитории", cfg.PRNumber))
+		}
+		return h.writeError(ec.format, ec.traceID, ec.start, errGiteaAPI,
+			fmt.Sprintf("Не удалось получить информацию о PR: %v", err))
+	}
+
+	if pr.State != "open" {
+		ec.log.Error("PR не в состоянии open", slog.String("state", pr.State))
+		return h.writeError(ec.format, ec.traceID, ec.start, errPRNotOpen,
+			fmt.Sprintf("PR #%d имеет статус '%s', требуется 'open'", cfg.PRNumber, pr.State))
+	}
+
+	projectKey := fmt.Sprintf("%s_%s_%s", cfg.Owner, cfg.Repo, pr.Head.Name)
+	ec.log = ec.log.With(slog.String("project_key", projectKey))
+
+	data := &ScanPRData{
+		PRNumber: cfg.PRNumber, PRTitle: pr.Title, HeadBranch: pr.Head.Name,
+		BaseBranch: pr.Base.Name, ProjectKey: projectKey, CommitSHA: pr.Head.Commit.ID,
+	}
+
+	// Проверка изменений в конфигурации (AC: #5)
+	hasChanges, chErr := shared.HasRelevantChangesInCommit(ctx, giteaClient, data.HeadBranch, data.CommitSHA)
+	if chErr != nil {
+		ec.log.Warn("Ошибка проверки изменений в коммите", slog.String("error", chErr.Error()))
+		hasChanges = true
+	}
+	if !hasChanges {
+		data.NoRelevantChanges = true
+		return h.writeSuccess(ec.format, ec.traceID, ec.start, data)
+	}
+
+	// Проверка, был ли коммит уже отсканирован
+	analyses, _ := sqClient.GetAnalyses(ctx, projectKey)
+	for _, a := range analyses {
+		if a.Revision == data.CommitSHA {
+			data.AlreadyScanned = true
+			return h.writeSuccess(ec.format, ec.traceID, ec.start, data)
+		}
+	}
+
+	if err := h.ensurePRProject(ctx, ec, sqClient, projectKey, cfg.Owner, cfg.Repo, data.HeadBranch); err != nil {
+		return err
+	}
+
+	h.runPRScan(ctx, ec, sqClient, data)
+
+	ec.log.Info("Сканирование PR завершено",
+		slog.String("status", data.ScanResult.Status),
+		slog.String("analysis_id", data.ScanResult.AnalysisID))
+
+	return h.writeSuccess(ec.format, ec.traceID, ec.start, data)
 }
 
 // writeSuccess выводит успешный результат.
