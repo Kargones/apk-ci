@@ -172,8 +172,8 @@ func (h *DbRestoreHandler) Execute(ctx context.Context, cfg *config.Config) erro
 		log.Info("Verbose режим: отображение плана перед выполнением")
 		plan := h.buildPlan(cfg, srcDB, srcServer, dstServer)
 		if format != output.FormatJSON {
-			if err := plan.WritePlanText(os.Stdout); err != nil {
-				log.Warn("Не удалось вывести план операций", slog.String("error", err.Error()))
+			if writeErr := plan.WritePlanText(os.Stdout); writeErr != nil {
+				log.Warn("Не удалось вывести план операций", slog.String("error", writeErr.Error()))
 			}
 			fmt.Fprintln(os.Stdout)
 		}

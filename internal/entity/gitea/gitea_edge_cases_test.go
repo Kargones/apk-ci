@@ -1,6 +1,7 @@
 package gitea
 
 import (
+	"context"
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
@@ -63,7 +64,7 @@ func TestSendReqEdgeCases(t *testing.T) {
 				AccessToken: "testtoken",
 			}
 
-			statusCode, body, err := api.sendReq(server.URL+"/test", tt.reqBody, tt.method)
+			statusCode, body, err := api.sendReq(context.Background(), server.URL+"/test", tt.reqBody, tt.method)
 
 			if tt.expectError {
 				if err == nil {

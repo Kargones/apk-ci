@@ -198,7 +198,7 @@ func (c *Convert) Convert(ctx context.Context, l *slog.Logger, cfg *config.Confi
 	}
 	g.RepPath = repSourcePath
 	g.Branch = c.Distination.Branch
-	if err := g.Switch(ctx, l); err != nil {
+	if switchErr := g.Switch(ctx, l); switchErr != nil {
 		l.Error("Ошибка переключения на целевую ветку",
 			slog.String("Описание ошибки", err.Error()),
 			slog.String("Ветка", c.Distination.Branch),
@@ -212,9 +212,9 @@ func (c *Convert) Convert(ctx context.Context, l *slog.Logger, cfg *config.Confi
 			slog.String("error", err.Error()),
 		)
 	}
-	if err := g.Config(ctx, l); err != nil {
+	if cfgErr := g.Config(ctx, l); cfgErr != nil {
 		l.Warn("Failed to configure git",
-			slog.String("error", err.Error()),
+			slog.String("error", cfgErr.Error()),
 		)
 	}
 

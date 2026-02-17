@@ -213,8 +213,8 @@ func (e *EmailAlerter) sendEmail(ctx context.Context, subject, body string) erro
 				ServerName: e.config.SMTPHost,
 				MinVersion: tls.VersionTLS12,
 			}
-			if err := client.StartTLS(tlsConfig); err != nil {
-				return fmt.Errorf("STARTTLS failed: %w", err)
+			if tlsErr := client.StartTLS(tlsConfig); tlsErr != nil {
+				return fmt.Errorf("STARTTLS failed: %w", tlsErr)
 			}
 		}
 	}
@@ -222,7 +222,7 @@ func (e *EmailAlerter) sendEmail(ctx context.Context, subject, body string) erro
 	// Авторизация если указаны credentials
 	if e.config.SMTPUser != "" && e.config.SMTPPassword != "" {
 		auth := smtp.PlainAuth("", e.config.SMTPUser, e.config.SMTPPassword, e.config.SMTPHost)
-		if err := client.Auth(auth); err != nil {
+		if authErr := client.Auth(auth); authErr != nil {
 			// M1 fix: Не включаем оригинальную ошибку — она может содержать credentials
 			return ErrSMTPAuth
 		}
@@ -236,8 +236,8 @@ func (e *EmailAlerter) sendEmail(ctx context.Context, subject, body string) erro
 	}
 
 	// Отправка
-	if err := client.Mail(e.config.From); err != nil {
-		return fmt.Errorf("MAIL FROM failed: %w", err)
+	if mailErr := client.Mail(e.config.From); mailErr != nil {
+		return fmt.Errorf("MAIL FROM failed: %w", mailErr)
 	}
 
 	for _, to := range e.config.To {
@@ -248,8 +248,8 @@ func (e *EmailAlerter) sendEmail(ctx context.Context, subject, body string) erro
 		default:
 		}
 
-		if err := client.Rcpt(to); err != nil {
-			return fmt.Errorf("RCPT TO failed for %s: %w", to, err)
+		if rcptErr := client.Rcpt(to); rcptErr != nil {
+			return fmt.Errorf("RCPT TO failed for %s: %w", to, rcptErr)
 		}
 	}
 
