@@ -1,6 +1,7 @@
 package gitea
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -28,7 +29,7 @@ func (g *API) SearchOrgRepos(orgName string) ([]Repository, error) {
 		urlString := fmt.Sprintf("%s/api/%s/orgs/%s/repos?page=%d&limit=%d",
 			g.GiteaURL, constants.APIVersion, orgName, page, SearchOrgReposPageLimit)
 
-		statusCode, body, err := g.sendReq(urlString, "", "GET")
+		statusCode, body, err := g.sendReq(context.Background(), urlString, "", "GET")
 		if err != nil {
 			return nil, fmt.Errorf("ошибка при запросе репозиториев организации %s: %w", orgName, err)
 		}
@@ -75,7 +76,7 @@ func (g *API) GetUserOrganizations() ([]Organization, error) {
 		urlString := fmt.Sprintf("%s/api/%s/user/orgs?page=%d&limit=%d",
 			g.GiteaURL, constants.APIVersion, page, GetUserOrgsPageLimit)
 
-		statusCode, body, err := g.sendReq(urlString, "", "GET")
+		statusCode, body, err := g.sendReq(context.Background(), urlString, "", "GET")
 		if err != nil {
 			return nil, fmt.Errorf("ошибка при запросе организаций пользователя: %w", err)
 		}
