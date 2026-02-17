@@ -1,6 +1,6 @@
 # Справочник API
 
-Этот раздел содержит подробную документацию по всем API интерфейсам и компонентам benadis-runner.
+Этот раздел содержит подробную документацию по всем API интерфейсам и компонентам apk-ci.
 
 ## Структура API
 
@@ -58,7 +58,7 @@
 
 ### Инициализация конфигурации
 ```go
-import "github.com/your-org/benadis-runner/internal/config"
+import "github.com/your-org/apk-ci/internal/config"
 
 cfg, err := config.MustLoad()
 if err != nil {
@@ -68,7 +68,7 @@ if err != nil {
 
 ### Выполнение операций с базой данных
 ```go
-import "github.com/your-org/benadis-runner/internal/app"
+import "github.com/your-org/apk-ci/internal/app"
 
 err := app.ExecuteDbRestore(ctx, logger, cfg, "MyDatabase")
 if err != nil {

@@ -282,7 +282,7 @@ if err := g.Switch(*ctx, l); err != nil {
 **Связанные (для понимания контекста):**
 - `internal/app/app.go` - функция `Git2Store` (строки 420-534)
 - `internal/entity/one/convert/convert.go` - пути к конфигурации (строки 102, 302)
-- `cmd/benadis-runner/yaml_integration_test.go` - тест (строки 10-96)
+- `cmd/apk-ci/yaml_integration_test.go` - тест (строки 10-96)
 
 ---
 
@@ -295,7 +295,7 @@ if err := g.Switch(*ctx, l); err != nil {
 rm -rf /tmp/4del/*
 
 # 2. Запустить тест
-go test -v -timeout 10m ./cmd/benadis-runner -run TestMain_WithRealYamlFile
+go test -v -timeout 10m ./cmd/apk-ci -run TestMain_WithRealYamlFile
 
 # 3. Проверить, что ветка xml создана от origin/xml
 cd /tmp/4del/s*/
@@ -313,7 +313,7 @@ ls -la src/
 
 ### 9.1. Несоответствие в main-test.yaml
 
-В файле `/root/r/benadis-runner/main-test.yaml`:
+В файле `/root/r/apk-ci/main-test.yaml`:
 - Строка 11: `INPUT_COMMAND: "git2store"`
 - Строка 48: `BR_COMMAND: "convert"`
 

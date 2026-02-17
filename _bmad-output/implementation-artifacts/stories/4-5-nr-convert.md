@@ -95,7 +95,7 @@ So that могу работать с разными инструментами �
 
 ### Существующая Legacy-реализация
 
-**Точка входа** (`cmd/benadis-runner/main.go:74-75`):
+**Точка входа** (`cmd/apk-ci/main.go:74-75`):
 ```go
 case constants.ActConvert:
     err = app.Convert(&ctx, l, cfg)
@@ -379,7 +379,7 @@ internal/entity/one/edt/
 | Файл | Изменение |
 |------|-----------|
 | `internal/constants/constants.go` | Добавить `ActNRConvert` |
-| `cmd/benadis-runner/main.go` | Добавить blank import converthandler |
+| `cmd/apk-ci/main.go` | Добавить blank import converthandler |
 
 ### Файлы НЕ ТРОГАТЬ
 
@@ -568,8 +568,8 @@ Claude Opus 4.5 (claude-opus-4-5-20251101)
 
 **Изменены:**
 - internal/constants/constants.go (добавлен ActNRConvert)
-- cmd/benadis-runner/main.go (добавлен blank import converthandler)
-- cmd/benadis-runner/main_test.go (убран convert из списка legacy)
+- cmd/apk-ci/main.go (добавлен blank import converthandler)
+- cmd/apk-ci/main_test.go (убран convert из списка legacy)
 
 ## Change Log
 

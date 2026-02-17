@@ -1,4 +1,4 @@
-# benadis-runner - Product Requirements Document
+# apk-ci - Product Requirements Document
 
 **Author:** XoR
 **Date:** 2025-11-25
@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-benadis-runner v2.0 — это трансформация существующего CLI-инструмента автоматизации для 1C:Enterprise из механического объединения утилит в расширяемую платформу с plug-in архитектурой.
+apk-ci v2.0 — это трансформация существующего CLI-инструмента автоматизации для 1C:Enterprise из механического объединения утилит в расширяемую платформу с plug-in архитектурой.
 
 **Проблема**: Текущая версия нарушает принципы SOLID, что приводит к высоким затратам на добавление нового функционала. Одинаковые операции выполняются по-разному в разных частях кода.
 
@@ -164,17 +164,17 @@ benadis-runner v2.0 — это трансформация существующе
 
 **Текущая структура** (сохраняется для обратной совместимости):
 ```
-BR_COMMAND=<command-name> ./benadis-runner
+BR_COMMAND=<command-name> ./apk-ci
 ```
 
 **Новая структура** (NR-версии во время миграции):
 ```
-BR_COMMAND=nr-<command-name> ./benadis-runner
+BR_COMMAND=nr-<command-name> ./apk-ci
 ```
 
 **Финальная структура** (после удаления deprecated):
 ```
-BR_COMMAND=<command-name> ./benadis-runner
+BR_COMMAND=<command-name> ./apk-ci
 ```
 
 ### Форматы вывода
@@ -200,8 +200,8 @@ BR_COMMAND=<command-name> ./benadis-runner
 
 **Приоритет источников** (от высшего к низшему):
 1. Переменные окружения (`BR_*`, `DBRESTORE_*`, etc.)
-2. Локальный файл конфигурации (`~/.benadis-runner/config.yaml`)
-3. Проектный файл (`./benadis-runner.yaml`)
+2. Локальный файл конфигурации (`~/.apk-ci/config.yaml`)
+3. Проектный файл (`./apk-ci.yaml`)
 4. Удалённые файлы из Gitea API
 5. Значения по умолчанию
 
@@ -214,7 +214,7 @@ implementations:
 
 # Observability
 logging:
-  file: "/var/log/benadis-runner/app.log"
+  file: "/var/log/apk-ci/app.log"
   format: "json"
   rotation:
     max_size_mb: 100
@@ -480,4 +480,4 @@ alerting:
 
 ---
 
-_This PRD captures the essence of benadis-runner — трансформация из набора утилит в расширяемую платформу для 1C DevOps с современным observability стеком и возможностью быстрого добавления нового функционала._
+_This PRD captures the essence of apk-ci — трансформация из набора утилит в расширяемую платформу для 1C DevOps с современным observability стеком и возможностью быстрого добавления нового функционала._

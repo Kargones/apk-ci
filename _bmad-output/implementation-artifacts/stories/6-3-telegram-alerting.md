@@ -231,7 +231,7 @@ func (t *TelegramAlerter) Send(ctx context.Context, alert Alert) error {
 ### Telegram Message Template (Markdown)
 
 ```go
-const telegramMessageTemplate = `🚨 *benadis-runner Alert*
+const telegramMessageTemplate = `🚨 *apk-ci Alert*
 
 *Error:* \`{{.ErrorCode}}\`
 *Severity:* {{.SeverityStr}}
@@ -500,7 +500,7 @@ Claude Opus 4.5 (claude-opus-4-5-20251101)
 - All 52 unit tests pass in alerting package (49 original + 3 from review)
 - All 50+ packages pass `go test ./...`
 - `go vet ./...` — no issues found
-- Application builds successfully with `go build ./cmd/benadis-runner/`
+- Application builds successfully with `go build ./cmd/apk-ci/`
 - Coverage: 81.5% of statements
 
 ### Completion Notes List

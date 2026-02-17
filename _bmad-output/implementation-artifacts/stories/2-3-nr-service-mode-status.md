@@ -43,7 +43,7 @@ So that я знаю можно ли работать с базой и вижу �
   - [x] 4.1 Создать `ServiceModeStatusData` с полями: `Enabled bool`, `Message string`, `ScheduledJobsBlocked bool`, `ActiveSessions int`, `InfobaseName string`
   - [x] 4.2 Реализовать `writeText(w io.Writer) error` для человекочитаемого формата
 - [x] Task 5: Зарегистрировать blank import в main.go (AC: 4)
-  - [x] 5.1 Добавить `_ "github.com/Kargones/apk-ci/internal/command/handlers/servicemodestatushandler"` в `cmd/benadis-runner/main.go`
+  - [x] 5.1 Добавить `_ "github.com/Kargones/apk-ci/internal/command/handlers/servicemodestatushandler"` в `cmd/apk-ci/main.go`
 - [x] Task 6: Написать unit-тесты (AC: 8)
   - [x] 6.1 `TestServiceModeStatusHandler_Name` — проверка имени
   - [x] 6.2 `TestServiceModeStatusHandler_Description` — не пустое
@@ -258,7 +258,7 @@ type ServiceModeStatusHandler struct {
 - Новый файл: `handler.go` — handler struct + init() + Execute
 - Новый файл: `handler_test.go` — unit-тесты
 - Изменение: `internal/constants/constants.go` — добавить `ActNRServiceModeStatus`
-- Изменение: `cmd/benadis-runner/main.go` — добавить blank import
+- Изменение: `cmd/apk-ci/main.go` — добавить blank import
 - Следует паттерну: один handler = один пакет в `handlers/`
 
 ### References
@@ -306,7 +306,7 @@ Claude Opus 4.5 (claude-opus-4-5-20251101)
 - Task 2: Создан пакет `internal/command/handlers/servicemodestatushandler/` с `ServiceModeStatusHandler` struct, реализующим `command.Handler` interface. Регистрация через `command.RegisterWithAlias` с deprecated alias `service-mode-status`
 - Task 3: Реализован метод `Execute` — получает traceID, валидирует config, создаёт RAC клиент, получает cluster/infobase/status, формирует text или JSON ответ. Ошибки выводятся структурированно через `output.Result` с `ErrorInfo`
 - Task 4: Создана `ServiceModeStatusData` struct с JSON тегами и `writeText` методом для человекочитаемого вывода
-- Task 5: Добавлен blank import в `cmd/benadis-runner/main.go` для self-registration через `init()`
+- Task 5: Добавлен blank import в `cmd/apk-ci/main.go` для self-registration через `init()`
 - Task 6: Написано 10 unit-тестов покрывающих: Name, Description, Registration, DeprecatedAlias, TextOutput, JSONOutput, NoInfobase, NilConfig, RACError, DisabledMode. Используется `ractest.MockRACClient` для тестирования без реального RAC. Handler поддерживает DI через опциональное поле `racClient rac.Client`
 
 ### File List
@@ -314,4 +314,4 @@ Claude Opus 4.5 (claude-opus-4-5-20251101)
 - `internal/constants/constants.go` — изменён (добавлена константа `ActNRServiceModeStatus`)
 - `internal/command/handlers/servicemodestatushandler/handler.go` — новый (handler, data struct, Execute, writeText, writeError, createRACClient, slog-логирование с trace_id)
 - `internal/command/handlers/servicemodestatushandler/handler_test.go` — новый (11 тестов: Name, Description, Registration, DeprecatedAlias, TextOutput, JSONOutput, NoInfobase, NilConfig, RACError, RACStepErrors/InfobaseError, RACStepErrors/StatusError, DisabledMode)
-- `cmd/benadis-runner/main.go` — изменён (добавлен blank import servicemodestatushandler, удалён мёртвый legacy case service-mode-status)
+- `cmd/apk-ci/main.go` — изменён (добавлен blank import servicemodestatushandler, удалён мёртвый legacy case service-mode-status)

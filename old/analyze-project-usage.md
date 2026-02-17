@@ -28,7 +28,7 @@ export BR_REPO_URL="https://gitea.example.com/myorg/myproject"
 export BR_ACCESS_TOKEN="your_access_token_here"
 
 # Запуск команды
-./benadis-runner
+./apk-ci
 ```
 
 ## Пример структуры проекта

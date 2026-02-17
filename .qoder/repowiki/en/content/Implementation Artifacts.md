@@ -4,7 +4,7 @@
 **Referenced Files in This Document**
 - [README.md](file://README.md)
 - [go.mod](file://go.mod)
-- [main.go](file://cmd/benadis-runner/main.go)
+- [main.go](file://cmd/apk-ci/main.go)
 - [constants.go](file://internal/constants/constants.go)
 - [tech-spec-epic-1.md](file://_bmad-output/implementation-artifacts/sprint-artifacts/tech-spec-epic-1.md)
 - [arch-epic-0-extension-publish.md](file://_bmad-output/implementation-artifacts/sprint-artifacts/arch-epic-0-extension-publish.md)
@@ -27,7 +27,7 @@
 9. [Conclusion](#conclusion)
 
 ## Introduction
-This document presents the implementation artifacts produced during the development of benadis-runner v2.0, focusing on the architectural transformation toward a modular, DI-driven platform with structured output and observability foundations. It synthesizes technical specifications, architectural decisions, and concrete implementation files to provide both technical depth and accessibility for stakeholders across roles.
+This document presents the implementation artifacts produced during the development of apk-ci v2.0, focusing on the architectural transformation toward a modular, DI-driven platform with structured output and observability foundations. It synthesizes technical specifications, architectural decisions, and concrete implementation files to provide both technical depth and accessibility for stakeholders across roles.
 
 ## Project Structure
 The repository organizes implementation artifacts across three primary areas:
@@ -48,7 +48,7 @@ ArchDocs["Architecture Docs"]
 Stories["Stories & Acceptance Criteria"]
 end
 subgraph "Codebase Integration"
-Main["cmd/benadis-runner/main.go"]
+Main["cmd/apk-ci/main.go"]
 Constants["internal/constants/constants.go"]
 App["internal/app/*"]
 Entity["internal/entity/gitea/*"]
@@ -64,7 +64,7 @@ Constants --> Main
 ```
 
 **Diagram sources**
-- [main.go](file://cmd/benadis-runner/main.go#L1-L262)
+- [main.go](file://cmd/apk-ci/main.go#L1-L262)
 - [constants.go](file://internal/constants/constants.go#L1-L223)
 - [tech-spec-epic-1.md](file://_bmad-output/implementation-artifacts/sprint-artifacts/tech-spec-epic-1.md#L1-L867)
 - [arch-epic-0-extension-publish.md](file://_bmad-output/implementation-artifacts/sprint-artifacts/arch-epic-0-extension-publish.md#L1-L895)
@@ -107,7 +107,7 @@ The system follows a layered architecture with clear separation of concerns:
 
 ```mermaid
 graph TB
-Main["cmd/benadis-runner/main.go"]
+Main["cmd/apk-ci/main.go"]
 Consts["internal/constants/constants.go"]
 App["internal/app/*"]
 GiteaAPI["internal/entity/gitea/gitea.go"]
@@ -122,7 +122,7 @@ Wire --> App
 ```
 
 **Diagram sources**
-- [main.go](file://cmd/benadis-runner/main.go#L1-L262)
+- [main.go](file://cmd/apk-ci/main.go#L1-L262)
 - [constants.go](file://internal/constants/constants.go#L1-L223)
 - [extension_publish.go](file://internal/app/extension_publish.go#L1-L1253)
 - [gitea.go](file://internal/entity/gitea/gitea.go#L1-L2183)
@@ -183,7 +183,7 @@ The extension-publish command automates distribution of 1C extensions across sub
 ```mermaid
 sequenceDiagram
 participant GA as Gitea Actions
-participant Main as benadis-runner (main.go)
+participant Main as apk-ci (main.go)
 participant Svc as ExtensionPublish Service
 participant API as Gitea API (entity)
 participant Server as Gitea Server
@@ -274,11 +274,11 @@ FormatOutput --> Exit(["Exit with code"])
 ```
 
 **Diagram sources**
-- [main.go](file://cmd/benadis-runner/main.go#L16-L261)
+- [main.go](file://cmd/apk-ci/main.go#L16-L261)
 - [constants.go](file://internal/constants/constants.go#L48-L102)
 
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L16-L261)
+- [main.go](file://cmd/apk-ci/main.go#L16-L261)
 - [constants.go](file://internal/constants/constants.go#L48-L102)
 
 ## Dependency Analysis
@@ -297,7 +297,7 @@ App["internal/app/extension_publish.go"]
 Gitea["internal/entity/gitea/gitea.go"]
 Config["internal/config/*"]
 Constants["internal/constants/constants.go"]
-Main["cmd/benadis-runner/main.go"]
+Main["cmd/apk-ci/main.go"]
 Main --> Constants
 Main --> App
 App --> Gitea
@@ -308,7 +308,7 @@ App --> Config
 - [go.mod](file://go.mod#L5-L26)
 - [extension_publish.go](file://internal/app/extension_publish.go#L1-L1253)
 - [gitea.go](file://internal/entity/gitea/gitea.go#L1-L2183)
-- [main.go](file://cmd/benadis-runner/main.go#L1-L262)
+- [main.go](file://cmd/apk-ci/main.go#L1-L262)
 
 **Section sources**
 - [go.mod](file://go.mod#L1-L27)

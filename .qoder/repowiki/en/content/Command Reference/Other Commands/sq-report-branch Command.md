@@ -6,7 +6,7 @@
 - [reporting.go](file://internal/service/sonarqube/reporting.go)
 - [service.go](file://internal/service/sonarqube/service.go)
 - [interfaces.go](file://internal/entity/sonarqube/interfaces.go)
-- [main.go](file://cmd/benadis-runner/main.go)
+- [main.go](file://cmd/apk-ci/main.go)
 - [app.go](file://internal/app/app.go)
 - [sonarqube_init.go](file://internal/app/sonarqube_init.go)
 - [constants.go](file://internal/constants/constants.go)
@@ -29,7 +29,7 @@
 
 ## Introduction
 
-The `sq-report-branch` command (ActSQReportBranch) is a critical component of the benadis-runner ecosystem designed to generate comprehensive quality reports for SonarQube-scanned branches. This command serves as a bridge between SonarQube's analysis capabilities and the development workflow, providing developers and quality assurance teams with actionable insights into code quality metrics, issues, and potential problems introduced in specific branch commits.
+The `sq-report-branch` command (ActSQReportBranch) is a critical component of the apk-ci ecosystem designed to generate comprehensive quality reports for SonarQube-scanned branches. This command serves as a bridge between SonarQube's analysis capabilities and the development workflow, providing developers and quality assurance teams with actionable insights into code quality metrics, issues, and potential problems introduced in specific branch commits.
 
 The command operates by retrieving analysis data from SonarQube's REST API, processing it according to predefined criteria, and formatting the results into human-readable reports that can be integrated into pull request validation workflows and quality gate enforcement systems.
 

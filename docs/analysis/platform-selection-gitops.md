@@ -1,4 +1,4 @@
-# Анализ выбора платформы оркестрации для benadis-runner
+# Анализ выбора платформы оркестрации для apk-ci
 
 **Дата анализа:** 2025-12-25
 **Версия:** 1.0
@@ -44,7 +44,7 @@
 
 ## 2. Профиль проекта
 
-### 2.1 Характеристики benadis-runner
+### 2.1 Характеристики apk-ci
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -139,7 +139,7 @@ RUN apt-get install -y git ca-certificates
 
 ## 4. Анализ Kubernetes
 
-### 4.1 Архитектура для benadis-runner на K8s
+### 4.1 Архитектура для apk-ci на K8s
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
@@ -206,17 +206,17 @@ RUN apt-get install -y git ca-certificates
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: benadis-runner
+  name: apk-ci
   namespace: gitea-runners
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: benadis-runner
+      app: apk-ci
   template:
     metadata:
       labels:
-        app: benadis-runner
+        app: apk-ci
     spec:
       containers:
       - name: act-runner
@@ -285,7 +285,7 @@ data:
 
 ## 5. Анализ Docker Swarm
 
-### 5.1 Архитектура для benadis-runner на Docker Swarm
+### 5.1 Архитектура для apk-ci на Docker Swarm
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
@@ -565,12 +565,12 @@ docker service update --image gitea/act_runner:0.2.11 benadis_gitea-runner
 
 ## 8. Обоснование выбора
 
-### 8.1 Почему Docker Swarm оптимален для benadis-runner
+### 8.1 Почему Docker Swarm оптимален для apk-ci
 
 #### Фактор 1: Специфика рабочей нагрузки
 
 ```
-benadis-runner — это CI/CD batch runner, а не микросервисное приложение.
+apk-ci — это CI/CD batch runner, а не микросервисное приложение.
 
 Характеристики:
 • Задачи выполняются по событию (commit, PR)
@@ -704,11 +704,11 @@ Kubernetes стоит выбрать, если:
 ### 9.2 Примерный Dockerfile
 
 ```dockerfile
-# Dockerfile.benadis-runner
+# Dockerfile.apk-ci
 FROM ubuntu:22.04
 
 LABEL maintainer="GitOps Team"
-LABEL description="benadis-runner для Gitea Actions"
+LABEL description="apk-ci для Gitea Actions"
 
 # Базовые зависимости
 RUN apt-get update && apt-get install -y \
@@ -737,17 +737,17 @@ RUN curl -L https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sona
     && rm /tmp/scanner.zip
 ENV PATH="/opt/sonar-scanner/bin:${PATH}"
 
-# benadis-runner
-COPY --from=builder /app/benadis-runner /usr/local/bin/benadis-runner
-RUN chmod +x /usr/local/bin/benadis-runner
+# apk-ci
+COPY --from=builder /app/apk-ci /usr/local/bin/apk-ci
+RUN chmod +x /usr/local/bin/apk-ci
 
 # Рабочая директория
 WORKDIR /tmp/benadis
 VOLUME ["/tmp/benadis"]
 
 # Точка входа для Gitea Act Runner
-# Act Runner будет запускать benadis-runner через exec
-ENTRYPOINT ["/usr/local/bin/benadis-runner"]
+# Act Runner будет запускать apk-ci через exec
+ENTRYPOINT ["/usr/local/bin/apk-ci"]
 ```
 
 ### 9.3 Мониторинг и наблюдаемость
@@ -798,7 +798,7 @@ volumes:
 
 ### Итоговая рекомендация
 
-Для проекта **benadis-runner** рекомендуется использовать **Docker Swarm** как платформу оркестрации по следующим причинам:
+Для проекта **apk-ci** рекомендуется использовать **Docker Swarm** как платформу оркестрации по следующим причинам:
 
 1. ✅ **Соответствие профилю нагрузки** — batch CI/CD jobs, не микросервисы
 2. ✅ **Простота интеграции с LAN** — прямой доступ к RAC, MSSQL, 1C серверам

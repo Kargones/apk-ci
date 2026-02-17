@@ -2,7 +2,7 @@
 
 <cite>
 **Referenced Files in This Document**
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go)
 - [internal/app/app.go](file://internal/app/app.go)
 - [internal/entity/one/convert/convert.go](file://internal/entity/one/convert/convert.go)
 - [internal/entity/one/designer/designer.go](file://internal/entity/one/designer/designer.go)
@@ -28,7 +28,7 @@
 
 ## Introduction
 
-The `dbupdate` command (ActDbupdate) is a critical component of the benadis-runner suite designed specifically for updating database schemas in 1C:Enterprise applications after configuration changes. This command ensures that the database structure remains synchronized with the latest configuration changes, maintaining data integrity and application functionality.
+The `dbupdate` command (ActDbupdate) is a critical component of the apk-ci suite designed specifically for updating database schemas in 1C:Enterprise applications after configuration changes. This command ensures that the database structure remains synchronized with the latest configuration changes, maintaining data integrity and application functionality.
 
 The dbupdate command serves as a bridge between the configuration management system and the database infrastructure, automatically applying schema modifications required by new or updated configurations. It integrates seamlessly with the broader GitOps pipeline, enabling automated deployment workflows that maintain consistency across development, testing, and production environments.
 
@@ -46,10 +46,10 @@ The dbupdate command performs the following primary functions:
 
 ```bash
 # Basic usage
-benadis-runner dbupdate
+apk-ci dbupdate
 
 # With specific configuration
-benadis-runner dbupdate --config config.yaml
+apk-ci dbupdate --config config.yaml
 
 # GitHub Actions integration
 gha:
@@ -61,7 +61,7 @@ gha:
 ```
 
 **Section sources**
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L121-L125)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go#L121-L125)
 - [config/action.yaml](file://config/action.yaml#L1-L50)
 
 ## Architecture and Components
@@ -100,7 +100,7 @@ App --> Config
 ```
 
 **Diagram sources**
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L121-L125)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go#L121-L125)
 - [internal/app/app.go](file://internal/app/app.go#L608-L646)
 - [internal/entity/one/convert/convert.go](file://internal/entity/one/convert/convert.go#L1-L50)
 
@@ -122,7 +122,7 @@ Provides the interface to 1C:Enterprise Designer for executing database update o
 Executes external commands with proper parameter handling and output capture.
 
 **Section sources**
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L121-L125)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go#L121-L125)
 - [internal/app/app.go](file://internal/app/app.go#L608-L678)
 - [internal/entity/one/convert/convert.go](file://internal/entity/one/convert/convert.go#L1-L100)
 
@@ -164,7 +164,7 @@ Main-->>User : Exit code + logs
 ```
 
 **Diagram sources**
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L121-L125)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go#L121-L125)
 - [internal/app/app.go](file://internal/app/app.go#L648-L678)
 - [internal/entity/one/convert/convert.go](file://internal/entity/one/convert/convert.go#L504-L535)
 - [internal/entity/one/designer/designer.go](file://internal/entity/one/designer/designer.go#L212-L280)
@@ -275,7 +275,7 @@ The system performs comprehensive validation of all configuration parameters:
 
 ## Integration with Other Commands
 
-The dbupdate command is designed to integrate seamlessly with other benadis-runner commands in typical deployment pipelines.
+The dbupdate command is designed to integrate seamlessly with other apk-ci commands in typical deployment pipelines.
 
 ```mermaid
 flowchart TD
@@ -298,32 +298,32 @@ end
 ```
 
 **Diagram sources**
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L1-L100)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go#L1-L100)
 
 ### Typical Deployment Pipeline
 
 1. **Configuration Management**
    ```bash
    # Step 1: Sync configuration from Git to store
-   benadis-runner git2store
+   apk-ci git2store
    
    # Step 2: Load configuration into database
-   benadis-runner store2db
+   apk-ci store2db
    ```
 
 2. **Database Schema Update**
    ```bash
    # Step 3: Update database schema
-   benadis-runner dbupdate
+   apk-ci dbupdate
    ```
 
 3. **Post-Update Operations**
    ```bash
    # Step 4: Disable service mode
-   benadis-runner service-mode-disable
+   apk-ci service-mode-disable
    
    # Step 5: Perform quality checks
-   benadis-runner sq-scan-branch
+   apk-ci sq-scan-branch
    ```
 
 ### Command Dependencies
@@ -335,7 +335,7 @@ The dbupdate command has specific dependencies on other commands:
 - **Alternative paths**: dbrestore can be used for emergency rollbacks
 
 **Section sources**
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L1-L100)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go#L1-L100)
 
 ## Error Handling and Recovery
 
@@ -564,7 +564,7 @@ SELECT * FROM INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE;
 **Diagnosis:**
 ```bash
 # Monitor system resources
-top -p $(pgrep benadis-runner)
+top -p $(pgrep apk-ci)
 
 # Check database locks
 SELECT * FROM sys.dm_tran_locks;
@@ -587,7 +587,7 @@ SET SHOWPLAN_ALL ON;
 export LOG_LEVEL=debug
 
 # Filter relevant log entries
-grep -i "dbupdate\|update\|schema" /var/log/benadis-runner.log
+grep -i "dbupdate\|update\|schema" /var/log/apk-ci.log
 ```
 
 #### 2. Database Monitoring
@@ -620,25 +620,25 @@ traceroute 1c-server
 #### 1. Emergency Rollback
 ```bash
 # Stop current operations
-kill $(pgrep benadis-runner)
+kill $(pgrep apk-ci)
 
 # Restore from backup
-benadis-runner dbrestore --dbname $BR_INFOBASE_NAME
+apk-ci dbrestore --dbname $BR_INFOBASE_NAME
 
 # Restart with minimal configuration
-benadis-runner dbupdate --minimal-config
+apk-ci dbupdate --minimal-config
 ```
 
 #### 2. Incremental Recovery
 ```bash
 # Identify failed operation
-grep -A 5 -B 5 "ERROR" /var/log/benadis-runner.log
+grep -A 5 -B 5 "ERROR" /var/log/apk-ci.log
 
 # Apply partial updates
-benadis-runner dbupdate --skip-failed
+apk-ci dbupdate --skip-failed
 
 # Resume normal operations
-benadis-runner service-mode-disable
+apk-ci service-mode-disable
 ```
 
 **Section sources**
@@ -728,17 +728,17 @@ jobs:
 ```bash
 #!/bin/bash
 # Automated health check script
-benadis-runner dbupdate --health-check
+apk-ci dbupdate --health-check
 if [ $? -ne 0 ]; then
     echo "Health check failed, initiating rollback"
-    benadis-runner dbrestore --latest-backup
+    apk-ci dbrestore --latest-backup
 fi
 ```
 
 #### 3. Notification Systems
 ```bash
 # Email notification on update completion
-benadis-runner dbupdate
+apk-ci dbupdate
 if [ $? -eq 0 ]; then
     echo "Update completed successfully" | mail -s "DB Update Success" team@example.com
 else

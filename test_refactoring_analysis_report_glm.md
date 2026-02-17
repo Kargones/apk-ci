@@ -3,7 +3,7 @@
 ## Обзор текущих тестов
 
 - Основные директории с тестами:
-  - `cmd/benadis-runner/main_test.go` — интеграционные и smoke-тесты точки входа.
+  - `cmd/apk-ci/main_test.go` — интеграционные и smoke-тесты точки входа.
   - `internal/app/app_test.go` — тесты инициализации и интеграции приложения.
   - `internal/config/config_test.go` — большой набор unit-тестов конфигов и парсеров YAML/ENV.
   - `internal/service/sonarqube/service_test.go`, `internal/service/sonarqube/scanner_test.go` — сервисный слой и обертка сканера.
@@ -108,7 +108,7 @@
 
 ## 1. Введение
 
-В рамках данного анализа была проведена оценка структуры тестовых файлов проекта benadis-runner с целью выявления дублирования кода и определения возможностей для улучшения покрытия модулей.
+В рамках данного анализа была проведена оценка структуры тестовых файлов проекта apk-ci с целью выявления дублирования кода и определения возможностей для улучшения покрытия модулей.
 
 ## 2. Обзор структуры тестовых файлов
 
@@ -118,7 +118,7 @@
 - `internal/app/` - тесты приложения (app_test.go - 1155 строк)
 - `internal/config/` - тесты конфигурации (config_test.go - 1603 строки)
 - `internal/git/` - тесты работы с Git (git_test.go - 1118 строк)
-- `cmd/benadis-runner/` - тесты основной команды (main_test.go - 1117 строк)
+- `cmd/apk-ci/` - тесты основной команды (main_test.go - 1117 строк)
 - `internal/entity/gitea/` - тесты Gitea API (gitea_test.go - 775 строк)
 - `internal/servicemode/` - тесты сервисного режима (servicemode_test.go - 936 строк)
 - `internal/rac/` - тесты RAC клиента (rac_test.go - 1260 строк)

@@ -3,7 +3,7 @@
 <cite>
 **Referenced Files in This Document**
 - [README.md](file://README.md)
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go)
 - [internal/config/config.go](file://internal/config/config.go)
 - [internal/app/sonarqube_init.go](file://internal/app/sonarqube_init.go)
 - [internal/servicemode/servicemode.go](file://internal/servicemode/servicemode.go)
@@ -33,9 +33,9 @@
 
 ## Introduction
 
-This troubleshooting guide provides comprehensive solutions for common issues encountered when using benadis-runner. The guide organizes problems by functional categories and provides systematic approaches to problem isolation, diagnosis, and resolution. Each section includes specific fixes documented in reports like `git_index_lock_fix_report.md` and `analysis_report.md`.
+This troubleshooting guide provides comprehensive solutions for common issues encountered when using apk-ci. The guide organizes problems by functional categories and provides systematic approaches to problem isolation, diagnosis, and resolution. Each section includes specific fixes documented in reports like `git_index_lock_fix_report.md` and `analysis_report.md`.
 
-Benadis-runner is a complex system with multiple integrated modules including service mode management, database restoration, 1C platform integration, and SonarQube scanning. Understanding the architecture helps in identifying root causes and implementing effective solutions.
+apk-ci is a complex system with multiple integrated modules including service mode management, database restoration, 1C platform integration, and SonarQube scanning. Understanding the architecture helps in identifying root causes and implementing effective solutions.
 
 ## Common Issues Categories
 
@@ -242,7 +242,7 @@ G --> G3["File Permissions"]
 **Diagnosis Steps:**
 1. Check service mode status:
    ```bash
-   ./benadis-runner service-mode-status --infobase MyInfobase
+   ./apk-ci service-mode-status --infobase MyInfobase
    ```
 
 2. Monitor session activity:
@@ -347,7 +347,7 @@ G --> G3["File Permissions"]
 **Diagnosis Steps:**
 1. Review analysis logs:
    ```bash
-   tail -f /var/log/benadis-runner.log | grep -i error
+   tail -f /var/log/apk-ci.log | grep -i error
    ```
 
 2. Check problematic files:
@@ -421,7 +421,7 @@ G --> G3["File Permissions"]
 
 3. Review recent Git operations:
    ```bash
-   tail -f /var/log/benadis-runner.log | grep -i git
+   tail -f /var/log/apk-ci.log | grep -i git
    ```
 
 **Solution:**
@@ -463,7 +463,7 @@ G --> G3["File Permissions"]
 3. Review branch creation logs:
    ```bash
    # Check Gitea API responses
-   grep -i "CreateTestBranch" /var/log/benadis-runner.log
+   grep -i "CreateTestBranch" /var/log/apk-ci.log
    ```
 
 **Solution:**
@@ -520,7 +520,7 @@ G --> G3["File Permissions"]
 **Diagnosis Steps:**
 1. Monitor system resources:
    ```bash
-   top -p $(pgrep benadis-runner)
+   top -p $(pgrep apk-ci)
    free -h
    ```
 
@@ -532,7 +532,7 @@ G --> G3["File Permissions"]
 3. Review process limits:
    ```bash
    ulimit -a
-   cat /proc/$(pgrep benadis-runner)/limits
+   cat /proc/$(pgrep apk-ci)/limits
    ```
 
 **Solution:**
@@ -583,22 +583,22 @@ G --> G3["File Permissions"]
 1. **Structured Logging:**
    ```bash
    # Filter by log level
-   grep '"level":"ERROR"' /var/log/benadis-runner.log
+   grep '"level":"ERROR"' /var/log/apk-ci.log
    
    # Search by operation
-   grep '"operation":"service-mode-enable"' /var/log/benadis-runner.log
+   grep '"operation":"service-mode-enable"' /var/log/apk-ci.log
    ```
 
 2. **Correlation ID Tracking:**
    ```bash
    # Find all logs for specific operation
-   grep '"correlation_id":"OPERATION_ID"' /var/log/benadis-runner.log
+   grep '"correlation_id":"OPERATION_ID"' /var/log/apk-ci.log
    ```
 
 3. **Error Pattern Recognition:**
    ```bash
    # Common error patterns
-   grep -E "(timeout|connection|authentication)" /var/log/benadis-runner.log
+   grep -E "(timeout|connection|authentication)" /var/log/apk-ci.log
    ```
 
 **Section sources**
@@ -611,10 +611,10 @@ G --> G3["File Permissions"]
 1. **Application Status:**
    ```bash
    # Check if application is running
-   pgrep benadis-runner
+   pgrep apk-ci
    
    # Verify configuration loading
-   ./benadis-runner --help
+   ./apk-ci --help
    ```
 
 2. **External Service Status:**
@@ -641,13 +641,13 @@ export BR_LOG_LEVEL=Debug
 export LOG_LEVEL=Debug
 
 # Run with debug output
-./benadis-runner service-mode-enable --infobase MyInfobase --debug
+./apk-ci service-mode-enable --infobase MyInfobase --debug
 ```
 
 **Verbose Configuration Display:**
 ```bash
 # Enable configuration display
-./benadis-runner --show-config
+./apk-ci --show-config
 ```
 
 ## Systematic Problem Isolation
@@ -826,7 +826,7 @@ export JAVA_OPTS="-Xmx8192m -XX:+UseG1GC"
 **Workaround:** Implement retry logic with exponential backoff and circuit breakers
 
 **Section sources**
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L1-L251)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go#L1-L251)
 - [internal/constants/constants.go](file://internal/constants/constants.go#L1-L218)
 
-This comprehensive troubleshooting guide provides systematic approaches to resolving common issues with benadis-runner. By following the categorized solutions and diagnostic techniques outlined here, teams can quickly identify and resolve problems while maintaining system reliability and performance.
+This comprehensive troubleshooting guide provides systematic approaches to resolving common issues with apk-ci. By following the categorized solutions and diagnostic techniques outlined here, teams can quickly identify and resolve problems while maintaining system reliability and performance.

@@ -2,7 +2,7 @@
 
 **Дата аудита:** 2026-01-27
 **Проверяющие:** Charlie (Senior Dev), Dana (QA Engineer), Claude Opus 4.5
-**Охват:** Все 9 историй Epic 1 (internal/command, internal/pkg/output, internal/pkg/apperrors, internal/pkg/logging, internal/pkg/tracing, internal/config, internal/di, internal/command/handlers/*, cmd/benadis-runner/main.go)
+**Охват:** Все 9 историй Epic 1 (internal/command, internal/pkg/output, internal/pkg/apperrors, internal/pkg/logging, internal/pkg/tracing, internal/config, internal/di, internal/command/handlers/*, cmd/apk-ci/main.go)
 
 ---
 
@@ -112,7 +112,7 @@
 - [ ] Или: `if _, err := fmt.Fprintf(...); err != nil { return err }`
 
 ### H8: Недокументированные и неконсистентные exit codes в main.go
-**Файл:** `cmd/benadis-runner/main.go`
+**Файл:** `cmd/apk-ci/main.go`
 **Описание:** Exit codes: 2 (unknown), 5 (config), 6 (convert), 7 (store2db, git2store), 8 (service-mode, dbrestore) — нет единой системы.
 **Решение:**
 - [ ] Создать константы `ExitCode*` в `internal/constants/constants.go`
@@ -169,7 +169,7 @@
 **Решение:** Добавить skip condition или mock config для standalone тестирования.
 
 ### M10: Пустая команда → "help" без проверки что help зарегистрирован
-**Файл:** `cmd/benadis-runner/main.go:36-39`
+**Файл:** `cmd/apk-ci/main.go:36-39`
 **Описание:** Если blank import для help удалён, код молча fallthrough в legacy switch с непонятной ошибкой.
 **Решение:** Добавить panic/assert если help handler не найден в registry.
 

@@ -2,7 +2,7 @@
 
 <cite>
 **Referenced Files in This Document**
-- [main.go](file://cmd/benadis-runner/main.go)
+- [main.go](file://cmd/apk-ci/main.go)
 - [app.go](file://internal/app/app.go)
 - [constants.go](file://internal/constants/constants.go)
 - [config.yaml](file://_bmad/bmm/config.yaml)
@@ -28,7 +28,7 @@
 9. [Conclusion](#conclusion)
 
 ## Introduction
-This document describes the Workflow Management system used by the benadis-runner project. It explains how workflows are organized, configured, and executed across analysis, planning, solutioning, and implementation phases. The system leverages modular workflow definitions with step-file architectures, centralized configuration, and a command-driven entry point to orchestrate automated processes.
+This document describes the Workflow Management system used by the apk-ci project. It explains how workflows are organized, configured, and executed across analysis, planning, solutioning, and implementation phases. The system leverages modular workflow definitions with step-file architectures, centralized configuration, and a command-driven entry point to orchestrate automated processes.
 
 ## Project Structure
 The Workflow Management system is composed of:
@@ -40,7 +40,7 @@ The Workflow Management system is composed of:
 ```mermaid
 graph TB
 subgraph "CLI Layer"
-MAIN["cmd/benadis-runner/main.go"]
+MAIN["cmd/apk-ci/main.go"]
 end
 subgraph "Application Layer"
 APP["internal/app/app.go"]
@@ -71,7 +71,7 @@ APP --> BRAINSTORM
 ```
 
 **Diagram sources**
-- [main.go](file://cmd/benadis-runner/main.go#L16-L261)
+- [main.go](file://cmd/apk-ci/main.go#L16-L261)
 - [app.go](file://internal/app/app.go#L1-L1307)
 - [constants.go](file://internal/constants/constants.go#L49-L102)
 - [workflow.yaml](file://_bmad/bmm/workflows/workflow-status/init/workflow.yaml#L1-L29)
@@ -84,7 +84,7 @@ APP --> BRAINSTORM
 - [workflow.md](file://_bmad/core/workflows/brainstorming/workflow.md#L1-L59)
 
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L16-L261)
+- [main.go](file://cmd/apk-ci/main.go#L16-L261)
 - [app.go](file://internal/app/app.go#L1-L1307)
 - [constants.go](file://internal/constants/constants.go#L49-L102)
 
@@ -101,7 +101,7 @@ Key responsibilities:
 - Output artifact management and templating
 
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L16-L261)
+- [main.go](file://cmd/apk-ci/main.go#L16-L261)
 - [app.go](file://internal/app/app.go#L1-L1307)
 - [config.yaml](file://_bmad/bmm/config.yaml#L6-L19)
 
@@ -129,7 +129,7 @@ CLI-->>User : "Display result"
 ```
 
 **Diagram sources**
-- [main.go](file://cmd/benadis-runner/main.go#L30-L260)
+- [main.go](file://cmd/apk-ci/main.go#L30-L260)
 - [app.go](file://internal/app/app.go#L68-L131)
 - [workflow.md](file://_bmad/bmm/workflows/1-analysis/create-product-brief/workflow.md#L50-L59)
 
@@ -276,7 +276,7 @@ The workflow system exhibits clear separation of concerns:
 
 ```mermaid
 graph TB
-CLI["cmd/benadis-runner/main.go"] --> APP["internal/app/app.go"]
+CLI["cmd/apk-ci/main.go"] --> APP["internal/app/app.go"]
 APP --> CONST["internal/constants/constants.go"]
 APP --> CFG["BMM config.yaml"]
 APP --> WS_MASTER["workflow-status/workflow.yaml"]
@@ -290,13 +290,13 @@ APP --> WF_BRAINSTORM["core/brainstorming/workflow.md"]
 ```
 
 **Diagram sources**
-- [main.go](file://cmd/benadis-runner/main.go#L16-L261)
+- [main.go](file://cmd/apk-ci/main.go#L16-L261)
 - [app.go](file://internal/app/app.go#L1-L1307)
 - [constants.go](file://internal/constants/constants.go#L49-L102)
 - [config.yaml](file://_bmad/bmm/config.yaml#L6-L19)
 
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L16-L261)
+- [main.go](file://cmd/apk-ci/main.go#L16-L261)
 - [app.go](file://internal/app/app.go#L1-L1307)
 - [constants.go](file://internal/constants/constants.go#L49-L102)
 
@@ -315,7 +315,7 @@ Common issues and resolutions:
 - Input file selection failures: Validate pattern matches and selective load strategies
 
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L254-L260)
+- [main.go](file://cmd/apk-ci/main.go#L254-L260)
 - [app.go](file://internal/app/app.go#L1-L1307)
 - [constants.go](file://internal/constants/constants.go#L49-L102)
 

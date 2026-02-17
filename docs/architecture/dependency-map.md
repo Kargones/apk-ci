@@ -4,7 +4,7 @@
 
 ## Обзор основных пакетов
 
-- `cmd/benadis-runner/main.go`
+- `cmd/apk-ci/main.go`
   - Точка входа. Выполняет `config.MustLoad()` и диспетчеризует команды через `switch cfg.Command` к функциям `internal/app`.
 
 - `internal/app`
@@ -35,7 +35,7 @@
 
 ## Карта зависимостей (текстовая)
 
-- `cmd/benadis-runner` → `internal/config` (MustLoad), `internal/app` (команды).
+- `cmd/apk-ci` → `internal/config` (MustLoad), `internal/app` (команды).
 - `internal/app` → `internal/config` (данные конфигурации, `CreateGiteaAPI`).
 - `internal/app` → `internal/service/sonarqube` (через `InitSonarQubeServices` конструирует сервисы).
 - `internal/app` → `internal/entity/sonarqube` (внутри `InitSonarQubeServices` вызывает `NewEntity`, `NewSonarScannerEntity`).

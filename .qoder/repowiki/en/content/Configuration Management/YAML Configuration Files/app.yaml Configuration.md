@@ -4,7 +4,7 @@
 **Referenced Files in This Document**
 - [config/app.yaml](file://config/app.yaml)
 - [internal/config/config.go](file://internal/config/config.go)
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go)
 - [internal/constants/constants.go](file://internal/constants/constants.go)
 - [config/action.yaml](file://config/action.yaml)
 </cite>
@@ -29,7 +29,7 @@
 
 ## Introduction
 
-The `app.yaml` configuration file serves as the central configuration hub for the benadis-runner application, defining application-wide settings that control system behavior, timeouts, file paths, and integration parameters. This configuration file is essential for proper application initialization and determines how the runner interacts with various external systems including 1C:Enterprise, Git repositories, SonarQube, and database systems.
+The `app.yaml` configuration file serves as the central configuration hub for the apk-ci application, defining application-wide settings that control system behavior, timeouts, file paths, and integration parameters. This configuration file is essential for proper application initialization and determines how the runner interacts with various external systems including 1C:Enterprise, Git repositories, SonarQube, and database systems.
 
 The configuration follows a hierarchical structure with clear separation of concerns, allowing for environment-specific customization while maintaining consistency across deployments. The file is designed to be human-readable and easily maintainable, with comprehensive documentation embedded directly in the YAML structure.
 
@@ -81,7 +81,7 @@ K --> K2["File Rotation"]
 
 ## Core Application Settings
 
-The core application settings define fundamental operational parameters that control the basic behavior of the benadis-runner:
+The core application settings define fundamental operational parameters that control the basic behavior of the apk-ci:
 
 ### Basic Configuration Parameters
 
@@ -420,8 +420,8 @@ The Git configuration section controls version control operations and repository
 
 ```yaml
 git:
-  userName: "benadis-runner"
-  userEmail: "benadis-runner@benadis.ru"
+  userName: "apk-ci"
+  userEmail: "apk-ci@benadis.ru"
   defaultBranch: "main"
   timeout: "30s"
   credentialHelper: "store"
@@ -445,7 +445,7 @@ The Git configuration supports environment variable overrides:
 // Default Git configuration
 func getDefaultGitConfig() *GitConfig {
     return &GitConfig{
-        UserName:          "benadis-runner",
+        UserName:          "apk-ci",
         UserEmail:         "runner@benadis.ru",
         DefaultBranch:     "main",
         Timeout:           30 * time.Second,
@@ -534,7 +534,7 @@ logging:
   level: "info"
   format: "json"
   output: "stdout"
-  filePath: "/var/log/benadis-runner.log"
+  filePath: "/var/log/apk-ci.log"
   maxSize: 100
   maxBackups: 3
   maxAge: 28
@@ -561,7 +561,7 @@ func getDefaultLoggingConfig() *LoggingConfig {
         Level:      "info",
         Format:     "json",
         Output:     "stdout",
-        FilePath:   "/var/log/benadis-runner.log",
+        FilePath:   "/var/log/apk-ci.log",
         MaxSize:    100,
         MaxBackups: 3,
         MaxAge:     7,
@@ -657,7 +657,7 @@ logging:
   level: "info"
   format: "json"
   output: "file"
-  filePath: "/var/log/benadis-runner-staging.log"
+  filePath: "/var/log/apk-ci-staging.log"
   maxSize: 200
   maxBackups: 5
 ```
@@ -683,7 +683,7 @@ logging:
   level: "warn"
   format: "json"
   output: "file"
-  filePath: "/var/log/benadis-runner-prod.log"
+  filePath: "/var/log/apk-ci-prod.log"
   maxSize: 500
   maxBackups: 10
   maxAge: 90
@@ -725,7 +725,7 @@ Config-->>Main : Complete Config
 ```
 
 **Diagram sources**
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L15-L25)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go#L15-L25)
 - [internal/config/config.go](file://internal/config/config.go#L600-L650)
 
 ### Error Handling and Defaults
@@ -778,7 +778,7 @@ func validateRequiredParams(inputParams *InputParams, l *slog.Logger) error {
 ```
 
 **Section sources**
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L15-L25)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go#L15-L25)
 - [internal/config/config.go](file://internal/config/config.go#L600-L650)
 
 ## Best Practices and Troubleshooting
@@ -835,7 +835,7 @@ Error: failed to open log file: permission denied
 ```bash
 # Create log directory with proper permissions
 mkdir -p /var/log
-chown benadis-runner:benadis-runner /var/log
+chown apk-ci:apk-ci /var/log
 chmod 755 /var/log
 ```
 

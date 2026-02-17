@@ -35,7 +35,7 @@ on:
 ```mermaid
 flowchart TB
     subgraph Runner["Gitea Actions Runner"]
-        subgraph BR["benadis-runner"]
+        subgraph BR["apk-ci"]
             Main["main.go<br/>(Entry Point)"]
             Registry["Command Handler<br/>(Registry)"]
             ExtService["ExtensionPublish<br/>Service"]
@@ -89,7 +89,7 @@ C4Context
 
     Person(dev, "DevOps Engineer", "Создаёт релизы расширений")
 
-    System(br, "benadis-runner", "CLI инструмент автоматизации")
+    System(br, "apk-ci", "CLI инструмент автоматизации")
 
     System_Ext(gitea, "Gitea Server", "Git-репозитории,<br/>Releases, PRs")
     System_Ext(ga, "Gitea Actions", "CI/CD runner")
@@ -106,7 +106,7 @@ C4Context
 
 | Компонент | Пакет | Ответственность |
 |-----------|-------|-----------------|
-| Entry Point | `cmd/benadis-runner/main.go` | Маршрутизация команды |
+| Entry Point | `cmd/apk-ci/main.go` | Маршрутизация команды |
 | ExtensionPublish Service | `internal/app/extension_publish.go` | Оркестрация процесса публикации |
 | ReleaseReader | `internal/entity/gitea/` | Получение информации о релизах |
 | RepoSearcher | `internal/entity/gitea/` | Поиск репозиториев и веток-подписок |
@@ -515,7 +515,7 @@ type APIInterface interface {
 
 | Точка интеграции | Файл | Метод | Использование |
 |------------------|------|-------|---------------|
-| Маршрутизация команд | `cmd/benadis-runner/main.go` | switch | Добавить case `CmdExtensionPublish` |
+| Маршрутизация команд | `cmd/apk-ci/main.go` | switch | Добавить case `CmdExtensionPublish` |
 | Константы | `internal/constants/constants.go` | — | Добавить `ActExtensionPublish` |
 | Config | `internal/config/config.go` | — | Использовать существующую конфигурацию Gitea |
 | Gitea API | `internal/entity/gitea/gitea.go` | Новые методы | Release API, Search API |
@@ -589,7 +589,7 @@ flowchart TB
 | `internal/entity/gitea/interfaces.go` | MODIFY | Расширить интерфейс APIInterface |
 | `internal/app/extension_publish.go` | CREATE | Основная логика команды |
 | `internal/app/extension_publish_test.go` | CREATE | Unit-тесты |
-| `cmd/benadis-runner/main.go` | MODIFY | Добавить case в switch |
+| `cmd/apk-ci/main.go` | MODIFY | Добавить case в switch |
 
 ---
 
@@ -599,7 +599,7 @@ flowchart TB
 sequenceDiagram
     autonumber
     participant GA as Gitea Actions
-    participant Main as benadis-runner<br/>(main)
+    participant Main as apk-ci<br/>(main)
     participant Svc as ExtPublish<br/>Service
     participant API as Gitea API<br/>(entity)
     participant Server as Gitea Server
@@ -884,7 +884,7 @@ func TestExtensionPublishE2E(t *testing.T) {
 ## 11. Связанные документы
 
 - [Epic-0: Extension Publish](../epics/epic-0-extension-publish.md)
-- [Архитектура benadis-runner v2.0](../architecture.md)
+- [Архитектура apk-ci v2.0](../architecture.md)
 - [Gitea API Documentation](https://docs.gitea.com/api/1.20/)
 
 ---

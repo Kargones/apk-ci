@@ -1,6 +1,6 @@
-# benadis-runner v2.0 — Epic Overview
+# apk-ci v2.0 — Epic Overview
 
-**Проект:** benadis-runner
+**Проект:** apk-ci
 **Версия:** 2.0
 **Дата создания:** 2025-11-25
 **Аудит:** 2026-01-26

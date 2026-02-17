@@ -2,7 +2,7 @@
 
 <cite>
 **Referenced Files in This Document**
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go)
 - [internal/app/app.go](file://internal/app/app.go)
 - [internal/config/config.go](file://internal/config/config.go)
 - [internal/constants/constants.go](file://internal/constants/constants.go)
@@ -29,18 +29,18 @@
 
 ## Introduction
 
-The benadis-runner is a sophisticated CLI tool designed to automate 1C:Enterprise development workflows. It serves as a comprehensive automation utility that streamlines database management, configuration conversion, service mode control, and SonarQube integration within the 1C ecosystem. The tool is built with modularity and separation of concerns, making it suitable for both simple automation tasks and complex CI/CD pipeline integrations.
+The apk-ci is a sophisticated CLI tool designed to automate 1C:Enterprise development workflows. It serves as a comprehensive automation utility that streamlines database management, configuration conversion, service mode control, and SonarQube integration within the 1C ecosystem. The tool is built with modularity and separation of concerns, making it suitable for both simple automation tasks and complex CI/CD pipeline integrations.
 
 The tool operates as a modular monolith architecture, where each major functionality is encapsulated within dedicated packages while maintaining clear boundaries and interfaces. This design enables efficient maintenance, testing, and scaling of individual components without affecting the overall system stability.
 
 ## Architecture Overview
 
-The benadis-runner follows a layered architecture pattern with clear separation between presentation, business logic, and data access layers. The architecture is designed around the principle of dependency injection and factory patterns, enabling loose coupling and high testability.
+The apk-ci follows a layered architecture pattern with clear separation between presentation, business logic, and data access layers. The architecture is designed around the principle of dependency injection and factory patterns, enabling loose coupling and high testability.
 
 ```mermaid
 graph TB
 subgraph "Presentation Layer"
-CLI[CLI Interface<br/>cmd/benadis-runner/main.go]
+CLI[CLI Interface<br/>cmd/apk-ci/main.go]
 Actions[Github Actions<br/>config/action.yaml]
 end
 subgraph "Application Layer"
@@ -83,7 +83,7 @@ ConfigMgr --> Constants
 ```
 
 **Diagram sources**
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L1-L252)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go#L1-L252)
 - [internal/app/app.go](file://internal/app/app.go#L1-L1301)
 - [internal/service/sonarqube/command_handler.go](file://internal/service/sonarqube/command_handler.go#L1-L344)
 
@@ -98,7 +98,7 @@ The architecture emphasizes:
 
 ### Application Entry Point
 
-The main entry point in `cmd/benadis-runner/main.go` serves as the orchestrator for all operations. It loads configuration, initializes logging, and routes commands to appropriate handlers based on the specified action.
+The main entry point in `cmd/apk-ci/main.go` serves as the orchestrator for all operations. It loads configuration, initializes logging, and routes commands to appropriate handlers based on the specified action.
 
 ```mermaid
 flowchart TD
@@ -124,7 +124,7 @@ ExitError --> Exit
 ```
 
 **Diagram sources**
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L20-L252)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go#L20-L252)
 
 ### Application Logic Layer
 
@@ -186,7 +186,7 @@ Config --> SecretConfig
 - [internal/config/config.go](file://internal/config/config.go#L1-L1445)
 
 **Section sources**
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L1-L252)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go#L1-L252)
 - [internal/app/app.go](file://internal/app/app.go#L1-L1301)
 - [internal/config/config.go](file://internal/config/config.go#L1-L1445)
 
@@ -304,7 +304,7 @@ Key environment variables include:
 
 ## External System Integration
 
-The benadis-runner excels at integrating with external systems commonly used in 1C:Enterprise environments. These integrations are implemented through well-defined interfaces that promote loose coupling and testability.
+The apk-ci excels at integrating with external systems commonly used in 1C:Enterprise environments. These integrations are implemented through well-defined interfaces that promote loose coupling and testability.
 
 ### SonarQube Integration
 
@@ -385,10 +385,10 @@ Here's a practical example of using the database restoration functionality:
 
 ```bash
 # Basic database restoration
-benadis-runner --command=dbrestore --dbname=test_base
+apk-ci --command=dbrestore --dbname=test_base
 
 # With custom timeout and session termination
-benadis-runner --command=dbrestore \
+apk-ci --command=dbrestore \
   --dbname=test_base \
   --terminate-sessions=true \
   --timeout=1800s
@@ -405,31 +405,31 @@ The tool automatically:
 
 ```bash
 # Scan a branch with SonarQube
-benadis-runner --command=sq-scan-branch \
+apk-ci --command=sq-scan-branch \
   --branch-for-scan=feature/new-feature \
   --commit-hash=abc123def456
 
 # Update project metadata
-benadis-runner --command=sq-project-update
+apk-ci --command=sq-project-update
 
 # Generate branch report
-benadis-runner --command=sq-report-branch
+apk-ci --command=sq-report-branch
 ```
 
 ### Service Mode Operations
 
 ```bash
 # Enable service mode with session termination
-benadis-runner --command=service-mode-enable \
+apk-ci --command=service-mode-enable \
   --dbname=production_base \
   --terminate-sessions=true
 
 # Check service mode status
-benadis-runner --command=service-mode-status \
+apk-ci --command=service-mode-status \
   --dbname=production_base
 
 # Disable service mode
-benadis-runner --command=service-mode-disable \
+apk-ci --command=service-mode-disable \
   --dbname=production_base
 ```
 
@@ -573,11 +573,11 @@ ExitWithError --> Exit
 
 ## Conclusion
 
-The benadis-runner CLI tool represents a mature, well-architected solution for automating 1C:Enterprise development workflows. Its modular design, comprehensive configuration management, and robust integration capabilities make it an essential tool for organizations adopting DevOps practices with 1C:Enterprise systems.
+The apk-ci CLI tool represents a mature, well-architected solution for automating 1C:Enterprise development workflows. Its modular design, comprehensive configuration management, and robust integration capabilities make it an essential tool for organizations adopting DevOps practices with 1C:Enterprise systems.
 
 The tool's strength lies in its ability to abstract complex operations into simple, composable commands while maintaining flexibility through extensive configuration options. The separation of concerns between application logic, services, and entities ensures maintainability and testability, while the comprehensive error handling and logging provide operational visibility.
 
-Key benefits of the benadis-runner include:
+Key benefits of the apk-ci include:
 - **Unified Interface**: Single tool for diverse automation needs
 - **CI/CD Integration**: Seamless GitHub Actions integration
 - **External System Support**: Robust integration with SonarQube, Gitea, and 1C:Enterprise systems

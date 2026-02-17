@@ -83,7 +83,7 @@ func (r *Runner) RunCommand(ctx context.Context, l *slog.Logger) ([]byte, error)
 
 ### 🟡 ПРОБЛЕМА #3: Отсутствие таймаута в контексте
 
-**Файл:** `cmd/benadis-runner/main.go`
+**Файл:** `cmd/apk-ci/main.go`
 **Строка:** 18
 
 ```go

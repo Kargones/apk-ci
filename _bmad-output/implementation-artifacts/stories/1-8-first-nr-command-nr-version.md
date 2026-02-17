@@ -211,7 +211,7 @@ type VersionData struct {
 
 **Ожидаемый Text output:**
 ```
-benadis-runner version 6.1.21.7:d8a0311-debug
+apk-ci version 6.1.21.7:d8a0311-debug
   Go:     go1.25.1
   Commit: d8a0311
 ```
@@ -258,7 +258,7 @@ internal/command/handlers/version/
 
 **Изменяемые файлы:**
 ```
-cmd/benadis-runner/main.go           # Добавить blank import
+cmd/apk-ci/main.go           # Добавить blank import
 internal/constants/constants.go      # Добавить ActNRVersion
 Makefile                             # Добавить target test-nr-version
 ```
@@ -327,7 +327,7 @@ ecd4f8d feat(logging): implement structured logging interface with slog adapter
 - [Source: internal/pkg/output/factory.go] — Output factory
 - [Source: internal/constants/version.go] — Version constants
 - [Source: internal/constants/constants.go] — Command constants
-- [Source: cmd/benadis-runner/main.go:32-44] — Registry integration в main
+- [Source: cmd/apk-ci/main.go:32-44] — Registry integration в main
 - [Source: internal/di/app.go] — App struct с DI dependencies
 - [Source: scripts/generate-version.sh] — Version generation script
 
@@ -375,6 +375,6 @@ Claude Opus 4.5 (claude-opus-4-5-20251101)
 - `internal/command/handlers/version/testdata/version_json_output.golden` — Golden file для JSON структуры
 
 **Изменённые файлы:**
-- `cmd/benadis-runner/main.go` — Добавлен blank import для self-registration
+- `cmd/apk-ci/main.go` — Добавлен blank import для self-registration
 - `internal/constants/constants.go` — Добавлена константа ActNRVersion
 - `Makefile` — Добавлен target test-nr-version

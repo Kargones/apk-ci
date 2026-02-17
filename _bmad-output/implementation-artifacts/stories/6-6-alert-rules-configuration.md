@@ -88,7 +88,7 @@ so that могу контролировать когда и какие алер�
 - Цепочка: `rules.Evaluate()` → `rateLimiter.Allow()` → `channel.Send()`
 - Design decision: rules НЕ возвращают ошибку — только allow/deny boolean
 
-**Alerting НЕ интегрирован в handlers** [Source: cmd/benadis-runner/main.go]
+**Alerting НЕ интегрирован в handlers** [Source: cmd/apk-ci/main.go]
 - Alerter инициализируется через DI (App.Alerter) но НЕ вызывается в текущих handlers
 - Story 6-6 НЕ решает эту проблему — только добавляет rules engine
 - Интеграция alerter.Send() в handlers — отдельная задача (TODO)

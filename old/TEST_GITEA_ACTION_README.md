@@ -2,7 +2,7 @@
 
 ## Что было создано
 
-Создан тест `cmd/github.com/Kargones/apk-ci/main_test.go`, который эмулирует запуск приложения benadis-runner из Gitea Action с параметрами из `action.yaml`.
+Создан тест `cmd/github.com/Kargones/apk-ci/main_test.go`, который эмулирует запуск приложения apk-ci из Gitea Action с параметрами из `action.yaml`.
 
 ## Файлы
 
@@ -41,7 +41,7 @@ go test -v ./cmd/github.com/Kargones/apk-ci/ -run TestMainWithGiteaActionParams
 === RUN   TestConfigLoadingWithGiteaActionParams
 --- PASS: TestConfigLoadingWithGiteaActionParams (0.00s)
 PASS
-ok      github.com/Kargones/apk-ci/cmd/benadis-runner       0.046s
+ok      github.com/Kargones/apk-ci/cmd/apk-ci       0.046s
 ```
 
 ## Особенности
@@ -56,7 +56,7 @@ ok      github.com/Kargones/apk-ci/cmd/benadis-runner       0.046s
 Тест использует переменные окружения, которые точно соответствуют входным параметрам из `action.yaml`:
 
 - `INPUT_*` переменные (от Gitea Action)
-- `BR_*` переменные (внутренние переменные benadis-runner)
+- `BR_*` переменные (внутренние переменные apk-ci)
 - Пути к исполняемым файлам и конфигурациям
 
 Подробная документация доступна в `docs/testing-gitea-action.md`.

@@ -4,9 +4,9 @@
 **Referenced Files in This Document**
 - [config/action.yaml](file://config/action.yaml)
 - [internal/config/config.go](file://internal/config/config.go)
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go)
 - [internal/constants/constants.go](file://internal/constants/constants.go)
-- [scripts/sq-scan-benadis-runner.sh](file://scripts/sq-scan-benadis-runner.sh)
+- [scripts/sq-scan-apk-ci.sh](file://scripts/sq-scan-apk-ci.sh)
 - [old/Test all action.yaml](file://old/Test all action.yaml)
 - [old/template-for-action.yaml](file://old/template-for-action.yaml)
 - [README.md](file://README.md)
@@ -26,9 +26,9 @@
 
 ## Introduction
 
-The `action.yaml` configuration file serves as the primary interface between GitHub Actions workflows and the benadis-runner application. This configuration defines how external CI/CD systems can invoke benadis-runner commands to automate 1C:Enterprise development tasks such as database operations, configuration management, and SonarQube integration.
+The `action.yaml` configuration file serves as the primary interface between GitHub Actions workflows and the apk-ci application. This configuration defines how external CI/CD systems can invoke apk-ci commands to automate 1C:Enterprise development tasks such as database operations, configuration management, and SonarQube integration.
 
-The action.yaml acts as a bridge between GitHub Actions' declarative workflow syntax and the functional capabilities of benadis-runner, providing a standardized way to execute complex operations through simple workflow definitions.
+The action.yaml acts as a bridge between GitHub Actions' declarative workflow syntax and the functional capabilities of apk-ci, providing a standardized way to execute complex operations through simple workflow definitions.
 
 ## Action.yaml Structure
 
@@ -44,7 +44,7 @@ C --> F["Composite Steps"]
 F --> G["Environment Setup"]
 F --> H["Command Execution"]
 G --> I["Variable Propagation"]
-H --> J["benadis-runner Binary"]
+H --> J["apk-ci Binary"]
 ```
 
 **Diagram sources**
@@ -55,7 +55,7 @@ H --> J["benadis-runner Binary"]
 
 ## Input Parameters Mapping
 
-The action.yaml defines comprehensive input parameters that map directly to the Config struct's fields in the Go application. These inputs provide fine-grained control over the execution context and behavior of benadis-runner commands.
+The action.yaml defines comprehensive input parameters that map directly to the Config struct's fields in the Go application. These inputs provide fine-grained control over the execution context and behavior of apk-ci commands.
 
 ### Required Inputs
 
@@ -130,7 +130,7 @@ inputs:
 
 ## Command Mappings
 
-The action.yaml supports a comprehensive set of commands that correspond to specific functionalities within the benadis-runner application. These commands are mapped to the constants defined in the application's constant package.
+The action.yaml supports a comprehensive set of commands that correspond to specific functionalities within the apk-ci application. These commands are mapped to the constants defined in the application's constant package.
 
 ### Core Commands
 
@@ -155,7 +155,7 @@ B --> |unknown| P["Error Handling"]
 
 **Diagram sources**
 - [internal/constants/constants.go](file://internal/constants/constants.go#L50-L85)
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L30-L250)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go#L30-L250)
 
 ### Command-Specific Parameters
 
@@ -177,11 +177,11 @@ Each command type supports specific parameters:
 
 **Section sources**
 - [internal/constants/constants.go](file://internal/constants/constants.go#L50-L85)
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L30-L250)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go#L30-L250)
 
 ## Environment Variable Bindings
 
-The action.yaml automatically propagates all input parameters as environment variables to the benadis-runner binary. This creates a seamless mapping between GitHub Actions inputs and the application's configuration system.
+The action.yaml automatically propagates all input parameters as environment variables to the apk-ci binary. This creates a seamless mapping between GitHub Actions inputs and the application's configuration system.
 
 ### Environment Variable Mapping
 
@@ -189,7 +189,7 @@ The action.yaml automatically propagates all input parameters as environment var
 sequenceDiagram
 participant GH as GitHub Actions
 participant ENV as Environment Variables
-participant APP as benadis-runner
+participant APP as apk-ci
 participant CFG as Config Struct
 GH->>ENV : Set INPUT_* variables
 ENV->>APP : Pass to binary execution
@@ -249,7 +249,7 @@ C --> E["Configure Debug Port"]
 E --> F["Wait for Debugger"]
 F --> G["Execute with Debugger"]
 D --> H["Execute Binary"]
-G --> I["benadis-runner"]
+G --> I["apk-ci"]
 H --> I
 I --> J["Command Processing"]
 J --> K["Log Results"]
@@ -264,16 +264,16 @@ The action.yaml supports advanced debugging capabilities through Delve integrati
 
 ```yaml
 steps:
-  - name: 'Run benadis-runner'
+  - name: 'Run apk-ci'
     run: |
       if [ "${{ inputs.debug_port }}" != "0" ]; then
         if [ "${{ inputs.wait }}" = "false" ]; then
-          dlv --listen=:${{ inputs.debug_port }} --headless=true --api-version=2 --accept-multiclient --continue exec ${{ github.action_path }}/benadis-runner
+          dlv --listen=:${{ inputs.debug_port }} --headless=true --api-version=2 --accept-multiclient --continue exec ${{ github.action_path }}/apk-ci
         else
-          dlv --listen=:${{ inputs.debug_port }} --headless=true --api-version=2 --accept-multiclient exec ${{ github.action_path }}/benadis-runner
+          dlv --listen=:${{ inputs.debug_port }} --headless=true --api-version=2 --accept-multiclient exec ${{ github.action_path }}/apk-ci
         fi
       else
-        ${{ github.action_path }}/benadis-runner
+        ${{ github.action_path }}/apk-ci
       fi
     shell: bash
 ```
@@ -289,7 +289,7 @@ steps:
 
 ## Real-World Workflow Examples
 
-The following examples demonstrate practical implementations of benadis-runner actions in various CI/CD scenarios.
+The following examples demonstrate practical implementations of apk-ci actions in various CI/CD scenarios.
 
 ### Database Update Workflow
 
@@ -319,7 +319,7 @@ jobs:
     steps:
       - name: Enable Service Mode
         if: ${{ inputs.service_mode == true }}
-        uses: gitops-tools/benadis-runner@latest
+        uses: gitops-tools/apk-ci@latest
         with:
           giteaURL: ${{ secrets.GITEA_URL }}
           repository: ${{ github.repository }}
@@ -330,7 +330,7 @@ jobs:
           logLevel: 'Debug'
           
       - name: Update Database Configuration
-        uses: gitops-tools/benadis-runner@latest
+        uses: gitops-tools/apk-ci@latest
         with:
           giteaURL: ${{ secrets.GITEA_URL }}
           repository: ${{ github.repository }}
@@ -343,7 +343,7 @@ jobs:
           
       - name: Disable Service Mode
         if: ${{ inputs.service_mode == true }}
-        uses: gitops-tools/benadis-runner@latest
+        uses: gitops-tools/apk-ci@latest
         with:
           giteaURL: ${{ secrets.GITEA_URL }}
           repository: ${{ github.repository }}
@@ -378,7 +378,7 @@ jobs:
           fetch-depth: 0
           
       - name: Run SonarQube Scan
-        uses: gitops-tools/benadis-runner@latest
+        uses: gitops-tools/apk-ci@latest
         with:
           giteaURL: ${{ secrets.GITEA_URL }}
           repository: ${{ github.repository }}
@@ -414,7 +414,7 @@ jobs:
     steps:
       - name: Restore Database (if requested)
         if: ${{ inputs.restore_database == true }}
-        uses: gitops-tools/benadis-runner@latest
+        uses: gitops-tools/apk-ci@latest
         with:
           giteaURL: ${{ secrets.GITEA_URL }}
           repository: ${{ github.repository }}
@@ -425,7 +425,7 @@ jobs:
           logLevel: 'Debug'
           
       - name: Load Configuration from Git
-        uses: gitops-tools/benadis-runner@latest
+        uses: gitops-tools/apk-ci@latest
         with:
           giteaURL: ${{ secrets.GITEA_URL }}
           repository: ${{ github.repository }}
@@ -435,7 +435,7 @@ jobs:
           logLevel: 'Info'
           
       - name: Apply Configuration
-        uses: gitops-tools/benadis-runner@latest
+        uses: gitops-tools/apk-ci@latest
         with:
           giteaURL: ${{ secrets.GITEA_URL }}
           repository: ${{ github.repository }}
@@ -446,7 +446,7 @@ jobs:
           logLevel: 'Debug'
           
       - name: Update Database
-        uses: gitops-tools/benadis-runner@latest
+        uses: gitops-tools/apk-ci@latest
         with:
           giteaURL: ${{ secrets.GITEA_URL }}
           repository: ${{ github.repository }}
@@ -568,7 +568,7 @@ configSystem: 'https://regdv.apkholding.ru/api/v1/repos/gitops-tools/gitops_cong
 
 1. **Fixed Version Pinning**:
    ```yaml
-   uses: gitops-tools/benadis-runner@v1.2.3  # Pin to specific version
+   uses: gitops-tools/apk-ci@v1.2.3  # Pin to specific version
    ```
 
 2. **Consistent Configuration**:
@@ -589,7 +589,7 @@ configSystem: 'https://regdv.apkholding.ru/api/v1/repos/gitops-tools/gitops_cong
    ```yaml
    - name: Conditional Step
      if: ${{ inputs.enable_feature == true }}
-     uses: gitops-tools/benadis-runner@latest
+     uses: gitops-tools/apk-ci@latest
      with:
        ...
    ```
@@ -598,7 +598,7 @@ configSystem: 'https://regdv.apkholding.ru/api/v1/repos/gitops-tools/gitops_cong
    ```yaml
    - name: Backup Operation
      continue-on-error: true
-     uses: gitops-tools/benadis-runner@latest
+     uses: gitops-tools/apk-ci@latest
      with:
        ...
    ```
@@ -686,4 +686,4 @@ configSystem: 'https://regdv.apkholding.ru/api/v1/repos/gitops-tools/gitops_cong
 
 **Section sources**
 - [internal/config/config.go](file://internal/config/config.go#L600-L650)
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L240-L252)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go#L240-L252)

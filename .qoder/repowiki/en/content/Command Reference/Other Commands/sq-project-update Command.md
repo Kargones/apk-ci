@@ -2,7 +2,7 @@
 
 <cite>
 **Referenced Files in This Document**
-- [main.go](file://cmd/benadis-runner/main.go)
+- [main.go](file://cmd/apk-ci/main.go)
 - [app.go](file://internal/app/app.go)
 - [command_handler.go](file://internal/service/sonarqube/command_handler.go)
 - [project.go](file://internal/service/sonarqube/project.go)
@@ -28,7 +28,7 @@
 
 ## Introduction
 
-The `sq-project-update` command (ActSQProjectUpdate) is a critical component of the benadis-runner system that manages SonarQube project metadata synchronization. This command ensures that SonarQube project information remains aligned with the source repository by updating project descriptions and administrators based on the latest repository data from Gitea.
+The `sq-project-update` command (ActSQProjectUpdate) is a critical component of the apk-ci system that manages SonarQube project metadata synchronization. This command ensures that SonarQube project information remains aligned with the source repository by updating project descriptions and administrators based on the latest repository data from Gitea.
 
 The command plays a vital role in maintaining consistency between development environments and code quality monitoring systems, particularly in CI/CD workflows where automated project maintenance is essential.
 
@@ -43,7 +43,7 @@ The `sq-project-update` command performs the following key operations:
 ### Command Syntax
 
 ```bash
-./benadis-runner sq-project-update --owner <owner> --repo <repo>
+./apk-ci sq-project-update --owner <owner> --repo <repo>
 ```
 
 Where:
@@ -51,7 +51,7 @@ Where:
 - `--repo`: Repository name
 
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L218-L221)
+- [main.go](file://cmd/apk-ci/main.go#L218-L221)
 - [constants.go](file://internal/constants/constants.go#L78-L79)
 
 ## Required Configuration
@@ -285,7 +285,7 @@ jobs:
           
       - name: Update SonarQube Project
         run: |
-          ./benadis-runner sq-project-update \
+          ./apk-ci sq-project-update \
             --owner "${{ github.repository_owner }}" \
             --repo "${{ github.event.repository.name }}"
 ```
@@ -441,10 +441,10 @@ Enable verbose logging for detailed troubleshooting:
 ```bash
 # Enable debug logging
 export LOG_LEVEL=DEBUG
-./benadis-runner sq-project-update --owner myorg --repo myrepo
+./apk-ci sq-project-update --owner myorg --repo myrepo
 
 # Enable structured logging
-./benadis-runner sq-project-update --owner myorg --repo myrepo --log-format=json
+./apk-ci sq-project-update --owner myorg --repo myrepo --log-format=json
 ```
 
 ### Common Error Messages

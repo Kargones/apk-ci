@@ -309,7 +309,7 @@ internal/
 ```
 
 **Изменяемые файлы:**
-- `cmd/benadis-runner/main.go` — добавление проверки Registry перед switch
+- `cmd/apk-ci/main.go` — добавление проверки Registry перед switch
 
 **Не изменять:**
 - `internal/app/*` — вызовы app.* функций остаются в legacy switch
@@ -369,7 +369,7 @@ Claude Opus 4.5 (claude-opus-4-5-20251101)
 - Все unit тесты пройдены: `go test ./internal/command/... -v` — 8/8 PASS
 - Race detection: `go test ./internal/command/... -race` — PASS
 - Lint: `golangci-lint run ./internal/command/...` — 0 issues
-- Build: `go build ./cmd/benadis-runner/...` — успешно
+- Build: `go build ./cmd/apk-ci/...` — успешно
 - Integration tests: `TestCommandRegistry_LegacyFallback`, `TestCommandRegistry_GetUnknown` — PASS
 
 ### Completion Notes List
@@ -393,10 +393,10 @@ Claude Opus 4.5 (claude-opus-4-5-20251101)
 - `internal/command/handler_test.go` — Compile-time interface check
 
 **Изменено:**
-- `cmd/benadis-runner/main.go` — добавлен import command, интеграция Registry
-- `cmd/benadis-runner/main_test.go` — добавлены integration тесты для Registry, исправлены errcheck, заменена кастомная contains на strings.Contains
-- `cmd/benadis-runner/yaml_integration_test.go` — заменён deprecated ioutil на os
-- `cmd/benadis-runner/create_temp_db_test.go` — добавлен nolint для goconst
+- `cmd/apk-ci/main.go` — добавлен import command, интеграция Registry
+- `cmd/apk-ci/main_test.go` — добавлены integration тесты для Registry, исправлены errcheck, заменена кастомная contains на strings.Contains
+- `cmd/apk-ci/yaml_integration_test.go` — заменён deprecated ioutil на os
+- `cmd/apk-ci/create_temp_db_test.go` — добавлен nolint для goconst
 
 ---
 

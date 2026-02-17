@@ -337,7 +337,7 @@ Claude Opus 4.5
 **Изменённые файлы:**
 - `internal/app/extension_publish_test.go` - добавлены тесты ExtensionPublish, ReportResultsText, GetTargetFilesToDelete
 - `internal/entity/gitea/gitea_test.go` - добавлены тесты CreatePRWithOptions: ServerError, InvalidJSON, ConflictFindError
-- `cmd/benadis-runner/yaml_integration_test.go` - исправлен TestMain_WithRealYamlFile
+- `cmd/apk-ci/yaml_integration_test.go` - исправлен TestMain_WithRealYamlFile
 - `bdocs/stories/0-8-unit-integration-tests.md` - обновлён статус
 
 **Новые файлы:**

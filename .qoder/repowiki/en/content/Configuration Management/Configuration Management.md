@@ -9,7 +9,7 @@
 - [config/action.yaml](file://config/action.yaml)
 - [config/menu_main.yaml](file://config/menu_main.yaml)
 - [config/menu_debug.yaml](file://config/menu_debug.yaml)
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go)
 - [internal/constants/constants.go](file://internal/constants/constants.go)
 - [internal/config/config_test.go](file://internal/config/config_test.go)
 - [internal/config/implementations_test.go](file://internal/config/implementations_test.go)
@@ -43,7 +43,7 @@
 
 ## Introduction
 
-Benadis-runner implements a sophisticated hierarchical configuration system that combines YAML files, environment variables, and default values using the cleanenv library. This system provides flexibility for different deployment scenarios while maintaining security and ease of maintenance.
+apk-ci implements a sophisticated hierarchical configuration system that combines YAML files, environment variables, and default values using the cleanenv library. This system provides flexibility for different deployment scenarios while maintaining security and ease of maintenance.
 
 The configuration management system supports multiple configuration files for different aspects of the application:
 - **app.yaml**: Application-wide settings and defaults
@@ -114,7 +114,7 @@ logging:
   level: "info"
   format: "json"
   output: "stdout"
-  filePath: "/var/log/benadis-runner.log"
+  filePath: "/var/log/apk-ci.log"
   maxSize: 100
   maxBackups: 3
   maxAge: 28
@@ -322,7 +322,7 @@ Config-->>Main : Complete Config
 
 **Diagram sources**
 - [internal/config/config.go](file://internal/config/config.go#L542-L702)
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L16-L262)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go#L16-L262)
 
 **Section sources**
 - [internal/config/config.go](file://internal/config/config.go#L542-L702)
@@ -586,7 +586,7 @@ logging:
   level: "debug"        # BR_LOG_LEVEL
   format: "text"        # BR_LOG_FORMAT  
   output: "stderr"      # BR_LOG_OUTPUT
-  filePath: "/var/log/benadis-runner.log"
+  filePath: "/var/log/apk-ci.log"
   maxSize: 100
   maxBackups: 3
   maxAge: 7
@@ -596,7 +596,7 @@ logging:
 export BR_LOG_LEVEL="debug"
 export BR_LOG_FORMAT="json"
 export BR_LOG_OUTPUT="file"
-export BR_LOG_FILE_PATH="/var/log/benadis-runner.log"
+export BR_LOG_FILE_PATH="/var/log/apk-ci.log"
 export BR_LOG_MAX_SIZE="50"
 export BR_LOG_MAX_BACKUPS="5"
 export BR_LOG_MAX_AGE="14"
@@ -615,10 +615,10 @@ FROM golang:1.21-alpine AS builder
 WORKDIR /app
 COPY --from=config /app/config/ ./config/
 COPY . .
-RUN go build -o benadis-runner cmd/benadis-runner/main.go
+RUN go build -o apk-ci cmd/apk-ci/main.go
 
 FROM alpine:latest
-COPY --from=builder /app/benadis-runner /usr/local/bin/
+COPY --from=builder /app/apk-ci /usr/local/bin/
 COPY --from=config /app/config/ /app/config/
 ENV BR_CONFIG_SYSTEM=/app/config/app.yaml
 ENV BR_CONFIG_SECRET=/app/config/secret.yaml
@@ -780,7 +780,7 @@ logging:
   level: "debug"
   format: "text"
   output: "stderr"
-  filePath: "/var/log/benadis-runner.log"
+  filePath: "/var/log/apk-ci.log"
   maxSize: 100
   maxBackups: 3
   maxAge: 7
@@ -792,7 +792,7 @@ logging:
 export BR_LOG_LEVEL="debug"
 export BR_LOG_FORMAT="json"
 export BR_LOG_OUTPUT="file"
-export BR_LOG_FILE_PATH="/var/log/benadis-runner.log"
+export BR_LOG_FILE_PATH="/var/log/apk-ci.log"
 export BR_LOG_MAX_SIZE="50"
 export BR_LOG_MAX_BACKUPS="5"
 export BR_LOG_MAX_AGE="14"
@@ -883,7 +883,7 @@ case constants.ActExtensionPublish:
 
 **Section sources**
 - [internal/config/config.go](file://internal/config/config.go#L180-L189)
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L213-L222)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go#L213-L222)
 - [internal/constants/constants.go](file://internal/constants/constants.go#L100-L101)
 - [docs/epics/extension-publish.md](file://docs/epics/extension-publish.md#L1-L326)
 
@@ -940,7 +940,7 @@ Enable debug logging to troubleshoot configuration issues:
 ```bash
 export BR_LOG_LEVEL="Debug"
 export BR_ENV="dev"
-./benadis-runner
+./apk-ci
 ```
 
 ### Configuration Validation Commands
@@ -965,4 +965,4 @@ ls -la config/
 
 **Section sources**
 - [internal/config/config.go](file://internal/config/config.go#L384-L415)
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L16-L262)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go#L16-L262)

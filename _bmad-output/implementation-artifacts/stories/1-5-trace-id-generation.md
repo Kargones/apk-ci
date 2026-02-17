@@ -236,7 +236,7 @@ internal/pkg/
 ```
 
 **Не изменять (пока):**
-- `cmd/benadis-runner/main.go` — интеграция будет в Story 1.7 (Wire DI)
+- `cmd/apk-ci/main.go` — интеграция будет в Story 1.7 (Wire DI)
 - `internal/pkg/logging/` — используем как есть через Logger.With()
 - `internal/pkg/output/result.go` — Metadata.TraceID уже определён
 

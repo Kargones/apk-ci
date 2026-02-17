@@ -175,7 +175,7 @@ type Release struct {
 
 - [ ] Добавлена константа `CmdExtensionPublish = "extension-publish"` в `internal/constants/constants.go`
 - [ ] Реализована функция `ExtensionPublish()` в `internal/app/`
-- [ ] Добавлен case в switch `cmd/benadis-runner/main.go`
+- [ ] Добавлен case в switch `cmd/apk-ci/main.go`
 - [ ] Команда корректно обрабатывает отсутствие подписок (не ошибка)
 - [ ] Логирование всех операций
 
@@ -232,7 +232,7 @@ type Release struct {
 | `internal/entity/gitea/gitea.go` | Новые методы API |
 | `internal/entity/gitea/types.go` | Структура `Release`, `Repository` |
 | `internal/app/extension_publish.go` | Основная логика команды |
-| `cmd/benadis-runner/main.go` | Точка входа (case в switch) |
+| `cmd/apk-ci/main.go` | Точка входа (case в switch) |
 
 ### Зависимости от существующего кода
 
@@ -308,7 +308,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Publish extension to subscribers
-        uses: docker://your-registry/benadis-runner:latest
+        uses: docker://your-registry/apk-ci:latest
         env:
           BR_COMMAND: extension-publish
           GITEA_TOKEN: ${{ secrets.GITEA_TOKEN }}

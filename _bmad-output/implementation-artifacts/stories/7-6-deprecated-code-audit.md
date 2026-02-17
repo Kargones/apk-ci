@@ -15,7 +15,7 @@ so that я знаю что именно нужно удалить при фин�
 1. [AC1] NR-команда `nr-deprecated-audit` (зарегистрированная в command registry через `command.Register()`) анализирует кодебейз и генерирует отчёт о deprecated коде
 2. [AC2] Отчёт содержит все deprecated aliases из `command.ListAllWithAliases()` (18 шт.): имя deprecated-команды, имя NR-команды, файл регистрации
 3. [AC3] Отчёт содержит все TODO-комментарии с тегом `H-7` (планируемое удаление deprecated aliases): файл, строка, текст TODO
-4. [AC4] Отчёт содержит все legacy case-ветки в `cmd/benadis-runner/main.go` (switch-блок строки 280-370) с пометкой "deprecated alias handled by DeprecatedBridge"
+4. [AC4] Отчёт содержит все legacy case-ветки в `cmd/apk-ci/main.go` (switch-блок строки 280-370) с пометкой "deprecated alias handled by DeprecatedBridge"
 5. [AC5] Текстовый и JSON вывод отчёта (через существующий `output.Writer`, BR_OUTPUT_FORMAT)
 6. [AC6] Общая статистика: количество deprecated aliases, TODO(H-7), legacy case-веток, и общее резюме "готовность к удалению"
 7. [AC7] CI-интеграция: команда возвращает exit code 0 (всегда success — это аудит, не валидация)
@@ -98,7 +98,7 @@ so that я знаю что именно нужно удалить при фин�
 - **`internal/command/handlers/version/handler.go`** — паттерн NR-handler без deprecated-alias (аналог)
 - **`internal/command/handlers/migratehandler/handler.go`** — ещё один handler без alias + Scanner (паттерн файлового сканирования)
 - **`internal/smoketest/registry_test.go:39-93`** — массив `allNRCommands` (добавить nr-deprecated-audit)
-- **`cmd/benadis-runner/shadow_mapping.go:69-73`** — список команд без legacy-аналога (добавить)
+- **`cmd/apk-ci/shadow_mapping.go:69-73`** — список команд без legacy-аналога (добавить)
 
 ### Паттерн Handler (без deprecated alias)
 
@@ -166,7 +166,7 @@ type TodoInfo struct {
 
 // LegacyCaseInfo — информация о legacy case в switch
 type LegacyCaseInfo struct {
-    File      string `json:"file"`       // cmd/benadis-runner/main.go
+    File      string `json:"file"`       // cmd/apk-ci/main.go
     Line      int    `json:"line"`       // line number
     CaseValue string `json:"case_value"` // e.g., "git2store"
     Note      string `json:"note"`       // NOTE comment if present
@@ -227,8 +227,8 @@ TODO(H-7) Comments (4):
     Удалить deprecated alias ActSQReportBranch после миграции всех workflows на NR-команды.
 
 Legacy Switch Cases (8):
-  cmd/benadis-runner/main.go:300  case "git2store"        — deprecated alias for nr-git2store
-  cmd/benadis-runner/main.go:337  case "storebind"        — deprecated alias for nr-storebind
+  cmd/apk-ci/main.go:300  case "git2store"        — deprecated alias for nr-git2store
+  cmd/apk-ci/main.go:337  case "storebind"        — deprecated alias for nr-storebind
   ...
 
 Summary:
@@ -261,7 +261,7 @@ Summary:
 
 ### Shadow mapping
 
-Добавить `nr-deprecated-audit` в `cmd/benadis-runner/shadow_mapping.go` (список команд без legacy-аналога):
+Добавить `nr-deprecated-audit` в `cmd/apk-ci/shadow_mapping.go` (список команд без legacy-аналога):
 ```go
 constants.ActNRDeprecatedAudit: nil, // ДОБАВИТЬ
 ```
@@ -329,8 +329,8 @@ fada818 feat(plan-display): operation plan display with plan-only and verbose mo
 - `internal/command/handlers/migratehandler/scanner.go` (NEW) — сканер файлов
 - `internal/constants/constants.go` (MODIFIED) — новые константы
 - `internal/smoketest/registry_test.go` (MODIFIED) — обновление smoke tests
-- `cmd/benadis-runner/main.go` (MODIFIED) — blank import handler
-- `cmd/benadis-runner/shadow_mapping.go` (MODIFIED) — добавление в noLegacy
+- `cmd/apk-ci/main.go` (MODIFIED) — blank import handler
+- `cmd/apk-ci/shadow_mapping.go` (MODIFIED) — добавление в noLegacy
 
 ### Testing Standards
 
@@ -351,8 +351,8 @@ fada818 feat(plan-display): operation plan display with plan-only and verbose mo
 - [Source: internal/command/handlers/version/handler.go:24] — паттерн Register() без alias
 - [Source: internal/command/handlers/migratehandler/] — паттерн файлового сканирования (scanner.go)
 - [Source: internal/constants/constants.go:103-146] — ActNR* константы
-- [Source: cmd/benadis-runner/main.go:280-370] — legacy switch-case блок
-- [Source: cmd/benadis-runner/shadow_mapping.go:69-73] — команды без legacy-аналога
+- [Source: cmd/apk-ci/main.go:280-370] — legacy switch-case блок
+- [Source: cmd/apk-ci/shadow_mapping.go:69-73] — команды без legacy-аналога
 - [Source: internal/smoketest/registry_test.go:39-93] — allNRCommands и deprecatedAliases массивы
 - [Source: _bmad-output/project-planning-artifacts/epics/epic-7-finalization.md:197-215] — Story 7.6 requirements
 - [Source: _bmad-output/project-planning-artifacts/prd.md:396-397] — FR49 (deprecated code removal), NFR16 (CI audit)
@@ -487,8 +487,8 @@ Claude Opus 4.6
 - `internal/command/handlers/deprecatedaudithandler/handler_test.go` (NEW) — unit/integration тесты Execute, report formatting
 - `internal/command/handlers/deprecatedaudithandler/scanner_test.go` (NEW) — unit тесты scanner: aliases, todo, legacy, exclusions
 - `internal/constants/constants.go` (MODIFIED) — добавлена константа ActNRDeprecatedAudit
-- `cmd/benadis-runner/main.go` (MODIFIED) — blank import deprecatedaudithandler
-- `cmd/benadis-runner/shadow_mapping.go` (MODIFIED) — комментарий о nr-deprecated-audit как команде без legacy
+- `cmd/apk-ci/main.go` (MODIFIED) — blank import deprecatedaudithandler
+- `cmd/apk-ci/shadow_mapping.go` (MODIFIED) — комментарий о nr-deprecated-audit как команде без legacy
 - `internal/smoketest/registry_test.go` (MODIFIED) — добавлен nr-deprecated-audit в allNRCommands, noLegacy; обновлены счётчики (23+18=41)
 
 **Файлы, изменённые в Review #30 (cross-story):**

@@ -9,7 +9,7 @@
 - [result.go](file://internal/pkg/output/result.go)
 - [json.go](file://internal/pkg/output/json.go)
 - [constants.go](file://internal/constants/constants.go)
-- [main.go](file://cmd/benadis-runner/main.go)
+- [main.go](file://cmd/apk-ci/main.go)
 - [config.go](file://internal/config/config.go)
 </cite>
 
@@ -37,7 +37,7 @@
 
 ## Introduction
 
-The nr-service-mode-status command in benadis-runner provides a comprehensive monitoring capability for 1C:Enterprise information bases by retrieving detailed service mode status information. This NR (New Runner) command represents a significant enhancement over the legacy service-mode-status, offering structured output formats, detailed session information display, and robust error handling mechanisms.
+The nr-service-mode-status command in apk-ci provides a comprehensive monitoring capability for 1C:Enterprise information bases by retrieving detailed service mode status information. This NR (New Runner) command represents a significant enhancement over the legacy service-mode-status, offering structured output formats, detailed session information display, and robust error handling mechanisms.
 
 The command retrieves not only the current service mode state but also provides comprehensive details about active user sessions, including user names, host information, application IDs, and session timing data. This enhanced functionality enables automation systems to make informed decisions about deployment operations based on both service mode status and user activity levels.
 
@@ -259,12 +259,12 @@ The nr-service-mode-status command supports flexible usage patterns for both man
 # Text format for human-readable output
 export BR_OUTPUT_FORMAT=text
 export BR_INFOBASE_NAME="ProductionERP"
-./benadis-runner
+./apk-ci
 
 # JSON format for automation integration
 export BR_OUTPUT_FORMAT=json
 export BR_INFOBASE_NAME="CustomerPortal"
-./benadis-runner
+./apk-ci
 ```
 
 **Automation Integration:**
@@ -274,7 +274,7 @@ export BR_INFOBASE_NAME="CustomerPortal"
 export BR_OUTPUT_FORMAT=json
 export BR_INFOBASE_NAME="${INFODB}"
 
-STATUS_OUTPUT=$(./benadis-runner 2>&1)
+STATUS_OUTPUT=$(./apk-ci 2>&1)
 EXIT_CODE=$?
 
 if [ $EXIT_CODE -ne 0 ]; then

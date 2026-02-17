@@ -1,4 +1,4 @@
-# Документация проекта benadis-runner
+# Документация проекта apk-ci
 
 > **Дата генерации:** 2025-11-24 (обновлено: Exhaustive Rescan)
 > **Режим сканирования:** Exhaustive Scan (full_rescan)
@@ -15,7 +15,7 @@
 
 ### Краткое описание
 
-`benadis-runner` — инструмент автоматизации для систем 1C:Enterprise. Оркестрирует CI/CD процессы, управляет сервисным режимом, операциями с базами данных MSSQL, синхронизацией Git ↔ хранилище 1C, и интегрируется с SonarQube.
+`apk-ci` — инструмент автоматизации для систем 1C:Enterprise. Оркестрирует CI/CD процессы, управляет сервисным режимом, операциями с базами данных MSSQL, синхронизацией Git ↔ хранилище 1C, и интегрируется с SonarQube.
 
 ### Технологический стек
 
@@ -116,7 +116,7 @@ make build
 ### Запуск команды
 
 ```bash
-BR_COMMAND=service-mode-status BR_INFOBASE_NAME=MyInfobase ./build/benadis-runner
+BR_COMMAND=service-mode-status BR_INFOBASE_NAME=MyInfobase ./build/apk-ci
 ```
 
 ### Тестирование

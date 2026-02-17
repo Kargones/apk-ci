@@ -2,7 +2,7 @@
 
 <cite>
 **Referenced Files in This Document**
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go) - *Updated with context support*
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go) - *Updated with context support*
 - [internal/app/app.go](file://internal/app/app.go) - *Updated with timeout management*
 - [internal/util/runner/runner.go](file://internal/util/runner/runner.go) - *Added context support to RunCommand*
 - [internal/entity/one/edt/edt.go](file://internal/entity/one/edt/edt.go) - *Updated with context handling*
@@ -47,13 +47,13 @@
 
 ## Introduction
 
-The Convert command in benadis-runner is a specialized module designed to facilitate the conversion of 1C:Enterprise projects between different formats, primarily from EDT (Enterprise Development Tools) format to XML format. This command serves as a crucial bridge between modern development workflows and legacy 1C systems, enabling seamless integration of 1C projects into contemporary DevOps pipelines.
+The Convert command in apk-ci is a specialized module designed to facilitate the conversion of 1C:Enterprise projects between different formats, primarily from EDT (Enterprise Development Tools) format to XML format. This command serves as a crucial bridge between modern development workflows and legacy 1C systems, enabling seamless integration of 1C projects into contemporary DevOps pipelines.
 
 The convert command operates through a sophisticated multi-stage process that involves repository management, configuration loading, format conversion, and result deployment. It leverages the power of 1C:Enterprise tools while maintaining compatibility with modern CI/CD practices. With the recent addition of context support, the command now provides robust timeout management and cancellation capabilities for long-running operations.
 
 ## Command Overview
 
-The convert command is activated through the `BR_COMMAND=convert` environment variable and follows a standardized execution pattern within the benadis-runner ecosystem. The command orchestrates a series of coordinated operations to transform project configurations from one format to another.
+The convert command is activated through the `BR_COMMAND=convert` environment variable and follows a standardized execution pattern within the apk-ci ecosystem. The command orchestrates a series of coordinated operations to transform project configurations from one format to another.
 
 ```mermaid
 flowchart TD
@@ -77,11 +77,11 @@ Success --> End
 ```
 
 **Diagram sources**
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L30-L40)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go#L30-L40)
 - [internal/app/app.go](file://internal/app/app.go#L60-L120)
 
 **Section sources**
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L30-L40)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go#L30-L40)
 - [internal/constants/constants.go](file://internal/constants/constants.go#L60-L70)
 
 ## Environment Variables
@@ -406,7 +406,7 @@ Runner->>OS : exec.CommandContext(ctx, ...)
 ```
 
 **Section sources**
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L18)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go#L18)
 - [internal/app/app.go](file://internal/app/app.go#L118-L120)
 - [internal/entity/one/edt/edt.go](file://internal/entity/one/edt/edt.go#L456)
 - [internal/util/runner/runner.go](file://internal/util/runner/runner.go#L107)
@@ -531,7 +531,7 @@ The system uses specific exit codes to indicate different types of failures:
 | 11 | Configuration Error | Invalid configuration detected |
 
 **Section sources**
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L30-L40)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go#L30-L40)
 - [internal/app/app.go](file://internal/app/app.go#L60-L120)
 
 ## Integration Points
@@ -773,7 +773,7 @@ export BR_INFOBASE_NAME=default
 
 **Execution:**
 ```bash
-./benadis-runner
+./apk-ci
 ```
 
 **Expected Outcome:**
@@ -807,7 +807,7 @@ export BR_CONFIG_PROJECT=/path/to/custom/project.yaml
 export BR_CONFIG_SECRET=/path/to/secrets/secret.yaml
 export BR_FORCE_UPDATE=true
 
-./benadis-runner
+./apk-ci
 ```
 
 ### GitHub Actions Integration
@@ -830,7 +830,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
         
-      - name: Setup benadis-runner
+      - name: Setup apk-ci
         uses: ./
         with:
           giteaURL: ${{ secrets.GITEA_URL }}
@@ -852,8 +852,8 @@ jobs:
 ```yaml
 version: '3.8'
 services:
-  benadis-runner:
-    image: benadis-runner:convert
+  apk-ci:
+    image: apk-ci:convert
     environment:
       - BR_COMMAND=convert
       - BR_ACTOR=docker_user
@@ -866,7 +866,7 @@ services:
       - ./configs:/configs:ro
       - ./logs:/logs
     working_dir: /workspace
-    command: ["./benadis-runner"]
+    command: ["./apk-ci"]
 ```
 
 **Section sources**
@@ -875,7 +875,7 @@ services:
 
 ## Conclusion
 
-The convert command in benadis-runner represents a sophisticated solution for bridging modern DevOps practices with traditional 1C:Enterprise development workflows. Through its comprehensive architecture, robust error handling, and extensive integration capabilities, it enables organizations to maintain their investment in 1C systems while adopting contemporary development methodologies.
+The convert command in apk-ci represents a sophisticated solution for bridging modern DevOps practices with traditional 1C:Enterprise development workflows. Through its comprehensive architecture, robust error handling, and extensive integration capabilities, it enables organizations to maintain their investment in 1C systems while adopting contemporary development methodologies.
 
 ### Key Benefits
 

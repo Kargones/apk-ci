@@ -2,7 +2,7 @@
 
 <cite>
 **Referenced Files in This Document**
-- [main.go](file://cmd/benadis-runner/main.go)
+- [main.go](file://cmd/apk-ci/main.go)
 - [wire.go](file://internal/di/wire.go)
 - [app.go](file://internal/di/app.go)
 - [providers.go](file://internal/di/providers.go)
@@ -54,7 +54,7 @@
 
 ## Introduction
 
-Benadis-runner is a comprehensive automation tool for 1C:Enterprise systems that provides modular functionality for database operations, configuration conversion, service mode management, and integration with development tools. The project follows a clean architecture pattern with clear separation of concerns across multiple packages.
+apk-ci is a comprehensive automation tool for 1C:Enterprise systems that provides modular functionality for database operations, configuration conversion, service mode management, and integration with development tools. The project follows a clean architecture pattern with clear separation of concerns across multiple packages.
 
 **Updated** The project has undergone a major architectural transformation with the introduction of Google Wire dependency injection, structured output system, redesigned logging infrastructure, and comprehensive tracing capabilities.
 
@@ -62,12 +62,12 @@ The development guide covers the essential aspects of contributing to the projec
 
 ## Project Architecture
 
-Benadis-runner follows a modular architecture with distinct layers that separate concerns and promote maintainability. The architecture has been enhanced with dependency injection and structured output capabilities:
+apk-ci follows a modular architecture with distinct layers that separate concerns and promote maintainability. The architecture has been enhanced with dependency injection and structured output capabilities:
 
 ```mermaid
 graph TB
 subgraph "Entry Point"
-MAIN[cmd/benadis-runner/main.go]
+MAIN[cmd/apk-ci/main.go]
 ENDPOINT[Command Registry]
 ENDPOINT --> MAIN
 end
@@ -105,7 +105,7 @@ SERVICE --> TRACEID
 ```
 
 **Diagram sources**
-- [main.go](file://cmd/benadis-runner/main.go#L25-L60)
+- [main.go](file://cmd/apk-ci/main.go#L25-L60)
 - [wire.go](file://internal/di/wire.go#L20-L25)
 - [app.go](file://internal/di/app.go#L18-L34)
 
@@ -131,7 +131,7 @@ The project is organized into several key directories, each serving a specific p
 
 ```mermaid
 graph TD
-ROOT[benadis-runner/] --> CMD[cmd/benadis-runner/]
+ROOT[apk-ci/] --> CMD[cmd/apk-ci/]
 ROOT --> CONFIG[config/]
 ROOT --> INTERNAL[internal/]
 ROOT --> SCRIPTS[scripts/]
@@ -170,7 +170,7 @@ SERVICE --> GITEA_SERVICE[gitea_service.go]
 
 ### Package Descriptions
 
-- **cmd/benadis-runner/**: Entry point and command-line interface with command registry
+- **cmd/apk-ci/**: Entry point and command-line interface with command registry
 - **internal/di/**: Dependency injection layer with Google Wire integration
 - **internal/pkg/output/**: Structured output system with JSON and text formatting
 - **internal/pkg/logging/**: Redesigned logging infrastructure with slog adapter
@@ -550,7 +550,7 @@ result.Metadata = &output.Metadata{
 
 ## Adding New Commands
 
-Adding new commands to benadis-runner leverages the self-registration pattern and dependency injection architecture.
+Adding new commands to apk-ci leverages the self-registration pattern and dependency injection architecture.
 
 ### Step 1: Create Command Handler
 
@@ -624,11 +624,11 @@ func TestMyCommandHandler_Execute(t *testing.T) {
 **Section sources**
 - [handler.go](file://internal/command/handler.go#L1-L28)
 - [registry.go](file://internal/command/registry.go#L19-L55)
-- [main.go](file://cmd/benadis-runner/main.go#L16-L23)
+- [main.go](file://cmd/apk-ci/main.go#L16-L23)
 
 ## Testing Strategy
 
-Benadis-runner employs a comprehensive testing strategy with multiple layers of test coverage, enhanced by the dependency injection architecture.
+apk-ci employs a comprehensive testing strategy with multiple layers of test coverage, enhanced by the dependency injection architecture.
 
 ### Testing Architecture with DI
 
@@ -771,7 +771,7 @@ func (m *MockDependency) Method(param string) error {
 
 ## Build and Release Process
 
-Benadis-runner uses a dual build system with both Makefile and Taskfile.yml for flexibility, enhanced with dependency injection support.
+apk-ci uses a dual build system with both Makefile and Taskfile.yml for flexibility, enhanced with dependency injection support.
 
 ### Makefile Features
 
@@ -806,12 +806,12 @@ tasks:
   build:
     desc: "Build binary for production"
     cmds:
-      - go build -o bin/benadis-runner ./cmd/benadis-runner
+      - go build -o bin/apk-ci ./cmd/apk-ci
   
   debug:
     desc: "Build debug binary with debug info"
     cmds:
-      - go build -gcflags="-N -l" -o bin/benadis-runner ./cmd/benadis-runner
+      - go build -gcflags="-N -l" -o bin/apk-ci ./cmd/apk-ci
   
   generate-wire:
     desc: "Generate Wire dependency injection code"
@@ -944,7 +944,7 @@ tasks:
   debug:
     desc: "Run with debugger for VS Code"
     cmds:
-      - dlv debug ./cmd/benadis-runner \
+      - dlv debug ./cmd/apk-ci \
         --headless --listen=127.0.0.1:2345 --api-version=2
 ```
 

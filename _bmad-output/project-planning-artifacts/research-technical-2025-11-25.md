@@ -2,13 +2,13 @@
 
 **Дата:** 2025-11-25
 **Подготовил:** BMad
-**Контекст проекта:** benadis-runner (Go) — автоматизация 1C:Enterprise
+**Контекст проекта:** apk-ci (Go) — автоматизация 1C:Enterprise
 
 ---
 
 ## Executive Summary
 
-Исследование выявило оптимальный подход для создания универсальной системы работы с CLI-инструментами 1C (RAC, ibcmd, ring) в проекте benadis-runner.
+Исследование выявило оптимальный подход для создания универсальной системы работы с CLI-инструментами 1C (RAC, ibcmd, ring) в проекте apk-ci.
 
 ### Основная рекомендация
 
@@ -40,7 +40,7 @@
 
 ### Project Context
 
-- **Проект:** benadis-runner
+- **Проект:** apk-ci
 - **Тип:** Brownfield CLI-инструмент автоматизации 1C:Enterprise
 - **Язык:** Go 1.25+
 - **Платформа 1C:** 8.3.18+
@@ -312,7 +312,7 @@ type RingAdapter struct { ... }
 - Инкрементальный: `cmd.StdoutPipe()` для потоковой обработки
 - С таймаутом: `exec.CommandContext(ctx, ...)` для отмены
 
-**Для benadis-runner:**
+**Для apk-ci:**
 - ✅ Уже используется
 - ✅ Нет внешних зависимостей
 - ⚠️ Требует собственных абстракций
@@ -343,7 +343,7 @@ session, _ := client.NewSession()
 output, _ := session.Output("ibcmd infobase list")
 ```
 
-**Для benadis-runner:**
+**Для apk-ci:**
 - ✅ Поддержка SSH-ключей (требование)
 - ✅ Часть экосистемы Go (golang.org/x)
 - ✅ Хорошо документирована
@@ -372,7 +372,7 @@ cb := gobreaker.NewCircuitBreaker(gobreaker.Settings{
 })
 ```
 
-**Для benadis-runner:**
+**Для apk-ci:**
 - ✅ Повышает надёжность (требование)
 - ✅ Лёгкая интеграция
 - ⚠️ Внешняя зависимость (но минимальная и от Sony)
@@ -410,7 +410,7 @@ result, err := failsafe.Get(
 )
 ```
 
-**Для benadis-runner:**
+**Для apk-ci:**
 - ✅ Композиция политик (retry + circuit breaker)
 - ✅ Современный API с дженериками
 - ⚠️ Более тяжёлая зависимость чем gobreaker
@@ -668,7 +668,7 @@ func (c *ChainParser[T]) Parse(output []byte) (T, error) {
 Предложено
 
 ## Контекст
-Проект benadis-runner интегрируется с несколькими CLI-инструментами 1C:
+Проект apk-ci интегрируется с несколькими CLI-инструментами 1C:
 - RAC (Remote Administration Console)
 - ibcmd (Information Base Command)
 - ring (1C EDT CLI)

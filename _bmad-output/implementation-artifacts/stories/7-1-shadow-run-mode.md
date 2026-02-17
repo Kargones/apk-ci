@@ -49,7 +49,7 @@ so that я уверен что новая версия работает иден
   - [x] Subtask 4.3: Текстовый формат: summary после основного результата
 
 - [x] Task 5: Интегрировать в main.go (AC: #1, #5, #10)
-  - [x] Subtask 5.1: В `cmd/benadis-runner/main.go` добавить проверку `BR_SHADOW_RUN` перед выполнением NR-команды
+  - [x] Subtask 5.1: В `cmd/apk-ci/main.go` добавить проверку `BR_SHADOW_RUN` перед выполнением NR-команды
   - [x] Subtask 5.2: Если shadow-run активен — вызвать `shadowrun.Runner` вместо прямого `handler.Execute()`
   - [x] Subtask 5.3: Правильно обработать exit code (0 если совпадение, 1 если различия)
 
@@ -88,7 +88,7 @@ Shadow-run вызывается из `main.go` перед (или вместо) 
 
 **Критическое различие context:** Legacy функции из `internal/app/` принимают `*context.Context` (указатель), а NR handlers принимают `context.Context` (значение). При вызове legacy-функции из shadow-run необходимо создать отдельный `*context.Context`.
 
-**Маппинг NR → Legacy (18 команд):** [Source: internal/command/registry.go, cmd/benadis-runner/main.go]
+**Маппинг NR → Legacy (18 команд):** [Source: internal/command/registry.go, cmd/apk-ci/main.go]
 ```
 "nr-service-mode-status"   → app.ServiceModeStatus()
 "nr-service-mode-enable"   → app.ServiceModeEnable()
@@ -183,7 +183,7 @@ type Handler interface {
 - Новый пакет `internal/command/shadowrun/` — рядом с `internal/command/handlers/` и `internal/command/registry.go`
 - Shadow-run НЕ является handler (не регистрируется в registry) — это middleware/interceptor
 - Маппинг функций из `internal/app/` требует импорта пакета `app` — может создать циклическую зависимость, проверить!
-- Если циклическая зависимость — вынести маппинг в `cmd/benadis-runner/` или передавать legacy-функцию как параметр
+- Если циклическая зависимость — вынести маппинг в `cmd/apk-ci/` или передавать legacy-функцию как параметр
 
 ### Предупреждения
 
@@ -211,7 +211,7 @@ type Handler interface {
 
 - [Source: internal/command/registry.go] — Register, RegisterWithAlias, Get, DeprecatedBridge
 - [Source: internal/command/handler.go] — Handler interface
-- [Source: cmd/benadis-runner/main.go] — Двухуровневая диспетчеризация (registry → legacy switch)
+- [Source: cmd/apk-ci/main.go] — Двухуровневая диспетчеризация (registry → legacy switch)
 - [Source: internal/app/app.go] — Legacy функции всех команд
 - [Source: internal/pkg/output/result.go] — Result, Metadata, ErrorInfo
 - [Source: internal/constants/constants.go:102-143] — ActNR* константы
@@ -231,8 +231,8 @@ Claude Opus 4.6
 - 9 тестов shadow output (writeShadowRunTextSummary, mergeShadowRunJSON) прошли
 - go vet прошёл без ошибок
 - Race detector прошёл без ошибок
-- Полная регрессия (все пакеты кроме cmd/benadis-runner) без ошибок
-- cmd/benadis-runner тесты — предсуществующий fail из-за недоступности Gitea API (не регрессия)
+- Полная регрессия (все пакеты кроме cmd/apk-ci) без ошибок
+- cmd/apk-ci тесты — предсуществующий fail из-за недоступности Gitea API (не регрессия)
 - Покрытие shadowrun: 96.0% (было 93.5%)
 
 ### Completion Notes List
@@ -240,7 +240,7 @@ Claude Opus 4.6
 - Создан пакет `internal/command/shadowrun/` с 5 файлами: config.go, mapping.go, comparison.go, output.go, shadowrun.go
 - Реализован Runner.Execute() — последовательно выполняет NR и legacy, захватывает stdout через os.Pipe(), сравнивает результаты
 - LegacyMapping с унифицированной сигнатурой LegacyFunc и обёртками для функций с дополнительными параметрами
-- Циклическая зависимость обойдена: маппинг в cmd/benadis-runner/shadow_mapping.go (не в internal/command/shadowrun/)
+- Циклическая зависимость обойдена: маппинг в cmd/apk-ci/shadow_mapping.go (не в internal/command/shadowrun/)
 - CompareResults сравнивает error presence и stdout output (с whitespace normalization, truncation до 500 рун)
 - ShadowRunResult с ToJSON() для сериализации duration в миллисекунды
 - Интеграция в main.go через executeShadowRun() — минимальные изменения в существующем коде
@@ -248,7 +248,7 @@ Claude Opus 4.6
 - writeShadowRunTextSummary(io.Writer) — текстовый summary с plain ASCII маркерами
 - Константа EnvShadowRun вынесена в отдельную группу Env-констант в constants.go
 - Help обновлён: секция "Опции" с BR_OUTPUT_FORMAT и BR_SHADOW_RUN
-- 38 unit/integration тестов shadowrun + 9 тестов shadow output в cmd/benadis-runner
+- 38 unit/integration тестов shadowrun + 9 тестов shadow output в cmd/apk-ci
 
 ### Code Review Fixes Applied (Review #18)
 
@@ -274,11 +274,11 @@ Claude Opus 4.6
 - internal/command/shadowrun/mapping_test.go
 - internal/command/shadowrun/comparison_test.go
 - internal/command/shadowrun/shadowrun_test.go
-- cmd/benadis-runner/shadow_mapping.go
-- cmd/benadis-runner/shadow_output_test.go
+- cmd/apk-ci/shadow_mapping.go
+- cmd/apk-ci/shadow_output_test.go
 
 **Изменённые файлы:**
-- cmd/benadis-runner/main.go (executeShadowRun, mergeShadowRunJSON, writeShadowRunTextSummary)
+- cmd/apk-ci/main.go (executeShadowRun, mergeShadowRunJSON, writeShadowRunTextSummary)
 - internal/constants/constants.go (EnvShadowRun вынесена в отдельную const-группу)
 - internal/command/handlers/help/help.go (добавлена секция "Опции" в help вывод)
 - _bmad-output/implementation-artifacts/sprint-artifacts/sprint-status.yaml (7-1 → in-progress → review)

@@ -54,7 +54,7 @@ So that я могу безопасно выполнять операции с б
   - [x] 4.1 Создать `ServiceModeEnableData` с полями: `Enabled bool`, `Message string`, `PermissionCode string`, `ScheduledJobsBlocked bool`, `AlreadyEnabled bool`, `TerminatedSessionsCount int`, `InfobaseName string`
   - [x] 4.2 Реализовать `writeText(w io.Writer) error` для человекочитаемого формата
 - [x] Task 5: Зарегистрировать blank import в main.go (AC: 7)
-  - [x] 5.1 Добавить `_ "github.com/Kargones/apk-ci/internal/command/handlers/servicemodeenablehandler"` в `cmd/benadis-runner/main.go`
+  - [x] 5.1 Добавить `_ "github.com/Kargones/apk-ci/internal/command/handlers/servicemodeenablehandler"` в `cmd/apk-ci/main.go`
   - [x] 5.2 Удалить legacy case `constants.ActServiceModeEnable` из switch в main.go (NR-handler полностью заменяет legacy)
 - [x] Task 6: Написать unit-тесты (AC: 13)
   - [x] 6.1 `TestServiceModeEnableHandler_Name` — проверка имени
@@ -405,7 +405,7 @@ func TestServiceModeEnableHandler_Execute_AlreadyEnabled(t *testing.T) {
 | Файл | Действие | Описание |
 |------|----------|----------|
 | `internal/constants/constants.go` | изменить | Добавить `ActNRServiceModeEnable` |
-| `cmd/benadis-runner/main.go` | изменить | Добавить blank import, удалить legacy case `ActServiceModeEnable` |
+| `cmd/apk-ci/main.go` | изменить | Добавить blank import, удалить legacy case `ActServiceModeEnable` |
 | `internal/command/handlers/servicemodeenablehandler/handler.go` | новый | Handler struct, init(), Execute, writeText, writeError, createRACClient |
 | `internal/command/handlers/servicemodeenablehandler/handler_test.go` | новый | Unit-тесты |
 
@@ -439,7 +439,7 @@ func TestServiceModeEnableHandler_Execute_AlreadyEnabled(t *testing.T) {
 - **Новый файл**: `handler.go` — handler struct + init() + Execute + writeText + writeError + createRACClient
 - **Новый файл**: `handler_test.go` — unit-тесты
 - **Изменение**: `internal/constants/constants.go` — добавить `ActNRServiceModeEnable`
-- **Изменение**: `cmd/benadis-runner/main.go` — добавить blank import, удалить legacy case `ActServiceModeEnable`
+- **Изменение**: `cmd/apk-ci/main.go` — добавить blank import, удалить legacy case `ActServiceModeEnable`
 - Следует паттерну: один handler = один пакет в `handlers/`
 - Именование пакета: `servicemodeenablehandler` (аналогично `servicemodestatushandler`)
 
@@ -459,7 +459,7 @@ func TestServiceModeEnableHandler_Execute_AlreadyEnabled(t *testing.T) {
 - [Source: internal/pkg/tracing/ — TraceIDFromContext, GenerateTraceID]
 - [Source: internal/constants/constants.go — ActServiceModeEnable (legacy), DefaultServiceModeMessage]
 - [Source: internal/config/config.go:186 — TerminateSessions bool, BR_TERMINATE_SESSIONS]
-- [Source: cmd/benadis-runner/main.go:88-108 — legacy case ActServiceModeEnable (УДАЛИТЬ)]
+- [Source: cmd/apk-ci/main.go:88-108 — legacy case ActServiceModeEnable (УДАЛИТЬ)]
 - [Source: _bmad-output/implementation-artifacts/stories/2-3-nr-service-mode-status.md — предыдущая story с learnings]
 - [Source: _bmad-output/implementation-artifacts/stories/2-4-session-info-service-mode-status.md — предыдущая story с learnings]
 
@@ -531,7 +531,7 @@ Claude Opus 4.5 (claude-opus-4-5-20251101)
 | Файл | Действие |
 |------|----------|
 | `internal/constants/constants.go` | изменён — добавлена константа `ActNRServiceModeEnable` |
-| `cmd/benadis-runner/main.go` | изменён — добавлен blank import `servicemodeenablehandler`, удалён legacy case `ActServiceModeEnable` |
+| `cmd/apk-ci/main.go` | изменён — добавлен blank import `servicemodeenablehandler`, удалён legacy case `ActServiceModeEnable` |
 | `internal/command/handlers/servicemodeenablehandler/handler.go` | создан — handler struct, init(), Execute, writeText, writeError, outputResult, createRACClient |
 | `internal/command/handlers/servicemodeenablehandler/handler_test.go` | создан — 15 unit-тестов |
 | `_bmad-output/implementation-artifacts/sprint-artifacts/sprint-status.yaml` | изменён — статус 2-5 → review |

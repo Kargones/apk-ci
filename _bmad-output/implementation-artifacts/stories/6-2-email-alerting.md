@@ -148,7 +148,7 @@ type EmailChannelConfig struct {
 
     // SubjectTemplate - шаблон темы письма
     // Placeholders: {{.ErrorCode}}, {{.Command}}, {{.Infobase}}
-    SubjectTemplate string `yaml:"subjectTemplate" env:"BR_ALERTING_EMAIL_SUBJECT" env-default:"[benadis-runner] {{.ErrorCode}}: {{.Command}}"`
+    SubjectTemplate string `yaml:"subjectTemplate" env:"BR_ALERTING_EMAIL_SUBJECT" env-default:"[apk-ci] {{.ErrorCode}}: {{.Command}}"`
 }
 ```
 
@@ -189,7 +189,7 @@ type Alerter interface {
 
 ```go
 const emailBodyTemplate = `
-benadis-runner Alert
+apk-ci Alert
 
 Error Code: {{.ErrorCode}}
 Severity: {{.Severity}}
@@ -203,7 +203,7 @@ Trace ID: {{.TraceID}}
 Timestamp: {{.Timestamp}}
 
 ---
-This is an automated alert from benadis-runner.
+This is an automated alert from apk-ci.
 `
 ```
 
@@ -256,7 +256,7 @@ func (r *RateLimiter) Allow(errorCode string) bool {
 | BR_ALERTING_SMTP_TLS | true | Использовать TLS |
 | BR_ALERTING_EMAIL_FROM | "" | Адрес отправителя |
 | BR_ALERTING_EMAIL_TO | "" | Получатели (comma-separated) |
-| BR_ALERTING_EMAIL_SUBJECT | [benadis-runner] {{.ErrorCode}}: {{.Command}} | Шаблон темы |
+| BR_ALERTING_EMAIL_SUBJECT | [apk-ci] {{.ErrorCode}}: {{.Command}} | Шаблон темы |
 
 ### Пример YAML конфигурации
 
@@ -272,7 +272,7 @@ alerting:
     smtpUser: "alerts@example.com"
     smtpPassword: "${SMTP_PASSWORD}"  # из переменной окружения
     useTLS: true
-    from: "benadis-runner@example.com"
+    from: "apk-ci@example.com"
     to:
       - "devops@example.com"
       - "oncall@example.com"

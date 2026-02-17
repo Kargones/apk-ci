@@ -6,7 +6,7 @@
 - [app.go](file://internal/app/app.go)
 - [convert.go](file://internal/entity/one/convert/convert.go)
 - [store.go](file://internal/entity/one/store/store.go)
-- [main.go](file://cmd/benadis-runner/main.go)
+- [main.go](file://cmd/apk-ci/main.go)
 - [config.go](file://internal/config/config.go)
 - [action.yaml](file://config/action.yaml)
 - [app.yaml](file://config/app.yaml)
@@ -26,13 +26,13 @@
 
 ## Introduction
 
-The `store2db` command in benadis-runner is a critical component designed to synchronize configuration data from 1C configuration storage to database systems. This command serves as the primary mechanism for deploying configuration changes to test and production environments, ensuring consistency between development configurations and operational databases.
+The `store2db` command in apk-ci is a critical component designed to synchronize configuration data from 1C configuration storage to database systems. This command serves as the primary mechanism for deploying configuration changes to test and production environments, ensuring consistency between development configurations and operational databases.
 
 The command operates by loading configuration data from 1C storage repositories, binding them to target databases, and applying the configuration changes through a series of orchestrated operations. It supports both standard configuration loading and custom configuration file scenarios through two distinct implementation variants.
 
 ## Command Overview
 
-The `store2db` command is identified by the environment variable `BR_COMMAND=store2db` and represents one of the core actions in the benadis-runner ecosystem. It facilitates the transfer of configuration artifacts from version-controlled storage to operational databases, enabling seamless deployment of configuration updates across different environments.
+The `store2db` command is identified by the environment variable `BR_COMMAND=store2db` and represents one of the core actions in the apk-ci ecosystem. It facilitates the transfer of configuration artifacts from version-controlled storage to operational databases, enabling seamless deployment of configuration updates across different environments.
 
 ```mermaid
 flowchart TD
@@ -50,11 +50,11 @@ Success --> Exit
 
 **Diagram sources**
 - [app.go](file://internal/app/app.go#L543-L570)
-- [main.go](file://cmd/benadis-runner/main.go#L30-L35)
+- [main.go](file://cmd/apk-ci/main.go#L30-L35)
 
 **Section sources**
 - [constants.go](file://internal/constants/constants.go#L67-L67)
-- [main.go](file://cmd/benadis-runner/main.go#L30-L35)
+- [main.go](file://cmd/apk-ci/main.go#L30-L35)
 
 ## Environment Variables
 

@@ -8,7 +8,7 @@ Status: done
 
 As a DevOps-инженер,
 I want отправлять трейсы в OTLP-совместимый бэкенд (Jaeger/Tempo),
-so that могу анализировать операции benadis-runner через распределённые трейсы с span-ами.
+so that могу анализировать операции apk-ci через распределённые трейсы с span-ами.
 
 ## Acceptance Criteria
 
@@ -17,7 +17,7 @@ so that могу анализировать операции benadis-runner че
 3. [AC3] Ключевые этапы операции (инициализация, выполнение, завершение) создают child span-ы
 4. [AC4] Трейсы экспортируются асинхронно через BatchSpanProcessor с буферизацией (FR54)
 5. [AC5] `tracing.enabled=false` (по умолчанию) → используется nop TracerProvider, overhead отсутствует
-6. [AC6] Resource attributes: service.name=benadis-runner, service.version из build info, deployment.environment из config
+6. [AC6] Resource attributes: service.name=apk-ci, service.version из build info, deployment.environment из config
 7. [AC7] TracerProvider.Shutdown(ctx) вызывается при завершении — все буферизированные span-ы отправляются
 8. [AC8] Существующий trace_id (из `internal/pkg/tracing/traceid.go`) связывается с OTel span context
 9. [AC9] Unit-тесты: nop mode, config validation, resource attributes, span creation, shutdown
@@ -154,7 +154,7 @@ type TracingConfig struct {
     Endpoint string `yaml:"endpoint" env:"BR_TRACING_ENDPOINT"`
 
     // ServiceName — имя сервиса для resource attributes.
-    ServiceName string `yaml:"serviceName" env:"BR_TRACING_SERVICE_NAME" env-default:"benadis-runner"`
+    ServiceName string `yaml:"serviceName" env:"BR_TRACING_SERVICE_NAME" env-default:"apk-ci"`
 
     // Environment — окружение (production, staging, development).
     Environment string `yaml:"environment" env:"BR_TRACING_ENVIRONMENT" env-default:"production"`
@@ -198,7 +198,7 @@ func (c *Config) Validate() error {
 func DefaultConfig() Config {
     return Config{
         Enabled:     false,
-        ServiceName: "benadis-runner",
+        ServiceName: "apk-ci",
         Environment: "production",
         Insecure:    true,
         Timeout:     5 * time.Second,
@@ -300,7 +300,7 @@ defer func() {
 }()
 
 // Создание root span для команды:
-tracer := otel.Tracer("benadis-runner")
+tracer := otel.Tracer("apk-ci")
 ctx, span := tracer.Start(ctx, commandName,
     trace.WithAttributes(
         attribute.String("command", commandName),
@@ -317,7 +317,7 @@ defer span.End()
 |------------|----------------------|----------|
 | BR_TRACING_ENABLED | false | Включить отправку трейсов |
 | BR_TRACING_ENDPOINT | "" | URL OTLP HTTP endpoint (http://jaeger:4318) |
-| BR_TRACING_SERVICE_NAME | benadis-runner | Имя сервиса для resource |
+| BR_TRACING_SERVICE_NAME | apk-ci | Имя сервиса для resource |
 | BR_TRACING_ENVIRONMENT | production | deployment.environment attribute |
 | BR_TRACING_INSECURE | true | Использовать HTTP вместо HTTPS |
 | BR_TRACING_TIMEOUT | 5s | Таймаут экспорта |
@@ -329,7 +329,7 @@ defer span.End()
 tracing:
   enabled: true
   endpoint: "http://jaeger:4318"
-  serviceName: "benadis-runner"
+  serviceName: "apk-ci"
   environment: "production"
   insecure: true
   timeout: "5s"
@@ -350,7 +350,7 @@ tracing:
 - `internal/di/app.go` — добавить TracerShutdown field
 - `internal/di/wire.go` — добавить ProvideTracerProvider в ProviderSet
 - `internal/di/wire_gen.go` — перегенерировать
-- `cmd/benadis-runner/main.go` — добавить defer TracerShutdown, root span creation
+- `cmd/apk-ci/main.go` — добавить defer TracerShutdown, root span creation
 - `go.mod`, `go.sum` — добавить OTel зависимости
 
 **НЕ СОЗДАВАТЬ:**
@@ -471,7 +471,7 @@ cbd8f7d feat(metrics): add Prometheus metrics with Pushgateway support (Story 6-
 - Только OTLP HTTP exporter (не gRPC) — упрощает зависимости
 - Sampling настраивается в Story 6.8 (AlwaysSample по умолчанию)
 - Нет automatic instrumentation HTTP клиентов (Gitea, SonarQube API) — может быть добавлено позже
-- Нет trace context propagation через HTTP headers — benadis-runner не является HTTP сервером
+- Нет trace context propagation через HTTP headers — apk-ci не является HTTP сервером
 - Span instrumentation в handlers опциональна — основной scope: root span в main.go
 
 ### References
@@ -486,7 +486,7 @@ cbd8f7d feat(metrics): add Prometheus metrics with Pushgateway support (Story 6-
 - [Source: internal/di/providers.go:215-239] — ProvideMetricsCollector (ШАБЛОН)
 - [Source: internal/di/app.go] — App struct (добавить TracerShutdown)
 - [Source: internal/config/config.go:531-550] — MetricsConfig (ШАБЛОН для TracingConfig)
-- [Source: cmd/benadis-runner/main.go] — Точка входа (добавить shutdown + root span)
+- [Source: cmd/apk-ci/main.go] — Точка входа (добавить shutdown + root span)
 - [Source: _bmad-output/project-planning-artifacts/prd.md#FR41] — Отправка трейсов в OTel бэкенд
 - [Source: _bmad-output/project-planning-artifacts/prd.md#FR43] — Span-ы для ключевых этапов
 - [Source: _bmad-output/project-planning-artifacts/prd.md#FR54] — Асинхронный экспорт с буферизацией
@@ -503,7 +503,7 @@ Claude Opus 4.6 (claude-opus-4-6)
 
 - semconv v1.26.0: `DeploymentEnvironment` (не `DeploymentEnvironmentName`) — исправлено при компиляции
 - testLogger: интерфейс logging.Logger требует `With(...any) logging.Logger` — исправлен тип возврата
-- `cmd/benadis-runner` main_test.go FAIL — предсуществующий интеграционный тест, требующий доступ к git.apkholding.ru (не регрессия)
+- `cmd/apk-ci` main_test.go FAIL — предсуществующий интеграционный тест, требующий доступ к git.apkholding.ru (не регрессия)
 - golangci-lint не установлен в среде — использован `go vet` (проходит без ошибок)
 
 ### Completion Notes List
@@ -516,7 +516,7 @@ Claude Opus 4.6 (claude-opus-4-6)
 - TracerProvider.Shutdown вызывается в defer main() с 5s timeout
 - 12 новых unit-тестов: Config validation (table-driven), nop mode, span creation с InMemoryExporter, child spans, shutdown, resource attributes
 - Все 37 тестов tracing пакета проходят (включая 25 существующих)
-- Все ~60 пакетов проекта компилируются и проходят тесты (кроме предсуществующего integration test в cmd/benadis-runner)
+- Все ~60 пакетов проекта компилируются и проходят тесты (кроме предсуществующего integration test в cmd/apk-ci)
 - go vet проходит без ошибок
 - Backward compatibility: disabled по умолчанию, существующий trace_id не затронут, nop provider — нулевой overhead
 - OTel v1.40.0 (latest), semconv v1.26.0
@@ -536,10 +536,10 @@ Claude Opus 4.6 (claude-opus-4-6)
 - internal/di/providers.go (ProvideTracerProvider, context/constants imports)
 - internal/di/wire.go (ProvideTracerProvider в ProviderSet)
 - internal/di/wire_gen.go (TracerShutdown в InitializeApp)
-- cmd/benadis-runner/main.go (tracing shutdown, root spans для registry и legacy команд, WithTraceID + ContextWithOTelTraceID)
+- cmd/apk-ci/main.go (tracing shutdown, root spans для registry и legacy команд, WithTraceID + ContextWithOTelTraceID)
 - go.mod (OTel зависимости: otel v1.40.0, sdk v1.40.0, otlptracehttp v1.40.0 и др.)
 - go.sum (контрольные суммы новых зависимостей)
-- .gitignore (benadis-runner binary)
+- .gitignore (apk-ci binary)
 - vendor/ (OTel модули)
 
 ## Change Log
@@ -552,7 +552,7 @@ Claude Opus 4.6 (claude-opus-4-6)
   - [H-3] config.go: validateTracingConfig теперь проверяет ServiceName
   - [M-1] provider_test.go: добавлен комментарий о запрете t.Parallel() из-за глобального SetTracerProvider
   - [M-2] TestResourceAttributes: переписан — реально проверяет service.name, version, environment
-  - [M-3] .gitignore: benadis-runner binary добавлен
+  - [M-3] .gitignore: apk-ci binary добавлен
   - [M-4] config.go: endpoint логируется на Debug вместо Info
   - 3 новых теста для ContextWithOTelTraceID (ValidHex, InvalidHex, SpanInheritsTraceID)
 
@@ -576,7 +576,7 @@ Claude Opus 4.6 (claude-opus-4-6)
 **Findings**: 1 CRITICAL
 
 **Issues fixed (code)**:
-- **C-1**: `cmd/benadis-runner/main.go` — os.Exit() в error paths предотвращал выполнение defer tracerShutdown(), теряя все трейсы при ошибках. Исправлено: вынесена логика в функцию run() → int, main() вызывает os.Exit(run()). Теперь defer-ы (tracerShutdown, span.End) корректно отрабатывают на всех путях выполнения
+- **C-1**: `cmd/apk-ci/main.go` — os.Exit() в error paths предотвращал выполнение defer tracerShutdown(), теряя все трейсы при ошибках. Исправлено: вынесена логика в функцию run() → int, main() вызывает os.Exit(run()). Теперь defer-ы (tracerShutdown, span.End) корректно отрабатывают на всех путях выполнения
 
 ### Adversarial Code Review #17 (2026-02-07)
 

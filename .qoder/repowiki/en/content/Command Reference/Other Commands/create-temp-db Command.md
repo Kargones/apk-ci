@@ -3,7 +3,7 @@
 
 <cite>
 **Referenced Files in This Document**   
-- [main.go](file://cmd/benadis-runner/main.go)
+- [main.go](file://cmd/apk-ci/main.go)
 - [app.go](file://internal/app/app.go)
 - [config.go](file://internal/config/config.go)
 - [constants.go](file://internal/constants/constants.go)
@@ -23,10 +23,10 @@
 9. [Conclusion](#conclusion)
 
 ## Introduction
-The `create-temp-db` command (ActCreateTempDb) in benadis-runner is designed to facilitate testing and development workflows by creating temporary Microsoft SQL Server (MSSQL) databases. This functionality enables developers and automated systems to work with isolated database instances for various purposes such as integration testing, feature development, and quality assurance processes. The command integrates with the application's configuration system and leverages internal components to manage database creation and connection parameters.
+The `create-temp-db` command (ActCreateTempDb) in apk-ci is designed to facilitate testing and development workflows by creating temporary Microsoft SQL Server (MSSQL) databases. This functionality enables developers and automated systems to work with isolated database instances for various purposes such as integration testing, feature development, and quality assurance processes. The command integrates with the application's configuration system and leverages internal components to manage database creation and connection parameters.
 
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L1-L252)
+- [main.go](file://cmd/apk-ci/main.go#L1-L252)
 - [constants.go](file://internal/constants/constants.go#L1-L219)
 
 ## Command Purpose and Use Cases
@@ -40,7 +40,7 @@ The primary purpose of the `create-temp-db` command is to create temporary MSSQL
 The command operates by leveraging configuration parameters and environment variables to establish connections to the database server and create new database instances with specified characteristics.
 
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L150-L154)
+- [main.go](file://cmd/apk-ci/main.go#L150-L154)
 - [app.go](file://internal/app/app.go#L879-L897)
 
 ## Environment Variables and Configuration
@@ -131,12 +131,12 @@ end
 ```
 
 **Diagram sources**
-- [main.go](file://cmd/benadis-runner/main.go#L1-L252)
+- [main.go](file://cmd/apk-ci/main.go#L1-L252)
 - [app.go](file://internal/app/app.go#L879-L897)
 - [designer.go](file://internal/entity/one/designer/designer.go#L376-L409)
 
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L1-L252)
+- [main.go](file://cmd/apk-ci/main.go#L1-L252)
 - [app.go](file://internal/app/app.go#L879-L897)
 
 ## Success and Error Paths
@@ -215,7 +215,7 @@ T --> U["Exit Code 8"]
 - [designer.go](file://internal/entity/one/designer/designer.go#L376-L409)
 
 ## Integration with Internal Components
-The `create-temp-db` command integrates with several internal components of the benadis-runner application, leveraging their functionality to accomplish its purpose.
+The `create-temp-db` command integrates with several internal components of the apk-ci application, leveraging their functionality to accomplish its purpose.
 
 ### Integration with internal/dbrestore
 The command shares infrastructure with the `internal/dbrestore` package, which is responsible for database restoration operations. Both components use similar configuration patterns and authentication mechanisms for connecting to MSSQL servers.

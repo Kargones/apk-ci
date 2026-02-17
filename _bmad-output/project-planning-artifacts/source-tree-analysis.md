@@ -3,9 +3,9 @@
 ## Дерево проекта
 
 ```
-benadis-runner/
+apk-ci/
 ├── cmd/
-│   └── benadis-runner/
+│   └── apk-ci/
 │       ├── main.go                    # Точка входа, маршрутизатор команд
 │       ├── main_test.go               # Тесты main
 │       ├── create_temp_db_test.go     # Тесты создания временной БД
@@ -135,7 +135,7 @@ benadis-runner/
 
 ## Критические директории
 
-### `cmd/benadis-runner/`
+### `cmd/apk-ci/`
 Точка входа приложения. `main.go` содержит switch-statement для маршрутизации 17 команд через `BR_COMMAND`.
 
 ### `internal/app/`

@@ -2,7 +2,7 @@
 
 <cite>
 **Referenced Files in This Document**
-- [main.go](file://cmd/benadis-runner/main.go)
+- [main.go](file://cmd/apk-ci/main.go)
 - [app.go](file://internal/app/app.go)
 - [gitea_service.go](file://internal/service/gitea_service.go)
 - [constants.go](file://internal/constants/constants.go)
@@ -28,7 +28,7 @@
 
 ## Introduction
 
-The `test-merge` command in benadis-runner is a sophisticated tool designed to simulate merge operations between 1C configuration branches to detect conflicts before actual merging occurs. This command plays a crucial role in maintaining code quality and preventing integration issues in 1C Enterprise development environments.
+The `test-merge` command in apk-ci is a sophisticated tool designed to simulate merge operations between 1C configuration branches to detect conflicts before actual merging occurs. This command plays a crucial role in maintaining code quality and preventing integration issues in 1C Enterprise development environments.
 
 The test-merge functionality creates a test branch and attempts to merge all active pull requests into this branch, automatically closing any PRs that would cause conflicts during the merge process. This approach allows teams to identify potential integration problems early in the development cycle.
 
@@ -62,7 +62,7 @@ Cleanup --> End([Command Complete])
 ```
 
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L230-L235)
+- [main.go](file://cmd/apk-ci/main.go#L230-L235)
 - [constants.go](file://internal/constants/constants.go#L118-L118)
 
 ## Architecture
@@ -113,13 +113,13 @@ GiteaService --> Config : "configured by"
 ```
 
 **Diagram sources**
-- [main.go](file://cmd/benadis-runner/main.go#L230-L235)
+- [main.go](file://cmd/apk-ci/main.go#L230-L235)
 - [app.go](file://internal/app/app.go#L1260-L1299)
 - [gitea_service.go](file://internal/service/gitea_service.go#L15-L25)
 - [interfaces.go](file://internal/entity/gitea/interfaces.go#L15-L45)
 
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L1-L252)
+- [main.go](file://cmd/apk-ci/main.go#L1-L252)
 - [app.go](file://internal/app/app.go#L1260-L1299)
 - [gitea_service.go](file://internal/service/gitea_service.go#L1-L201)
 
@@ -274,7 +274,7 @@ export ACCESS_TOKEN="ghp_xxxxxxxxxxxxxxxxxxxxxxxx"
 export COMMAND="test-merge"
 export LOG_LEVEL="Debug"
 
-./benadis-runner
+./apk-ci
 ```
 
 ### GitHub Actions Integration
@@ -293,8 +293,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
         
-      - name: Setup benadis-runner
-        uses: gitops-tools/benadis-runner@latest
+      - name: Setup apk-ci
+        uses: gitops-tools/apk-ci@latest
         with:
           giteaURL: ${{ github.server_url }}
           repository: ${{ github.repository }}
@@ -312,7 +312,7 @@ docker run --rm \
   -e ACCESS_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxxxxxx \
   -e COMMAND=test-merge \
   -v /tmp/benadis:/tmp/benadis \
-  benadis-runner:test-merge
+  apk-ci:test-merge
 ```
 
 ### Programmatic Usage
@@ -395,8 +395,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         
-      - name: Setup benadis-runner
-        uses: gitops-tools/benadis-runner@latest
+      - name: Setup apk-ci
+        uses: gitops-tools/apk-ci@latest
         with:
           giteaURL: ${{ github.server_url }}
           repository: ${{ github.repository }}
@@ -410,7 +410,7 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-            const logs = fs.readFileSync('/tmp/benadis-runner.log', 'utf8');
+            const logs = fs.readFileSync('/tmp/apk-ci.log', 'utf8');
             // Process logs to identify conflicts
             // Create issue or comment on PR with conflict details
 ```
@@ -434,7 +434,7 @@ pipeline {
                     
                     sh '''
                         export ${envVars.collect { "${it.key}=${it.value}" }.join(' ')}
-                        ./benadis-runner
+                        ./apk-ci
                     '''
                 }
             }
@@ -503,7 +503,7 @@ Implement robust error handling in CI/CD pipelines:
 steps:
   - name: Test Merge
     continue-on-error: false
-    uses: gitops-tools/benadis-runner@latest
+    uses: gitops-tools/apk-ci@latest
     with:
       command: test-merge
       logLevel: Debug
@@ -580,7 +580,7 @@ Enable debug mode for detailed troubleshooting:
 
 ```bash
 export LOG_LEVEL="Debug"
-./benadis-runner
+./apk-ci
 ```
 
 ### Log Analysis
@@ -589,13 +589,13 @@ Key log patterns to monitor:
 
 ```bash
 # Successful execution
-grep "Проверка конфликтов слияния успешно завершена" /var/log/benadis-runner.log
+grep "Проверка конфликтов слияния успешно завершена" /var/log/apk-ci.log
 
 # Errors
-grep "Ошибка" /var/log/benadis-runner.log
+grep "Ошибка" /var/log/apk-ci.log
 
 # Debug information
-grep "DEBUG" /var/log/benadis-runner.log
+grep "DEBUG" /var/log/apk-ci.log
 ```
 
 **Section sources**
@@ -604,7 +604,7 @@ grep "DEBUG" /var/log/benadis-runner.log
 
 ## Conclusion
 
-The test-merge command in benadis-runner provides a powerful solution for detecting merge conflicts in 1C configuration repositories before they become problematic. By simulating merge operations in a controlled test environment, teams can identify and resolve integration issues early in the development cycle.
+The test-merge command in apk-ci provides a powerful solution for detecting merge conflicts in 1C configuration repositories before they become problematic. By simulating merge operations in a controlled test environment, teams can identify and resolve integration issues early in the development cycle.
 
 Key benefits include:
 

@@ -2,7 +2,7 @@
 
 <cite>
 **Referenced Files in This Document **   
-- [main.go](file://cmd/benadis-runner/main.go)
+- [main.go](file://cmd/apk-ci/main.go)
 - [constants.go](file://internal/constants/constants.go)
 - [app.go](file://internal/app/app.go)
 </cite>
@@ -22,14 +22,14 @@
 5. [Common Use Cases and Issues](#common-use-cases-and-issues)
 
 ## Introduction
-This document provides detailed information about additional commands in the benadis-runner application beyond the primary ones. These specialized commands support various development, testing, and integration workflows within the 1C:Enterprise ecosystem. The commands are implemented in the main.go and app.go files and are triggered through environment variables that map to specific constant values defined in constants.go.
+This document provides detailed information about additional commands in the apk-ci application beyond the primary ones. These specialized commands support various development, testing, and integration workflows within the 1C:Enterprise ecosystem. The commands are implemented in the main.go and app.go files and are triggered through environment variables that map to specific constant values defined in constants.go.
 
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L0-L252)
+- [main.go](file://cmd/apk-ci/main.go#L0-L252)
 - [constants.go](file://internal/constants/constants.go#L0-L219)
 
 ## Command Overview
-The benadis-runner application implements several specialized commands for managing databases, configuration stores, and SonarQube integration. Each command is associated with a specific constant value (BR_COMMAND) that determines which functionality is executed when the application runs.
+The apk-ci application implements several specialized commands for managing databases, configuration stores, and SonarQube integration. Each command is associated with a specific constant value (BR_COMMAND) that determines which functionality is executed when the application runs.
 
 ```mermaid
 graph TD
@@ -51,11 +51,11 @@ I --> P[Merge Conflict Testing]
 ```
 
 **Diagram sources **
-- [main.go](file://cmd/benadis-runner/main.go#L0-L252)
+- [main.go](file://cmd/apk-ci/main.go#L0-L252)
 - [constants.go](file://internal/constants/constants.go#L0-L219)
 
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L0-L252)
+- [main.go](file://cmd/apk-ci/main.go#L0-L252)
 - [constants.go](file://internal/constants/constants.go#L0-L219)
 
 ## Detailed Command Analysis
@@ -85,7 +85,7 @@ The create-temp-db command creates temporary databases for testing purposes. Thi
 - Insufficient permissions or disk space
 
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L168-L176)
+- [main.go](file://cmd/apk-ci/main.go#L168-L176)
 - [constants.go](file://internal/constants/constants.go#L118-L119)
 
 ### create-stores (ActCreateStores)
@@ -115,7 +115,7 @@ The create-stores command creates configuration stores for version control of 1C
 - Invalid repository configuration
 
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L177-L185)
+- [main.go](file://cmd/apk-ci/main.go#L177-L185)
 - [app.go](file://internal/app/app.go#L899-L921)
 - [constants.go](file://internal/constants/constants.go#L120-L121)
 
@@ -143,7 +143,7 @@ The storebind command binds a configuration store to a database, establishing th
 - Permission denied errors
 
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L160-L167)
+- [main.go](file://cmd/apk-ci/main.go#L160-L167)
 - [constants.go](file://internal/constants/constants.go#L116-L117)
 
 ### dbupdate (ActDbupdate)
@@ -171,7 +171,7 @@ The dbupdate command updates a database with the latest configuration from a sto
 - Schema update errors
 
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L145-L152)
+- [main.go](file://cmd/apk-ci/main.go#L145-L152)
 - [constants.go](file://internal/constants/constants.go#L114-L115)
 
 ### sq-project-update (ActSQProjectUpdate)
@@ -200,7 +200,7 @@ The sq-project-update command refreshes SonarQube project metadata, ensuring cod
 - Authentication errors
 
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L186-L193)
+- [main.go](file://cmd/apk-ci/main.go#L186-L193)
 - [app.go](file://internal/app/app.go#L89-L157)
 - [constants.go](file://internal/constants/constants.go#L126-L127)
 
@@ -229,7 +229,7 @@ The sq-report-branch command generates reports on branch quality metrics from So
 - Reporting service failures
 
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L209-L216)
+- [main.go](file://cmd/apk-ci/main.go#L209-L216)
 - [app.go](file://internal/app/app.go#L190-L218)
 - [constants.go](file://internal/constants/constants.go#L128-L129)
 
@@ -257,7 +257,7 @@ The test-merge command checks for merge conflicts between branches, helping prev
 - Repository connectivity issues
 
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L217-L224)
+- [main.go](file://cmd/apk-ci/main.go#L217-L224)
 - [constants.go](file://internal/constants/constants.go#L130-L131)
 
 ## Integration and Workflows
@@ -289,11 +289,11 @@ end
 ```
 
 **Diagram sources **
-- [main.go](file://cmd/benadis-runner/main.go#L0-L252)
+- [main.go](file://cmd/apk-ci/main.go#L0-L252)
 - [app.go](file://internal/app/app.go#L0-L1301)
 
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L0-L252)
+- [main.go](file://cmd/apk-ci/main.go#L0-L252)
 - [app.go](file://internal/app/app.go#L0-L1301)
 
 ## Common Use Cases and Issues
@@ -311,6 +311,6 @@ end
 4. **Configuration Errors**: Missing or incorrect environment variables can cause command failures
 
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L0-L252)
+- [main.go](file://cmd/apk-ci/main.go#L0-L252)
 - [app.go](file://internal/app/app.go#L0-L1301)
 - [constants.go](file://internal/constants/constants.go#L0-L219)

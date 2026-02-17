@@ -451,7 +451,7 @@ internal/constants/
 - `internal/entity/one/designer/designer.go` — legacy код UpdateCfg
 - `internal/entity/one/convert/convert.go` — legacy координация
 - `internal/app/app.go` — legacy DbUpdateWithConfig
-- `cmd/benadis-runner/main.go` — точка входа (не менять switch-case)
+- `cmd/apk-ci/main.go` — точка входа (не менять switch-case)
 
 ### Что НЕ делать
 

@@ -310,13 +310,13 @@ import (
 
 ### Предыдущая стория — уроки (Story 7.1)
 
-- **Blank imports для init():** Shadow-run использует маппинг в `cmd/benadis-runner/shadow_mapping.go`, но НЕ blank imports. Smoke-тесты ДОЛЖНЫ использовать blank imports т.к. находятся в `internal/`, а не в `cmd/`
-- **Циклические зависимости обойдены:** Shadow-run вынес маппинг в `cmd/benadis-runner/` чтобы избежать циклического импорта `command/shadowrun → app → command`. Smoke-тесты в `internal/smoketest/` импортируют handlers напрямую — проверь что нет циклов
+- **Blank imports для init():** Shadow-run использует маппинг в `cmd/apk-ci/shadow_mapping.go`, но НЕ blank imports. Smoke-тесты ДОЛЖНЫ использовать blank imports т.к. находятся в `internal/`, а не в `cmd/`
+- **Циклические зависимости обойдены:** Shadow-run вынес маппинг в `cmd/apk-ci/` чтобы избежать циклического импорта `command/shadowrun → app → command`. Smoke-тесты в `internal/smoketest/` импортируют handlers напрямую — проверь что нет циклов
 - **os.Stdout захват:** Использовать `testutil.CaptureStdout()` из `internal/pkg/testutil/capture.go`
 - **Тесты написаны с покрытием 96%** — ставим планку не ниже
 - **Code review найдёт 5-15 issues** — готовиться к итерациям
 
-### Exit codes приложения [Source: cmd/benadis-runner/main.go]
+### Exit codes приложения [Source: cmd/apk-ci/main.go]
 
 ```
 0 — Успех
@@ -355,7 +355,7 @@ Claude Opus 4.6
 - Dev Notes содержали неточные import-пути: `sonarqube/branchscan` → реально `sonarqube/scanbranch`, `sonarqube/prscan` → `sonarqube/scanpr`, `gitea/actionmenubuild` → `gitea/actionmenu`
 - Dev Notes указывали 16 deprecated aliases, реально найдено 18 (+ test-merge, action-menu-build)
 - Dev Notes указывали `version` как deprecated alias для `nr-version`, но в коде version handler использует `command.Register()` без alias
-- Pre-existing failure: `cmd/benadis-runner` тесты падают из-за недоступности Gitea API — не связано с изменениями
+- Pre-existing failure: `cmd/apk-ci` тесты падают из-за недоступности Gitea API — не связано с изменениями
 
 ### Completion Notes List
 
@@ -366,7 +366,7 @@ Claude Opus 4.6
 - ✅ Создан CI workflow `smoke-tests.yaml` с trigger на push в main
 - ✅ Добавлен Makefile target `test-smoke` с timeout 60s
 - ✅ Smoke-тесты добавлены в основной CI pipeline (ci.yaml)
-- ✅ Регрессионных проблем не обнаружено (FAIL только в cmd/benadis-runner — pre-existing)
+- ✅ Регрессионных проблем не обнаружено (FAIL только в cmd/apk-ci — pre-existing)
 
 ### File List
 

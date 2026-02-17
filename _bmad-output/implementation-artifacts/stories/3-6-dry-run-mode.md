@@ -385,7 +385,7 @@ internal/command/handlers/
 ### Файлы НЕ ТРОГАТЬ
 
 - Legacy код (`internal/app/`, `internal/entity/`)
-- `cmd/benadis-runner/main.go` — точка входа (не менять)
+- `cmd/apk-ci/main.go` — точка входа (не менять)
 
 ### Что НЕ делать
 

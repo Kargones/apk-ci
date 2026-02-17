@@ -34,7 +34,7 @@ LEGACY РЕАЛИЗАЦИЯ:
 ├── internal/entity/one/edt/edt.go          ✅ EDT операции
 ├── internal/entity/one/enterprise/         ✅ Enterprise операции
 ├── internal/app/app.go                     ✅ Оркестрация
-└── cmd/benadis-runner/main.go              ✅ switch-case
+└── cmd/apk-ci/main.go              ✅ switch-case
 
 NR АРХИТЕКТУРА (ОЖИДАЕТСЯ):
 ├── internal/command/handlers/store/        ❌ НЕ СУЩЕСТВУЕТ

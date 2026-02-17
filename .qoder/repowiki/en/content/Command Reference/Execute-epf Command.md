@@ -2,7 +2,7 @@
 
 <cite>
 **Referenced Files in This Document**
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go)
 - [internal/app/app.go](file://internal/app/app.go)
 - [internal/app/execute_epf_test.go](file://internal/app/execute_epf_test.go)
 - [internal/entity/one/enterprise/enterprise.go](file://internal/entity/one/enterprise/enterprise.go)
@@ -28,7 +28,7 @@
 
 ## Introduction
 
-The `execute-epf` command in benadis-runner is designed to execute external processing files (.epf) in 1C:Enterprise applications. This command enables automation of various administrative tasks, data processing operations, and system maintenance procedures through programmatically executed external processing files.
+The `execute-epf` command in apk-ci is designed to execute external processing files (.epf) in 1C:Enterprise applications. This command enables automation of various administrative tasks, data processing operations, and system maintenance procedures through programmatically executed external processing files.
 
 The command integrates seamlessly with GitHub Actions and provides a robust framework for executing .epf files stored in remote repositories, managing temporary file creation, and interfacing with the 1C command-line tools.
 
@@ -54,7 +54,7 @@ Exit --> End
 ```
 
 **Section sources**
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L200-L210)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go#L200-L210)
 - [internal/constants/constants.go](file://internal/constants/constants.go#L85-L85)
 
 ## Environment Variables
@@ -409,7 +409,7 @@ Execute EPF files for automated data migration between systems:
 export BR_COMMAND="execute-epf"
 export BR_START_EPF="https://example.com/migration.epf"
 export BR_INFOBASE_NAME="ProductionDB"
-./benadis-runner
+./apk-ci
 ```
 
 ### Report Generation
@@ -420,7 +420,7 @@ Automate report generation using pre-built EPF templates:
 export BR_COMMAND="execute-epf"
 export BR_START_EPF="https://example.com/report_generator.epf"
 export BR_INFOBASE_NAME="ReportingDB"
-./benadis-runner
+./apk-ci
 ```
 
 ### System Maintenance Tasks
@@ -431,7 +431,7 @@ Perform routine maintenance operations:
 export BR_COMMAND="execute-epf"
 export BR_START_EPF="https://example.com/maintenance.epf"
 export BR_INFOBASE_NAME="MaintenanceDB"
-./benadis-runner
+./apk-ci
 ```
 
 ### Batch Processing Operations
@@ -442,7 +442,7 @@ Execute batch operations on large datasets:
 export BR_COMMAND="execute-epf"
 export BR_START_EPF="https://example.com/batch_processor.epf"
 export BR_INFOBASE_NAME="BatchDB"
-./benadis-runner
+./apk-ci
 ```
 
 ## Testing
@@ -517,7 +517,7 @@ Enable debug logging for detailed troubleshooting:
 ```bash
 export LOG_LEVEL="debug"
 export BR_COMMAND="execute-epf"
-./benadis-runner
+./apk-ci
 ```
 
 ### Common Error Messages
@@ -538,7 +538,7 @@ Monitor logs for detailed error information:
 export LOG_LEVEL="debug"
 
 # Run with logging
-./benadis-runner 2>&1 | tee execution.log
+./apk-ci 2>&1 | tee execution.log
 ```
 
 ### Performance Optimization

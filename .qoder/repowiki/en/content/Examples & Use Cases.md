@@ -10,7 +10,7 @@
 - [3-1cedtcli.sh](file://scripts/3-1cedtcli.sh)
 - [generate-version.sh](file://scripts/generate-version.sh)
 - [install-dev-tools.sh](file://scripts/install-dev-tools.sh)
-- [sq-scan-benadis-runner.sh](file://scripts/sq-scan-benadis-runner.sh)
+- [sq-scan-apk-ci.sh](file://scripts/sq-scan-apk-ci.sh)
 - [sonarqube_init.go](file://internal/app/sonarqube_init.go)
 - [sonarqube.go](file://internal/config/sonarqube.go)
 - [command_handler.go](file://internal/service/sonarqube/command_handler.go)
@@ -30,9 +30,9 @@
 
 ## CI/CD Pipeline with GitHub Actions
 
-The benadis-runner can be integrated into GitHub Actions workflows using the action.yaml configuration file. This enables automated execution of various commands through GitHub Actions, providing a seamless CI/CD experience for 1C development projects.
+The apk-ci can be integrated into GitHub Actions workflows using the action.yaml configuration file. This enables automated execution of various commands through GitHub Actions, providing a seamless CI/CD experience for 1C development projects.
 
-The action.yaml file defines a composite action that accepts multiple inputs including Gitea URL, repository information, access tokens, and specific commands to execute. The action is designed to run the benadis-runner binary with environment variables mapped from the input parameters, allowing for flexible configuration of different operations.
+The action.yaml file defines a composite action that accepts multiple inputs including Gitea URL, repository information, access tokens, and specific commands to execute. The action is designed to run the apk-ci binary with environment variables mapped from the input parameters, allowing for flexible configuration of different operations.
 
 Key features of the GitHub Actions integration include:
 - Debug mode support with configurable debug port and wait options
@@ -48,7 +48,7 @@ The action can be triggered on various events and supports both main and debug c
 
 ## Database Restore Automation
 
-The database restore functionality in benadis-runner is configured through the dbconfig.yaml file, which contains definitions for multiple database instances across different environments. This configuration enables automated restoration and management of MSSQL databases used in 1C applications.
+The database restore functionality in apk-ci is configured through the dbconfig.yaml file, which contains definitions for multiple database instances across different environments. This configuration enables automated restoration and management of MSSQL databases used in 1C applications.
 
 The dbconfig.yaml file defines database configurations with key properties:
 - one-server: Specifies the application server for the database
@@ -70,7 +70,7 @@ This comprehensive database configuration system enables automated database oper
 
 ## Quality Gates with SonarQube Scanning
 
-benadis-runner integrates with SonarQube to implement quality gates in the development process. The integration is configured through several components that work together to enable code analysis and quality verification.
+apk-ci integrates with SonarQube to implement quality gates in the development process. The integration is configured through several components that work together to enable code analysis and quality verification.
 
 The SonarQube configuration is defined in the internal/config/sonarqube.go file, which specifies settings such as:
 - SonarQube server URL and authentication token
@@ -87,12 +87,12 @@ The service layer in internal/service/sonarqube/command_handler.go implements th
 
 The branch scanning functionality in internal/entity/sonarqube/branch_scanner.go retrieves Git metadata and performs SonarQube scans, while the service layer in internal/service/sonarqube/branch_scanner_service.go provides orchestration with validation, retry logic, and result processing.
 
-A sample script (sq-scan-benadis-runner.sh) demonstrates how to execute a SonarQube scan with specific parameters including project key, source directory, server URL, and authentication token. This enables automated quality checks as part of CI/CD pipelines, ensuring code quality standards are maintained.
+A sample script (sq-scan-apk-ci.sh) demonstrates how to execute a SonarQube scan with specific parameters including project key, source directory, server URL, and authentication token. This enables automated quality checks as part of CI/CD pipelines, ensuring code quality standards are maintained.
 
 ```mermaid
 sequenceDiagram
 participant CI as CI/CD System
-participant Runner as benadis-runner
+participant Runner as apk-ci
 participant SonarQube as SonarQube Server
 participant Git as Git Repository
 CI->>Runner : Trigger scan (via action or script)
@@ -113,18 +113,18 @@ Runner-->>CI : Report scan results and quality status
 - [command_handler.go](file://internal/service/sonarqube/command_handler.go#L1-L344)
 - [branch_scanner.go](file://internal/entity/sonarqube/branch_scanner.go#L1-L449)
 - [branch_scanner_service.go](file://internal/service/sonarqube/branch_scanner_service.go#L1-L408)
-- [sq-scan-benadis-runner.sh](file://scripts/sq-scan-benadis-runner.sh#L1-L7)
+- [sq-scan-apk-ci.sh](file://scripts/sq-scan-apk-ci.sh#L1-L7)
 
 **Section sources**
 - [sonarqube.go](file://internal/config/sonarqube.go#L1-L253)
 - [command_handler.go](file://internal/service/sonarqube/command_handler.go#L1-L344)
 - [branch_scanner.go](file://internal/entity/sonarqube/branch_scanner.go#L1-L449)
 - [branch_scanner_service.go](file://internal/service/sonarqube/branch_scanner_service.go#L1-L408)
-- [sq-scan-benadis-runner.sh](file://scripts/sq-scan-benadis-runner.sh#L1-L7)
+- [sq-scan-apk-ci.sh](file://scripts/sq-scan-apk-ci.sh#L1-L7)
 
 ## Environment Setup and Version Management
 
-The scripts directory contains several shell scripts that demonstrate environment setup and version management practices for the benadis-runner project.
+The scripts directory contains several shell scripts that demonstrate environment setup and version management practices for the apk-ci project.
 
 The 0-env-config.sh script configures Git settings for the development environment, including user name, email, and credential caching. This ensures consistent Git configuration across development environments.
 
@@ -169,7 +169,7 @@ These scripts illustrate how to automate container operations for 1C application
 
 ## 1C Project Conversion
 
-The benadis-runner includes functionality for converting 1C projects between different formats and storage types. While specific conversion scripts are not visible in the provided context, the architecture suggests support for various conversion operations.
+The apk-ci includes functionality for converting 1C projects between different formats and storage types. While specific conversion scripts are not visible in the provided context, the architecture suggests support for various conversion operations.
 
 Based on the project structure, conversion capabilities likely include:
 - Converting between file-based and database-based configuration storage
@@ -213,7 +213,7 @@ This workflow supports modern development practices by decoupling configuration 
 
 ## Service Mode State Management
 
-The benadis-runner includes functionality for managing service mode states in 1C information bases. While specific implementation details are not fully visible in the provided context, the architecture indicates support for this critical administrative function.
+The apk-ci includes functionality for managing service mode states in 1C information bases. While specific implementation details are not fully visible in the provided context, the architecture indicates support for this critical administrative function.
 
 Service mode management typically involves:
 - Enabling service mode to restrict user access during maintenance

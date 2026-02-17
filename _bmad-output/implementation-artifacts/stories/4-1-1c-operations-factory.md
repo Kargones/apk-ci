@@ -675,7 +675,7 @@ internal/di/
 ### Файлы НЕ ТРОГАТЬ
 
 - Legacy код (`internal/entity/one/`, `internal/app/`)
-- `cmd/benadis-runner/main.go` — точка входа
+- `cmd/apk-ci/main.go` — точка входа
 - Существующие реализации (`updater.go`, `tempdb_creator.go`) — они уже работают
 
 ### Что НЕ делать

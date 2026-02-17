@@ -81,7 +81,7 @@ So that база синхронизирована с хранилищем кон
 
 ### Существующая Legacy-реализация
 
-**Точка входа** (`cmd/benadis-runner/main.go:62-70`):
+**Точка входа** (`cmd/apk-ci/main.go:62-70`):
 ```go
 case constants.ActStore2db:
     err = app.Store2DbWithConfig(&ctx, l, cfg)
@@ -287,7 +287,7 @@ internal/constants/
 | Файл | Изменение |
 |------|-----------|
 | `internal/constants/constants.go` | Добавить `ActNRStore2db` |
-| `cmd/benadis-runner/main.go` | Добавить blank import store2dbhandler |
+| `cmd/apk-ci/main.go` | Добавить blank import store2dbhandler |
 
 ### Файлы НЕ ТРОГАТЬ
 
@@ -405,8 +405,8 @@ Claude Opus 4.5 (claude-opus-4-5-20251101)
 
 **Изменено:**
 - `internal/constants/constants.go` — добавлена константа `ActNRStore2db`
-- `cmd/benadis-runner/main.go` — добавлен blank import store2dbhandler
-- `cmd/benadis-runner/main_test.go` — удалён `ActStore2db` из `legacyCommands`
+- `cmd/apk-ci/main.go` — добавлен blank import store2dbhandler
+- `cmd/apk-ci/main_test.go` — удалён `ActStore2db` из `legacyCommands`
 
 **Review fixes (2026-02-04):**
 - `internal/command/handlers/store2dbhandler/handler.go`:

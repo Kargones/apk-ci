@@ -2,7 +2,7 @@
 
 <cite>
 **Referenced Files in This Document**
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go) - *Updated in recent commit*
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go) - *Updated in recent commit*
 - [internal/app/app.go](file://internal/app/app.go) - *Updated in recent commit*
 - [internal/git/git.go](file://internal/git/git.go) - *Updated with configurable timeouts*
 - [internal/config/config.go](file://internal/config/config.go) - *Added GitConfig structure*
@@ -37,7 +37,7 @@
 
 ## Introduction
 
-The `git2store` command in benadis-runner is a specialized tool designed to synchronize configuration data from Git repositories to 1C configuration storage. This command serves as a critical bridge between modern version control practices and traditional 1C configuration management systems, enabling seamless integration of development workflows with enterprise configuration management.
+The `git2store` command in apk-ci is a specialized tool designed to synchronize configuration data from Git repositories to 1C configuration storage. This command serves as a critical bridge between modern version control practices and traditional 1C configuration management systems, enabling seamless integration of development workflows with enterprise configuration management.
 
 The command automates the complex process of converting Git-based configuration files into 1C-compatible formats, managing database operations, and ensuring data integrity throughout the synchronization process. It handles everything from repository initialization to final storage commits, providing a robust solution for organizations transitioning to Git-based workflows while maintaining compatibility with existing 1C infrastructure.
 
@@ -91,7 +91,7 @@ ErrorHandle --> End
 - [internal/app/app.go](file://internal/app/app.go#L417-L531)
 
 **Section sources**
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L40-L45)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go#L40-L45)
 - [internal/constants/constants.go](file://internal/constants/constants.go#L58-L59)
 
 ## Environment Variables
@@ -629,7 +629,7 @@ users:
   db: Administrator
   storeAdmin: Administrator
 git:
-  userName: benadis-runner
+  userName: apk-ci
   userEmail: runner@benadis.ru
   defaultBranch: main
   timeout: "60m"

@@ -43,7 +43,7 @@ Benadis Runner - это система автоматизации DevOps про�
 
 ## Компоненты проекта
 
-### 1. CLI Interface (cmd/benadis-runner)
+### 1. CLI Interface (cmd/apk-ci)
 
 **Назначение**: Точка входа в приложение, обработка команд и параметров.
 
@@ -372,7 +372,7 @@ client := &http.Client{
 **Пример использования**:
 ```yaml
 - name: Проверка конфликтов слияния
-  uses: https://git.example.com/actions/benadis-runner@latest
+  uses: https://git.example.com/actions/apk-ci@latest
   with:
     giteaURL: ${{ github.server_url }}
     repository: ${{ github.repository }}

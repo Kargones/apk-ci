@@ -18,7 +18,7 @@
 
 ```bash
 git clone <repository-url>
-cd benadis-runner
+cd apk-ci
 ```
 
 ### Настройка среды разработки
@@ -45,7 +45,7 @@ make deps
 make build
 ```
 
-Результат: `./build/benadis-runner`
+Результат: `./build/apk-ci`
 
 ### Кросс-платформенная сборка
 
@@ -176,7 +176,7 @@ make run
 ### Прямой запуск
 
 ```bash
-BR_COMMAND=service-mode-status BR_INFOBASE_NAME=MyInfobase ./benadis-runner
+BR_COMMAND=service-mode-status BR_INFOBASE_NAME=MyInfobase ./apk-ci
 ```
 
 ## Структура переменных окружения
@@ -233,7 +233,7 @@ func NewCommand(ctx *context.Context, l *slog.Logger, cfg *config.Config) error 
 
 ### 3. Маршрутизация
 
-`cmd/benadis-runner/main.go`:
+`cmd/apk-ci/main.go`:
 
 ```go
 case constants.ActNewCommand:
@@ -351,7 +351,7 @@ func (m *MockGiteaAPI) GetCommitFiles(hash string) ([]CommitFile, error) {
 ### Установка уровня
 
 ```bash
-BR_LOG_LEVEL=Debug ./benadis-runner
+BR_LOG_LEVEL=Debug ./apk-ci
 ```
 
 ## Релиз
@@ -365,9 +365,9 @@ make release
 Выполняет: clean, check, build-all
 
 Результаты в `./build/`:
-- benadis-runner-linux-amd64
-- benadis-runner-windows-amd64.exe
-- benadis-runner-darwin-amd64
+- apk-ci-linux-amd64
+- apk-ci-windows-amd64.exe
+- apk-ci-darwin-amd64
 
 ## Документация
 

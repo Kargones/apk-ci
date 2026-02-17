@@ -6,7 +6,7 @@ Status: done
 
 As a DevOps-инженер,
 I want получать результаты команд в JSON формате со структурированными ошибками,
-so that я могу интегрировать benadis-runner с другими инструментами автоматизации.
+so that я могу интегрировать apk-ci с другими инструментами автоматизации.
 
 ## Acceptance Criteria
 
@@ -422,7 +422,7 @@ internal/pkg/
 
 **Не изменять:**
 - `internal/command/` — не требует изменений для этой story
-- `cmd/benadis-runner/main.go` — интеграция будет в Story 1.7 (Wire DI)
+- `cmd/apk-ci/main.go` — интеграция будет в Story 1.7 (Wire DI)
 
 ### Testing Standards
 

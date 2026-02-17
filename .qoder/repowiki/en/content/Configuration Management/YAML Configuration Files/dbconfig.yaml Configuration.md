@@ -5,7 +5,7 @@
 - [dbconfig.yaml](file://config/dbconfig.yaml)
 - [config.go](file://internal/config/config.go)
 - [dbrestore.go](file://internal/entity/dbrestore/dbrestore.go)
-- [main.go](file://cmd/benadis-runner/main.go)
+- [main.go](file://cmd/apk-ci/main.go)
 - [app.go](file://internal/app/app.go)
 </cite>
 
@@ -24,7 +24,7 @@
 
 ## Introduction
 
-The `dbconfig.yaml` file serves as the central configuration hub for managing multiple database connection profiles in the benadis-runner application. This YAML-based configuration file defines database connections for various 1C:Enterprise environments, including both development and production systems. The configuration enables automated database operations, service mode management, and seamless integration with CI/CD pipelines through GitHub Actions.
+The `dbconfig.yaml` file serves as the central configuration hub for managing multiple database connection profiles in the apk-ci application. This YAML-based configuration file defines database connections for various 1C:Enterprise environments, including both development and production systems. The configuration enables automated database operations, service mode management, and seamless integration with CI/CD pipelines through GitHub Actions.
 
 The dbconfig.yaml file organizes database configurations into named profiles, each containing essential connection parameters including server addresses, database names, and operational flags. These profiles support both local and remote MSSQL instances commonly used in 1C:Enterprise deployments.
 
@@ -194,7 +194,7 @@ V8_ARCH_PR_APKKURSK_BUH_2011_2021:
 
 ## Integration with Commands
 
-The dbconfig.yaml integrates seamlessly with various benadis-runner commands, particularly those involving database operations:
+The dbconfig.yaml integrates seamlessly with various apk-ci commands, particularly those involving database operations:
 
 ### Service Mode Operations
 
@@ -476,4 +476,4 @@ Monitor-->>Client : Health Report
 3. **Resource Monitoring**: Monitor database resource utilization
 4. **Batch Operations**: Optimize batch operations for large datasets
 
-The dbconfig.yaml configuration system provides a robust foundation for managing database connections in the benadis-runner application. By following these guidelines and leveraging the built-in validation and error handling mechanisms, organizations can ensure reliable and secure database operations across their 1C:Enterprise environments.
+The dbconfig.yaml configuration system provides a robust foundation for managing database connections in the apk-ci application. By following these guidelines and leveraging the built-in validation and error handling mechanisms, organizations can ensure reliable and secure database operations across their 1C:Enterprise environments.

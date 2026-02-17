@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-benadis-runner v2.0 — архитектурная трансформация CLI-инструмента автоматизации для 1C:Enterprise. Ключевые принципы: SOLID-совместимость, DI через Wire, Command Registry для расширяемости, Strategy pattern для сменных реализаций (1cv8/ibcmd/native), и полный observability-стек (slog + OpenTelemetry).
+apk-ci v2.0 — архитектурная трансформация CLI-инструмента автоматизации для 1C:Enterprise. Ключевые принципы: SOLID-совместимость, DI через Wire, Command Registry для расширяемости, Strategy pattern для сменных реализаций (1cv8/ibcmd/native), и полный observability-стек (slog + OpenTelemetry).
 
 ## Decision Summary
 
@@ -22,9 +22,9 @@ benadis-runner v2.0 — архитектурная трансформация CL
 ## Project Structure
 
 ```
-benadis-runner/
+apk-ci/
 ├── cmd/
-│   └── benadis-runner/
+│   └── apk-ci/
 │       └── main.go              # Точка входа, инициализация Wire
 ├── internal/
 │   ├── di/                      # Wire providers и injectors
@@ -131,7 +131,7 @@ benadis-runner/
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                        benadis-runner                           │
+│                        apk-ci                           │
 ├─────────────────────────────────────────────────────────────────┤
 │  Command Layer                                                  │
 │  ┌──────────────────────────────────────────────────────────┐  │
@@ -483,8 +483,8 @@ func (s Secret) LogValue() slog.Value {
 ┌─────────────────────────────────────────────────────────────┐
 │                    Gitea Actions Runner                     │
 │  ┌───────────────────────────────────────────────────────┐  │
-│  │                   benadis-runner                      │  │
-│  │  BR_COMMAND=xxx BR_INFOBASE_NAME=yyy ./benadis-runner │  │
+│  │                   apk-ci                      │  │
+│  │  BR_COMMAND=xxx BR_INFOBASE_NAME=yyy ./apk-ci │  │
 │  └───────────────────────────────────────────────────────┘  │
 └─────────────────────┬───────────────────────────────────────┘
                       │

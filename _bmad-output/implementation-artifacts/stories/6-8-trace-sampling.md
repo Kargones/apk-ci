@@ -183,7 +183,7 @@ tracingCfg := tracing.Config{
 - `internal/pkg/tracing/traceid.go` — генерация trace ID
 - `internal/pkg/tracing/context.go` — context propagation
 - `internal/pkg/tracing/nop.go` — nop provider
-- `cmd/benadis-runner/main.go` — root span creation (sampler работает внутри provider)
+- `cmd/apk-ci/main.go` — root span creation (sampler работает внутри provider)
 - `internal/di/wire.go` / `wire_gen.go` — DI wiring (shutdown function тип не меняется)
 - `go.mod` / `go.sum` — новых зависимостей НЕТ (SDK sampler уже vendored)
 
@@ -266,7 +266,7 @@ func TestNewTracerProvider_SamplingRateHalf(t *testing.T) {
 tracing:
   enabled: true
   endpoint: "http://jaeger:4318"
-  serviceName: "benadis-runner"
+  serviceName: "apk-ci"
   environment: "production"
   insecure: true
   timeout: "5s"
@@ -337,7 +337,7 @@ Claude Opus 4.6
 - Все 43 теста tracing пакета прошли (0.010s)
 - Все тесты config и di пакетов прошли
 - `go vet ./...` — без ошибок
-- Единственный FAIL при `go test ./...` — `cmd/benadis-runner` (интеграционный тест, требует Gitea API и дисплей, предсуществующая проблема)
+- Единственный FAIL при `go test ./...` — `cmd/apk-ci` (интеграционный тест, требует Gitea API и дисплей, предсуществующая проблема)
 
 ### Completion Notes List
 

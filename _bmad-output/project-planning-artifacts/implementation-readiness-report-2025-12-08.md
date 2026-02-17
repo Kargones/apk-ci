@@ -16,7 +16,7 @@ documentsIncluded:
 # Implementation Readiness Assessment Report
 
 **Date:** 2025-12-08
-**Project:** benadis-runner
+**Project:** apk-ci
 
 ## 1. Document Inventory
 
@@ -195,7 +195,7 @@ documentsIncluded:
 
 ### Результат
 
-✅ **UX не требуется.** benadis-runner — CLI-инструмент для CI/CD автоматизации. Web Interface упоминается только как Post-MVP Growth Feature.
+✅ **UX не требуется.** apk-ci — CLI-инструмент для CI/CD автоматизации. Web Interface упоминается только как Post-MVP Growth Feature.
 
 ### Warnings
 

@@ -22,7 +22,7 @@
   - Все проверки: make check
 
 
-  /bmad:bmm:workflows:prd /home/xor/r/benadis-runner/bdocs/index.md
+  /bmad:bmm:workflows:prd /home/xor/r/apk-ci/bdocs/index.md
 
    Следующие шаги
 

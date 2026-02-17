@@ -141,7 +141,7 @@ __debug*
 - `setup-dev` target — РАСШИРИТЬ добавлением `dlv` установки
 - `help` target (если используется) — новые targets должны быть видны
 
-**cmd/benadis-runner/main.go** [Source: cmd/benadis-runner/main.go]
+**cmd/apk-ci/main.go** [Source: cmd/apk-ci/main.go]
 - НЕ МЕНЯТЬ — debug mode через Makefile, не через код
 - Tracing через OpenTelemetry уже работает (trace_id в логах)
 - Context-based cancellation уже реализован
@@ -172,7 +172,7 @@ __debug*
 
 **НЕ МЕНЯТЬ:**
 - Существующие Makefile targets
-- cmd/benadis-runner/main.go
+- cmd/apk-ci/main.go
 - internal/config/config.go
 - go.mod / go.sum / vendor/
 
@@ -191,17 +191,17 @@ COPY . .
 # Сборка с debug информацией
 RUN go build -gcflags="all=-N -l" \
     -ldflags "-X main.Version=debug -X main.BuildTime=$(date -u '+%Y-%m-%dT%H:%M:%SZ')" \
-    -o /app/benadis-runner-debug ./cmd/benadis-runner/
+    -o /app/apk-ci-debug ./cmd/apk-ci/
 
 FROM debian:bookworm-slim
 
 # Копировать бинарник и dlv
 COPY --from=builder /go/bin/dlv /usr/local/bin/dlv
-COPY --from=builder /app/benadis-runner-debug /app/benadis-runner-debug
+COPY --from=builder /app/apk-ci-debug /app/apk-ci-debug
 
 EXPOSE 2345
 
-ENTRYPOINT ["dlv", "exec", "/app/benadis-runner-debug", \
+ENTRYPOINT ["dlv", "exec", "/app/apk-ci-debug", \
     "--headless", "--listen=:2345", "--api-version=2", "--accept-multiclient"]
 ```
 
@@ -309,7 +309,7 @@ go install github.com/go-delve/delve/cmd/dlv@latest
 ### References
 
 - [Source: Makefile] — Текущие targets и переменные (расширить)
-- [Source: cmd/benadis-runner/main.go] — Точка входа (НЕ менять)
+- [Source: cmd/apk-ci/main.go] — Точка входа (НЕ менять)
 - [Source: .gitignore:18-20] — Debug files exclusion (уже настроен)
 - [Source: _bmad-output/project-planning-artifacts/prd.md#FR44-46] — Delve debugging requirements
 - [Source: _bmad-output/project-planning-artifacts/epics/epic-6-observability.md#Story-6.9] — Исходные требования
@@ -326,7 +326,7 @@ Claude Opus 4.6
 ### Debug Log References
 
 - `make build` — успешно, backward compatible
-- `make test` — все тесты проходят (FAIL `cmd/benadis-runner` — существующая проблема с недоступностью Gitea API, не регрессия)
+- `make test` — все тесты проходят (FAIL `cmd/apk-ci` — существующая проблема с недоступностью Gitea API, не регрессия)
 - `make debug` — debug бинарник собирается с `-gcflags="all=-N -l"`
 - `make debug-clean` — удаление debug артефактов работает
 - `make -n debug-run BR_DEBUG_PORT=3456` — порт корректно переопределяется через BR_DEBUG_PORT
@@ -359,7 +359,7 @@ Claude Opus 4.6
 - `.dockerignore` — создан: исключение build артефактов, документации и IDE файлов из Docker build context
 
 ### Adversarial Code Review #13
-- H-1 fix: `launch.json` — исправлен путь к main.go (git.benadis.ru/... → cmd/benadis-runner)
+- H-1 fix: `launch.json` — исправлен путь к main.go (git.benadis.ru/... → cmd/apk-ci)
 - M-6 fix: `Makefile` — добавлены недостающие targets в .PHONY (~25 targets)
 - M-7 fix: `Makefile` — исправлена инвертированная проверка файла в setup-dev
 

@@ -697,7 +697,7 @@ Claude Opus 4.5 (claude-opus-4-5-20251101)
 
 **Изменены:**
 - internal/constants/constants.go (добавлена ActNRTestMerge)
-- cmd/benadis-runner/main_test.go (обновлён TestCommandRegistry_LegacyFallback)
+- cmd/apk-ci/main_test.go (обновлён TestCommandRegistry_LegacyFallback)
 - _bmad-output/implementation-artifacts/sprint-artifacts/sprint-status.yaml (status: in-progress → review)
 
 ## Change Log

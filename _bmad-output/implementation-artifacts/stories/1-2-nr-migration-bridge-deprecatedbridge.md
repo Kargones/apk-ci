@@ -449,7 +449,7 @@ internal/command/
 
 **Не изменять:**
 - `internal/command/handler.go` — Handler interface остаётся без изменений
-- `cmd/benadis-runner/main.go` — не требует изменений для этой story
+- `cmd/apk-ci/main.go` — не требует изменений для этой story
 
 ### Testing Standards
 

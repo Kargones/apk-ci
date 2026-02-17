@@ -2,7 +2,7 @@
 
 <cite>
 **Referenced Files in This Document**   
-- [main.go](file://cmd/benadis-runner/main.go)
+- [main.go](file://cmd/apk-ci/main.go)
 - [app.go](file://internal/app/app.go)
 - [store.go](file://internal/entity/one/store/store.go)
 - [config.go](file://internal/config/config.go)
@@ -21,12 +21,12 @@
 8. [Troubleshooting Guide](#troubleshooting-guide)
 
 ## Introduction
-The `create-stores` command (ActCreateStores) in benadis-runner is responsible for initializing configuration storage directories for 1C:Enterprise projects. This command creates the necessary directory structure and initializes storage repositories that serve as the foundation for version control workflows in 1C development environments. The command orchestrates the creation of both main configuration storage and extension storages, establishing the infrastructure needed for subsequent operations like git2store and store2db.
+The `create-stores` command (ActCreateStores) in apk-ci is responsible for initializing configuration storage directories for 1C:Enterprise projects. This command creates the necessary directory structure and initializes storage repositories that serve as the foundation for version control workflows in 1C development environments. The command orchestrates the creation of both main configuration storage and extension storages, establishing the infrastructure needed for subsequent operations like git2store and store2db.
 
 The command plays a critical role in the automation pipeline by preparing the storage environment before configuration data is transferred from version control to the 1C system. It ensures that proper directory structures are in place with correct permissions and initialization, enabling seamless integration between Git-based version control systems and 1C:Enterprise's native configuration storage mechanism.
 
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L0-L252)
+- [main.go](file://cmd/apk-ci/main.go#L0-L252)
 - [constants.go](file://internal/constants/constants.go#L0-L219)
 
 ## Command Workflow
@@ -60,12 +60,12 @@ Main-->>CLI : Command completed
 ```
 
 **Diagram sources **
-- [main.go](file://cmd/benadis-runner/main.go#L0-L252)
+- [main.go](file://cmd/apk-ci/main.go#L0-L252)
 - [app.go](file://internal/app/app.go#L899-L939)
 - [store.go](file://internal/entity/one/store/store.go#L859-L1018)
 
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L0-L252)
+- [main.go](file://cmd/apk-ci/main.go#L0-L252)
 - [app.go](file://internal/app/app.go#L899-L939)
 
 ## Input Parameters and Configuration
@@ -149,7 +149,7 @@ The logging system captures detailed debug information throughout the process, i
 - [constants.go](file://internal/constants/constants.go#L0-L219)
 
 ## Integration with Other Commands
-The `create-stores` command serves as a foundational component in the benadis-runner ecosystem, integrating closely with other commands like store2db and git2store to support comprehensive version control workflows for 1C:Enterprise projects.
+The `create-stores` command serves as a foundational component in the apk-ci ecosystem, integrating closely with other commands like store2db and git2store to support comprehensive version control workflows for 1C:Enterprise projects.
 
 The command establishes the storage infrastructure required by the git2store command, which transfers configuration data from Git repositories into 1C storage repositories. Without properly initialized storage directories, the git2store operation cannot proceed, making create-stores a prerequisite step in the deployment pipeline.
 
@@ -192,11 +192,11 @@ style Store2Db fill:#FF9800,stroke:#F57C00
 ```
 
 **Diagram sources **
-- [main.go](file://cmd/benadis-runner/main.go#L0-L252)
+- [main.go](file://cmd/apk-ci/main.go#L0-L252)
 - [app.go](file://internal/app/app.go#L417-L616)
 
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L0-L252)
+- [main.go](file://cmd/apk-ci/main.go#L0-L252)
 - [app.go](file://internal/app/app.go#L417-L616)
 
 ## Practical Usage Examples
@@ -210,7 +210,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Create configuration storage
-        uses: ./benadis-runner
+        uses: ./apk-ci
         with:
           giteaURL: ${{ secrets.GITEA_URL }}
           repository: org/project
@@ -229,10 +229,10 @@ export BR_CONFIG_SECRET="./config/secret.yaml"
 export BR_WORKDIR="/tmp/benadis"
 export BR_TMPDIR="/tmp/benadis/temp"
 
-./benadis-runner
+./apk-ci
 ```
 
-The command is often combined with other benadis-runner commands in sequential scripts that automate the entire deployment pipeline:
+The command is often combined with other apk-ci commands in sequential scripts that automate the entire deployment pipeline:
 
 ```bash
 #!/bin/bash
@@ -241,16 +241,16 @@ set -e
 
 # Initialize storage repositories
 export BR_COMMAND="create-stores"
-./benadis-runner || exit 1
+./apk-ci || exit 1
 
 # Transfer configuration from Git to storage
 export BR_COMMAND="git2store"
-./benadis-runner || exit 1
+./apk-ci || exit 1
 
 # Apply configuration from storage to database
 export BR_COMMAND="store2db"
 export BR_INFOBASE_NAME="ProductionDB"
-./benadis-runner || exit 1
+./apk-ci || exit 1
 
 echo "Deployment completed successfully"
 ```
@@ -259,7 +259,7 @@ These usage patterns demonstrate how the create-stores command integrates into b
 
 **Section sources**
 - [action.yaml](file://config/action.yaml#L0-L120)
-- [main.go](file://cmd/benadis-runner/main.go#L0-L252)
+- [main.go](file://cmd/apk-ci/main.go#L0-L252)
 
 ## Troubleshooting Guide
 When encountering issues with the `create-stores` command, several common problems and their resolution strategies should be considered. Understanding these troubleshooting scenarios helps ensure reliable operation in production environments.

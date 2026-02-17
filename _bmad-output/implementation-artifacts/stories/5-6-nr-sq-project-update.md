@@ -663,7 +663,7 @@ Claude Opus 4.5 (claude-opus-4-5-20251101)
 
 **Изменённые файлы:**
 - internal/constants/constants.go (добавлена константа ActNRSQProjectUpdate)
-- cmd/benadis-runner/main.go (blank imports для SonarQube NR-handlers, удалены legacy cases)
+- cmd/apk-ci/main.go (blank imports для SonarQube NR-handlers, удалены legacy cases)
 
 ## Change Log
 

@@ -91,7 +91,7 @@ so that миграция происходит быстро, безопасно �
 - **`internal/command/handlers/version/version.go`** — паттерн NR-handler без deprecated-алиаса (аналог для nr-migrate)
 - **`internal/command/handlers/forcedisconnecthandler/handler.go`** — ещё один handler без alias (пример `command.Register()`)
 - **`internal/smoketest/registry_test.go:38-65`** — массив `allNRCommands` (добавить nr-migrate)
-- **`cmd/benadis-runner/shadow_mapping.go:69-73`** — список команд без legacy-аналога (добавить nr-migrate)
+- **`cmd/apk-ci/shadow_mapping.go:69-73`** — список команд без legacy-аналога (добавить nr-migrate)
 
 ### Паттерн Handler (без deprecated alias)
 
@@ -101,9 +101,9 @@ package migratehandler
 
 import (
     "context"
-    "github.com/<org>/benadis-runner/internal/command"
-    "github.com/<org>/benadis-runner/internal/config"
-    "github.com/<org>/benadis-runner/internal/constants"
+    "github.com/<org>/apk-ci/internal/command"
+    "github.com/<org>/apk-ci/internal/config"
+    "github.com/<org>/apk-ci/internal/constants"
 )
 
 func init() {
@@ -157,7 +157,7 @@ env:
 **Формат 3: inline в run**
 ```yaml
 - name: Запуск команды
-  run: BR_COMMAND=dbrestore ./benadis-runner  # → BR_COMMAND=nr-dbrestore
+  run: BR_COMMAND=dbrestore ./apk-ci  # → BR_COMMAND=nr-dbrestore
 ```
 
 **Формат 4: с кавычками**
@@ -224,7 +224,7 @@ Backup files created:
 
 ### Shadow mapping
 
-Добавить `nr-migrate` в `cmd/benadis-runner/shadow_mapping.go` строки 69-73 (список команд без legacy-аналога):
+Добавить `nr-migrate` в `cmd/apk-ci/shadow_mapping.go` строки 69-73 (список команд без legacy-аналога):
 ```go
 // Команды без legacy-аналога
 constants.ActNRVersion:                  nil,
@@ -287,7 +287,7 @@ internal/command/handlers/
 - [Source: internal/command/handlers/version/version.go:24] — паттерн Register() без alias
 - [Source: internal/command/handlers/forcedisconnecthandler/handler.go:24] — паттерн Register() без alias
 - [Source: internal/constants/constants.go:103-143] — ActNR* константы
-- [Source: cmd/benadis-runner/shadow_mapping.go:69-73] — команды без legacy-аналога
+- [Source: cmd/apk-ci/shadow_mapping.go:69-73] — команды без legacy-аналога
 - [Source: internal/smoketest/registry_test.go:38-65] — allNRCommands массив
 - [Source: docs/runbooks/rollback-nr-to-legacy.md:72-91] — таблица маппинга
 - [Source: _bmad-output/project-planning-artifacts/epics/epic-7-finalization.md:175-194] — Story 7.5 requirements
@@ -305,7 +305,7 @@ Claude Opus 4.6 (claude-opus-4-6)
 - Все 30 unit-тестов в migratehandler прошли (22 изначальных + 8 добавленных в review)
 - Все smoke-тесты (10 тестов) прошли — включая TotalCommandCount (22+18=40)
 - go vet ./... — чисто
-- Существующий FAIL в cmd/benadis-runner (TestMain_WithRealYamlFile) — pre-existing, интеграционный тест требующий доступ к Gitea API
+- Существующий FAIL в cmd/apk-ci (TestMain_WithRealYamlFile) — pre-existing, интеграционный тест требующий доступ к Gitea API
 
 ### Completion Notes List
 
@@ -398,7 +398,7 @@ Claude Opus 4.6 (claude-opus-4-6)
 - internal/command/handlers/migratehandler/scanner_test.go (NEW)
 - internal/constants/constants.go (MODIFIED — добавлены ActNRMigrate, EnvMigratePath, EnvMigrateNoBackup)
 - internal/smoketest/registry_test.go (MODIFIED — добавлен nr-migrate в allNRCommands, noLegacy, обновлены комментарии/счётчики)
-- cmd/benadis-runner/main.go (MODIFIED — blank import migratehandler)
-- cmd/benadis-runner/shadow_mapping.go (MODIFIED — комментарий о nr-migrate без legacy-аналога)
+- cmd/apk-ci/main.go (MODIFIED — blank import migratehandler)
+- cmd/apk-ci/shadow_mapping.go (MODIFIED — комментарий о nr-migrate без legacy-аналога)
 - _bmad-output/implementation-artifacts/sprint-artifacts/sprint-status.yaml (MODIFIED — 7-5: in-progress → review)
 - _bmad-output/implementation-artifacts/stories/7-5-migration-script.md (MODIFIED — tasks marked, status updated, review notes)

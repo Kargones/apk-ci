@@ -2,7 +2,7 @@
 
 <cite>
 **Referenced Files in This Document**
-- [main.go](file://cmd/benadis-runner/main.go)
+- [main.go](file://cmd/apk-ci/main.go)
 - [extension_publish.go](file://internal/app/extension_publish.go)
 - [extension_publish_test.go](file://internal/app/extension_publish_test.go)
 - [extension_publish_integration_test.go](file://internal/app/extension_publish_integration_test.go)
@@ -13,7 +13,7 @@
 - [error_handling_test.go](file://internal/service/sonarqube/error_handling_test.go)
 - [config.go](file://internal/config/config.go)
 - [sonarqube.go](file://internal/config/sonarqube.go)
-- [main_test.go](file://cmd/benadis-runner/main_test.go)
+- [main_test.go](file://cmd/apk-ci/main_test.go)
 </cite>
 
 ## Update Summary
@@ -43,18 +43,18 @@
 
 ## Introduction
 
-Benadis-runner is a comprehensive automation tool for 1C:Enterprise systems that provides modular functionality for database operations, configuration conversion, service mode management, and integration with development tools. The project now includes a sophisticated Extension Publishing System with BMM (Business Model Canvas) framework integration, enabling automated distribution of 1C extensions across multiple subscribed repositories.
+apk-ci is a comprehensive automation tool for 1C:Enterprise systems that provides modular functionality for database operations, configuration conversion, service mode management, and integration with development tools. The project now includes a sophisticated Extension Publishing System with BMM (Business Model Canvas) framework integration, enabling automated distribution of 1C extensions across multiple subscribed repositories.
 
 The development guide covers the essential aspects of contributing to the project, including understanding the codebase architecture, implementing new features, maintaining test coverage, and following established coding standards. The new Extension Publishing System adds significant capabilities for managing 1C extension distribution across organizational repositories.
 
 ## Project Architecture
 
-Benadis-runner follows a modular architecture with distinct layers that separate concerns and promote maintainability. The architecture now includes enhanced support for the Extension Publishing System and BMM framework integration.
+apk-ci follows a modular architecture with distinct layers that separate concerns and promote maintainability. The architecture now includes enhanced support for the Extension Publishing System and BMM framework integration.
 
 ```mermaid
 graph TB
 subgraph "Presentation Layer"
-CMD[cmd/benadis-runner/main.go]
+CMD[cmd/apk-ci/main.go]
 EXT_PUB[Extension Publishing System]
 ENDPOINTS[HTTP Endpoints]
 end
@@ -95,7 +95,7 @@ EXT_PUB --> BMM
 ```
 
 **Diagram sources**
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L1-L262)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go#L1-L262)
 - [internal/app/extension_publish.go](file://internal/app/extension_publish.go#L1-L1253)
 - [internal/app/app.go](file://internal/app/app.go#L1-L1307)
 - [internal/config/config.go](file://internal/config/config.go#L1-L800)
@@ -110,7 +110,7 @@ EXT_PUB --> BMM
 6. **BMM Integration**: Business model canvas framework integration
 
 **Section sources**
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L1-L262)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go#L1-L262)
 - [internal/app/extension_publish.go](file://internal/app/extension_publish.go#L1-L1253)
 - [internal/app/app.go](file://internal/app/app.go#L1-L1307)
 
@@ -122,7 +122,7 @@ The project is organized into several key directories, each serving a specific p
 
 ```mermaid
 graph TD
-ROOT[benadis-runner/] --> CMD[cmd/benadis-runner/]
+ROOT[apk-ci/] --> CMD[cmd/apk-ci/]
 ROOT --> CONFIG[config/]
 ROOT --> INTERNAL[internal/]
 ROOT --> SCRIPTS[scripts/]
@@ -169,7 +169,7 @@ BMA_CORE --> WORKFLOWS[workflows/]
 
 ### Package Descriptions
 
-- **cmd/benadis-runner/**: Entry point and command-line interface with extension-publish command support
+- **cmd/apk-ci/**: Entry point and command-line interface with extension-publish command support
 - **internal/app/**: Core business logic including the new Extension Publishing System
 - **internal/config/**: Configuration management and loading
 - **internal/constants/**: Application constants including new extension-publish action
@@ -221,7 +221,7 @@ App-->>User : Publish report
 ```
 
 **Diagram sources**
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L244-L253)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go#L244-L253)
 - [internal/app/extension_publish.go](file://internal/app/extension_publish.go#L998-L1252)
 
 ### Key Components
@@ -256,7 +256,7 @@ The Extension Publishing System performs the following steps:
 
 **Section sources**
 - [internal/app/extension_publish.go](file://internal/app/extension_publish.go#L1-L1253)
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L244-L253)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go#L244-L253)
 - [internal/constants/constants.go](file://internal/constants/constants.go#L100-L101)
 
 ## BMM Framework Integration
@@ -267,7 +267,7 @@ The BMM (Business Model Canvas) framework provides a comprehensive methodology f
 
 ```mermaid
 graph TB
-BMM_CONFIG[_bmad/bmm/config.yaml] --> PROJECT_NAME[project_name: benadis-runner]
+BMM_CONFIG[_bmad/bmm/config.yaml] --> PROJECT_NAME[project_name: apk-ci]
 BMM_CONFIG --> SKILL_LEVEL[user_skill_level: intermediate]
 BMM_CONFIG --> OUTPUT_FOLDERS[output_folders: _bmad-output]
 BMM_CONFIG --> CORE_CONFIG[Core Configuration Values]
@@ -317,7 +317,7 @@ The BMM framework includes standardized templates and documentation standards:
 
 ## Adding New Commands
 
-Adding new commands to benadis-runner involves several steps to ensure proper integration with the existing architecture and Extension Publishing System:
+Adding new commands to apk-ci involves several steps to ensure proper integration with the existing architecture and Extension Publishing System:
 
 ### Step 1: Define Command Constants
 
@@ -334,7 +334,7 @@ const (
 
 ### Step 2: Register Command in main.go
 
-Extend the switch statement in `cmd/benadis-runner/main.go`:
+Extend the switch statement in `cmd/apk-ci/main.go`:
 
 ```go
 switch cfg.Command {
@@ -420,13 +420,13 @@ func TestIntegration_ExtensionPublish_RealGitea(t *testing.T) {
 ```
 
 **Section sources**
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L244-L253)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go#L244-L253)
 - [internal/app/extension_publish.go](file://internal/app/extension_publish.go#L998-L1252)
 - [internal/constants/constants.go](file://internal/constants/constants.go#L100-L101)
 
 ## Testing Strategy
 
-Benadis-runner employs a comprehensive testing strategy with multiple layers of test coverage, including extensive testing for the new Extension Publishing System and BMM framework integration.
+apk-ci employs a comprehensive testing strategy with multiple layers of test coverage, including extensive testing for the new Extension Publishing System and BMM framework integration.
 
 ### Testing Architecture
 
@@ -534,7 +534,7 @@ func (m *MockGiteaAPI) GetReleaseByTag(tag string) (*gitea.Release, error) {
 
 ## Build and Release Process
 
-Benadis-runner uses a dual build system with both Makefile and Taskfile.yml for flexibility, with enhanced support for the new Extension Publishing System and BMM framework.
+apk-ci uses a dual build system with both Makefile and Taskfile.yml for flexibility, with enhanced support for the new Extension Publishing System and BMM framework.
 
 ### Makefile Features
 
@@ -568,12 +568,12 @@ tasks:
   build:
     desc: "Build binary for production"
     cmds:
-      - go build -o bin/benadis-runner ./cmd/benadis-runner
+      - go build -o bin/apk-ci ./cmd/apk-ci
   
   debug:
     desc: "Build debug binary with debug info"
     cmds:
-      - go build -gcflags="-N -l" -o bin/benadis-runner ./cmd/benadis-runner
+      - go build -gcflags="-N -l" -o bin/apk-ci ./cmd/apk-ci
   
   test-extension-publish:
     desc: "Run extension publish tests"
@@ -691,7 +691,7 @@ tasks:
   debug:
     desc: "Run with debugger for VS Code"
     cmds:
-      - dlv debug ./cmd/benadis-runner \
+      - dlv debug ./cmd/apk-ci \
         --headless --listen=127.0.0.1:2345 --api-version=2
 ```
 
@@ -833,7 +833,7 @@ Maint->>Dev : Merge PR
 
 ## Context Support
 
-Benadis-runner implements comprehensive context support for managing request lifecycles, cancellation, and timeouts across the application, including the new Extension Publishing System.
+apk-ci implements comprehensive context support for managing request lifecycles, cancellation, and timeouts across the application, including the new Extension Publishing System.
 
 ### Context Creation and Management
 
@@ -914,13 +914,13 @@ func (e *ErrorHandlingService) ExecuteWithTimeout(ctx context.Context, timeout t
 ```
 
 **Section sources**
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L18-L20)
-- [main_test.go](file://cmd/benadis-runner/main_test.go#L886-L924)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go#L18-L20)
+- [main_test.go](file://cmd/apk-ci/main_test.go#L886-L924)
 - [error_handling.go](file://internal/service/sonarqube/error_handling.go#L210-L232)
 
 ## Error Handling Patterns
 
-Benadis-runner implements a comprehensive error handling system with multiple resilience patterns to ensure robust operation in production environments, including enhanced patterns for the Extension Publishing System.
+apk-ci implements a comprehensive error handling system with multiple resilience patterns to ensure robust operation in production environments, including enhanced patterns for the Extension Publishing System.
 
 ### Error Handling Service
 
@@ -1086,7 +1086,7 @@ func (e *ErrorHandlingService) ExecuteWithTimeout(ctx context.Context, timeout t
 
 ## Configuration Management
 
-Benadis-runner implements a robust configuration management system with multiple sources and validation, including enhanced support for the Extension Publishing System and BMM framework.
+apk-ci implements a robust configuration management system with multiple sources and validation, including enhanced support for the Extension Publishing System and BMM framework.
 
 ### Configuration Structure
 
@@ -1159,7 +1159,7 @@ type ExtensionPublishConfig struct {
 
 // BMM Framework configuration
 type BMMConfig struct {
-    ProjectName string `env:"BMM_PROJECT_NAME" env-default:"benadis-runner"`
+    ProjectName string `env:"BMM_PROJECT_NAME" env-default:"apk-ci"`
     SkillLevel string `env:"BMM_USER_SKILL_LEVEL" env-default:"intermediate"`
     OutputFolder string `env:"BMM_OUTPUT_FOLDER"`
     CommunicationLanguage string `env:"BMM_COMMUNICATION_LANGUAGE" env-default:"Russian"`

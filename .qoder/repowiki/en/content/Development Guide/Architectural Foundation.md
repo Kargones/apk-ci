@@ -4,7 +4,7 @@
 **Referenced Files in This Document**
 - [README.md](file://README.md)
 - [go.mod](file://go.mod)
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go)
 - [internal/app/app.go](file://internal/app/app.go)
 - [internal/config/config.go](file://internal/config/config.go)
 - [internal/constants/constants.go](file://internal/constants/constants.go)
@@ -29,11 +29,11 @@
 9. [Conclusion](#conclusion)
 
 ## Introduction
-This document establishes the architectural foundation for the benadis-runner project, a Go-based automation toolkit for 1C:Enterprise environments. It covers the system's modular architecture, configuration management, core workflows, and integration patterns. The project emphasizes centralized configuration, layered design, and robust operational procedures for tasks such as database restoration, configuration conversion, service mode management, and SonarQube integration.
+This document establishes the architectural foundation for the apk-ci project, a Go-based automation toolkit for 1C:Enterprise environments. It covers the system's modular architecture, configuration management, core workflows, and integration patterns. The project emphasizes centralized configuration, layered design, and robust operational procedures for tasks such as database restoration, configuration conversion, service mode management, and SonarQube integration.
 
 ## Project Structure
 The project follows a layered architecture with clear separation of concerns:
-- Command entry point in cmd/benadis-runner/main.go orchestrates operations via internal/app functions
+- Command entry point in cmd/apk-ci/main.go orchestrates operations via internal/app functions
 - Centralized configuration loading in internal/config handles environment variables, YAML files, and defaults
 - Domain-specific modules under internal/entity implement business capabilities (conversion, database restore, 1C operations)
 - Utility packages provide cross-cutting concerns (git operations, logging adapters)
@@ -41,7 +41,7 @@ The project follows a layered architecture with clear separation of concerns:
 ```mermaid
 graph TB
 subgraph "Entry Point"
-CMD["cmd/benadis-runner/main.go"]
+CMD["cmd/apk-ci/main.go"]
 end
 subgraph "Application Layer"
 APP["internal/app/app.go"]
@@ -71,7 +71,7 @@ CONFIG --> APPYAML
 ```
 
 **Diagram sources**
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L1-L262)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go#L1-L262)
 - [internal/app/app.go](file://internal/app/app.go#L1-L800)
 - [internal/config/config.go](file://internal/config/config.go#L1-L800)
 - [internal/constants/constants.go](file://internal/constants/constants.go#L1-L225)
@@ -121,7 +121,7 @@ The system employs a layered architecture with clear boundaries between presenta
 ```mermaid
 graph TB
 subgraph "Presentation Layer"
-MAIN["cmd/benadis-runner/main.go<br/>Command Dispatcher"]
+MAIN["cmd/apk-ci/main.go<br/>Command Dispatcher"]
 end
 subgraph "Application Layer"
 APPCORE["internal/app/app.go<br/>Business Orchestration"]
@@ -161,7 +161,7 @@ GITMOD --> GITEA
 ```
 
 **Diagram sources**
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L1-L262)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go#L1-L262)
 - [internal/app/app.go](file://internal/app/app.go#L1-L800)
 - [internal/config/config.go](file://internal/config/config.go#L1-L800)
 - [internal/constants/constants.go](file://internal/constants/constants.go#L1-L225)
@@ -183,7 +183,7 @@ participant Main as "main.go"
 participant Config as "config.MustLoad"
 participant App as "app package"
 participant Entity as "domain entities"
-User->>Main : Execute benadis-runner
+User->>Main : Execute apk-ci
 Main->>Config : Load configuration
 Config-->>Main : Config object
 Main->>Main : Parse BR_COMMAND
@@ -207,7 +207,7 @@ Main-->>User : Result/Exit code
 ```
 
 **Diagram sources**
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L16-L262)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go#L16-L262)
 - [internal/app/app.go](file://internal/app/app.go#L58-L800)
 - [internal/entity/one/designer/designer.go](file://internal/entity/one/designer/designer.go#L414-L527)
 - [internal/entity/dbrestore/dbrestore.go](file://internal/entity/dbrestore/dbrestore.go#L128-L259)
@@ -306,7 +306,7 @@ The dependency map reveals the current architectural state and areas for improve
 ```mermaid
 graph TB
 subgraph "Entry Point"
-MAIN["cmd/benadis-runner/main.go"]
+MAIN["cmd/apk-ci/main.go"]
 end
 subgraph "Configuration Layer"
 CONFIG["internal/config/config.go"]
@@ -345,7 +345,7 @@ LOGGING -.-> APP
 
 **Diagram sources**
 - [docs/architecture/dependency-map.md](file://docs/architecture/dependency-map.md#L1-L80)
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L1-L262)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go#L1-L262)
 - [internal/app/app.go](file://internal/app/app.go#L1-L800)
 - [internal/config/config.go](file://internal/config/config.go#L1-L800)
 
@@ -415,4 +415,4 @@ The system incorporates several performance optimization strategies:
 - [internal/config/config.go](file://internal/config/config.go#L542-L702)
 
 ## Conclusion
-The benadis-runner project demonstrates a well-structured, modular architecture designed for reliability and maintainability. The centralized configuration system, layered design, and robust error handling provide a solid foundation for automation tasks in 1C:Enterprise environments. While the current architecture shows good separation of concerns, the dependency analysis highlights opportunities to improve adherence to SOLID principles, particularly around dependency inversion and interface segregation. The system's focus on configurability, logging, and operational safety positions it well for future enhancements and scaling requirements.
+The apk-ci project demonstrates a well-structured, modular architecture designed for reliability and maintainability. The centralized configuration system, layered design, and robust error handling provide a solid foundation for automation tasks in 1C:Enterprise environments. While the current architecture shows good separation of concerns, the dependency analysis highlights opportunities to improve adherence to SOLID principles, particularly around dependency inversion and interface segregation. The system's focus on configurability, logging, and operational safety positions it well for future enhancements and scaling requirements.

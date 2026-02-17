@@ -2,13 +2,13 @@
 
 ## Обзор
 
-Данный документ содержит анализ модулей проекта benadis-runner, которые используют прямые файловые операции, и план их рефакторинга для использования пакета `internal/entity/filer`.
+Данный документ содержит анализ модулей проекта apk-ci, которые используют прямые файловые операции, и план их рефакторинга для использования пакета `internal/entity/filer`.
 
 ## Найденные модули с файловыми операциями
 
 ### 1. internal/app/app.go
 
-**Местоположение:** `/root/r/benadis-runner/internal/app/app.go`
+**Местоположение:** `/root/r/apk-ci/internal/app/app.go`
 
 **Найденные файловые операции:**
 - `os.MkdirTemp()` в функции `Convert()` (строка 59)
@@ -30,7 +30,7 @@ if err != nil {
 
 ### 2. scripts/install-dev-tools-no-sudo.sh
 
-**Местоположение:** `/root/r/benadis-runner/scripts/install-dev-tools-no-sudo.sh`
+**Местоположение:** `/root/r/apk-ci/scripts/install-dev-tools-no-sudo.sh`
 
 **Найденные файловые операции:**
 - `mktemp -d` для создания временной директории

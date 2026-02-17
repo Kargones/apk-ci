@@ -100,7 +100,7 @@ So that могу автоматизировать задачи в 1C с полн
 
 ### Существующая Legacy-реализация
 
-**Точка входа** (`cmd/benadis-runner/main.go:134-143`):
+**Точка входа** (`cmd/apk-ci/main.go:134-143`):
 ```go
 case constants.ActExecuteEpf:
     err = app.ExecuteEpf(&ctx, l, cfg)
@@ -377,7 +377,7 @@ internal/constants/
 | Файл | Изменение |
 |------|-----------|
 | `internal/constants/constants.go` | Добавить `ActNRExecuteEpf` |
-| `cmd/benadis-runner/main.go` | Добавить blank import, удалить legacy case execute-epf |
+| `cmd/apk-ci/main.go` | Добавить blank import, удалить legacy case execute-epf |
 
 ### Файлы НЕ ТРОГАТЬ
 
@@ -529,7 +529,7 @@ Claude Opus 4.5 (claude-opus-4-5-20251101)
 - ✅ Handler executeepfhandler создан по паттерну store2dbhandler
 - ✅ Все AC (1-11) выполнены
 - ✅ Рефакторинг тестов: устранено дублирование в `TestExecuteEpfHandler_Execute_CustomTimeout` и `TestExecuteEpfHandler_Execute_InvalidTimeout_UsesDefault` — вынесена общая функция `newMockEpfExecutorWithTimeoutCheck`
-- ✅ Тесты cmd/benadis-runner падают по инфраструктурным причинам (нет доступа к Gitea API, нет виртуального дисплея) — не связано с изменениями в этой story
+- ✅ Тесты cmd/apk-ci падают по инфраструктурным причинам (нет доступа к Gitea API, нет виртуального дисплея) — не связано с изменениями в этой story
 
 ### Change Log
 
@@ -544,8 +544,8 @@ Claude Opus 4.5 (claude-opus-4-5-20251101)
 
 **Изменённые файлы:**
 - `internal/constants/constants.go` — добавлена константа ActNRExecuteEpf (строка 131)
-- `cmd/benadis-runner/main.go` — blank import executeepfhandler (строка 20), NOTE комментарий (строки 135-136)
-- `cmd/benadis-runner/main_test.go` — удалён execute-epf из списка legacy команд (мигрирован в registry)
+- `cmd/apk-ci/main.go` — blank import executeepfhandler (строка 20), NOTE комментарий (строки 135-136)
+- `cmd/apk-ci/main_test.go` — удалён execute-epf из списка legacy команд (мигрирован в registry)
 
 **Не изменяемые файлы (по спецификации):**
 - `internal/entity/one/enterprise/enterprise.go` — бизнес-логика EpfExecutor

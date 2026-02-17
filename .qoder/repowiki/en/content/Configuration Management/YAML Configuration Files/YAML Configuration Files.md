@@ -38,7 +38,7 @@
 
 ## Introduction
 
-The benadis-runner employs a sophisticated YAML-based configuration system that centralizes all application settings, database connections, and operational parameters. This system provides a unified approach to configuration management across all modules, ensuring consistency and maintainability while supporting multiple deployment environments.
+The apk-ci employs a sophisticated YAML-based configuration system that centralizes all application settings, database connections, and operational parameters. This system provides a unified approach to configuration management across all modules, ensuring consistency and maintainability while supporting multiple deployment environments.
 
 The configuration system is built around five primary configuration files, each serving a specific purpose in the application's operation:
 
@@ -119,7 +119,7 @@ logging:
   level: "info"
   format: "text"
   output: "stderr"
-  filePath: "/var/log/benadis-runner.log"
+  filePath: "/var/log/apk-ci.log"
   maxSize: 100
   maxBackups: 3
   maxAge: 28
@@ -179,8 +179,8 @@ scanner:
 
 ```yaml
 git:
-  userName: "benadis-runner"
-  userEmail: "benadis-runner@benadis.ru"
+  userName: "apk-ci"
+  userEmail: "apk-ci@benadis.ru"
   defaultBranch: "main"
   timeout: "30s"
   credentialHelper: "store"
@@ -277,7 +277,7 @@ Config --> DatabaseInfo : "manages"
 
 ## GitHub Actions Integration (action.yaml)
 
-The `action.yaml` file defines the GitHub Actions workflow interface, specifying input parameters, environment variables, and execution steps for the benadis-runner.
+The `action.yaml` file defines the GitHub Actions workflow interface, specifying input parameters, environment variables, and execution steps for the apk-ci.
 
 ### Action Metadata
 
@@ -351,16 +351,16 @@ The action provides flexible execution modes:
 
 ```yaml
 steps:
-  - name: 'Run benadis-runner'
+  - name: 'Run apk-ci'
     run: |
       if [ "${{ inputs.debug_port }}" != "0" ]; then
         if [ "${{ inputs.wait }}" = "false" ]; then
-          dlv --listen=:${{ inputs.debug_port }} --headless=true --api-version=2 --accept-multiclient --continue exec ${{ github.action_path }}/benadis-runner
+          dlv --listen=:${{ inputs.debug_port }} --headless=true --api-version=2 --accept-multiclient --continue exec ${{ github.action_path }}/apk-ci
         else
-          dlv --listen=:${{ inputs.debug_port }} --headless=true --api-version=2 --accept-multiclient exec ${{ github.action_path }}/benadis-runner
+          dlv --listen=:${{ inputs.debug_port }} --headless=true --api-version=2 --accept-multiclient exec ${{ github.action_path }}/apk-ci
         fi
       else
-        ${{ github.action_path }}/benadis-runner
+        ${{ github.action_path }}/apk-ci
       fi
     shell: bash
 ```
@@ -423,7 +423,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version of benadis-runner'
+        description: 'Version of apk-ci'
         required: true
         default: 'v1.2.4'
         type: string
@@ -443,7 +443,7 @@ jobs:
     steps:
       - name: Service Mode Enable DB
         if: ${{ inputs.action_1 == true }}
-        uses: https://${{ secrets.TOKEN_FULL }}:@regdv.apkholding.ru/gitops-tools/benadis-runner@${{ inputs.version }}
+        uses: https://${{ secrets.TOKEN_FULL }}:@regdv.apkholding.ru/gitops-tools/apk-ci@${{ inputs.version }}
         with:
           giteaURL: ${{ gitea.server_url }}
           repository: ${{ gitea.repository }}
@@ -702,7 +702,7 @@ BR_IMPL_DB_CREATE: "1cv8"      # Override db_create
 BR_LOG_LEVEL: "info"      # Override logging.level
 BR_LOG_FORMAT: "text"     # Override logging.format
 BR_LOG_OUTPUT: "stderr"   # Override logging.output
-BR_LOG_FILE_PATH: "/var/log/benadis-runner.log"  # Override logging.filePath
+BR_LOG_FILE_PATH: "/var/log/apk-ci.log"  # Override logging.filePath
 ```
 
 **Section sources**
@@ -768,7 +768,7 @@ logging:
   level: "info"
   format: "text"
   output: "stderr"
-  filePath: "/var/log/benadis-runner.log"
+  filePath: "/var/log/apk-ci.log"
   maxSize: 100
   maxBackups: 3
   maxAge: 28
@@ -1016,7 +1016,7 @@ logging:
   level: "info"
   format: "text"
   output: "stderr"
-  filePath: "/var/log/benadis-runner.log"
+  filePath: "/var/log/apk-ci.log"
   maxSize: 100
   maxBackups: 3
   maxAge: 28

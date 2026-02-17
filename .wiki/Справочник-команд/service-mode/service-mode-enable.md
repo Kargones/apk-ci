@@ -9,7 +9,7 @@
 ## Синтаксис
 
 ```bash
-benadis-runner service-mode-enable --infobase <имя-информационной-базы> [--terminate-sessions]
+apk-ci service-mode-enable --infobase <имя-информационной-базы> [--terminate-sessions]
 ```
 
 ## Параметры
@@ -115,10 +115,10 @@ RAC реализация в `internal/rac/service_mode.go` выполняет ф
 
 ```bash
 # Включение сервисного режима без завершения сессий
-benadis-runner service-mode-enable --infobase MyInfobase
+apk-ci service-mode-enable --infobase MyInfobase
 
 # Включение сервисного режима с завершением активных сессий  
-benadis-runner service-mode-enable --infobase MyInfobase --terminate-sessions
+apk-ci service-mode-enable --infobase MyInfobase --terminate-sessions
 ```
 
 ### Использование с переменными окружения
@@ -130,7 +130,7 @@ export BR_TERMINATE_SESSIONS="true"
 export BR_COMMAND="service-mode-enable"
 
 # Запуск команды
-benadis-runner
+apk-ci
 ```
 
 ### Интеграция с скриптами
@@ -142,7 +142,7 @@ set -e
 INFOBASE="ProductionDB"
 
 echo "Включение сервисного режима для $INFOBASE..."
-benadis-runner service-mode-enable \
+apk-ci service-mode-enable \
     --infobase "$INFOBASE" \
     --terminate-sessions
 
@@ -152,7 +152,7 @@ echo "Сервисный режим активирован"
 # ...
 
 echo "Отключение сервисного режима..."
-benadis-runner service-mode-disable --infobase "$INFOBASE"
+apk-ci service-mode-disable --infobase "$INFOBASE"
 ```
 
 ## Ожидаемый результат
@@ -228,7 +228,7 @@ benadis-runner service-mode-disable --infobase "$INFOBASE"
 # GitHub Actions пример
 - name: Enable Service Mode
   run: |
-    benadis-runner service-mode-enable \
+    apk-ci service-mode-enable \
       --infobase ${{ env.INFOBASE_NAME }} \
       --terminate-sessions
   env:
@@ -279,7 +279,7 @@ rac infobase summary list --cluster=<cluster-uuid>
 
 ```bash
 export BR_LOG_LEVEL="debug"
-benadis-runner service-mode-enable --infobase MyInfobase
+apk-ci service-mode-enable --infobase MyInfobase
 ```
 
 ### Производительность

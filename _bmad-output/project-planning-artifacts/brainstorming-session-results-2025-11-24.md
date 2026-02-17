@@ -15,7 +15,7 @@
 
 ## Executive Summary
 
-**Topic:** Технические подходы для benadis-runner
+**Topic:** Технические подходы для apk-ci
 
 **Session Goals:** Рефакторинг архитектуры
 

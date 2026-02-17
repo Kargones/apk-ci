@@ -280,7 +280,7 @@ type WebhookPayload struct {
     Command   string    `json:"command"`
     Infobase  string    `json:"infobase,omitempty"`
     Severity  string    `json:"severity"`
-    Source    string    `json:"source"`  // "benadis-runner"
+    Source    string    `json:"source"`  // "apk-ci"
 }
 
 func (w *WebhookAlerter) createPayload(alert Alert) WebhookPayload {
@@ -292,7 +292,7 @@ func (w *WebhookAlerter) createPayload(alert Alert) WebhookPayload {
         Command:   alert.Command,
         Infobase:  alert.Infobase,
         Severity:  alert.Severity.String(),
-        Source:    "benadis-runner",
+        Source:    "apk-ci",
     }
 }
 ```
@@ -353,7 +353,7 @@ func (w *WebhookAlerter) sendRequest(ctx context.Context, url string, payload We
         return fmt.Errorf("failed to create request: %w", err)
     }
     req.Header.Set("Content-Type", "application/json")
-    req.Header.Set("User-Agent", "benadis-runner/1.0")
+    req.Header.Set("User-Agent", "apk-ci/1.0")
 
     // Добавляем custom headers
     for key, value := range w.config.Headers {
@@ -569,7 +569,7 @@ POST https://hooks.slack.com/services/XXX/YYY/ZZZ
 Content-Type: application/json
 
 {
-  "text": "🚨 benadis-runner Alert: E001 in service-mode-enable"
+  "text": "🚨 apk-ci Alert: E001 in service-mode-enable"
 }
 ```
 
@@ -583,9 +583,9 @@ Authorization: Token token=YOUR_TOKEN
   "routing_key": "YOUR_ROUTING_KEY",
   "event_action": "trigger",
   "payload": {
-    "summary": "benadis-runner: E001",
+    "summary": "apk-ci: E001",
     "severity": "critical",
-    "source": "benadis-runner"
+    "source": "apk-ci"
   }
 }
 ```

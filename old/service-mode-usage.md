@@ -78,7 +78,7 @@ export BR_SERVICE_MODE_MESSAGE="Плановое техническое обсл
 export BR_TERMINATE_SESSIONS="true"
 
 # Запуск
-./benadis-runner
+./apk-ci
 ```
 
 #### 2. Отключение сервисного режима
@@ -89,7 +89,7 @@ export BR_COMMAND="service-mode-disable"
 export BR_INFOBASE_NAME="TestBase"
 
 # Запуск
-./benadis-runner
+./apk-ci
 ```
 
 #### 3. Проверка статуса сервисного режима
@@ -100,7 +100,7 @@ export BR_COMMAND="service-mode-status"
 export BR_INFOBASE_NAME="TestBase"
 
 # Запуск
-./benadis-runner
+./apk-ci
 ```
 
 ### Программное использование

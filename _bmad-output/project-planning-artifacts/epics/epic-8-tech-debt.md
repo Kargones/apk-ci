@@ -156,7 +156,7 @@
 Текущее состояние:
 - `internal/pkg/alerting/` содержит полную реализацию (~5500 строк с тестами): email, telegram, webhook, rules engine, rate limiting
 - `internal/di/providers.go:130` — ProvideAlerter() готов, но не вызывается из main.go
-- `cmd/benadis-runner/main.go:221` — TODO о необходимости интеграции
+- `cmd/apk-ci/main.go:221` — TODO о необходимости интеграции
 - Handler interface (`internal/command/handler.go:12`) принимает только `(ctx, cfg)` — нет DI-зависимостей
 
 Подход к интеграции:
@@ -174,7 +174,7 @@
 3. **Handler interface extension**: добавление `SetAlerter(alerting.Alerter)` (опционально)
 
 Файлы для изменения:
-- `cmd/benadis-runner/main.go` — создание Alerter, передача в execution path
+- `cmd/apk-ci/main.go` — создание Alerter, передача в execution path
 - `internal/command/registry.go` или новый `internal/command/middleware.go` — middleware
 - `internal/di/providers.go` — удаление TODO-комментариев H-1/H-9
 
@@ -364,7 +364,7 @@ DI Logger для handlers:
 - Вариант 3: Functional options в конструкторе handler
 
 Файлы затрагиваемые:
-- `cmd/benadis-runner/main.go` — основная точка интеграции
+- `cmd/apk-ci/main.go` — основная точка интеграции
 - `internal/command/handler.go` — расширение interface или context helper
 - `internal/command/handlers/migratehandler/handler.go:107` — sync.Once для mapping
 

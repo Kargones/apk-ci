@@ -82,7 +82,7 @@ So that могу работать с версионированием конфи
 
 ### Существующая Legacy-реализация
 
-**Точка входа** (`cmd/benadis-runner/main.go:125-132`):
+**Точка входа** (`cmd/apk-ci/main.go:125-132`):
 ```go
 case constants.ActStoreBind:
     err = app.StoreBind(&ctx, l, cfg)
@@ -271,7 +271,7 @@ internal/constants/
 | Файл | Изменение |
 |------|-----------|
 | `internal/constants/constants.go` | Добавить `ActNRStorebind` |
-| `cmd/benadis-runner/main.go` | Добавить blank import storebindhandler |
+| `cmd/apk-ci/main.go` | Добавить blank import storebindhandler |
 
 ### Файлы НЕ ТРОГАТЬ
 
@@ -405,8 +405,8 @@ Claude Opus 4.5 (claude-opus-4-5-20251101)
 
 **Изменённые файлы:**
 - `internal/constants/constants.go` — добавлена константа ActNRStorebind
-- `cmd/benadis-runner/main.go` — добавлен blank import storebindhandler, удалён мёртвый legacy case
-- `cmd/benadis-runner/main_test.go` — удалён storebind из legacyCommands (команда мигрирована)
+- `cmd/apk-ci/main.go` — добавлен blank import storebindhandler, удалён мёртвый legacy case
+- `cmd/apk-ci/main_test.go` — удалён storebind из legacyCommands (команда мигрирована)
 
 ## Change Log
 

@@ -9,7 +9,7 @@ Status: Draft
 
 ## Overview
 
-Epic 1 "Architectural Foundation" создаёт SOLID-совместимую архитектурную основу для benadis-runner v2.0. Это фундамент для всей трансформации — от механического объединения утилит к расширяемой платформе с plug-in архитектурой. Epic включает реализацию Command Registry с self-registration (OCP), NR-Migration Bridge для безопасной миграции, OutputWriter для структурированного вывода (text/JSON), Logger interface с slog адаптером, генерацию trace_id, расширение конфигурации, настройку Wire DI и создание первой NR-команды (nr-version) как proof of concept.
+Epic 1 "Architectural Foundation" создаёт SOLID-совместимую архитектурную основу для apk-ci v2.0. Это фундамент для всей трансформации — от механического объединения утилит к расширяемой платформе с plug-in архитектурой. Epic включает реализацию Command Registry с self-registration (OCP), NR-Migration Bridge для безопасной миграции, OutputWriter для структурированного вывода (text/JSON), Logger interface с slog адаптером, генерацию trace_id, расширение конфигурации, настройку Wire DI и создание первой NR-команды (nr-version) как proof of concept.
 
 После завершения Epic 1 новые команды добавляются без изменения main.go, все зависимости внедряются через Wire, результаты команд выводятся в структурированном формате, а deprecated-команды логируются с рекомендацией миграции. Это создаёт основу для параллельного существования старых и новых команд во время миграции (FR47-FR50).
 
@@ -702,7 +702,7 @@ Epic 1 не взаимодействует с:
 | AC8 | FR4, FR5 | Workflows: Wire DI | `internal/di/wire.go`, `wire_gen.go` | Build: go generate succeeds; Unit: NewApp returns non-nil |
 | AC9 | FR47 | Services/Modules: version handler | `internal/command/handlers/version/` | Integration: Full flow Registry→Execute→Output; E2E: built binary works |
 | AC10 | FR3 | Services/Modules: help.go | `internal/command/help.go` | Unit: ListAll returns all; Integration: help output contains nr-version |
-| AC11 | FR47, FR48 | Workflows: Command Execution Flow | `cmd/benadis-runner/main.go` | Integration: Unknown command → legacy fallback; Log shows path taken |
+| AC11 | FR47, FR48 | Workflows: Command Execution Flow | `cmd/apk-ci/main.go` | Integration: Unknown command → legacy fallback; Log shows path taken |
 | AC12 | — | — | Production pipeline | E2E: nr-version in real Gitea Actions workflow |
 
 ### FR → Story → AC Mapping
@@ -851,7 +851,7 @@ jobs:
 
       - name: E2E Test
         run: |
-          BR_COMMAND=nr-version BR_OUTPUT_FORMAT=json ./benadis-runner | jq .
+          BR_COMMAND=nr-version BR_OUTPUT_FORMAT=json ./apk-ci | jq .
           # Verify valid JSON output
 ```
 

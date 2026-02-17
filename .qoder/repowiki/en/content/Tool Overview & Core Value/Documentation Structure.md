@@ -5,7 +5,7 @@
 - [README.md](file://README.md)
 - [go.mod](file://go.mod)
 - [Makefile](file://Makefile)
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go)
 - [internal/app/app.go](file://internal/app/app.go)
 - [internal/config/config.go](file://internal/config/config.go)
 - [internal/constants/constants.go](file://internal/constants/constants.go)
@@ -32,7 +32,7 @@
 9. [Conclusion](#conclusion)
 
 ## Introduction
-This document describes the documentation structure and architecture of the benadis-runner project. It explains how the application is organized, how configuration is centralized, and how different modules (conversion, database restore, service mode management, SonarQube integration, and BMA&D workflow orchestration) interact. The goal is to provide both technical depth for developers and a clear understanding for stakeholders.
+This document describes the documentation structure and architecture of the apk-ci project. It explains how the application is organized, how configuration is centralized, and how different modules (conversion, database restore, service mode management, SonarQube integration, and BMA&D workflow orchestration) interact. The goal is to provide both technical depth for developers and a clear understanding for stakeholders.
 
 ## Project Structure
 The project follows a layered architecture with a central configuration system and modular components:
@@ -46,7 +46,7 @@ The project follows a layered architecture with a central configuration system a
 ```mermaid
 graph TB
 subgraph "CLI Layer"
-MAIN["cmd/benadis-runner/main.go"]
+MAIN["cmd/apk-ci/main.go"]
 end
 subgraph "Application Core"
 APP["internal/app/app.go"]
@@ -77,7 +77,7 @@ BMA_BMM --> WF_DOC
 ```
 
 **Diagram sources**
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L16-L262)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go#L16-L262)
 - [internal/app/app.go](file://internal/app/app.go#L1-L130)
 - [internal/config/config.go](file://internal/config/config.go#L548-L702)
 - [internal/constants/constants.go](file://internal/constants/constants.go#L48-L102)
@@ -113,7 +113,7 @@ Key configuration sources:
 - Centralized config loader: [internal/config/config.go](file://internal/config/config.go#L548-L702)
 
 **Section sources**
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L16-L262)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go#L16-L262)
 - [internal/app/app.go](file://internal/app/app.go#L58-L131)
 - [internal/config/config.go](file://internal/config/config.go#L548-L702)
 - [internal/constants/constants.go](file://internal/constants/constants.go#L48-L102)
@@ -122,7 +122,7 @@ Key configuration sources:
 ## Architecture Overview
 The system uses a command-driven architecture with a central configuration layer:
 
-- Entry point: [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L16-L262) reads environment variables and invokes application functions
+- Entry point: [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go#L16-L262) reads environment variables and invokes application functions
 - Application logic: [internal/app/app.go](file://internal/app/app.go#L58-L131) orchestrates domain operations
 - Configuration: [internal/config/config.go](file://internal/config/config.go#L548-L702) loads and merges settings from YAML, secrets, and environment variables
 - Domain modules encapsulate business logic and integrate with external systems (1C tools, MSSQL, RAC, SonarQube)
@@ -130,7 +130,7 @@ The system uses a command-driven architecture with a central configuration layer
 
 ```mermaid
 sequenceDiagram
-participant CLI as "CLI Entry<br/>cmd/benadis-runner/main.go"
+participant CLI as "CLI Entry<br/>cmd/apk-ci/main.go"
 participant APP as "App Orchestrator<br/>internal/app/app.go"
 participant CFG as "Config Loader<br/>internal/config/config.go"
 participant MOD as "Domain Module"
@@ -143,7 +143,7 @@ APP-->>CLI : Completion/Error
 ```
 
 **Diagram sources**
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L16-L262)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go#L16-L262)
 - [internal/app/app.go](file://internal/app/app.go#L58-L131)
 - [internal/config/config.go](file://internal/config/config.go#L548-L702)
 
@@ -169,12 +169,12 @@ LOG_RESULT --> END(["Process End"])
 ```
 
 **Diagram sources**
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L16-L262)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go#L16-L262)
 - [internal/config/config.go](file://internal/config/config.go#L548-L702)
 - [internal/constants/constants.go](file://internal/constants/constants.go#L48-L102)
 
 **Section sources**
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L16-L262)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go#L16-L262)
 - [internal/config/config.go](file://internal/config/config.go#L548-L702)
 - [internal/constants/constants.go](file://internal/constants/constants.go#L48-L102)
 
@@ -355,7 +355,7 @@ External dependencies and their roles:
 
 ```mermaid
 graph TB
-MAIN["cmd/benadis-runner/main.go"] --> APP["internal/app/app.go"]
+MAIN["cmd/apk-ci/main.go"] --> APP["internal/app/app.go"]
 APP --> CFG["internal/config/config.go"]
 APP --> CONV["internal/entity/one/convert/convert.go"]
 APP --> DBREST["internal/entity/dbrestore/dbrestore.go"]
@@ -368,7 +368,7 @@ GO_MOD --> TEST["github.com/stretchr/testify"]
 
 **Diagram sources**
 - [go.mod](file://go.mod#L5-L26)
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L1-L20)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go#L1-L20)
 - [internal/app/app.go](file://internal/app/app.go#L1-L30)
 
 **Section sources**
@@ -397,4 +397,4 @@ Common issues and resolution paths:
 - [internal/config/sonarqube.go](file://internal/config/sonarqube.go#L144-L194)
 
 ## Conclusion
-The benadis-runner project employs a centralized configuration architecture with modular domain components and a robust CLI dispatcher. The BMA&D engine complements development workflows by generating planning and documentation artifacts. The design emphasizes configurability, structured logging, and clear separation of concerns, enabling reliable automation across 1C-related operations and code quality workflows.
+The apk-ci project employs a centralized configuration architecture with modular domain components and a robust CLI dispatcher. The BMA&D engine complements development workflows by generating planning and documentation artifacts. The design emphasizes configurability, structured logging, and clear separation of concerns, enabling reliable automation across 1C-related operations and code quality workflows.

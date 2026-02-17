@@ -7,7 +7,7 @@
 - [rac.go](file://internal/rac/rac.go)
 - [config.go](file://internal/config/config.go)
 - [constants.go](file://internal/constants/constants.go)
-- [main.go](file://cmd/benadis-runner/main.go)
+- [main.go](file://cmd/apk-ci/main.go)
 - [app.go](file://internal/app/app.go)
 - [servicemode_test.go](file://internal/servicemode/servicemode_test.go)
 </cite>
@@ -26,7 +26,7 @@
 
 ## Introduction
 
-The 1C:Enterprise platform integration in benadis-runner provides comprehensive service mode management capabilities for 1C information bases. This system enables administrators to control access to 1C databases through Remote Administration Console (RAC) commands, allowing for safe maintenance operations, updates, and administrative tasks while preventing user interference.
+The 1C:Enterprise platform integration in apk-ci provides comprehensive service mode management capabilities for 1C information bases. This system enables administrators to control access to 1C databases through Remote Administration Console (RAC) commands, allowing for safe maintenance operations, updates, and administrative tasks while preventing user interference.
 
 The integration consists of several key components that work together to provide a robust, secure, and reliable service mode management solution. The system supports three primary operations: enabling service mode, disabling service mode, and checking the current service mode status for 1C information bases.
 
@@ -64,7 +64,7 @@ Cluster --> Infobase
 ```
 
 **Diagram sources**
-- [main.go](file://cmd/benadis-runner/main.go#L1-L50)
+- [main.go](file://cmd/apk-ci/main.go#L1-L50)
 - [app.go](file://internal/app/app.go#L1-L100)
 - [servicemode.go](file://internal/servicemode/servicemode.go#L1-L50)
 
@@ -427,11 +427,11 @@ For production 1C environments, the system emphasizes:
 export BR_COMMAND="service-mode-enable"
 export BR_INFOBASE_NAME="MyDatabase"
 export BR_TERMINATE_SESSIONS="true"
-./benadis-runner
+./apk-ci
 
 # Enable service mode without terminating sessions
 export BR_TERMINATE_SESSIONS="false"
-./benadis-runner
+./apk-ci
 ```
 
 #### Disable Service Mode
@@ -439,7 +439,7 @@ export BR_TERMINATE_SESSIONS="false"
 # Disable service mode
 export BR_COMMAND="service-mode-disable"
 export BR_INFOBASE_NAME="MyDatabase"
-./benadis-runner
+./apk-ci
 ```
 
 #### Check Service Mode Status
@@ -447,7 +447,7 @@ export BR_INFOBASE_NAME="MyDatabase"
 # Check current service mode status
 export BR_COMMAND="service-mode-status"
 export BR_INFOBASE_NAME="MyDatabase"
-./benadis-runner
+./apk-ci
 ```
 
 ### Advanced Configuration Examples
@@ -496,7 +496,7 @@ export SERVICE_RAC_RETRIES="3"
 ```
 
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L50-L100)
+- [main.go](file://cmd/apk-ci/main.go#L50-L100)
 - [app.go](file://internal/app/app.go#L200-L250)
 
 ## Troubleshooting Guide
@@ -574,10 +574,10 @@ The system provides comprehensive logging for troubleshooting:
 ```bash
 # Enable debug logging
 export INPUT_LOGLEVEL="Debug"
-./benadis-runner
+./apk-ci
 
 # Check logs for specific operations
-grep "service-mode" /var/log/benadis-runner.log
+grep "service-mode" /var/log/apk-ci.log
 ```
 
 **Section sources**

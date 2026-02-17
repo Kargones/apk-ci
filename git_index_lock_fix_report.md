@@ -1,7 +1,7 @@
 # Отчет об исправлении ошибки Git index.lock
 
 ## Проблема
-В логе `/root/r/benadis-runner/promts/err-debug-01.md` была обнаружена критическая ошибка:
+В логе `/root/r/apk-ci/promts/err-debug-01.md` была обнаружена критическая ошибка:
 ```
 fatal: Не удалось создать «/tmp/4del/s2032845846/.git/index.lock»: Файл существует.
 ```

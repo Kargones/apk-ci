@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-This project, `benadis-runner`, is a Go-based command-line tool for automating tasks related to the 1C:Enterprise platform. It provides a set of modules for performing various operations, including:
+This project, `apk-ci`, is a Go-based command-line tool for automating tasks related to the 1C:Enterprise platform. It provides a set of modules for performing various operations, including:
 
 *   **Convert:** Converts data between different formats.
 *   **DBRestore:** Restores and manages MSSQL databases.
@@ -24,20 +24,20 @@ To build the application, run the following command:
 make build
 ```
 
-This will create an executable file named `benadis-runner` in the `build` directory.
+This will create an executable file named `apk-ci` in the `build` directory.
 
 ### Running the application
 
 To run the application, you need to specify a command and any required options. The general syntax is:
 
 ```bash
-./build/benadis-runner <command> [options]
+./build/apk-ci <command> [options]
 ```
 
 For example, to enable the service mode for an information base named `MyInfobase`, you would run:
 
 ```bash
-./build/benadis-runner service-mode-enable --infobase MyInfobase
+./build/apk-ci service-mode-enable --infobase MyInfobase
 ```
 
 ### Running tests

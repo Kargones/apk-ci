@@ -108,7 +108,7 @@ type LoggingConfig struct {
 - Level: "info"
 - Format: "text"
 - Output: "stderr"
-- FilePath: "/var/log/benadis-runner.log"
+- FilePath: "/var/log/apk-ci.log"
 - MaxSize: 100 MB
 - MaxBackups: 3
 - MaxAge: 7 days
@@ -179,7 +179,7 @@ type Config struct {
 | Переменная | Значение по умолчанию | Описание |
 |------------|----------------------|----------|
 | BR_LOG_OUTPUT | stderr | Вывод логов: "stderr" или "file" |
-| BR_LOG_FILE_PATH | /var/log/benadis-runner.log | Путь к файлу логов |
+| BR_LOG_FILE_PATH | /var/log/apk-ci.log | Путь к файлу логов |
 | BR_LOG_MAX_SIZE | 100 | Максимальный размер файла в MB |
 | BR_LOG_MAX_BACKUPS | 3 | Количество backup файлов |
 | BR_LOG_MAX_AGE | 7 | Максимальный возраст backup в днях |
@@ -193,7 +193,7 @@ logging:
   level: "info"
   format: "json"
   output: "file"
-  filePath: "/var/log/benadis-runner/app.log"
+  filePath: "/var/log/apk-ci/app.log"
   maxSize: 100      # MB
   maxBackups: 10    # файлов
   maxAge: 30        # дней

@@ -40,7 +40,7 @@
 
 ## Introduction
 
-The `nr-service-mode-enable` command represents a modernized approach to managing service mode operations on 1C:Enterprise infobases within the benadis-runner framework. This NR (Named Reference) command provides a comprehensive, idempotent solution for controlling access to production systems during administrative operations, featuring structured output formats, robust error handling, and seamless integration with the Command Registry architecture.
+The `nr-service-mode-enable` command represents a modernized approach to managing service mode operations on 1C:Enterprise infobases within the apk-ci framework. This NR (Named Reference) command provides a comprehensive, idempotent solution for controlling access to production systems during administrative operations, featuring structured output formats, robust error handling, and seamless integration with the Command Registry architecture.
 
 The implementation follows modern Go practices with dependency injection, interface segregation, and comprehensive testing patterns. It maintains backward compatibility through deprecated alias support while introducing enhanced functionality for CI/CD automation and operational excellence.
 
@@ -693,7 +693,7 @@ export BR_TERMINATE_SESSIONS="true"
 export BR_OUTPUT_FORMAT="json"
 
 # Enable service mode with JSON output for automation
-benadis-runner > service_mode_enable.json
+apk-ci > service_mode_enable.json
 
 # Parse JSON output for CI/CD decision making
 if jq -e '.status == "success"' service_mode_enable.json; then
@@ -773,7 +773,7 @@ echo $BR_INFOBASE_NAME
 export BR_INFOBASE_NAME="ProductionDB"
 
 # Or use inline assignment
-BR_INFOBASE_NAME="ProductionDB" benadis-runner
+BR_INFOBASE_NAME="ProductionDB" apk-ci
 
 # Check variable precedence
 env | grep BR_INFOBASE_NAME
@@ -854,7 +854,7 @@ export BR_LOG_LEVEL="debug"
 export BR_OUTPUT_FORMAT="json"
 
 # Capture detailed execution trace
-benadis-runner service-mode-enable 2>&1 | tee service_mode_debug.log
+apk-ci service-mode-enable 2>&1 | tee service_mode_debug.log
 ```
 
 #### Trace ID Analysis
@@ -866,7 +866,7 @@ The command generates unique trace IDs for correlation:
 TRACE_ID=$(jq -r '.metadata.trace_id' service_mode_response.json)
 
 # Search logs for trace correlation
-grep "$TRACE_ID" /var/log/benadis-runner.log
+grep "$TRACE_ID" /var/log/apk-ci.log
 
 # Analyze operation duration
 DURATION=$(jq -r '.metadata.duration_ms' service_mode_response.json)
@@ -878,7 +878,7 @@ echo "Operation took ${DURATION}ms"
 ```bash
 # Verify session termination effectiveness
 export BR_OUTPUT_FORMAT="json"
-benadis-runner service-mode-enable
+apk-ci service-mode-enable
 
 # Check session count in subsequent status queries
 rac session list --cluster=<cluster_uuid> --infobase=<infobase_uuid>
@@ -908,7 +908,7 @@ rac infobase info --cluster=<cluster_uuid> --infobase=<infobase_uuid>
 # Force disable service mode using NR command
 export BR_COMMAND="nr-service-mode-disable"
 export BR_INFOBASE_NAME="ProductionDB"
-benadis-runner
+apk-ci
 ```
 
 ### Performance Troubleshooting
@@ -924,7 +924,7 @@ benadis-runner
 
 ```bash
 # Monitor system resources during operation
-top -p $(pgrep benadis-runner)
+top -p $(pgrep apk-ci)
 free -h
 
 # Check RAC server resources
@@ -1002,7 +1002,7 @@ export BR_COMMAND="nr-service-mode-enable"
 export BR_SERVICE_MODE_MESSAGE="$MESSAGE"
 export BR_TERMINATE_SESSIONS="true"
 export BR_OUTPUT_FORMAT="json"
-benadis-runner > enable_output.json
+apk-ci > enable_output.json
 
 if jq -e '.status == "success"' enable_output.json; then
     echo "Service mode enabled successfully"
@@ -1020,7 +1020,7 @@ echo "Performing maintenance operations..."
 # Disable service mode
 echo "Disabling service mode for $INFODBASE..."
 export BR_COMMAND="nr-service-mode-disable"
-benadis-runner > disable_output.json
+apk-ci > disable_output.json
 
 if jq -e '.status == "success"' disable_output.json; then
     echo "Service mode disabled successfully"
@@ -1041,7 +1041,7 @@ INFODBASE="${BR_INFOBASE_NAME}"
 export BR_COMMAND="nr-service-mode-status"
 export BR_INFOBASE_NAME="$INFODBASE"
 export BR_OUTPUT_FORMAT="json"
-STATUS_OUTPUT=$(benadis-runner 2>&1)
+STATUS_OUTPUT=$(apk-ci 2>&1)
 
 if jq -e '.status == "success"' <<< "$STATUS_OUTPUT"; then
     ENABLED=$(jq -r '.data.enabled' <<< "$STATUS_OUTPUT")
@@ -1092,7 +1092,7 @@ echo "Environment: $BR_ENV" >> $LOG_FILE
 echo "Termination flag: $BR_TERMINATE_SESSIONS" >> $LOG_FILE
 
 # Include structured output in audit log
-benadis-runner > operation_output.json
+apk-ci > operation_output.json
 jq -r '.metadata.trace_id' operation_output.json >> $LOG_FILE
 jq -r '.metadata.duration_ms' operation_output.json >> $LOG_FILE
 jq -r '.data.message' operation_output.json >> $LOG_FILE
@@ -1111,7 +1111,7 @@ for DB in "${INFODBASES[@]}"; do
     export BR_OUTPUT_FORMAT="json"
     
     # Use background processing for independent operations
-    benadis-runner service-mode-enable &
+    apk-ci service-mode-enable &
 done
 
 # Wait for all operations to complete
@@ -1127,7 +1127,7 @@ done
 
 ```bash
 # Monitor resource usage during operations
-while benadis-runner service-mode-enable; do
+while apk-ci service-mode-enable; do
     # Check system resources
     MEM_USAGE=$(free | awk 'NR==2{printf "%.1f%%", $3*100/$2}') 
     CPU_USAGE=$(top -bn1 | grep "Cpu(s)" | awk "{print \$2}" | cut -d'%' -f1)

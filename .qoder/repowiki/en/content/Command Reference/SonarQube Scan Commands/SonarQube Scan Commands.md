@@ -5,11 +5,11 @@
 - [command_handler.go](file://internal/service/sonarqube/command_handler.go)
 - [branch_scanner.go](file://internal/entity/sonarqube/branch_scanner.go)
 - [sonarqube.go](file://internal/config/sonarqube.go)
-- [main.go](file://cmd/benadis-runner/main.go)
+- [main.go](file://cmd/apk-ci/main.go)
 - [app.go](file://internal/app/app.go)
 - [sonarqube_init.go](file://internal/app/sonarqube_init.go)
 - [constants.go](file://internal/constants/constants.go)
-- [sq-scan-benadis-runner.sh](file://scripts/sq-scan-benadis-runner.sh)
+- [sq-scan-apk-ci.sh](file://scripts/sq-scan-apk-ci.sh)
 - [sq-scan-test-01.sh](file://scripts/sq-scan-test-01.sh)
 </cite>
 
@@ -29,7 +29,7 @@
 
 ## Introduction
 
-The SonarQube scanning commands in benadis-runner provide automated code quality analysis for 1C:Enterprise projects. These commands enable developers to perform comprehensive static code analysis on Git branches and pull requests, ensuring code quality standards are maintained throughout the development lifecycle.
+The SonarQube scanning commands in apk-ci provide automated code quality analysis for 1C:Enterprise projects. These commands enable developers to perform comprehensive static code analysis on Git branches and pull requests, ensuring code quality standards are maintained throughout the development lifecycle.
 
 The system supports two primary scanning modes:
 - **Branch Scanning (`sq-scan-branch`)**: Analyzes specific Git branches, including main branches and feature branches with commit hash filtering
@@ -39,7 +39,7 @@ The system supports two primary scanning modes:
 
 ### Available Commands
 
-The benadis-runner implements two main SonarQube scanning commands:
+The apk-ci implements two main SonarQube scanning commands:
 
 1. **`sq-scan-branch`**: Performs code quality analysis on Git branches
 2. **`sq-scan-pr`**: Conducts pull request-specific code analysis
@@ -71,7 +71,7 @@ Error --> End
 
 **Section sources**
 - [constants.go](file://internal/constants/constants.go#L85-L90)
-- [main.go](file://cmd/benadis-runner/main.go#L130-L145)
+- [main.go](file://cmd/apk-ci/main.go#L130-L145)
 
 ## Environment Variables
 
@@ -614,13 +614,13 @@ Monitor key log patterns for troubleshooting:
 
 ```bash
 # Successful scan completion
-grep "Branch scan completed" /var/log/benadis-runner.log
+grep "Branch scan completed" /var/log/apk-ci.log
 
 # Authentication failures
-grep "Failed to authenticate" /var/log/benadis-runner.log
+grep "Failed to authenticate" /var/log/apk-ci.log
 
 # Network timeouts
-grep "timeout" /var/log/benadis-runner.log | grep -i sonarqube
+grep "timeout" /var/log/apk-ci.log | grep -i sonarqube
 ```
 
 **Section sources**
@@ -676,7 +676,7 @@ func monitorScanPerformance(result *BranchScanResult) {
 
 ## Conclusion
 
-The SonarQube scanning commands in benadis-runner provide a robust and scalable solution for automated code quality analysis in 1C:Enterprise projects. The system's modular architecture, comprehensive error handling, and integration capabilities make it suitable for enterprise environments requiring continuous code quality monitoring.
+The SonarQube scanning commands in apk-ci provide a robust and scalable solution for automated code quality analysis in 1C:Enterprise projects. The system's modular architecture, comprehensive error handling, and integration capabilities make it suitable for enterprise environments requiring continuous code quality monitoring.
 
 Key benefits include:
 

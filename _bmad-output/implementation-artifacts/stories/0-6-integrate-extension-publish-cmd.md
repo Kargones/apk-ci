@@ -31,7 +31,7 @@ so that публикация интегрирована в CI/CD.
       <add>Константа CmdExtensionPublish = "extension-publish"</add>
       <location>После ActTestMerge (строка ~99)</location>
     </file>
-    <file path="cmd/benadis-runner/main.go" role="entrypoint">
+    <file path="cmd/apk-ci/main.go" role="entrypoint">
       <add>case в switch для extension-publish</add>
       <pattern>
         case constants.ActXxx:
@@ -116,7 +116,7 @@ so that публикация интегрирована в CI/CD.
 
 **Паттерн main.go switch:**
 ```go
-// cmd/benadis-runner/main.go
+// cmd/apk-ci/main.go
 switch command {
 // ... существующие cases ...
 case constants.ActExtensionPublish:
@@ -206,7 +206,7 @@ func ExtensionPublish(cfg *config.Config, l *slog.Logger) error {
 ### Project Structure Notes
 
 - Константа: `internal/constants/constants.go` (строка ~99)
-- Case: `cmd/benadis-runner/main.go` (в switch command)
+- Case: `cmd/apk-ci/main.go` (в switch command)
 - Функция: `internal/app/extension_publish.go`
 
 ### Важно: Config
@@ -218,7 +218,7 @@ func ExtensionPublish(cfg *config.Config, l *slog.Logger) error {
 ### References
 
 - [Source: internal/constants/constants.go#ActTestMerge] - последняя константа команды
-- [Source: cmd/benadis-runner/main.go] - точка входа с switch
+- [Source: cmd/apk-ci/main.go] - точка входа с switch
 - [Source: internal/app/app.go] - примеры app функций
 - [Source: internal/config/config.go] - структура конфигурации
 
@@ -249,7 +249,7 @@ Claude Opus 4.5
 ### Completion Notes List
 
 1. Добавлена константа `ActExtensionPublish = "extension-publish"` в internal/constants/constants.go:100-101
-2. Добавлен case в cmd/benadis-runner/main.go:244-253 для обработки команды
+2. Добавлен case в cmd/apk-ci/main.go:244-253 для обработки команды
 3. Реализована функция `ExtensionPublish()` в internal/app/extension_publish.go:657-873
 4. Добавлена структура `PublishResult` для агрегации результатов
 5. Реализован dry-run режим через переменную окружения BR_DRY_RUN
@@ -260,7 +260,7 @@ Claude Opus 4.5
 ### File List
 
 - internal/constants/constants.go - добавлена константа ActExtensionPublish
-- cmd/benadis-runner/main.go - добавлен case для extension-publish
+- cmd/apk-ci/main.go - добавлен case для extension-publish
 - internal/app/extension_publish.go - добавлена функция ExtensionPublish() и структура PublishResult
 - internal/app/extension_publish_test.go - добавлены unit-тесты для ExtensionPublish
 

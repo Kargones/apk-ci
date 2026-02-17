@@ -3,7 +3,7 @@
 <cite>
 **Referenced Files in This Document**
 - [config.go](file://internal/config/config.go)
-- [main.go](file://cmd/benadis-runner/main.go)
+- [main.go](file://cmd/apk-ci/main.go)
 - [app.yaml](file://config/app.yaml)
 - [action.yaml](file://config/action.yaml)
 - [constants.go](file://internal/constants/constants.go)
@@ -20,10 +20,10 @@
 8. [Performance Considerations](#performance-considerations)
 
 ## Introduction
-The benadis-runner application implements a hierarchical configuration system that determines the final values of configuration parameters through a layered approach. This document details the precedence rules where environment variables take priority over YAML file values, which in turn override hardcoded defaults in the Config struct. The system uses the cleanenv library to manage this layered configuration loading process, ensuring predictable and traceable configuration resolution.
+The apk-ci application implements a hierarchical configuration system that determines the final values of configuration parameters through a layered approach. This document details the precedence rules where environment variables take priority over YAML file values, which in turn override hardcoded defaults in the Config struct. The system uses the cleanenv library to manage this layered configuration loading process, ensuring predictable and traceable configuration resolution.
 
 ## Configuration Loading Process
-The configuration loading process in benadis-runner follows a structured sequence that begins with reading input parameters from environment variables and progresses through multiple configuration sources. The process starts in the `MustLoad` function, which orchestrates the entire configuration loading workflow.
+The configuration loading process in apk-ci follows a structured sequence that begins with reading input parameters from environment variables and progresses through multiple configuration sources. The process starts in the `MustLoad` function, which orchestrates the entire configuration loading workflow.
 
 ```mermaid
 flowchart TD
@@ -53,10 +53,10 @@ style End fill:#f9f,stroke:#333
 
 **Section sources**
 - [config.go](file://internal/config/config.go#L500-L699)
-- [main.go](file://cmd/benadis-runner/main.go#L10-L200)
+- [main.go](file://cmd/apk-ci/main.go#L10-L200)
 
 ## Configuration Precedence Hierarchy
-The configuration precedence hierarchy in benadis-runner follows a clear order of operations, with each layer potentially overriding values from the previous layer. The hierarchy is implemented as follows:
+The configuration precedence hierarchy in apk-ci follows a clear order of operations, with each layer potentially overriding values from the previous layer. The hierarchy is implemented as follows:
 
 1. **Environment Variables**: Highest priority - directly set in the execution environment
 2. **YAML Configuration Files**: Medium priority - loaded from external configuration files
@@ -116,7 +116,7 @@ InputParams --> Config : "maps to"
 When setting `BR_COMMAND=dbrestore`, this environment variable overrides the command field in app.yaml. This is implemented through the `InputParams` struct which maps `INPUT_COMMAND` to `GHACommand`, which is then assigned to the `Command` field in the main `Config` struct during the `MustLoad` process.
 
 ## Technical Implementation with cleanenv
-The cleanenv library is used throughout the benadis-runner application to implement the layered configuration loading approach. The implementation follows a consistent pattern across different configuration components.
+The cleanenv library is used throughout the apk-ci application to implement the layered configuration loading approach. The implementation follows a consistent pattern across different configuration components.
 
 ```mermaid
 sequenceDiagram
@@ -283,7 +283,7 @@ style End fill:#f9f,stroke:#333
 - Ensure YAML file paths are correct and accessible
 
 ## Performance Considerations
-The configuration loading process has several performance implications that should be considered when deploying and operating the benadis-runner application.
+The configuration loading process has several performance implications that should be considered when deploying and operating the apk-ci application.
 
 ### Configuration Loading Speed
 The configuration loading speed is affected by several factors:

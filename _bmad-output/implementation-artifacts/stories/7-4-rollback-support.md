@@ -97,7 +97,7 @@ Handler     ↓
 # Проблема обнаружена с текущей версией
 # Rollback = откат на предыдущую версию через Gitea release
 # В Gitea Actions:
-#   uses: benadis-runner@v1.x.x  # предыдущая стабильная версия
+#   uses: apk-ci@v1.x.x  # предыдущая стабильная версия
 # ИЛИ:
 #   BR_COMMAND=service-mode-status  # deprecated alias → NR handler (с warning)
 ```
@@ -113,8 +113,8 @@ Handler     ↓
 - **`internal/command/registry.go:71-113`** — `List()`, `ListNames()` — существующие функции для перечисления команд
 - **`internal/command/handlers/version/version.go`** — VersionHandler с текстовым и JSON выводом
 - **`internal/command/handlers/version/version_test.go`** — тесты VersionHandler
-- **`cmd/benadis-runner/shadow_mapping.go`** — маппинг NR → legacy для shadow-run (18 команд)
-- **`cmd/benadis-runner/main.go:275-389`** — legacy switch-case (маршрутизация старых команд)
+- **`cmd/apk-ci/shadow_mapping.go`** — маппинг NR → legacy для shadow-run (18 команд)
+- **`cmd/apk-ci/main.go:275-389`** — legacy switch-case (маршрутизация старых команд)
 
 ### Паттерн registry List [Source: internal/command/registry.go]
 
@@ -221,8 +221,8 @@ ActNRServiceModeStatus = "nr-service-mode-status" // NR
 - [Source: internal/command/registry.go:115-147] — RegisterWithAlias()
 - [Source: internal/command/registry.go:60-113] — Get(), List(), ListNames()
 - [Source: internal/command/deprecated_test.go] — тесты DeprecatedBridge (358 строк)
-- [Source: cmd/benadis-runner/main.go:242-265, 275-389] — двухуровневая маршрутизация
-- [Source: cmd/benadis-runner/shadow_mapping.go] — маппинг NR → legacy (18 команд)
+- [Source: cmd/apk-ci/main.go:242-265, 275-389] — двухуровневая маршрутизация
+- [Source: cmd/apk-ci/shadow_mapping.go] — маппинг NR → legacy (18 команд)
 - [Source: internal/command/handlers/version/version.go] — VersionHandler (расширить)
 - [Source: internal/command/handlers/version/version_test.go] — тесты VersionHandler
 - [Source: internal/constants/constants.go:49-144] — все ActNR* и Act* константы
@@ -243,7 +243,7 @@ Claude Opus 4.6
 - Все тесты `./internal/smoketest/` проходят (включая 3 новых rollback-теста)
 - Golden test обновлён для поддержки rollback_mapping в JSON
 - `go vet ./internal/command/... ./internal/smoketest/...` — без ошибок
-- `cmd/benadis-runner` — FAIL из-за отсутствия сетевого доступа к Gitea (предсуществующий, не связан с изменениями)
+- `cmd/apk-ci` — FAIL из-за отсутствия сетевого доступа к Gitea (предсуществующий, не связан с изменениями)
 
 ### Completion Notes List
 
@@ -265,7 +265,7 @@ Claude Opus 4.6
 - 2026-02-07: Story 7.4 Rollback Support (FR64) — реализованы все 3 задачи: rollback-маппинг в nr-version, runbook документация, unit-тесты rollback-сценариев
 - 2026-02-07: Code review #22 fixes — H-1/H-2: исправлена ссылка на несуществующую `nr-help` → `help` (runbook + комментарий); M-1: CommandInfo → Info (lint stutter fix); M-2: buildRollbackMapping фильтрует только NR-команды (с `nr-` префиксом); M-3: runbook таблица обновлена
 - 2026-02-07: Code review #23 fixes — H-1: удалено мёртвое поле Info.IsDeprecated; M-2: убран omitempty с rollback_mapping для консистентного API; M-3: усилен тест alias-маппинга в smoketest; M-4: добавлены пояснения к placeholder-версиям в runbook; L-1: исправлена категория nr-execute-epf в runbook
-- 2026-02-07: Code review #24 fixes — M-1: точный capacity в ListAllWithAliases(); M-3: пояснение про ./benadis-runner в runbook; L-2: добавлен jq пример извлечения rollback_mapping
+- 2026-02-07: Code review #24 fixes — M-1: точный capacity в ListAllWithAliases(); M-3: пояснение про ./apk-ci в runbook; L-2: добавлен jq пример извлечения rollback_mapping
 
 ### File List
 

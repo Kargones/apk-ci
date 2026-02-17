@@ -236,7 +236,7 @@ if cfg.Command == "" {
 ### Ожидаемый текстовый вывод
 
 ```
-benadis-runner — инструмент автоматизации 1C:Enterprise
+apk-ci — инструмент автоматизации 1C:Enterprise
 
 NR-команды:
   help          Вывод списка доступных команд
@@ -343,7 +343,7 @@ internal/command/deprecated.go          # Добавить Description() + Depre
 internal/command/registry.go            # (опционально) добавить Deprecatable interface
 internal/command/handlers/version/version.go  # Добавить Description()
 internal/constants/constants.go         # Добавить ActHelp
-cmd/benadis-runner/main.go             # Blank import + пустая команда → help
+cmd/apk-ci/main.go             # Blank import + пустая команда → help
 ```
 
 ### Testing Standards
@@ -404,8 +404,8 @@ cmd/benadis-runner/main.go             # Blank import + пустая коман�
 - [Source: internal/pkg/output/result.go] — Result struct
 - [Source: internal/pkg/output/factory.go] — Output factory
 - [Source: internal/constants/constants.go:49-104] — Все Act* константы для legacy-команд
-- [Source: cmd/benadis-runner/main.go:35-47] — Registry integration
-- [Source: cmd/benadis-runner/main.go:50-280] — Legacy switch (все case для legacy-команд)
+- [Source: cmd/apk-ci/main.go:35-47] — Registry integration
+- [Source: cmd/apk-ci/main.go:50-280] — Legacy switch (все case для legacy-команд)
 
 ### Review Follow-ups (AI Code Review #34)
 
@@ -463,7 +463,7 @@ Claude Opus 4.5 (claude-opus-4-5-20251101)
 - internal/command/deprecated_test.go — добавлен Description() в testDeprecatedHandler
 - internal/command/handlers/version/version.go — добавлен Description()
 - internal/constants/constants.go — добавлен ActHelp
-- cmd/benadis-runner/main.go — blank import help + пустая команда → help
+- cmd/apk-ci/main.go — blank import help + пустая команда → help
 - internal/command/handlers/version/version_test.go — замена captureStdout на testutil.CaptureStdout
 - internal/command/handlers/version/golden_test.go — замена captureStdout на testutil.CaptureStdout
 - internal/command/handlers/version/integration_test.go — замена captureStdout на testutil.CaptureStdout

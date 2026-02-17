@@ -71,7 +71,7 @@ so that я могу анализировать их автоматизирова
 - [ ] [AI-Review][HIGH] NewSlogAdapter не проверяет nil logger — nil *slog.Logger вызовет panic [slog.go:13-15]
 - [ ] [AI-Review][MEDIUM] NewLogger жёстко связан с lumberjack зависимостью — тяжёлая зависимость для stdlib-only логирования [factory.go:25-41]
 - [ ] [AI-Review][MEDIUM] NopLogger.With() возвращает тот же объект — нарушает контракт Logger [nop.go:29]
-- [ ] [AI-Review][MEDIUM] DefaultFilePath = "/var/log/benadis-runner.log" — hardcoded Linux path, невалидный на Windows [config.go:29]
+- [ ] [AI-Review][MEDIUM] DefaultFilePath = "/var/log/apk-ci.log" — hardcoded Linux path, невалидный на Windows [config.go:29]
 - [ ] [AI-Review][LOW] TestNewLogger_WritesToStderr модифицирует os.Stdout/os.Stderr — может конфликтовать при параллельном запуске [factory_test.go:72-111]
 
 ## Dev Notes
@@ -89,7 +89,7 @@ so that я могу анализировать их автоматизирова
 - **stderr**: ТОЛЬКО логи через Logger
 - **stdout**: ТОЛЬКО результаты команд через OutputWriter (Story 1.3)
 - **НИКОГДА** не использовать fmt.Print* в production коде
-- Это предотвращает поломку downstream JSON парсеров: `benadis-runner | jq`
+- Это предотвращает поломку downstream JSON парсеров: `apk-ci | jq`
 
 **Интеграция с существующим кодом:**
 - В main.go уже используется `cfg.Logger` типа `*slog.Logger`
@@ -331,7 +331,7 @@ internal/pkg/
 ```
 
 **Не изменять (пока):**
-- `cmd/benadis-runner/main.go` — интеграция будет в Story 1.7 (Wire DI)
+- `cmd/apk-ci/main.go` — интеграция будет в Story 1.7 (Wire DI)
 - `internal/command/deprecated.go` — переход на Logger в Story 1.7
 - `internal/config/config.go` — LoggingConfig будет добавлена в Story 1.6
 

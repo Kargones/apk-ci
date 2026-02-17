@@ -5,7 +5,7 @@
 - [extension_publish.go](file://internal/app/extension_publish.go)
 - [gitea.go](file://internal/entity/gitea/gitea.go)
 - [gitea_service.go](file://internal/service/gitea_service.go)
-- [main.go](file://cmd/benadis-runner/main.go)
+- [main.go](file://cmd/apk-ci/main.go)
 - [constants.go](file://internal/constants/constants.go)
 - [extension-publish.md](file://docs/epics/extension-publish.md)
 - [external-extension-workflow.md](file://docs/diagrams/external-extension-workflow.md)
@@ -454,7 +454,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Publish extension to subscribers
-        uses: docker://your-registry/benadis-runner:latest
+        uses: docker://your-registry/apk-ci:latest
         env:
           BR_COMMAND: extension-publish
           GITEA_TOKEN: ${{ secrets.GITEA_TOKEN }}

@@ -2,7 +2,7 @@
 
 <cite>
 **Referenced Files in This Document**
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go)
 - [internal/constants/constants.go](file://internal/constants/constants.go)
 - [internal/logging/utils.go](file://internal/logging/utils.go)
 - [internal/entity/filer/errors.go](file://internal/entity/filer/errors.go)
@@ -29,7 +29,7 @@
 
 ## Introduction
 
-benadis-runner implements a comprehensive error handling and exit code system designed to provide robust error management for automation scripts and CI/CD pipelines. The system features centralized error handling, structured logging, custom error types, and intelligent error recovery mechanisms that ensure reliable operation across diverse deployment environments.
+apk-ci implements a comprehensive error handling and exit code system designed to provide robust error management for automation scripts and CI/CD pipelines. The system features centralized error handling, structured logging, custom error types, and intelligent error recovery mechanisms that ensure reliable operation across diverse deployment environments.
 
 The error handling architecture follows modern Go best practices with emphasis on:
 - **Structured logging** with contextual information
@@ -40,7 +40,7 @@ The error handling architecture follows modern Go best practices with emphasis o
 
 ## Centralized Error Handling Architecture
 
-The error handling system in benadis-runner is built around a layered architecture that separates concerns and provides consistent error management across all modules.
+The error handling system in apk-ci is built around a layered architecture that separates concerns and provides consistent error management across all modules.
 
 ```mermaid
 graph TB
@@ -76,7 +76,7 @@ StructuredLogger --> ContextTracking
 ```
 
 **Diagram sources**
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L1-L252)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go#L1-L252)
 - [internal/service/sonarqube/error_handling.go](file://internal/service/sonarqube/error_handling.go#L1-L311)
 - [internal/logging/utils.go](file://internal/logging/utils.go#L1-L190)
 
@@ -87,12 +87,12 @@ The architecture ensures that:
 - Recovery mechanisms are applied consistently
 
 **Section sources**
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L1-L252)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go#L1-L252)
 - [internal/service/sonarqube/error_handling.go](file://internal/service/sonarqube/error_handling.go#L1-L311)
 
 ## Custom Error Types
 
-benadis-runner defines several categories of custom error types to handle different failure scenarios with appropriate context and recovery strategies.
+apk-ci defines several categories of custom error types to handle different failure scenarios with appropriate context and recovery strategies.
 
 ### File System Error Types
 
@@ -183,7 +183,7 @@ The system implements a four-tier severity classification:
 
 ## Exit Code System
 
-benadis-runner uses a standardized exit code system to facilitate automation script integration and CI/CD pipeline decision-making.
+apk-ci uses a standardized exit code system to facilitate automation script integration and CI/CD pipeline decision-making.
 
 ### Standard Exit Codes
 
@@ -236,7 +236,7 @@ LogServiceModeError --> Exit8["Exit Code 8"]
 ```
 
 **Diagram sources**
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L30-L252)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go#L30-L252)
 
 ### Command-Specific Exit Codes
 
@@ -247,11 +247,11 @@ Each command type has specific error conditions that trigger different exit code
 - **Service Mode Operations (exit code 8)**: RAC connectivity issues, invalid base names, or session management problems
 
 **Section sources**
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L30-L252)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go#L30-L252)
 
 ## Structured Logging Implementation
 
-benadis-runner implements a sophisticated structured logging system using Go's standard `log/slog` package with custom adapters and context tracking.
+apk-ci implements a sophisticated structured logging system using Go's standard `log/slog` package with custom adapters and context tracking.
 
 ### Logging Architecture
 
@@ -303,11 +303,11 @@ logger.LogError(ctx, "Operation failed",
 
 **Section sources**
 - [internal/logging/utils.go](file://internal/logging/utils.go#L1-L190)
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L20-L30)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go#L20-L30)
 
 ## Error Recovery Strategies
 
-benadis-runner implements multiple error recovery strategies to handle transient failures and ensure system resilience.
+apk-ci implements multiple error recovery strategies to handle transient failures and ensure system resilience.
 
 ### Circuit Breaker Pattern
 
@@ -367,7 +367,7 @@ ReturnSuccess --> End
 
 ## Common Error Scenarios
 
-Based on the QWEN.md documentation and code analysis, here are the most common error scenarios encountered in benadis-runner:
+Based on the QWEN.md documentation and code analysis, here are the most common error scenarios encountered in apk-ci:
 
 ### Service Mode Operation Errors
 
@@ -451,7 +451,7 @@ Based on the QWEN.md documentation and code analysis, here are the most common e
 
 **Section sources**
 - [QWEN.md](file://QWEN.md#L200-L268)
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L30-L252)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go#L30-L252)
 
 ## Troubleshooting Guide
 
@@ -461,14 +461,14 @@ Use these commands to diagnose common error scenarios:
 
 ```bash
 # Check configuration loading
-./benadis-runner --help
+./apk-ci --help
 
 # Enable debug logging
 export LOG_LEVEL=debug
-./benadis-runner service-mode-status --infobase MyInfobase
+./apk-ci service-mode-status --infobase MyInfobase
 
 # Test RAC connectivity
-./benadis-runner service-mode-status --infobase MyInfobase --debug
+./apk-ci service-mode-status --infobase MyInfobase --debug
 ```
 
 ### Log Analysis Patterns
@@ -510,7 +510,7 @@ Example recovery script for common scenarios:
 
 ```bash
 #!/bin/bash
-# Recovery script for benadis-runner errors
+# Recovery script for apk-ci errors
 
 # Check exit code and attempt recovery
 case $? in
@@ -529,7 +529,7 @@ esac
 ```
 
 **Section sources**
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L30-L252)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go#L30-L252)
 - [internal/config/config.go](file://internal/config/config.go#L700-L800)
 
 ## Best Practices
@@ -565,7 +565,7 @@ esac
 
 ## Conclusion
 
-benadis-runner's error handling and exit code system provides a robust foundation for reliable automation operations. The centralized approach ensures consistent error management across all modules while providing flexibility for specific error handling strategies.
+apk-ci's error handling and exit code system provides a robust foundation for reliable automation operations. The centralized approach ensures consistent error management across all modules while providing flexibility for specific error handling strategies.
 
 Key strengths of the system include:
 

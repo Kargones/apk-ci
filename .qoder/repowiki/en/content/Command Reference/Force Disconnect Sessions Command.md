@@ -10,7 +10,7 @@
 - [mock.go](file://internal/adapter/onec/rac/ractest/mock.go)
 - [constants.go](file://internal/constants/constants.go)
 - [result.go](file://internal/pkg/output/result.go)
-- [main.go](file://cmd/benadis-runner/main.go)
+- [main.go](file://cmd/apk-ci/main.go)
 - [2-6-force-disconnect-sessions.md](file://_bmad-output/implementation-artifacts/stories/2-6-force-disconnect-sessions.md)
 </cite>
 
@@ -54,7 +54,7 @@ The command is specifically designed for 1C:Enterprise environments with Remote 
 
 ## Architecture and Design
 
-The Force Disconnect Sessions Command follows a well-established pattern within the benadis-runner framework, leveraging the self-registration command architecture and dependency injection principles.
+The Force Disconnect Sessions Command follows a well-established pattern within the apk-ci framework, leveraging the self-registration command architecture and dependency injection principles.
 
 ```mermaid
 graph TB
@@ -173,7 +173,7 @@ HANDLER-->>MAIN : Execution result
 **Diagram sources**
 - [handler.go](file://internal/command/handlers/forcedisconnecthandler/handler.go#L22-L24)
 - [registry.go](file://internal/command/registry.go#L36-L55)
-- [main.go](file://cmd/benadis-runner/main.go#L17)
+- [main.go](file://cmd/apk-ci/main.go#L17)
 
 **Section sources**
 - [handler.go](file://internal/command/handlers/forcedisconnecthandler/handler.go#L105-L120)
@@ -423,7 +423,7 @@ Automatic integration with the global command registry ensures seamless discover
 **Section sources**
 - [interfaces.go](file://internal/adapter/onec/rac/interfaces.go#L102-L109)
 - [constants.go](file://internal/constants/constants.go#L108-L110)
-- [main.go](file://cmd/benadis-runner/main.go#L17)
+- [main.go](file://cmd/apk-ci/main.go#L17)
 
 ## Usage Examples
 
@@ -434,7 +434,7 @@ The simplest invocation requires only the command name and information base spec
 ```bash
 export BR_COMMAND="nr-force-disconnect-sessions"
 export BR_INFOBASE_NAME="ProductionDB"
-./benadis-runner
+./apk-ci
 ```
 
 ### With Grace Period
@@ -445,7 +445,7 @@ For operations requiring a controlled shutdown window:
 export BR_COMMAND="nr-force-disconnect-sessions"
 export BR_INFOBASE_NAME="ProductionDB"
 export BR_DISCONNECT_DELAY_SEC="30"
-./benadis-runner
+./apk-ci
 ```
 
 ### Programmatic Integration
@@ -456,7 +456,7 @@ JSON output format enables easy integration with automation systems:
 export BR_COMMAND="nr-force-disconnect-sessions"
 export BR_INFOBASE_NAME="TestDB"
 export BR_OUTPUT_FORMAT="json"
-./benadis-runner
+./apk-ci
 ```
 
 ### Error Handling Example
@@ -531,11 +531,11 @@ For troubleshooting session-related issues:
 # Check current session status
 export BR_COMMAND="nr-service-mode-status"
 export BR_INFOBASE_NAME="YourDB"
-./benadis-runner
+./apk-ci
 
 # Verify RAC connectivity
 export BR_COMMAND="nr-version"
-./benadis-runner
+./apk-ci
 ```
 
 ### Log Analysis
@@ -553,7 +553,7 @@ Key log entries to monitor:
 
 ## Conclusion
 
-The Force Disconnect Sessions Command represents a sophisticated addition to the benadis-runner ecosystem, providing essential session management capabilities for 1C:Enterprise environments. Its implementation demonstrates best practices in Go development, including comprehensive error handling, robust testing, and clean architectural design.
+The Force Disconnect Sessions Command represents a sophisticated addition to the apk-ci ecosystem, providing essential session management capabilities for 1C:Enterprise environments. Its implementation demonstrates best practices in Go development, including comprehensive error handling, robust testing, and clean architectural design.
 
 The command's key strengths include its idempotent nature, comprehensive audit logging, graceful error handling, and flexible output formats. These features make it suitable for both automated operations and manual administrative tasks.
 

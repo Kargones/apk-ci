@@ -178,6 +178,6 @@
 
 ## Ссылки на документы
 
-- **Функциональные требования:** `/root/r/benadis-runner-apk/promts/refact-36.md`
-- **Архитектурное описание:** `/root/r/benadis-runner-apk/promts/refact-36-architecture.md`
-- **План реализации:** `/root/r/benadis-runner-apk/promts/refact-36-implementation-plan.md` (текущий документ)
+- **Функциональные требования:** `/root/r/apk-ci-apk/promts/refact-36.md`
+- **Архитектурное описание:** `/root/r/apk-ci-apk/promts/refact-36-architecture.md`
+- **План реализации:** `/root/r/apk-ci-apk/promts/refact-36-implementation-plan.md` (текущий документ)

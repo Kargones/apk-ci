@@ -56,7 +56,7 @@ So that я могу освободить базу от активных подк
   - [x] 4.2 Создать `DisconnectedSessionInfo` с полями: `UserName string`, `AppID string`, `Host string`, `SessionID string`
   - [x] 4.3 Реализовать `writeText(w io.Writer) error` для человекочитаемого формата
 - [x] Task 5: Зарегистрировать blank import в main.go (AC: 7)
-  - [x] 5.1 Добавить `_ "github.com/Kargones/apk-ci/internal/command/handlers/forcedisconnecthandler"` в `cmd/benadis-runner/main.go`
+  - [x] 5.1 Добавить `_ "github.com/Kargones/apk-ci/internal/command/handlers/forcedisconnecthandler"` в `cmd/apk-ci/main.go`
 - [x] Task 6: Написать unit-тесты (AC: 13)
   - [x] 6.1 `TestForceDisconnectHandler_Name` — проверка имени
   - [x] 6.2 `TestForceDisconnectHandler_Description` — не пустое
@@ -452,7 +452,7 @@ func TestForceDisconnectHandler_Execute_PartialFailure(t *testing.T) {
 | Файл | Действие | Описание |
 |------|----------|----------|
 | `internal/constants/constants.go` | изменить | Добавить `ActNRForceDisconnectSessions` |
-| `cmd/benadis-runner/main.go` | изменить | Добавить blank import `forcedisconnecthandler` |
+| `cmd/apk-ci/main.go` | изменить | Добавить blank import `forcedisconnecthandler` |
 | `internal/command/handlers/forcedisconnecthandler/handler.go` | новый | Handler struct, init(), Execute, writeText, writeError, createRACClient |
 | `internal/command/handlers/forcedisconnecthandler/handler_test.go` | новый | Unit-тесты |
 
@@ -487,7 +487,7 @@ func TestForceDisconnectHandler_Execute_PartialFailure(t *testing.T) {
 - **Новый файл**: `handler.go` — handler struct + init() + Execute + writeText + writeError + createRACClient
 - **Новый файл**: `handler_test.go` — unit-тесты
 - **Изменение**: `internal/constants/constants.go` — добавить `ActNRForceDisconnectSessions`
-- **Изменение**: `cmd/benadis-runner/main.go` — добавить blank import
+- **Изменение**: `cmd/apk-ci/main.go` — добавить blank import
 - Следует паттерну: один handler = один пакет в `handlers/`
 - Именование пакета: `forcedisconnecthandler` (аналогично `servicemodeenablehandler`)
 
@@ -505,7 +505,7 @@ func TestForceDisconnectHandler_Execute_PartialFailure(t *testing.T) {
 - [Source: internal/pkg/output/result.go — Result, Metadata, ErrorInfo structs]
 - [Source: internal/pkg/tracing/ — TraceIDFromContext, GenerateTraceID]
 - [Source: internal/constants/constants.go — текущие константы]
-- [Source: cmd/benadis-runner/main.go — blank imports, registry flow]
+- [Source: cmd/apk-ci/main.go — blank imports, registry flow]
 - [Source: _bmad-output/implementation-artifacts/stories/2-5-nr-service-mode-enable.md — предыдущая story с learnings]
 
 ### Git Intelligence
@@ -582,5 +582,5 @@ Claude Opus 4.5 (claude-opus-4-5-20251101)
 - `internal/constants/constants.go` — добавлена константа `ActNRForceDisconnectSessions`
 - `internal/command/handlers/forcedisconnecthandler/handler.go` — handler struct, init(), Execute, writeText, writeError, createRACClient, data structs
 - `internal/command/handlers/forcedisconnecthandler/handler_test.go` — 20 unit-тестов
-- `cmd/benadis-runner/main.go` — добавлен blank import `forcedisconnecthandler`
+- `cmd/apk-ci/main.go` — добавлен blank import `forcedisconnecthandler`
 - `_bmad-output/implementation-artifacts/sprint-artifacts/sprint-status.yaml` — обновлён статус story 2-6 на review

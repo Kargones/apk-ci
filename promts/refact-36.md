@@ -71,7 +71,7 @@
   - DbName (choice, options из Config.ProjectConfig.Prod.<Имя прод базы>.related)
   - update_conf (boolean, default: true)
 - 6.1.2. Включать шаги: восстановление БД, включение сервисного режима, загрузка конфигурации, применение конфигурации, отключение сервисного режима
-- 6.1.3. Использовать runner 'edt' и benadis-runner action
+- 6.1.3. Использовать runner 'edt' и apk-ci action
 
 ### 6.2. Шаблон "2. Обновление прод баз.yaml"
 - 6.2.1. Содержать workflow_dispatch триггер с параметрами:
@@ -80,7 +80,7 @@
   - DbName (choice, options из Config.ProjectConfig.Prod в формате "<dbName> (<key>)")
   - update_conf (boolean, default: true)
 - 6.2.2. Включать шаги: включение сервисного режима, загрузка конфигурации, применение конфигурации, отключение сервисного режима
-- 6.2.3. Использовать runner 'edt' и benadis-runner action
+- 6.2.3. Использовать runner 'edt' и apk-ci action
 
 ### 6.3. Шаблон "авто. Конвертация и перенос в хранилище.yaml"
 - 6.3.1. Содержать статический шаблон без изменений

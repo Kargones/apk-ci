@@ -64,13 +64,13 @@ env-vars:
 
 ```bash
 # Запуск основного теста
-go test -v -run TestMain_WithYamlConfig ./cmd/benadis-runner
+go test -v -run TestMain_WithYamlConfig ./cmd/apk-ci
 
 # Запуск интеграционного теста
-go test -v -run TestMain_WithRealYamlFile ./cmd/benadis-runner
+go test -v -run TestMain_WithRealYamlFile ./cmd/apk-ci
 
 # Запуск всех новых тестов
-go test -v -run "TestMain_With.*Yaml" ./cmd/benadis-runner
+go test -v -run "TestMain_With.*Yaml" ./cmd/apk-ci
 ```
 
 ## Использование для отладки
@@ -78,7 +78,7 @@ go test -v -run "TestMain_With.*Yaml" ./cmd/benadis-runner
 Тест `TestMain_WithRealYamlFile` специально создан для удобной отладки приложения:
 
 1. **Настройте параметры в `main-test.yaml`** - измените переменные окружения под ваши нужды
-2. **Запустите тест** - `go test -v -run "TestMain_WithRealYamlFile" ./cmd/benadis-runner`
+2. **Запустите тест** - `go test -v -run "TestMain_WithRealYamlFile" ./cmd/apk-ci`
 3. **Наблюдайте за выполнением** - тест покажет все логи и действия приложения
 4. **Анализируйте результат** - тест выведет информацию о выполнении или ошибках
 

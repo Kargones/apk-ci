@@ -4,7 +4,7 @@
 **Referenced Files in This Document**
 - [handler.go](file://internal/command/handlers/servicemodedisablehandler/handler.go)
 - [handler_test.go](file://internal/command/handlers/servicemodedisablehandler/handler_test.go)
-- [main.go](file://cmd/benadis-runner/main.go)
+- [main.go](file://cmd/apk-ci/main.go)
 - [constants.go](file://internal/constants/constants.go)
 - [result.go](file://internal/pkg/output/result.go)
 - [writer.go](file://internal/pkg/output/writer.go)
@@ -36,7 +36,7 @@
 
 ## Introduction
 
-The `service-mode-disable` command in benadis-runner is a critical component designed to restore normal user access to a 1C:Enterprise infobase after administrative tasks have been completed. This command specifically handles the process of disabling the service mode, which temporarily restricts user access during maintenance, updates, or other administrative operations.
+The `service-mode-disable` command in apk-ci is a critical component designed to restore normal user access to a 1C:Enterprise infobase after administrative tasks have been completed. This command specifically handles the process of disabling the service mode, which temporarily restricts user access during maintenance, updates, or other administrative operations.
 
 **Updated** The command now implements the NR (New Runner) architecture with structured output formatting, comprehensive error handling, and migration support for legacy commands.
 
@@ -472,7 +472,7 @@ rac infobase info --cluster=<cluster-uuid> --infobase=<infobase-uuid>
 # Check current status
 export BR_COMMAND="nr-service-mode-status"
 export BR_INFOBASE_NAME="ProductionDB"
-./benadis-runner
+./apk-ci
 
 # Manual verification
 rac infobase info --cluster=<cluster-uuid> --infobase=<infobase-uuid>
@@ -501,7 +501,7 @@ export BR_INFOBASE_NAME="ProductionDB"
 export BR_OUTPUT_FORMAT="json"
 
 echo "Restoring normal access to ProductionDB..."
-OUTPUT=$(./benadis-runner 2>&1)
+OUTPUT=$(./apk-ci 2>&1)
 
 # Parse JSON output
 STATUS=$(echo "$OUTPUT" | jq -r '.status')
@@ -534,19 +534,19 @@ export BR_INFOBASE_NAME="CriticalDB"
 export BR_OUTPUT_FORMAT="json"
 
 echo "Checking service mode status..."
-./benadis-runner
+./apk-ci
 
 # If service mode is still enabled, force disable
 if [ $? -eq 0 ]; then
     # Using new NR command
     export BR_COMMAND="nr-service-mode-disable"
     echo "Emergency: Disabling service mode with NR command..."
-    ./benadis-runner
+    ./apk-ci
     
     # Alternative: Using legacy command (migration supported)
     export BR_COMMAND="service-mode-disable"
     echo "Emergency: Disabling service mode with legacy command..."
-    ./benadis-runner
+    ./apk-ci
     
     if [ $? -eq 0 ]; then
         echo "✓ Emergency recovery completed"
@@ -628,7 +628,7 @@ jobs:
           
       - name: Disable service mode
         run: |
-          OUTPUT=$(./benadis-runner)
+          OUTPUT=$(./apk-ci)
           echo "Service Mode Output: $OUTPUT"
           
           STATUS=$(echo "$OUTPUT" | jq -r '.status')
@@ -721,7 +721,7 @@ export BR_COMMAND="nr-service-mode-status"
 export BR_INFOBASE_NAME="TestBase"
 export BR_OUTPUT_FORMAT="json"
 
-./benadis-runner
+./apk-ci
 
 # Expected output: Service mode status retrieved successfully
 ```
@@ -802,7 +802,7 @@ $RAC_PATH infobase info --server=localhost --cluster=$CLUSTER_UUID --infobase=$I
 ```bash
 # Test with verbose output
 export RAC_DEBUG=true
-./benadis-runner
+./apk-ci
 
 # Check RAC server logs
 tail -f /var/log/1cv8/1cv8.log
@@ -822,7 +822,7 @@ export BR_COMMAND="nr-service-mode-disable"
 export BR_INFOBASE_NAME="TestBase"
 export BR_OUTPUT_FORMAT="json"
 
-./benadis-runner 2>&1 | tee service-mode-disable.log
+./apk-ci 2>&1 | tee service-mode-disable.log
 ```
 
 #### Log Pattern Analysis
@@ -840,7 +840,7 @@ Key log patterns to monitor:
 
 ```bash
 # Measure operation duration
-time ./benadis-runner
+time ./apk-ci
 
 # Expected timing: < 10 seconds for typical operations
 ```
@@ -853,7 +853,7 @@ export BR_COMMAND="nr-service-mode-disable"
 export BR_INFOBASE_NAME="TestBase"
 
 # Monitor CPU and memory usage
-top -p $(pgrep benadis-runner)
+top -p $(pgrep apk-ci)
 
 # Monitor network connections
 ss -tuln | grep :1545
@@ -865,7 +865,7 @@ ss -tuln | grep :1545
 
 ## Conclusion
 
-The service-mode-disable command in benadis-runner provides a robust and reliable mechanism for managing 1C:Enterprise service mode operations through the NR (New Runner) architecture. Through its structured approach to validation, configuration loading, error handling, and output formatting, it ensures that service mode can be safely and effectively disabled when administrative tasks are completed.
+The service-mode-disable command in apk-ci provides a robust and reliable mechanism for managing 1C:Enterprise service mode operations through the NR (New Runner) architecture. Through its structured approach to validation, configuration loading, error handling, and output formatting, it ensures that service mode can be safely and effectively disabled when administrative tasks are completed.
 
 **Updated** The implementation now features comprehensive structured output system, migration support for legacy commands, and extensive test coverage that validates both success and failure scenarios.
 

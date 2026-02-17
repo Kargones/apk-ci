@@ -36,7 +36,7 @@
 10. [Best Practices](#best-practices)
 
 ## Introduction
-The Gitea integration in benadis-runner provides a comprehensive interface for managing repository operations, including branch creation, commit retrieval, pull request management, issue tracking, release management, and repository search capabilities. The integration supports automated workflows for synchronizing 1C configurations with Gitea repositories through Git2Store and storebind operations, with enhanced release-based publishing workflows.
+The Gitea integration in apk-ci provides a comprehensive interface for managing repository operations, including branch creation, commit retrieval, pull request management, issue tracking, release management, and repository search capabilities. The integration supports automated workflows for synchronizing 1C configurations with Gitea repositories through Git2Store and storebind operations, with enhanced release-based publishing workflows.
 
 The integration follows a layered architecture with clear separation between the API client, service layer, and business logic. It leverages interface abstraction to enable mock testing and extensibility, allowing for flexible configuration and reliable operation in various environments. The system uses access tokens from SecretConfig.Gitea for authentication and implements robust error handling for common issues such as rate limits, merge conflicts, synchronization race conditions, and repository search limitations.
 
@@ -146,7 +146,7 @@ This implementation handles the asynchronous nature of conflict checking in larg
 ```mermaid
 sequenceDiagram
 participant User as "Developer"
-participant Runner as "benadis-runner"
+participant Runner as "apk-ci"
 participant Gitea as "Gitea API"
 User->>Runner : Push changes to feature branch
 Runner->>Gitea : Create PR via CreatePR()

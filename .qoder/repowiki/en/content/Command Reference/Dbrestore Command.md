@@ -2,7 +2,7 @@
 
 <cite>
 **Referenced Files in This Document**
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go)
 - [internal/app/app.go](file://internal/app/app.go)
 - [internal/entity/dbrestore/dbrestore.go](file://internal/entity/dbrestore/dbrestore.go)
 - [internal/config/config.go](file://internal/config/config.go)
@@ -25,13 +25,13 @@
 
 ## Introduction
 
-The `dbrestore` command in benadis-runner is a specialized functionality designed to restore MSSQL databases from historical backups for 1C:Enterprise applications. This command plays a crucial role in GitOps workflows by enabling automated database restoration from production environments to development or testing environments.
+The `dbrestore` command in apk-ci is a specialized functionality designed to restore MSSQL databases from historical backups for 1C:Enterprise applications. This command plays a crucial role in GitOps workflows by enabling automated database restoration from production environments to development or testing environments.
 
-The dbrestore command integrates seamlessly with the broader benadis-runner ecosystem, providing a robust solution for database migration and synchronization tasks. It leverages advanced features like automatic timeout calculation based on historical statistics, intelligent server discovery, and comprehensive error handling.
+The dbrestore command integrates seamlessly with the broader apk-ci ecosystem, providing a robust solution for database migration and synchronization tasks. It leverages advanced features like automatic timeout calculation based on historical statistics, intelligent server discovery, and comprehensive error handling.
 
 ## Command Overview
 
-The dbrestore command is executed through the benadis-runner application and is identified by the constant `ActDbrestore = "dbrestore"` in the constants package. When invoked, the command performs the following primary operations:
+The dbrestore command is executed through the apk-ci application and is identified by the constant `ActDbrestore = "dbrestore"` in the constants package. When invoked, the command performs the following primary operations:
 
 1. **Initialization**: Sets up the HASP network key for 1C:Enterprise licensing
 2. **Configuration Loading**: Creates a DBRestore instance from project configuration
@@ -83,7 +83,7 @@ The dbrestore command relies on several environment variables to configure its e
 | `MSSQL_PASSWORD` | Database password (alternative to secret.yaml) | - |
 
 **Section sources**
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L1-L252)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go#L1-L252)
 - [internal/constants/constants.go](file://internal/constants/constants.go#L1-L199)
 
 ## Configuration Requirements
@@ -567,12 +567,12 @@ For large restores, the system implements:
 2. **Use Service Mode**:
    ```bash
    # Enable service mode before restore
-   benadis-runner --command service-mode-enable --dbname database_name
+   apk-ci --command service-mode-enable --dbname database_name
    
    # Perform restore operation
    
    # Disable service mode after restore
-   benadis-runner --command service-mode-disable --dbname database_name
+   apk-ci --command service-mode-disable --dbname database_name
    ```
 
 3. **Configure Session Termination**:
@@ -614,4 +614,4 @@ For large restores, the system implements:
 2. **Capacity Planning**: Plan for peak restore operation loads
 3. **Resource Allocation**: Ensure adequate server resources for restore operations
 
-The dbrestore command in benadis-runner provides a robust, scalable solution for automated database restoration in 1C:Enterprise environments. By following the guidelines and best practices outlined in this documentation, teams can effectively leverage this functionality while maintaining system reliability and performance.
+The dbrestore command in apk-ci provides a robust, scalable solution for automated database restoration in 1C:Enterprise environments. By following the guidelines and best practices outlined in this documentation, teams can effectively leverage this functionality while maintaining system reliability and performance.

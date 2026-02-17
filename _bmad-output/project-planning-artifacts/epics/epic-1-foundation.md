@@ -182,7 +182,7 @@ Wire DI + Command Registry + Output + Logging + Tracing + первая NR-ком
 
 **As a** DevOps-инженер,
 **I want** получать результаты команд в JSON формате со структурированными ошибками,
-**So that** я могу интегрировать benadis-runner с другими инструментами автоматизации.
+**So that** я могу интегрировать apk-ci с другими инструментами автоматизации.
 
 **Acceptance Criteria:**
 

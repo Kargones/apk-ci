@@ -37,11 +37,11 @@
 8. [Troubleshooting Guide](#troubleshooting-guide)
 
 ## Introduction
-This document provides comprehensive documentation for the advanced integration features in benadis-runner, focusing on three key external systems: SonarQube for code quality analysis, Gitea for version control operations, and 1C:Enterprise platform for service mode management. The integrations enable automated code scanning, repository management, and database maintenance operations within the CI/CD pipeline. Each integration follows a modular design with dedicated services, configuration management, and error handling strategies to ensure reliable operation.
+This document provides comprehensive documentation for the advanced integration features in apk-ci, focusing on three key external systems: SonarQube for code quality analysis, Gitea for version control operations, and 1C:Enterprise platform for service mode management. The integrations enable automated code scanning, repository management, and database maintenance operations within the CI/CD pipeline. Each integration follows a modular design with dedicated services, configuration management, and error handling strategies to ensure reliable operation.
 
 ## SonarQube Integration
 
-The SonarQube integration in benadis-runner provides comprehensive code quality analysis capabilities through a multi-layered architecture that handles branch scanning, pull request analysis, and report generation. The integration is implemented across several components in the `internal/entity/sonarqube` package, with the core functionality centered around the `BranchScannerEntity` and `SonarScannerService` classes.
+The SonarQube integration in apk-ci provides comprehensive code quality analysis capabilities through a multi-layered architecture that handles branch scanning, pull request analysis, and report generation. The integration is implemented across several components in the `internal/entity/sonarqube` package, with the core functionality centered around the `BranchScannerEntity` and `SonarScannerService` classes.
 
 The scanning workflow begins with the `ScanBranch` method in `branch_scanner.go`, which orchestrates the complete analysis process. When initiated, the scanner first retrieves Git metadata for the specified branch using the `GetBranchMetadata` method, capturing essential information such as commit hash, author, timestamp, and whether the branch is the main branch. This metadata is then used to configure the scanner with appropriate properties, including setting the `sonar.branch.name` property for non-main branches.
 
@@ -56,7 +56,7 @@ Report generation is handled by the reporting service component, which can gener
 
 ## Gitea Integration
 
-The Gitea integration enables benadis-runner to perform various repository operations through the Gitea REST API. Implemented in the `internal/entity/gitea` package, this integration provides functionality for branch management, issue tracking, and batch file operations. The core component is the `API` struct defined in `gitea.go`, which encapsulates all interactions with the Gitea server.
+The Gitea integration enables apk-ci to perform various repository operations through the Gitea REST API. Implemented in the `internal/entity/gitea` package, this integration provides functionality for branch management, issue tracking, and batch file operations. The core component is the `API` struct defined in `gitea.go`, which encapsulates all interactions with the Gitea server.
 
 For branch management, the integration supports creating and deleting test branches through the `CreateTestBranch` and `DeleteTestBranch` methods. These operations are essential for implementing safe testing workflows where changes can be evaluated in isolated environments before being merged into main branches. The `ActivePR` method retrieves all currently open pull requests, enabling automated processing of pending merge requests.
 
@@ -105,7 +105,7 @@ Key improvements in the new implementation include:
 
 ## Authentication Mechanisms
 
-Each integration in benadis-runner implements secure authentication mechanisms appropriate to the target system. For SonarQube, authentication is handled through API tokens configured in the `SonarQubeConfig` struct. The token is stored in the `Token` field and passed in HTTP headers when making API requests to the SonarQube server. This token-based authentication provides secure access without requiring username/password credentials.
+Each integration in apk-ci implements secure authentication mechanisms appropriate to the target system. For SonarQube, authentication is handled through API tokens configured in the `SonarQubeConfig` struct. The token is stored in the `Token` field and passed in HTTP headers when making API requests to the SonarQube server. This token-based authentication provides secure access without requiring username/password credentials.
 
 The Gitea integration uses personal access tokens for authentication, specified in the `AccessToken` field of the `Config` struct. These tokens are included in API requests as Bearer tokens in the Authorization header. The integration supports loading the token from environment variables, configuration files, or direct assignment, with environment variables taking precedence for security reasons.
 
@@ -143,7 +143,7 @@ All integrations follow a consistent error handling pattern where errors are log
 
 ```mermaid
 graph TD
-subgraph "benadis-runner"
+subgraph "apk-ci"
 SQ[SonarQube Integration]
 GT[Gitea Integration]
 SM[1C Service Mode Integration]
@@ -201,7 +201,7 @@ Runner-->>User : Notification
 
 Common integration issues and their solutions:
 
-**Connection Timeouts**: For SonarQube and Gitea integrations, increase the `Timeout` configuration value. For 1C RAC operations, adjust the `RacTimeout` parameter. Ensure network connectivity between benadis-runner and the target systems.
+**Connection Timeouts**: For SonarQube and Gitea integrations, increase the `Timeout` configuration value. For 1C RAC operations, adjust the `RacTimeout` parameter. Ensure network connectivity between apk-ci and the target systems.
 
 **Authentication Failures**: Verify that authentication tokens and credentials are correctly configured in environment variables or configuration files. Check that tokens have not expired and have the required permissions for the operations being performed. For the new RAC adapter, ensure both cluster and database credentials are properly set if required.
 

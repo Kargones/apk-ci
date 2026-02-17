@@ -34,7 +34,7 @@
 10. [Appendices](#appendices)
 
 ## Introduction
-This document presents the comprehensive project planning artifacts for benadis-runner, a CLI automation tool for 1C:Enterprise systems. The artifacts capture the strategic vision, technical architecture, implementation roadmap, and governance framework that guide the transformation from a monolithic collection of utilities into a modular, extensible platform with modern observability and CI/CD integration capabilities.
+This document presents the comprehensive project planning artifacts for apk-ci, a CLI automation tool for 1C:Enterprise systems. The artifacts capture the strategic vision, technical architecture, implementation roadmap, and governance framework that guide the transformation from a monolithic collection of utilities into a modular, extensible platform with modern observability and CI/CD integration capabilities.
 
 The planning artifacts encompass:
 - Executive summaries and stakeholder alignment
@@ -126,7 +126,7 @@ The planning system comprises several interconnected components that serve disti
 - [epics.md](file://_bmad-output/project-planning-artifacts/epics.md#L1-L46)
 
 ## Architecture Overview
-The benadis-runner architecture represents a deliberate evolution toward modern software engineering practices while maintaining backward compatibility with existing 1C:Enterprise integrations. The architecture emphasizes:
+The apk-ci architecture represents a deliberate evolution toward modern software engineering practices while maintaining backward compatibility with existing 1C:Enterprise integrations. The architecture emphasizes:
 
 **Clean Architecture Principles**
 - Separation of concerns through layered design
@@ -191,7 +191,7 @@ SRV --> CFG
 ## Detailed Component Analysis
 
 ### Product Requirements Document (PRD)
-The PRD serves as the authoritative specification for benadis-runner v2.0, establishing the transformation from mechanical utility aggregation to a modular platform. Key aspects include:
+The PRD serves as the authoritative specification for apk-ci v2.0, establishing the transformation from mechanical utility aggregation to a modular platform. Key aspects include:
 
 **Strategic Objectives**
 - SOLID-compliant architecture with explicit dependency inversion
@@ -350,7 +350,7 @@ Deprecated command detection with automatic migration warnings ensures smooth tr
 - [tech-spec-epic-1.md](file://_bmad-output/implementation-artifacts/sprint-artifacts/tech-spec-epic-1.md#L454-L481)
 
 ## Conclusion
-The benadis-runner project planning artifacts represent a comprehensive framework for transforming a monolithic CLI tool into a modern, extensible platform. The artifacts demonstrate:
+The apk-ci project planning artifacts represent a comprehensive framework for transforming a monolithic CLI tool into a modern, extensible platform. The artifacts demonstrate:
 
 **Strategic Clarity**: Clear alignment between business objectives, technical architecture, and implementation approach ensures focused execution toward measurable outcomes.
 
@@ -360,7 +360,7 @@ The benadis-runner project planning artifacts represent a comprehensive framewor
 
 **Innovation Leadership**: Continuous research, brainstorming, and architectural exploration position the project at the forefront of CLI integration and DevOps automation practices.
 
-The planning artifacts provide the essential documentation for stakeholders to understand, participate in, and support the benadis-runner transformation journey.
+The planning artifacts provide the essential documentation for stakeholders to understand, participate in, and support the apk-ci transformation journey.
 
 ## Appendices
 

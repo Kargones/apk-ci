@@ -2,16 +2,16 @@
 
 ## Обзор
 
-Данный runbook описывает процедуру отката (rollback) с NR-команд на предыдущую стабильную версию benadis-runner при обнаружении проблем в production.
+Данный runbook описывает процедуру отката (rollback) с NR-команд на предыдущую стабильную версию apk-ci при обнаружении проблем в production.
 
 ### Что такое NR-команды
 
-NR (New Registry) — обновлённая архитектура команд benadis-runner с самостоятельной регистрацией, структурированным выводом (JSON/текст), трассировкой и логированием. Все NR-команды имеют префикс `nr-` (например, `nr-service-mode-status`).
+NR (New Registry) — обновлённая архитектура команд apk-ci с самостоятельной регистрацией, структурированным выводом (JSON/текст), трассировкой и логированием. Все NR-команды имеют префикс `nr-` (например, `nr-service-mode-status`).
 
 ### Предварительные условия
 
 - Доступ к Gitea Actions workflow файлам проекта
-- Знание текущей версии benadis-runner и предыдущей стабильной версии
+- Знание текущей версии apk-ci и предыдущей стабильной версии
 - Доступ к переменным окружения CI/CD пайплайна
 
 ### Важно
@@ -32,9 +32,9 @@ gh release list -R <owner>/<repo>
 curl -s https://git.benadis.ru/api/v1/repos/<owner>/<repo>/releases | jq '.[].tag_name'
 ```
 
-### Шаг 2: Откатить версию benadis-runner в CI/CD
+### Шаг 2: Откатить версию apk-ci в CI/CD
 
-В файле Gitea Actions workflow (`.gitea/workflows/*.yaml`) измените версию benadis-runner:
+В файле Gitea Actions workflow (`.gitea/workflows/*.yaml`) измените версию apk-ci:
 
 > **Примечание:** Версии `v2.0.0` и `v1.9.0` в примерах ниже — условные. Замените на актуальные версии из вашего реестра релизов.
 
@@ -45,7 +45,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Выполнить команду
-        uses: actions/benadis-runner@v2.0.0  # замените на актуальную версию
+        uses: actions/apk-ci@v2.0.0  # замените на актуальную версию
         env:
           BR_COMMAND: nr-service-mode-status
           BR_INFOBASE_NAME: ${{ vars.INFOBASE_NAME }}
@@ -58,7 +58,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Выполнить команду
-        uses: actions/benadis-runner@v1.9.0  # замените на предыдущую стабильную версию
+        uses: actions/apk-ci@v1.9.0  # замените на предыдущую стабильную версию
         env:
           BR_COMMAND: nr-service-mode-status
           BR_INFOBASE_NAME: ${{ vars.INFOBASE_NAME }}
@@ -103,7 +103,7 @@ jobs:
 
 ```bash
 git add .gitea/workflows/
-git commit -m "rollback: откат benadis-runner на v1.9.0"
+git commit -m "rollback: откат apk-ci на v1.9.0"
 git push
 ```
 
@@ -113,13 +113,13 @@ git push
 
 После выполнения rollback необходимо убедиться, что legacy-команда работает корректно.
 
-> **Примечание:** Примеры ниже используют `./benadis-runner` для локальной проверки. В CI/CD путь к бинарнику определяется Gitea Actions автоматически.
+> **Примечание:** Примеры ниже используют `./apk-ci` для локальной проверки. В CI/CD путь к бинарнику определяется Gitea Actions автоматически.
 
 ### 1. Проверка exit code
 
 ```bash
 # Запуск команды и проверка exit code
-BR_COMMAND=service-mode-status BR_INFOBASE_NAME=MyInfobase ./benadis-runner
+BR_COMMAND=service-mode-status BR_INFOBASE_NAME=MyInfobase ./apk-ci
 echo "Exit code: $?"
 # Ожидание: 0 (успех)
 ```
@@ -128,7 +128,7 @@ echo "Exit code: $?"
 
 ```bash
 # Если используется текущая версия и deprecated-алиас:
-BR_COMMAND=service-mode-status BR_INFOBASE_NAME=MyInfobase ./benadis-runner 2>&1 | grep -i deprecated
+BR_COMMAND=service-mode-status BR_INFOBASE_NAME=MyInfobase ./apk-ci 2>&1 | grep -i deprecated
 # Ожидание: "WARNING: command 'service-mode-status' is deprecated, use 'nr-service-mode-status' instead"
 # Наличие этого warning подтверждает что deprecated bridge работает.
 ```
@@ -137,17 +137,17 @@ BR_COMMAND=service-mode-status BR_INFOBASE_NAME=MyInfobase ./benadis-runner 2>&1
 
 ```bash
 # Текстовый вывод (по умолчанию)
-BR_COMMAND=service-mode-status BR_INFOBASE_NAME=MyInfobase ./benadis-runner
+BR_COMMAND=service-mode-status BR_INFOBASE_NAME=MyInfobase ./apk-ci
 
 # JSON вывод
-BR_COMMAND=service-mode-status BR_INFOBASE_NAME=MyInfobase BR_OUTPUT_FORMAT=json ./benadis-runner
+BR_COMMAND=service-mode-status BR_INFOBASE_NAME=MyInfobase BR_OUTPUT_FORMAT=json ./apk-ci
 ```
 
 ### 4. Запуск smoke-тестов
 
 ```bash
 # Smoke-тесты проверяют базовую работоспособность системы
-BR_COMMAND=nr-version ./benadis-runner
+BR_COMMAND=nr-version ./apk-ci
 # Ожидание: информация о версии без ошибок
 ```
 
@@ -156,7 +156,7 @@ BR_COMMAND=nr-version ./benadis-runner
 Если доступен shadow-run, используйте его для сравнения NR и legacy выводов:
 
 ```bash
-BR_SHADOW_RUN=true BR_COMMAND=nr-service-mode-status BR_INFOBASE_NAME=MyInfobase ./benadis-runner
+BR_SHADOW_RUN=true BR_COMMAND=nr-service-mode-status BR_INFOBASE_NAME=MyInfobase ./apk-ci
 # Shadow-run выполнит обе версии и покажет различия
 ```
 
@@ -171,7 +171,7 @@ BR_SHADOW_RUN=true BR_COMMAND=nr-service-mode-status BR_INFOBASE_NAME=MyInfobase
 - Проверьте changelog новой версии
 - Убедитесь что issue/баг-трекер отмечает проблему как исправленную
 
-### Шаг 2: Обновить версию benadis-runner
+### Шаг 2: Обновить версию apk-ci
 
 ```yaml
 # Обновить на исправленную версию
@@ -180,7 +180,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Выполнить команду
-        uses: actions/benadis-runner@v2.0.1  # исправленная версия
+        uses: actions/apk-ci@v2.0.1  # исправленная версия
         env:
           BR_COMMAND: nr-service-mode-status
           BR_INFOBASE_NAME: ${{ vars.INFOBASE_NAME }}
@@ -199,7 +199,7 @@ env:
 Перед полным переключением рекомендуется запустить shadow-run для проверки идентичности результатов:
 
 ```bash
-BR_SHADOW_RUN=true BR_COMMAND=nr-service-mode-status BR_INFOBASE_NAME=MyInfobase ./benadis-runner
+BR_SHADOW_RUN=true BR_COMMAND=nr-service-mode-status BR_INFOBASE_NAME=MyInfobase ./apk-ci
 ```
 
 ### Шаг 5: Валидация с plan-only
@@ -207,7 +207,7 @@ BR_SHADOW_RUN=true BR_COMMAND=nr-service-mode-status BR_INFOBASE_NAME=MyInfobase
 Используйте plan-only режим для проверки плана операций без реального выполнения:
 
 ```bash
-BR_PLAN_ONLY=true BR_COMMAND=nr-dbrestore BR_INFOBASE_NAME=MyInfobase ./benadis-runner
+BR_PLAN_ONLY=true BR_COMMAND=nr-dbrestore BR_INFOBASE_NAME=MyInfobase ./apk-ci
 ```
 
 ---
@@ -229,26 +229,26 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Включить сервисный режим
-        uses: actions/benadis-runner@v2.0.0
+        uses: actions/apk-ci@v2.0.0
         env:
           BR_COMMAND: nr-service-mode-enable
           BR_INFOBASE_NAME: ${{ vars.INFOBASE_NAME }}
           BR_OUTPUT_FORMAT: json
 
       - name: Восстановить БД
-        uses: actions/benadis-runner@v2.0.0
+        uses: actions/apk-ci@v2.0.0
         env:
           BR_COMMAND: nr-dbrestore
           BR_INFOBASE_NAME: ${{ vars.INFOBASE_NAME }}
 
       - name: Обновить БД
-        uses: actions/benadis-runner@v2.0.0
+        uses: actions/apk-ci@v2.0.0
         env:
           BR_COMMAND: nr-dbupdate
           BR_INFOBASE_NAME: ${{ vars.INFOBASE_NAME }}
 
       - name: Отключить сервисный режим
-        uses: actions/benadis-runner@v2.0.0
+        uses: actions/apk-ci@v2.0.0
         env:
           BR_COMMAND: nr-service-mode-disable
           BR_INFOBASE_NAME: ${{ vars.INFOBASE_NAME }}
@@ -269,26 +269,26 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Включить сервисный режим
-        uses: actions/benadis-runner@v1.9.0  # откат версии
+        uses: actions/apk-ci@v1.9.0  # откат версии
         env:
           BR_COMMAND: service-mode-enable     # legacy-команда
           BR_INFOBASE_NAME: ${{ vars.INFOBASE_NAME }}
           # BR_OUTPUT_FORMAT убран — legacy не поддерживает JSON output
 
       - name: Восстановить БД
-        uses: actions/benadis-runner@v1.9.0
+        uses: actions/apk-ci@v1.9.0
         env:
           BR_COMMAND: dbrestore               # legacy-команда
           BR_INFOBASE_NAME: ${{ vars.INFOBASE_NAME }}
 
       - name: Обновить БД
-        uses: actions/benadis-runner@v1.9.0
+        uses: actions/apk-ci@v1.9.0
         env:
           BR_COMMAND: dbupdate                # legacy-команда
           BR_INFOBASE_NAME: ${{ vars.INFOBASE_NAME }}
 
       - name: Отключить сервисный режим
-        uses: actions/benadis-runner@v1.9.0
+        uses: actions/apk-ci@v1.9.0
         env:
           BR_COMMAND: service-mode-disable    # legacy-команда
           BR_INFOBASE_NAME: ${{ vars.INFOBASE_NAME }}
@@ -306,7 +306,7 @@ jobs:
     runs-on: self-hosted
     steps:
       - name: Проверка версии и rollback-маппинга
-        uses: actions/benadis-runner@v2.0.0
+        uses: actions/apk-ci@v2.0.0
         env:
           BR_COMMAND: nr-version
           BR_OUTPUT_FORMAT: json
@@ -315,7 +315,7 @@ jobs:
       - name: Извлечь rollback-маппинг
         run: |
           # Пример извлечения маппинга из JSON вывода
-          BR_COMMAND=nr-version BR_OUTPUT_FORMAT=json ./benadis-runner | jq '.data.rollback_mapping'
+          BR_COMMAND=nr-version BR_OUTPUT_FORMAT=json ./apk-ci | jq '.data.rollback_mapping'
 ```
 
 ---

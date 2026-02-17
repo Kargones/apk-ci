@@ -36,7 +36,7 @@ LEGACY РЕАЛИЗАЦИЯ:
 ├── internal/service/sonarqube/             ✅ Command handlers
 ├── internal/entity/gitea/                  ✅ Gitea API client
 ├── internal/app/app.go                     ✅ SQ* функции
-└── cmd/benadis-runner/main.go              ✅ switch-case
+└── cmd/apk-ci/main.go              ✅ switch-case
 
 NR АРХИТЕКТУРА (ОЖИДАЕТСЯ):
 ├── internal/command/handlers/sonarqube/    ❌ НЕ СУЩЕСТВУЕТ

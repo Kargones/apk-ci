@@ -31,7 +31,7 @@
 
 ## Configuration Mechanism Overview
 
-The benadis-runner application implements a comprehensive configuration system that prioritizes environment variables over YAML configuration files using the cleanenv library. This mechanism allows for flexible configuration management across different environments while maintaining backward compatibility with existing YAML-based configurations.
+The apk-ci application implements a comprehensive configuration system that prioritizes environment variables over YAML configuration files using the cleanenv library. This mechanism allows for flexible configuration management across different environments while maintaining backward compatibility with existing YAML-based configurations.
 
 The configuration system follows a hierarchical approach where environment variables take precedence over file-based configurations, enabling dynamic runtime adjustments without modifying configuration files. The cleanenv library is used throughout the codebase to parse environment variables and bind them to struct fields, providing type safety and default value support.
 
@@ -42,7 +42,7 @@ The primary configuration structure is defined in the Config struct within inter
 
 ## Environment Variable Binding with Struct Tags
 
-The benadis-runner application uses struct tags to establish the binding between environment variables and configuration fields. Each field in the Config struct is annotated with `env` and `env-default` tags that specify the corresponding environment variable name and default value.
+The apk-ci application uses struct tags to establish the binding between environment variables and configuration fields. Each field in the Config struct is annotated with `env` and `env-default` tags that specify the corresponding environment variable name and default value.
 
 The cleanenv library reads these struct tags during configuration loading and automatically populates the struct fields with values from environment variables when available. If an environment variable is not set, the library uses the specified default value or leaves the field empty if no default is provided.
 
@@ -58,7 +58,7 @@ This approach provides a clean separation between configuration definition and i
 
 ## Supported Environment Variables
 
-The benadis-runner supports a comprehensive set of environment variables that control various aspects of application behavior. These variables are categorized by their functional areas and have specific purposes, default values, and impacts on application execution.
+The apk-ci supports a comprehensive set of environment variables that control various aspects of application behavior. These variables are categorized by their functional areas and have specific purposes, default values, and impacts on application execution.
 
 ### Core Application Variables
 These variables control fundamental application behavior and are required for basic operation:
@@ -93,7 +93,7 @@ These variables control which implementation tools to use:
 ### Git Configuration Variables
 These variables configure Git operations:
 
-- **GIT_USER_NAME**: Username for Git operations. Default: "benadis-runner".
+- **GIT_USER_NAME**: Username for Git operations. Default: "apk-ci".
 - **GIT_USER_EMAIL**: Email address for Git operations. Default: "runner@benadis.ru".
 - **GIT_DEFAULT_BRANCH**: Default branch name. Default: "main".
 - **GIT_TIMEOUT**: Timeout for Git operations. Default: 30 seconds.
@@ -177,7 +177,7 @@ These variables are passed through GitHub Actions inputs:
 
 ## Logging Configuration Variables
 
-The benadis-runner includes comprehensive logging configuration through environment variables with the `BR_LOG_*` prefix. These variables control the logging behavior and output format.
+The apk-ci includes comprehensive logging configuration through environment variables with the `BR_LOG_*` prefix. These variables control the logging behavior and output format.
 
 ### Logging Level Configuration
 - **BR_LOG_LEVEL**: Sets the logging verbosity level. Valid values: "debug", "info", "warn", "error". Default: "info".
@@ -190,7 +190,7 @@ The benadis-runner includes comprehensive logging configuration through environm
 ### File Logging Configuration
 When BR_LOG_OUTPUT is set to "file", additional variables control file logging:
 
-- **BR_LOG_FILE_PATH**: Path to log file when output is "file". Default: "/var/log/benadis-runner.log".
+- **BR_LOG_FILE_PATH**: Path to log file when output is "file". Default: "/var/log/apk-ci.log".
 - **BR_LOG_MAX_SIZE**: Maximum log file size in MB. Default: 100.
 - **BR_LOG_MAX_BACKUPS**: Maximum number of backup log files. Default: 3.
 - **BR_LOG_MAX_AGE**: Maximum age of backup log files in days. Default: 7.
@@ -204,7 +204,7 @@ When BR_LOG_OUTPUT is set to "file", additional variables control file logging:
 
 ## Output Writer Configuration
 
-The benadis-runner includes a flexible output writer system controlled by the `BR_OUTPUT_FORMAT` environment variable. This system allows switching between different output formats without restarting the application.
+The apk-ci includes a flexible output writer system controlled by the `BR_OUTPUT_FORMAT` environment variable. This system allows switching between different output formats without restarting the application.
 
 ### Output Format Selection
 - **BR_OUTPUT_FORMAT**: Controls the output format for command results. Valid values: "json", "text". Default: "text".
@@ -231,7 +231,7 @@ The output writer is created through a factory pattern:
 
 ## Configuration Loading Priority
 
-The benadis-runner follows a specific priority order when loading configuration values, ensuring that more specific or runtime-defined values override general or static ones. The priority hierarchy from highest to lowest is:
+The apk-ci follows a specific priority order when loading configuration values, ensuring that more specific or runtime-defined values override general or static ones. The priority hierarchy from highest to lowest is:
 
 1. **Environment Variables**: Highest priority, allowing runtime overrides
 2. **GitHub Actions Inputs**: Passed through INPUT_* environment variables
@@ -441,7 +441,7 @@ For production deployments:
 - Configure file logging with appropriate rotation settings
 - Monitor log file permissions and disk space
 
-Following these best practices ensures consistent and reliable operation of the benadis-runner across different environments while maintaining security and ease of use.
+Following these best practices ensures consistent and reliable operation of the apk-ci across different environments while maintaining security and ease of use.
 
 **Section sources**
 - [config.go](file://internal/config/config.go#L130-L200)

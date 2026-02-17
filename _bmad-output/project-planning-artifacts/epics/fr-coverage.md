@@ -1,6 +1,6 @@
 # Functional Requirements — Inventory & Coverage
 
-**Проект:** benadis-runner v2.0
+**Проект:** apk-ci v2.0
 **Всего FR:** 68 (основная нумерация) + Epic 0 (NEW)
 **Покрытие:** 100%
 

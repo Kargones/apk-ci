@@ -93,7 +93,7 @@ So that могу начать версионирование новой конф
 
 ### Существующая Legacy-реализация
 
-**Точка входа** (`cmd/benadis-runner/main.go:174-188` — актуальный код ищите через grep):
+**Точка входа** (`cmd/apk-ci/main.go:174-188` — актуальный код ищите через grep):
 ```go
 case constants.ActCreateStores:
     err = app.CreateStoresWrapper(&ctx, l, cfg)
@@ -293,7 +293,7 @@ internal/constants/
 | Файл | Изменение |
 |------|-----------|
 | `internal/constants/constants.go` | Добавить `ActNRCreateStores` |
-| `cmd/benadis-runner/main.go` | Добавить blank import createstoreshandler |
+| `cmd/apk-ci/main.go` | Добавить blank import createstoreshandler |
 
 ### Файлы НЕ ТРОГАТЬ
 
@@ -436,8 +436,8 @@ Claude Opus 4.5 (claude-opus-4-5-20251101)
 
 **Изменены:**
 - `internal/constants/constants.go` — добавлен `ActNRCreateStores`
-- `cmd/benadis-runner/main.go` — blank import createstoreshandler
-- `cmd/benadis-runner/main_test.go` — убран create-stores из legacy списка
+- `cmd/apk-ci/main.go` — blank import createstoreshandler
+- `cmd/apk-ci/main_test.go` — убран create-stores из legacy списка
 
 **Изменены (Code Review #2):**
 - `internal/command/handlers/createstoreshandler/handler.go` — H-1, H-2, H-3 fixes (idempotency, main check, extension errors)

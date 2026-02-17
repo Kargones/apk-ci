@@ -2,7 +2,7 @@
 
 <cite>
 **Referenced Files in This Document**
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go)
 - [internal/app/app.go](file://internal/app/app.go)
 - [internal/constants/constants.go](file://internal/constants/constants.go)
 - [internal/entity/one/store/store.go](file://internal/entity/one/store/store.go)
@@ -27,7 +27,7 @@
 
 ## Introduction
 
-The `storebind` command (ActStoreBind) is a critical component of the benadis-runner system that enables the binding of 1C configuration storage to a target infobase. This command establishes the essential connection between file-based configuration repositories and database-based 1C systems, facilitating seamless synchronization workflows for development and deployment processes.
+The `storebind` command (ActStoreBind) is a critical component of the apk-ci system that enables the binding of 1C configuration storage to a target infobase. This command establishes the essential connection between file-based configuration repositories and database-based 1C systems, facilitating seamless synchronization workflows for development and deployment processes.
 
 The storebind command serves as the foundation for the complete sync pipeline, working in conjunction with git2store and store2db commands to create a robust CI/CD workflow for 1C applications. By binding storage to an infobase, developers can synchronize configuration changes between Git repositories and 1C databases, ensuring consistency across development environments.
 
@@ -309,7 +309,7 @@ func (s *Store) Bind(ctx *context.Context, l *slog.Logger, cfg *config.Config, d
 
 ## Integration with Other Commands
 
-The storebind command works seamlessly with other benadis-runner commands to form a complete synchronization pipeline:
+The storebind command works seamlessly with other apk-ci commands to form a complete synchronization pipeline:
 
 ### Git2Store Integration
 

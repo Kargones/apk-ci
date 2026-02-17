@@ -8,7 +8,7 @@
 - [menu_debug.yaml](file://config/menu_debug.yaml)
 - [config.go](file://internal/config/config.go)
 - [sonarqube.go](file://internal/config/sonarqube.go)
-- [main.go](file://cmd/benadis-runner/main.go)
+- [main.go](file://cmd/apk-ci/main.go)
 - [constants.go](file://internal/constants/constants.go)
 - [config_test.go](file://internal/config/config_test.go)
 </cite>
@@ -28,7 +28,7 @@
 
 ## Introduction
 
-The benadis-runner application uses a sophisticated configuration system built around YAML files and environment variables. This system provides flexible configuration management for different deployment scenarios while maintaining security and operational reliability. The configuration architecture separates concerns into distinct files for application settings, database connections, menus, and secrets, enabling modular and maintainable configuration management.
+The apk-ci application uses a sophisticated configuration system built around YAML files and environment variables. This system provides flexible configuration management for different deployment scenarios while maintaining security and operational reliability. The configuration architecture separates concerns into distinct files for application settings, database connections, menus, and secrets, enabling modular and maintainable configuration management.
 
 ## Configuration Architecture
 
@@ -71,7 +71,7 @@ CONFIG --> MENUCONFIG
 
 **Diagram sources**
 - [config.go](file://internal/config/config.go#L1-L100)
-- [main.go](file://cmd/benadis-runner/main.go#L1-L50)
+- [main.go](file://cmd/apk-ci/main.go#L1-L50)
 
 ## Core Configuration Files
 
@@ -144,7 +144,7 @@ AppConfig --> DatabaseInfo
 
 ## Application Configuration (app.yaml)
 
-The `app.yaml` file serves as the primary configuration file containing system-wide settings for the benadis-runner application. It defines logging, timeouts, executable paths, and service-specific configurations.
+The `app.yaml` file serves as the primary configuration file containing system-wide settings for the apk-ci application. It defines logging, timeouts, executable paths, and service-specific configurations.
 
 ### Logging Configuration
 
@@ -153,7 +153,7 @@ logging:
   level: "info"
   format: "json"
   output: "stdout"
-  filePath: "/var/log/benadis-runner.log"
+  filePath: "/var/log/apk-ci.log"
   maxSize: 100
   maxBackups: 3
   maxAge: 28
@@ -386,7 +386,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version of benadis-runner'
+        description: 'Version of apk-ci'
         required: true
         default: 'v1.2.4'
         type: string
@@ -441,7 +441,7 @@ Loader-->>Main : Final Config
 
 **Diagram sources**
 - [config.go](file://internal/config/config.go#L600-L700)
-- [main.go](file://cmd/benadis-runner/main.go#L15-L30)
+- [main.go](file://cmd/apk-ci/main.go#L15-L30)
 
 ### Configuration Priority Order
 
@@ -817,7 +817,7 @@ logging:
   level: "info"
   format: "json"
   output: "file"
-  filePath: "/var/log/benadis-runner.log"
+  filePath: "/var/log/apk-ci.log"
   maxSize: 100
   maxBackups: 7
   maxAge: 30

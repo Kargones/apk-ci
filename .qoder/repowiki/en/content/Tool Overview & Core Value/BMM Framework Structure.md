@@ -4,7 +4,7 @@
 **Referenced Files in This Document**
 - [README.md](file://README.md)
 - [go.mod](file://go.mod)
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go)
 - [internal/app/app.go](file://internal/app/app.go)
 - [_bmad/_config/manifest.yaml](file::_bmad/_config/manifest.yaml)
 - [_bmad/_config/workflow-manifest.csv]::_bmad/_config/workflow-manifest.csv)
@@ -27,7 +27,7 @@
 9. [Conclusion](#conclusion)
 
 ## Introduction
-This document describes the BMM (Business Model Management) Framework structure within the benadis-runner project. It explains how the BMM module integrates with the broader application architecture, how workflows are organized, and how agents and teams are configured. The BMM Framework provides a structured methodology for product discovery, planning, solutioning, and implementation, supported by reusable workflows, agents, and configuration.
+This document describes the BMM (Business Model Management) Framework structure within the apk-ci project. It explains how the BMM module integrates with the broader application architecture, how workflows are organized, and how agents and teams are configured. The BMM Framework provides a structured methodology for product discovery, planning, solutioning, and implementation, supported by reusable workflows, agents, and configuration.
 
 ## Project Structure
 The BMM Framework is organized under the `_bmad` directory, which contains:
@@ -51,7 +51,7 @@ Core["_bmad/core<br/>agents, tasks, workflows"]
 BMM["_bmad/bmm<br/>agents, workflows, teams, config"]
 end
 subgraph "Application"
-Main["cmd/benadis-runner/main.go<br/>CLI entrypoint"]
+Main["cmd/apk-ci/main.go<br/>CLI entrypoint"]
 App["internal/app/app.go<br/>business logic"]
 end
 subgraph "Outputs"
@@ -65,7 +65,7 @@ Config --> Core
 ```
 
 **Diagram sources**
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L1-L262)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go#L1-L262)
 - [internal/app/app.go](file://internal/app/app.go#L1-L1307)
 - [_bmad/_config/manifest.yaml]::_bmad/_config/manifest.yaml#L1-L11)
 - [_bmad/bmm/config.yaml]::_bmad/bmm/config.yaml#L1-L19)
@@ -73,7 +73,7 @@ Config --> Core
 **Section sources**
 - [README.md](file://README.md#L1-L220)
 - [go.mod](file://go.mod#L1-L27)
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L1-L262)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go#L1-L262)
 - [internal/app/app.go](file://internal/app/app.go#L1-L1307)
 - [_bmad/_config/manifest.yaml]::_bmad/_config/manifest.yaml#L1-L11)
 - [_bmad/bmm/config.yaml]::_bmad/bmm/config.yaml#L1-L19)
@@ -96,7 +96,7 @@ Configuration and manifests:
 - [_bmad/core/config.yaml]::_bmad/core/config.yaml#L1-L10)
 
 ## Architecture Overview
-The BMM Framework operates as an extension of the benadis-runner application. The CLI entrypoint delegates to application logic, which coordinates BMM workflows and agents. Agents load configuration, resolve persona instructions, and execute menu-driven actions or workflow files. Teams orchestrate multiple agents for collaborative sessions.
+The BMM Framework operates as an extension of the apk-ci application. The CLI entrypoint delegates to application logic, which coordinates BMM workflows and agents. Agents load configuration, resolve persona instructions, and execute menu-driven actions or workflow files. Teams orchestrate multiple agents for collaborative sessions.
 
 ```mermaid
 sequenceDiagram
@@ -114,7 +114,7 @@ APP-->>CLI : Log completion and exit
 ```
 
 **Diagram sources**
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L16-L260)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go#L16-L260)
 - [internal/app/app.go](file://internal/app/app.go#L1-L1307)
 - [_bmad/bmm/agents/architect.md]::_bmad/bmm/agents/architect.md#L1-L69)
 - [_bmad/bmm/agents/dev.md]::_bmad/bmm/agents/dev.md#L1-L71)
@@ -207,7 +207,7 @@ Manifest["_bmad/_config/manifest.yaml"]
 WFCSV["_bmad/_config/workflow-manifest.csv"]
 BMMConfig["_bmad/bmm/config.yaml"]
 CoreConfig["_bmad/core/config.yaml"]
-Main["cmd/benadis-runner/main.go"]
+Main["cmd/apk-ci/main.go"]
 App["internal/app/app.go"]
 BMM["_bmad/bmm"]
 Core["_bmad/core"]
@@ -225,7 +225,7 @@ App --> BMM
 - [_bmad/_config/workflow-manifest.csv]::_bmad/_config/workflow-manifest.csv#L1-L36)
 - [_bmad/bmm/config.yaml]::_bmad/bmm/config.yaml#L1-L19)
 - [_bmad/core/config.yaml]::_bmad/core/config.yaml#L1-L10)
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L1-L262)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go#L1-L262)
 - [internal/app/app.go](file://internal/app/app.go#L1-L1307)
 
 **Section sources**
@@ -233,7 +233,7 @@ App --> BMM
 - [_bmad/_config/workflow-manifest.csv]::_bmad/_config/workflow-manifest.csv#L1-L36)
 - [_bmad/bmm/config.yaml]::_bmad/bmm/config.yaml#L1-L19)
 - [_bmad/core/config.yaml]::_bmad/core/config.yaml#L1-L10)
-- [cmd/benadis-runner/main.go](file://cmd/benadis-runner/main.go#L1-L262)
+- [cmd/apk-ci/main.go](file://cmd/apk-ci/main.go#L1-L262)
 - [internal/app/app.go](file://internal/app/app.go#L1-L1307)
 
 ## Performance Considerations
@@ -253,4 +253,4 @@ Common issues and resolutions:
 - [_bmad/bmm/config.yaml]::_bmad/bmm/config.yaml#L8-L19)
 
 ## Conclusion
-The BMM Framework provides a structured, persona-driven methodology integrated into the benadis-runner application. Through curated agents, comprehensive workflows, and shared configurations, it enables disciplined product and engineering processes from discovery through implementation. The modular design, manifests, and centralized configuration support maintain consistency and scalability across projects.
+The BMM Framework provides a structured, persona-driven methodology integrated into the apk-ci application. Through curated agents, comprehensive workflows, and shared configurations, it enables disciplined product and engineering processes from discovery through implementation. The modular design, manifests, and centralized configuration support maintain consistency and scalability across projects.

@@ -142,7 +142,7 @@ So that изменения из IDE попадают в хранилище ав�
 
 ### Существующая Legacy-реализация
 
-**Точка входа** (`cmd/benadis-runner/main.go:85`):
+**Точка входа** (`cmd/apk-ci/main.go:85`):
 ```go
 case constants.ActGit2store:
     err = app.Git2Store(&ctx, l, cfg)
@@ -449,7 +449,7 @@ internal/constants/
 | Файл | Изменение |
 |------|-----------|
 | `internal/constants/constants.go` | Добавить `ActNRGit2store` |
-| `cmd/benadis-runner/main.go` | Добавить blank import git2storehandler |
+| `cmd/apk-ci/main.go` | Добавить blank import git2storehandler |
 
 ### Файлы НЕ ТРОГАТЬ
 
@@ -704,8 +704,8 @@ Claude Opus 4.5 (claude-opus-4-5-20251101)
 
 **Изменено:**
 - `internal/constants/constants.go` — Добавлена константа `ActNRGit2store`
-- `cmd/benadis-runner/main.go` — Добавлен blank import git2storehandler, удалён legacy case git2store
-- `cmd/benadis-runner/main_test.go` — Убран git2store из списка legacy команд
+- `cmd/apk-ci/main.go` — Добавлен blank import git2storehandler, удалён legacy case git2store
+- `cmd/apk-ci/main_test.go` — Убран git2store из списка legacy команд
 
 **Code Review #1 Fixes (2026-02-04):**
 - `handler.go` — Добавлены: валидация InfobaseName, cleanup репозитория, context.WithTimeout, поле Errors

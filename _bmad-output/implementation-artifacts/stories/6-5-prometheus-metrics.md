@@ -8,7 +8,7 @@ Status: done
 
 As a DevOps-инженер,
 I want экспортировать метрики в Prometheus формате,
-so that могу строить дашборды в Grafana и мониторить работу benadis-runner.
+so that могу строить дашборды в Grafana и мониторить работу apk-ci.
 
 ## Acceptance Criteria
 
@@ -95,10 +95,10 @@ so that могу строить дашборды в Grafana и монитори�
 - ctx.Done() check перед push операцией
 
 **CLI Специфика — Pushgateway** [Source: epic-6-observability.md]
-- benadis-runner это CLI, не держит HTTP сервер
+- apk-ci это CLI, не держит HTTP сервер
 - Метрики отправляются в Pushgateway при завершении команды
 - Библиотека: `github.com/prometheus/client_golang/prometheus/push`
-- Grouping: job="benadis-runner", instance=hostname
+- Grouping: job="apk-ci", instance=hostname
 
 ### Структура MetricsConfig (в config.go)
 
@@ -113,8 +113,8 @@ type MetricsConfig struct {
     PushgatewayURL string `yaml:"pushgatewayUrl" env:"BR_METRICS_PUSHGATEWAY_URL"`
 
     // JobName — имя job для группировки метрик.
-    // По умолчанию: "benadis-runner"
-    JobName string `yaml:"jobName" env:"BR_METRICS_JOB_NAME" env-default:"benadis-runner"`
+    // По умолчанию: "apk-ci"
+    JobName string `yaml:"jobName" env:"BR_METRICS_JOB_NAME" env-default:"apk-ci"`
 
     // Timeout — таймаут HTTP запросов к Pushgateway.
     // По умолчанию: 10 секунд.
@@ -379,7 +379,7 @@ func ProvideMetricsCollector(cfg *config.Config, logger logging.Logger) metrics.
 |------------|----------------------|----------|
 | BR_METRICS_ENABLED | false | Включить сбор и отправку метрик |
 | BR_METRICS_PUSHGATEWAY_URL | "" | URL Prometheus Pushgateway |
-| BR_METRICS_JOB_NAME | "benadis-runner" | Job name для группировки |
+| BR_METRICS_JOB_NAME | "apk-ci" | Job name для группировки |
 | BR_METRICS_TIMEOUT | 10s | Таймаут HTTP запросов |
 | BR_METRICS_INSTANCE | hostname | Instance label для метрик |
 
@@ -390,7 +390,7 @@ func ProvideMetricsCollector(cfg *config.Config, logger logging.Logger) metrics.
 metrics:
   enabled: true
   pushgatewayUrl: "http://pushgateway.monitoring.svc:9091"
-  jobName: "benadis-runner"
+  jobName: "apk-ci"
   timeout: "10s"
   instanceLabel: "" # auto from hostname
 ```
@@ -440,7 +440,7 @@ func TestPrometheusCollector_Push(t *testing.T) {
     // Mock Pushgateway
     server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
         assert.Equal(t, http.MethodPost, r.Method)
-        assert.Contains(t, r.URL.Path, "/metrics/job/benadis-runner")
+        assert.Contains(t, r.URL.Path, "/metrics/job/apk-ci")
         w.WriteHeader(http.StatusOK)
     }))
     defer server.Close()
@@ -448,7 +448,7 @@ func TestPrometheusCollector_Push(t *testing.T) {
     config := metrics.Config{
         Enabled:        true,
         PushgatewayURL: server.URL,
-        JobName:        "benadis-runner",
+        JobName:        "apk-ci",
         Timeout:        10 * time.Second,
     }
 
@@ -529,7 +529,7 @@ Buckets: `[0.1, 0.5, 1, 5, 10, 30, 60, 120, 300, 600]` секунд
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    benadis-runner CLI                        │
+│                    apk-ci CLI                        │
 │  ┌───────────────────────────────────────────────────────┐  │
 │  │ Handler.Execute() → MetricsCollector.RecordCommandEnd │  │
 │  │                   → MetricsCollector.Push()           │  │
@@ -615,7 +615,7 @@ Claude Opus 4.5 (claude-opus-4-5-20251101)
 - internal/pkg/metrics/prometheus_test.go
 
 **Изменённые файлы:**
-- cmd/benadis-runner/main.go (интеграция MetricsCollector в NR-команды)
+- cmd/apk-ci/main.go (интеграция MetricsCollector в NR-команды)
 - internal/config/config.go (добавлен MetricsConfig struct, поле в AppConfig и Config, функции загрузки)
 - internal/di/providers.go (добавлен ProvideMetricsCollector)
 - go.mod (добавлен github.com/prometheus/client_golang v1.20.5)

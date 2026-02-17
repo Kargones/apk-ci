@@ -444,7 +444,7 @@ internal/constants/
 
 - `internal/entity/one/designer/designer.go` — legacy код CreateTempDb
 - `internal/app/app.go` — legacy CreateTempDbWrapper
-- `cmd/benadis-runner/main.go` — точка входа (не менять switch-case)
+- `cmd/apk-ci/main.go` — точка входа (не менять switch-case)
 
 ### Что НЕ делать
 
@@ -590,7 +590,7 @@ Claude Opus 4.5 (claude-opus-4-5-20251101)
 - `internal/constants/constants.go` - добавлен `ActNRCreateTempDb`
 - `internal/adapter/onec/interfaces.go` - добавлены `TempDatabaseCreator`, `CreateTempDBOptions`, `TempDBResult`
 - `internal/adapter/onec/onectest/mock.go` - добавлен `MockTempDatabaseCreator`
-- `cmd/benadis-runner/main.go` - добавлен blank import для handler
+- `cmd/apk-ci/main.go` - добавлен blank import для handler
 
 **Modified During Code Review #1:**
 - `internal/adapter/onec/tempdb_creator.go` - H2 fix: явная инициализация slice params
@@ -598,7 +598,7 @@ Claude Opus 4.5 (claude-opus-4-5-20251101)
 - `internal/command/handlers/createtempdbhandler/handler_test.go` - M1/M2 fixes: t.Setenv, формат времени, mock ibcmd файлы
 
 **Modified During Code Review #2:**
-- `cmd/benadis-runner/main.go` - H1 fix: удалён мёртвый код legacy switch-case для ActCreateTempDb
+- `cmd/apk-ci/main.go` - H1 fix: удалён мёртвый код legacy switch-case для ActCreateTempDb
 - `internal/command/handlers/createtempdbhandler/handler.go` - H2/H3/M2 fixes: path validation, context cancellation checks, ErrContextCancelled
 - `internal/command/handlers/createtempdbhandler/handler_test.go` - M1 fix: t.Setenv в helper-тестах, тест для context cancellation
 
@@ -660,7 +660,7 @@ Claude Opus 4.5 (claude-opus-4-5-20251101)
 - L3: TODO в legacy designer.go — в legacy, не в новом коде
 
 ### Files Modified (Review #2):
-- `cmd/benadis-runner/main.go` — H1 fix (удалён мёртвый код)
+- `cmd/apk-ci/main.go` — H1 fix (удалён мёртвый код)
 - `internal/command/handlers/createtempdbhandler/handler.go` — H2, H3, M2 fixes (path validation, context checks, константа)
 - `internal/command/handlers/createtempdbhandler/handler_test.go` — M1 fix (t.Setenv) + H3 tests (context cancelled)
 

@@ -159,7 +159,7 @@ type CreatePROptions struct {
 {release.Body}
 
 ---
-*This PR was automatically created by benadis-runner extension-publish*
+*This PR was automatically created by apk-ci extension-publish*
 ```
 
 ### Gitea API для создания PR

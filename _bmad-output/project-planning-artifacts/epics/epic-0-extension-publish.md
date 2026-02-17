@@ -21,7 +21,7 @@
 | GetProjectSubscriptions() | Story 0.3 | `internal/app/extension_publish.go:39` | ✅ |
 | SyncExtensionDirectory() | Story 0.4 | `internal/app/extension_publish.go` | ✅ |
 | CreatePR with release info | Story 0.5 | `internal/entity/gitea/gitea.go` | ✅ |
-| Команда extension-publish | Story 0.6 | `cmd/benadis-runner/main.go:244` | ✅ |
+| Команда extension-publish | Story 0.6 | `cmd/apk-ci/main.go:244` | ✅ |
 | Error handling & reporting | Story 0.7 | `internal/app/extension_publish.go` | ✅ |
 | Unit & Integration тесты | Story 0.8 | `extension_publish_test.go` (92.9%) | ✅ |
 
@@ -204,7 +204,7 @@ err = handler.Execute(ctx, cfg)
 - [ ] Case в main.go switch
 
 **Technical Notes:**
-- Файлы: `internal/constants/constants.go`, `cmd/benadis-runner/main.go`
+- Файлы: `internal/constants/constants.go`, `cmd/apk-ci/main.go`
 
 ---
 
@@ -256,7 +256,7 @@ err = handler.Execute(ctx, cfg)
 | `internal/entity/gitea/gitea.go` | Новые методы API |
 | `internal/entity/gitea/types.go` | Структура `Release`, расширение `Repository`, структура `ProjectYAML` |
 | `internal/app/extension_publish.go` | Основная логика команды |
-| `cmd/benadis-runner/main.go` | Точка входа (case в switch) |
+| `cmd/apk-ci/main.go` | Точка входа (case в switch) |
 
 ### Механизм подписок
 

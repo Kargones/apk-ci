@@ -208,7 +208,7 @@ assert.False(t, data["state_changed"].(bool))
 - `internal/pkg/output/` — не менять Result/Metadata/ErrorInfo
 - `internal/pkg/tracing/` — не менять
 - `internal/constants/constants.go` — не нужны новые константы
-- `cmd/benadis-runner/main.go` — не нужны изменения
+- `cmd/apk-ci/main.go` — не нужны изменения
 - Legacy код: `internal/rac/`, `internal/servicemode/`, `internal/app/app.go`
 
 ### Что НЕ делать

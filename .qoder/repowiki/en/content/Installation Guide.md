@@ -26,19 +26,19 @@
 9. [Conclusion](#conclusion)
 
 ## Introduction
-The benadis-runner is a comprehensive tool designed for automating operations with the 1C:Enterprise platform, including data conversion, database restoration, service mode management, and integration with Enterprise Development Tools (EDT). This installation guide provides detailed instructions for setting up benadis-runner across different environments, covering multiple installation methods, prerequisites, verification procedures, and solutions to common issues.
+The apk-ci is a comprehensive tool designed for automating operations with the 1C:Enterprise platform, including data conversion, database restoration, service mode management, and integration with Enterprise Development Tools (EDT). This installation guide provides detailed instructions for setting up apk-ci across different environments, covering multiple installation methods, prerequisites, verification procedures, and solutions to common issues.
 
 **Section sources**
 - [README.md](file://README.md#L1-L20)
 
 ## Prerequisites
-Before installing benadis-runner, ensure that your system meets the following prerequisites:
+Before installing apk-ci, ensure that your system meets the following prerequisites:
 
 ### Go Runtime
-The Go programming language runtime is required for building and running benadis-runner. The application is developed using Go, and various installation methods depend on Go tools.
+The Go programming language runtime is required for building and running apk-ci. The application is developed using Go, and various installation methods depend on Go tools.
 
 ### 1C:Enterprise Platform Tools
-benadis-runner integrates with several 1C:Enterprise platform components:
+apk-ci integrates with several 1C:Enterprise platform components:
 - **1cv8**: The main 1C:Enterprise executable for running configuration commands
 - **ibcmd**: Command-line utility for managing information bases
 - **rac**: Remote Administration Console for cluster management
@@ -75,7 +75,7 @@ D --> D4[cifs-utils]
 - [internal/config/config.go](file://internal/config/config.go#L942-L988)
 
 ## Installation Methods
-benadis-runner offers multiple installation methods to accommodate different deployment scenarios and user requirements.
+apk-ci offers multiple installation methods to accommodate different deployment scenarios and user requirements.
 
 ### Makefile Targets
 The project includes a comprehensive Makefile with various targets for building, testing, and deploying the application:
@@ -101,12 +101,12 @@ Several shell scripts facilitate different aspects of the installation process:
 These scripts handle dependency resolution, path configuration, and tool installation in an automated manner.
 
 ### Direct Build from Source
-For users who prefer manual control over the installation process, benadis-runner can be built directly from source:
+For users who prefer manual control over the installation process, apk-ci can be built directly from source:
 
 ```bash
 git clone <repository-url>
-cd benadis-runner
-go build -o benadis-runner ./cmd/benadis-runner
+cd apk-ci
+go build -o apk-ci ./cmd/apk-ci
 ```
 
 This method gives users complete control over the build process and allows for custom compilation flags.
@@ -118,7 +118,7 @@ This method gives users complete control over the build process and allows for c
 - [README.md](file://README.md#L25-L35)
 
 ## Development Environment Setup
-Setting up a development environment for benadis-runner involves installing necessary tools and configuring the workspace properly.
+Setting up a development environment for apk-ci involves installing necessary tools and configuring the workspace properly.
 
 ### Using install-dev-tools.sh
 The primary script for development environment setup is `install-dev-tools.sh`, which performs the following operations:
@@ -178,7 +178,7 @@ style End fill:#bbf,stroke:#333
 - [mise.toml](file://mise.toml#L1-L6)
 
 ## Containerized Deployment
-benadis-runner supports containerized deployment through Docker, enabling consistent execution environments across different systems.
+apk-ci supports containerized deployment through Docker, enabling consistent execution environments across different systems.
 
 ### Starting the Container
 The `9-start-container.sh` script provides a simple way to launch a container with the necessary 1C:Enterprise tools:
@@ -216,7 +216,7 @@ While the provided script uses a pre-built image, users can also create custom c
 - [scripts/9-start-container.sh](file://scripts/9-start-container.sh#L1-L7)
 
 ## Version Management
-Effective version management is crucial for tracking changes and maintaining stability in the benadis-runner application.
+Effective version management is crucial for tracking changes and maintaining stability in the apk-ci application.
 
 ### Automatic Version Generation
 The `generate-version.sh` script automates version file creation by:
@@ -258,26 +258,26 @@ This automated versioning system ensures traceability and helps identify the exa
 - [scripts/generate-version.sh](file://scripts/generate-version.sh#L1-L227)
 
 ## Verification Steps
-After installation, verify that benadis-runner is properly set up and functioning correctly.
+After installation, verify that apk-ci is properly set up and functioning correctly.
 
 ### Checking Command Availability
-Verify that the benadis-runner binary is accessible in your PATH:
+Verify that the apk-ci binary is accessible in your PATH:
 
 ```bash
-which benadis-runner
+which apk-ci
 ```
 
 Or if installed via Makefile:
 
 ```bash
-which benadis-runner
+which apk-ci
 ```
 
 ### Testing Version Output
 Check that the application can display its version information:
 
 ```bash
-benadis-runner version
+apk-ci version
 ```
 
 Or using the Makefile target:

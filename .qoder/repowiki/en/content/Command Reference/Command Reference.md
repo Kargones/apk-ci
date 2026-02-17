@@ -2,7 +2,7 @@
 
 <cite>
 **Referenced Files in This Document**
-- [main.go](file://cmd/benadis-runner/main.go)
+- [main.go](file://cmd/apk-ci/main.go)
 - [app.go](file://internal/app/app.go)
 - [registry.go](file://internal/command/registry.go)
 - [handler.go](file://internal/command/handler.go)
@@ -56,17 +56,17 @@
    - [execute-epf](#execute-epf)
 
 ## Introduction
-The benadis-runner application provides a comprehensive set of commands for automating various operations related to 1C:Enterprise development and deployment processes. The application has evolved to use a new Next Generation (NR) command framework that implements self-registration, structured output formatting, and backward compatibility through deprecated bridge patterns.
+The apk-ci application provides a comprehensive set of commands for automating various operations related to 1C:Enterprise development and deployment processes. The application has evolved to use a new Next Generation (NR) command framework that implements self-registration, structured output formatting, and backward compatibility through deprecated bridge patterns.
 
 The NR framework introduces a modern command architecture where commands register themselves automatically via init() functions, eliminating the need for manual registration in main.go. Commands now support structured output in both JSON and human-readable formats, enhanced error handling with machine-readable error codes, and improved traceability through distributed tracing.
 
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L1-L50)
+- [main.go](file://cmd/apk-ci/main.go#L1-L50)
 - [registry.go](file://internal/command/registry.go#L1-L50)
 - [handler.go](file://internal/command/handler.go#L1-L28)
 
 ## Command Framework Architecture
-The benadis-runner uses a modern command framework architecture that separates concerns between command registration, execution, and output formatting. The framework consists of several key components:
+The apk-ci uses a modern command framework architecture that separates concerns between command registration, execution, and output formatting. The framework consists of several key components:
 
 ### Self-Registering Commands
 Each command package contains an init() function that registers the command handler with the global registry. This eliminates the need for manual registration in main.go and allows commands to be added or modified independently.
@@ -112,7 +112,7 @@ M --> N[Actual Handler Execution]
 - [result.go](file://internal/pkg/output/result.go#L11-L30)
 
 ## Command Dispatch Mechanism
-The benadis-runner implements a two-tier command dispatch mechanism that prioritizes NR commands while maintaining backward compatibility with legacy commands.
+The apk-ci implements a two-tier command dispatch mechanism that prioritizes NR commands while maintaining backward compatibility with legacy commands.
 
 ### Priority-Based Dispatch
 1. **NR Command Registry Check**: First, the application searches for commands in the self-registering registry
@@ -141,10 +141,10 @@ UnknownCommand --> Success
 ```
 
 **Diagram sources**
-- [main.go](file://cmd/benadis-runner/main.go#L25-L58)
+- [main.go](file://cmd/apk-ci/main.go#L25-L58)
 
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L45-L58)
+- [main.go](file://cmd/apk-ci/main.go#L45-L58)
 - [registry.go](file://internal/command/registry.go#L57-L64)
 - [deprecated.go](file://internal/command/deprecated.go#L112-L143)
 
@@ -184,7 +184,7 @@ Structured error responses include:
 - [text.go](file://internal/pkg/output/text.go#L9-L54)
 
 ## Exit Codes
-The benadis-runner application uses a standardized exit code system that has been enhanced to support the new NR command framework. The exit codes provide clear signals for automation systems and help distinguish between different types of failures.
+The apk-ci application uses a standardized exit code system that has been enhanced to support the new NR command framework. The exit codes provide clear signals for automation systems and help distinguish between different types of failures.
 
 | Exit Code | NR Command | Legacy Command | Meaning |
 |-----------|------------|----------------|---------|
@@ -199,7 +199,7 @@ The benadis-runner application uses a standardized exit code system that has bee
 **Note**: NR commands primarily use exit code 8 for service operation failures, while legacy commands maintain their specific exit codes for different operation types.
 
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L223-L228)
+- [main.go](file://cmd/apk-ci/main.go#L223-L228)
 - [registry.go](file://internal/command/registry.go#L57-L64)
 
 ## Command Reference
@@ -220,7 +220,7 @@ The nr-version command displays application version information in either JSON o
 
 **Expected Outputs**:
 - JSON format: `{"status":"success","command":"nr-version","data":{"version":"x.y.z","go_version":"go1.x.x","commit":"abc123"},"metadata":{"duration_ms":123,"trace_id":"abc-def-ghi","api_version":"v1"}}`
-- Text format: `benadis-runner version x.y.z.10.11.5:5deea45-debug`
+- Text format: `apk-ci version x.y.z.10.11.5:5deea45-debug`
 
 **Section sources**
 - [version/version.go](file://internal/command/handlers/version/version.go#L74-L109)
@@ -377,7 +377,7 @@ The convert command performs conversion of 1C:Enterprise projects from repositor
 - Failure: Error message logged with details about the failure
 
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L70-L78)
+- [main.go](file://cmd/apk-ci/main.go#L70-L78)
 - [app.go](file://internal/app/app.go#L80-L150)
 
 ### dbrestore
@@ -405,7 +405,7 @@ The dbrestore command restores a 1C database from a backup. It initializes HASP 
 - Failure: Error message logged with details about the restoration failure
 
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L102-L112)
+- [main.go](file://cmd/apk-ci/main.go#L102-L112)
 - [app.go](file://internal/app/app.go#L600-L650)
 
 ### service-mode-enable
@@ -434,7 +434,7 @@ The service-mode-enable command enables service mode for a specified 1C informat
 - Failure: Error message logged with details about why service mode could not be enabled
 
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L75-L95)
+- [main.go](file://cmd/apk-ci/main.go#L75-L95)
 - [app.go](file://internal/app/app.go#L150-L200)
 
 ### service-mode-disable
@@ -462,7 +462,7 @@ The service-mode-disable command disables service mode for a specified 1C inform
 - Failure: Error message logged with details about why service mode could not be disabled
 
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L95-L110)
+- [main.go](file://cmd/apk-ci/main.go#L95-L110)
 - [app.go](file://internal/app/app.go#L200-L250)
 
 ### service-mode-status
@@ -490,7 +490,7 @@ The service-mode-status command checks the current status of service mode for a 
 - Failure: Error message logged with details about why status could not be retrieved
 
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L110-L120)
+- [main.go](file://cmd/apk-ci/main.go#L110-L120)
 - [app.go](file://internal/app/app.go#L250-L300)
 
 ### git2store
@@ -526,7 +526,7 @@ The git2store command synchronizes data from a Git repository into a 1C configur
 - Failure: Error message logged with details about the synchronization failure
 
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L80-L89)
+- [main.go](file://cmd/apk-ci/main.go#L80-L89)
 - [app.go](file://internal/app/app.go#L300-L500)
 
 ### store2db
@@ -554,7 +554,7 @@ The store2db command loads configuration from a 1C configuration repository into
 - Failure: Error message logged with details about the loading failure
 
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L60-L75)
+- [main.go](file://cmd/apk-ci/main.go#L60-L75)
 - [app.go](file://internal/app/app.go#L500-L550)
 
 ### sq-scan-branch
@@ -584,7 +584,7 @@ The sq-scan-branch command performs SonarQube analysis on a specific branch of c
 - Failure: Error message logged with details about the scanning failure
 
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L163-L172)
+- [main.go](file://cmd/apk-ci/main.go#L163-L172)
 - [app.go](file://internal/app/app.go#L550-L600)
 
 ### sq-scan-pr
@@ -615,7 +615,7 @@ The sq-scan-pr command performs SonarQube analysis on a pull request. It retriev
 - Failure: Error message logged with details about the scanning failure, including "PR not found" if the PR doesn't exist
 
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L173-L182)
+- [main.go](file://cmd/apk-ci/main.go#L173-L182)
 - [app.go](file://internal/app/app.go#L550-L600)
 
 ### execute-epf
@@ -641,5 +641,5 @@ The execute-epf command runs 1C:Enterprise external processing files (.epf) with
 - Failure: Error message logged with details about execution failure
 
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L153-L162)
+- [main.go](file://cmd/apk-ci/main.go#L153-L162)
 - [app.go](file://internal/app/app.go#L150-L200)

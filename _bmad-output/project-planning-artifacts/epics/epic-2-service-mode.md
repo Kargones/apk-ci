@@ -31,7 +31,7 @@ LEGACY РЕАЛИЗАЦИЯ:
 ├── internal/servicemode/servicemode.go     ✅ Manager interface
 ├── internal/rac/                           ✅ RAC client
 ├── internal/app/app.go                     ✅ ServiceMode* функции
-└── cmd/benadis-runner/main.go:61-121       ✅ switch-case
+└── cmd/apk-ci/main.go:61-121       ✅ switch-case
 
 NR АРХИТЕКТУРА (ОЖИДАЕТСЯ):
 ├── internal/command/handlers/servicemode/  ❌ НЕ СУЩЕСТВУЕТ

@@ -195,7 +195,7 @@ type ServiceModeStatusData struct {
 - `internal/adapter/onec/rac/ractest/mock.go` — Story 2.1 (done). `GetSessionsFunc` уже определён в mock
 - `internal/command/registry.go`, `handler.go`, `deprecated.go` — не менять
 - `internal/constants/constants.go` — новых констант не нужно
-- `cmd/benadis-runner/main.go` — не менять
+- `cmd/apk-ci/main.go` — не менять
 
 ### Существующий Mock (НЕ МЕНЯТЬ mock.go!)
 
@@ -328,4 +328,4 @@ Claude Opus 4.5 (claude-opus-4-5-20251101)
 - `internal/command/handlers/servicemodestatushandler/handler.go` — изменён (SessionInfoData, Sessions поле, GetSessions вызов, writeText секция сессий, fix: graceful degradation text output)
 - `internal/command/handlers/servicemodestatushandler/handler_test.go` — изменён (5 новых тестов + 1 subtest text SessionsFetchError, import time)
 
-**Примечание:** `cmd/benadis-runner/main.go` и `internal/constants/constants.go` были изменены в Story 2.3, не в 2.4. Story 2.4 только расширяла существующий handler.
+**Примечание:** `cmd/apk-ci/main.go` и `internal/constants/constants.go` были изменены в Story 2.3, не в 2.4. Story 2.4 только расширяла существующий handler.

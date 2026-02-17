@@ -3,7 +3,7 @@
 
 <cite>
 **Referenced Files in This Document**   
-- [main.go](file://cmd/benadis-runner/main.go)
+- [main.go](file://cmd/apk-ci/main.go)
 - [app.go](file://internal/app/app.go)
 - [servicemode.go](file://internal/servicemode/servicemode.go)
 - [service_mode.go](file://internal/rac/service_mode.go)
@@ -26,20 +26,20 @@
 
 ## Introduction
 
-The service mode commands in benadis-runner provide administrative control over the 1C:Enterprise service mode, allowing for maintenance operations on information bases. These commands enable administrators to temporarily block user access to databases while performing critical operations such as configuration updates, data migrations, or system maintenance. The three primary commands—`service-mode-enable`, `service-mode-disable`, and `service-mode-status`—offer comprehensive management capabilities for the service mode functionality.
+The service mode commands in apk-ci provide administrative control over the 1C:Enterprise service mode, allowing for maintenance operations on information bases. These commands enable administrators to temporarily block user access to databases while performing critical operations such as configuration updates, data migrations, or system maintenance. The three primary commands—`service-mode-enable`, `service-mode-disable`, and `service-mode-status`—offer comprehensive management capabilities for the service mode functionality.
 
 These commands interact with the 1C:Enterprise server through the Remote Administration Console (RAC), providing a programmatic interface for service mode operations. The implementation follows a layered architecture where high-level commands are processed through multiple components, from the main application entry point down to the RAC client that communicates directly with the 1C server.
 
 The service mode functionality is essential for ensuring data consistency during administrative operations, preventing conflicts between user activities and system maintenance tasks. By enabling service mode, administrators can guarantee that no users are actively modifying data while critical operations are being performed, reducing the risk of data corruption or operational failures.
 
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L60-L92)
+- [main.go](file://cmd/apk-ci/main.go#L60-L92)
 - [app.go](file://internal/app/app.go#L100-L150)
 - [service-mode-usage.md](file://old/service-mode-usage.md#L1-L20)
 
 ## Command Syntax and Parameters
 
-The service mode commands in benadis-runner follow a consistent syntax pattern using environment variables to configure their behavior. Each command is invoked by setting the `BR_COMMAND` environment variable to the appropriate action value, along with required parameters for the operation.
+The service mode commands in apk-ci follow a consistent syntax pattern using environment variables to configure their behavior. Each command is invoked by setting the `BR_COMMAND` environment variable to the appropriate action value, along with required parameters for the operation.
 
 The primary commands and their corresponding BR_COMMAND values are:
 - `service-mode-enable`: Enables service mode for an information base
@@ -138,12 +138,12 @@ Main-->>User : Completion status
 ```
 
 **Diagram sources**
-- [main.go](file://cmd/benadis-runner/main.go#L60-L92)
+- [main.go](file://cmd/apk-ci/main.go#L60-L92)
 - [app.go](file://internal/app/app.go#L100-L150)
 - [servicemode.go](file://internal/servicemode/servicemode.go#L200-L250)
 
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L60-L92)
+- [main.go](file://cmd/apk-ci/main.go#L60-L92)
 - [app.go](file://internal/app/app.go#L100-L150)
 - [servicemode.go](file://internal/servicemode/servicemode.go#L200-L250)
 

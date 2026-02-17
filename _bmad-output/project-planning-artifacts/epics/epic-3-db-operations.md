@@ -30,7 +30,7 @@ LEGACY РЕАЛИЗАЦИЯ:
 ├── internal/entity/dbrestore/dbrestore.go  ✅ DbRestore logic
 ├── internal/app/app.go                     ✅ DbRestore*, DbUpdate*
 ├── internal/service/                       ✅ Сервисный слой
-└── cmd/benadis-runner/main.go              ✅ switch-case
+└── cmd/apk-ci/main.go              ✅ switch-case
 
 NR АРХИТЕКТУРА (ОЖИДАЕТСЯ):
 ├── internal/command/handlers/database/     ❌ НЕ СУЩЕСТВУЕТ

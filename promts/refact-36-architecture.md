@@ -344,7 +344,7 @@ jobs:
       - name: Восстановление базы данных (Test)
         id: br-dbrestore
         if: ${{ inputs.restore_DB == true }}
-        uses: https://${{ secrets.TOKEN_FULL }}:@regdv.apkholding.ru/gitops-tools/benadis-runner@latest
+        uses: https://${{ secrets.TOKEN_FULL }}:@regdv.apkholding.ru/gitops-tools/apk-ci@latest
         with:
           giteaURL: ${{ gitea.server_url }}
           repository: ${{ gitea.repository }}
@@ -357,7 +357,7 @@ jobs:
       - name: Включение сервисного режима (Test)
         id: br-service-mode-enable
         if: ${{ inputs.service_mode_enable == true }}
-        uses: https://${{ secrets.TOKEN_FULL }}:@regdv.apkholding.ru/gitops-tools/benadis-runner@latest
+        uses: https://${{ secrets.TOKEN_FULL }}:@regdv.apkholding.ru/gitops-tools/apk-ci@latest
         with:
           giteaURL: ${{ gitea.server_url }}
           repository: ${{ gitea.repository }}
@@ -370,7 +370,7 @@ jobs:
       - name: Загрузка конфигурации из хранилища (Test)
         id: br-store2db
         if: ${{ inputs.load_cfg == true }}
-        uses: https://${{ secrets.TOKEN_FULL }}:@regdv.apkholding.ru/gitops-tools/benadis-runner@latest
+        uses: https://${{ secrets.TOKEN_FULL }}:@regdv.apkholding.ru/gitops-tools/apk-ci@latest
         with:
           giteaURL: ${{ gitea.server_url }}
           repository: ${{ gitea.repository }}
@@ -383,7 +383,7 @@ jobs:
       - name: Применение конфигурации (Test)
         id: br-dbupdate
         if: ${{ inputs.update_conf == true }}
-        uses: https://${{ secrets.TOKEN_FULL }}:@regdv.apkholding.ru/gitops-tools/benadis-runner@latest
+        uses: https://${{ secrets.TOKEN_FULL }}:@regdv.apkholding.ru/gitops-tools/apk-ci@latest
         with:
           giteaURL: ${{ gitea.server_url }}
           repository: ${{ gitea.repository }}
@@ -395,7 +395,7 @@ jobs:
 
       - name: Отключение сервисного режима (Test)
         id: br-service-mode-disable
-        uses: https://${{ secrets.TOKEN_FULL }}:@regdv.apkholding.ru/gitops-tools/benadis-runner@latest
+        uses: https://${{ secrets.TOKEN_FULL }}:@regdv.apkholding.ru/gitops-tools/apk-ci@latest
         with:
           giteaURL: ${{ gitea.server_url }}
           repository: ${{ gitea.repository }}
@@ -441,7 +441,7 @@ jobs:
       - name: Включение сервисного режима (Prod)
         id: br-service-mode-enable
         if: ${{ inputs.service_mode_enable == true }}
-        uses: https://${{ secrets.TOKEN_FULL }}:@regdv.apkholding.ru/gitops-tools/benadis-runner@latest
+        uses: https://${{ secrets.TOKEN_FULL }}:@regdv.apkholding.ru/gitops-tools/apk-ci@latest
         with:
           giteaURL: ${{ gitea.server_url }}
           repository: ${{ gitea.repository }}
@@ -454,7 +454,7 @@ jobs:
       - name: Загрузка конфигурации из хранилища (Prod)
         id: br-store2db
         if: ${{ inputs.load_cfg == true }}
-        uses: https://${{ secrets.TOKEN_FULL }}:@regdv.apkholding.ru/gitops-tools/benadis-runner@latest
+        uses: https://${{ secrets.TOKEN_FULL }}:@regdv.apkholding.ru/gitops-tools/apk-ci@latest
         with:
           giteaURL: ${{ gitea.server_url }}
           repository: ${{ gitea.repository }}
@@ -467,7 +467,7 @@ jobs:
       - name: Применение конфигурации (Prod)
         id: br-dbupdate
         if: ${{ inputs.update_conf == true }}
-        uses: https://${{ secrets.TOKEN_FULL }}:@regdv.apkholding.ru/gitops-tools/benadis-runner@latest
+        uses: https://${{ secrets.TOKEN_FULL }}:@regdv.apkholding.ru/gitops-tools/apk-ci@latest
         with:
           giteaURL: ${{ gitea.server_url }}
           repository: ${{ gitea.repository }}
@@ -479,7 +479,7 @@ jobs:
 
       - name: Отключение сервисного режима (Prod)
         id: br-service-mode-disable
-        uses: https://${{ secrets.TOKEN_FULL }}:@regdv.apkholding.ru/gitops-tools/benadis-runner@latest
+        uses: https://${{ secrets.TOKEN_FULL }}:@regdv.apkholding.ru/gitops-tools/apk-ci@latest
         with:
           giteaURL: ${{ gitea.server_url }}
           repository: ${{ gitea.repository }}
@@ -503,7 +503,7 @@ jobs:
     steps:
       - name: Конвертация
         id: br-convert
-        uses: https://${{ secrets.TOKEN_FULL }}:@regdv.apkholding.ru/gitops-tools/benadis-runner@latest
+        uses: https://${{ secrets.TOKEN_FULL }}:@regdv.apkholding.ru/gitops-tools/apk-ci@latest
         with:
           giteaURL: ${{ github.server_url }}
           repository: ${{ github.repository }}
@@ -513,7 +513,7 @@ jobs:
           actor: ${{ gitea.actor }}
       - name: Перенос в хранилище
         id: br-convert
-        uses: https://${{ secrets.TOKEN_FULL }}:@regdv.apkholding.ru/gitops-tools/benadis-runner@latest
+        uses: https://${{ secrets.TOKEN_FULL }}:@regdv.apkholding.ru/gitops-tools/apk-ci@latest
         with:
           giteaURL: ${{ github.server_url }}
           repository: ${{ github.repository }}

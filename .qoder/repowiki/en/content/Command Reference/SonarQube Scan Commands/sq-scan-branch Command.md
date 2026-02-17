@@ -3,7 +3,7 @@
 
 <cite>
 **Referenced Files in This Document**   
-- [main.go](file://cmd/benadis-runner/main.go)
+- [main.go](file://cmd/apk-ci/main.go)
 - [app.go](file://internal/app/app.go)
 - [sonarqube_init.go](file://internal/app/sonarqube_init.go)
 - [git.go](file://internal/git/git.go)
@@ -28,10 +28,10 @@
 12. [Performance Considerations](#performance-considerations)
 
 ## Introduction
-The `sq-scan-branch` command in benadis-runner initiates SonarQube code quality analysis on a specific 1C:Enterprise project branch. This command provides automated static code analysis capabilities, enabling continuous code quality monitoring for development branches. The implementation follows a structured workflow that validates configuration, initializes services, clones repositories, and executes SonarQube scans with comprehensive error handling and logging.
+The `sq-scan-branch` command in apk-ci initiates SonarQube code quality analysis on a specific 1C:Enterprise project branch. This command provides automated static code analysis capabilities, enabling continuous code quality monitoring for development branches. The implementation follows a structured workflow that validates configuration, initializes services, clones repositories, and executes SonarQube scans with comprehensive error handling and logging.
 
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L0-L252)
+- [main.go](file://cmd/apk-ci/main.go#L0-L252)
 - [app.go](file://internal/app/app.go#L1091-L1289)
 
 ## Command Configuration and Environment Variables
@@ -87,11 +87,11 @@ end
 ```
 
 **Diagram sources**
-- [main.go](file://cmd/benadis-runner/main.go#L0-L252)
+- [main.go](file://cmd/apk-ci/main.go#L0-L252)
 - [app.go](file://internal/app/app.go#L1091-L1289)
 
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L0-L252)
+- [main.go](file://cmd/apk-ci/main.go#L0-L252)
 - [app.go](file://internal/app/app.go#L1091-L1289)
 
 ## Configuration Validation and Branch Eligibility

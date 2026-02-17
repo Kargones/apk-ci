@@ -6,7 +6,7 @@
 - [app.go](file://internal/app/app.go)
 - [sonarqube_init.go](file://internal/app/sonarqube_init.go)
 - [interfaces.go](file://internal/entity/sonarqube/interfaces.go)
-- [main.go](file://cmd/benadis-runner/main.go)
+- [main.go](file://cmd/apk-ci/main.go)
 - [config.go](file://internal/config/config.go)
 - [sonarqube.go](file://internal/config/sonarqube.go)
 - [constants.go](file://internal/constants/constants.go)
@@ -27,7 +27,7 @@
 
 ## Introduction
 
-The `sq-scan-pr` command is a specialized SonarQube integration feature within the benadis-runner ecosystem designed to trigger pull request analysis for 1C:Enterprise development workflows. This command enables automated code quality assessment specifically for pull requests, providing developers with immediate feedback on code quality metrics and potential issues before merging changes into the main branch.
+The `sq-scan-pr` command is a specialized SonarQube integration feature within the apk-ci ecosystem designed to trigger pull request analysis for 1C:Enterprise development workflows. This command enables automated code quality assessment specifically for pull requests, providing developers with immediate feedback on code quality metrics and potential issues before merging changes into the main branch.
 
 The command operates as part of a broader SonarQube integration strategy that includes branch scanning, project management, and reporting capabilities. It leverages the Gitea API for PR context retrieval and integrates seamlessly with the existing command-line interface architecture.
 
@@ -64,7 +64,7 @@ Success --> End
 - [app.go](file://internal/app/app.go#L1150-L1200)
 
 **Section sources**
-- [main.go](file://cmd/benadis-runner/main.go#L115-L120)
+- [main.go](file://cmd/apk-ci/main.go#L115-L120)
 - [constants.go](file://internal/constants/constants.go#L85-L86)
 
 ## Architecture and Components
