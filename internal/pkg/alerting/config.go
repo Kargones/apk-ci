@@ -20,61 +20,60 @@ const (
 )
 
 // Config содержит настройки для пакета alerting.
-// Используется при создании Alerter через NewAlerter().
+// Используется при создании Alerter через NewAlerter() и как единый источник истины
+// для конфигурации алертинга (issue #81: устранение дублирования config/alerting structs).
 type Config struct {
 	// Enabled — включён ли алертинг (по умолчанию false).
-	Enabled bool
+	Enabled bool `yaml:"enabled" env:"BR_ALERTING_ENABLED" env-default:"false"`
 
 	// RateLimitWindow — минимальный интервал между алертами одного типа.
-	// По умолчанию: 5 минут.
-	RateLimitWindow time.Duration
+	RateLimitWindow time.Duration `yaml:"rateLimitWindow" env:"BR_ALERTING_RATE_LIMIT_WINDOW" env-default:"5m"`
 
 	// Email — конфигурация email канала.
-	Email EmailConfig
+	Email EmailConfig `yaml:"email"`
 
 	// Telegram — конфигурация telegram канала.
-	Telegram TelegramConfig
+	Telegram TelegramConfig `yaml:"telegram"`
 
 	// Webhook — конфигурация webhook канала.
-	Webhook WebhookConfig
+	Webhook WebhookConfig `yaml:"webhook"`
+
+	// Rules — правила фильтрации алертов.
+	Rules RulesConfig `yaml:"rules"`
 }
 
 // EmailConfig содержит настройки email канала.
 type EmailConfig struct {
 	// Enabled — включён ли email канал.
-	Enabled bool
+	Enabled bool `yaml:"enabled" env:"BR_ALERTING_EMAIL_ENABLED" env-default:"false"`
 
 	// SMTPHost — адрес SMTP сервера.
-	SMTPHost string
+	SMTPHost string `yaml:"smtpHost" env:"BR_ALERTING_SMTP_HOST"`
 
 	// SMTPPort — порт SMTP сервера (25, 465, 587).
-	// По умолчанию: 587 (StartTLS).
-	SMTPPort int
+	SMTPPort int `yaml:"smtpPort" env:"BR_ALERTING_SMTP_PORT" env-default:"587"`
 
 	// SMTPUser — пользователь для SMTP авторизации.
-	SMTPUser string
+	SMTPUser string `yaml:"smtpUser" env:"BR_ALERTING_SMTP_USER"`
 
 	// SMTPPassword — пароль для SMTP авторизации.
-	SMTPPassword string
+	SMTPPassword string `yaml:"smtpPassword" env:"BR_ALERTING_SMTP_PASSWORD"`
 
 	// UseTLS — использовать TLS (StartTLS для 587, implicit для 465).
-	// По умолчанию: true.
-	UseTLS bool
+	UseTLS bool `yaml:"useTLS" env:"BR_ALERTING_SMTP_TLS" env-default:"true"`
 
 	// From — адрес отправителя.
-	From string
+	From string `yaml:"from" env:"BR_ALERTING_EMAIL_FROM"`
 
 	// To — список получателей.
-	To []string
+	To []string `yaml:"to" env:"BR_ALERTING_EMAIL_TO" env-separator:","`
 
 	// SubjectTemplate — шаблон темы письма.
 	// Placeholders: {{.ErrorCode}}, {{.Command}}, {{.Infobase}}
-	// По умолчанию: "[apk-ci] {{.ErrorCode}}: {{.Command}}"
-	SubjectTemplate string
+	SubjectTemplate string `yaml:"subjectTemplate" env:"BR_ALERTING_EMAIL_SUBJECT" env-default:"[apk-ci] {{.ErrorCode}}: {{.Command}}"`
 
 	// Timeout — таймаут SMTP операций.
-	// По умолчанию: 30 секунд.
-	Timeout time.Duration
+	Timeout time.Duration `yaml:"timeout" env:"BR_ALERTING_SMTP_TIMEOUT" env-default:"30s"`
 }
 
 // DefaultConfig возвращает конфигурацию с значениями по умолчанию.
@@ -99,32 +98,31 @@ func DefaultConfig() Config {
 			Timeout:    DefaultWebhookTimeout,
 			MaxRetries: DefaultMaxRetries,
 		},
+		Rules: RulesConfig{
+			MinSeverity: "INFO",
+		},
 	}
 }
 
 // Validate проверяет корректность конфигурации.
 // Возвращает ошибку если обязательные поля не заполнены.
 func (c *Config) Validate() error {
-	// Если alerting отключён — валидация не требуется
 	if !c.Enabled {
 		return nil
 	}
 
-	// Если email канал включён — проверяем обязательные поля
 	if c.Email.Enabled {
 		if err := c.Email.Validate(); err != nil {
 			return err
 		}
 	}
 
-	// Если telegram канал включён — проверяем обязательные поля
 	if c.Telegram.Enabled {
 		if err := c.Telegram.Validate(); err != nil {
 			return err
 		}
 	}
 
-	// Если webhook канал включён — проверяем обязательные поля
 	if c.Webhook.Enabled {
 		if err := c.Webhook.Validate(); err != nil {
 			return err
@@ -148,9 +146,6 @@ func (e *EmailConfig) Validate() error {
 		return ErrFromRequired
 	}
 
-	// H-1/Review #9: Защита от CRLF injection в email заголовках.
-	// Управляющие символы в From/To могут внедрить произвольные SMTP заголовки.
-	// M-4/Review #10: используем email-specific валидатор (HTAB запрещён в email адресах).
 	if containsInvalidEmailHeaderChars(e.From) {
 		return ErrEmailAddressInvalid
 	}
