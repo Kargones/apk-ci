@@ -1,6 +1,7 @@
 package gitea
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -17,7 +18,7 @@ import (
 func (g *API) GetLatestRelease() (*Release, error) {
 	urlString := fmt.Sprintf("%s/api/%s/repos/%s/%s/releases/latest", g.GiteaURL, constants.APIVersion, g.Owner, g.Repo)
 
-	statusCode, body, err := g.sendReq(urlString, "", "GET")
+	statusCode, body, err := g.sendReq(context.Background(), urlString, "", "GET")
 	if err != nil {
 		return nil, fmt.Errorf("ошибка при выполнении запроса: %w", err)
 	}
@@ -53,7 +54,7 @@ func (g *API) GetReleaseByTag(tag string) (*Release, error) {
 	escapedTag := url.QueryEscape(tag)
 	urlString := fmt.Sprintf("%s/api/%s/repos/%s/%s/releases/tags/%s", g.GiteaURL, constants.APIVersion, g.Owner, g.Repo, escapedTag)
 
-	statusCode, body, err := g.sendReq(urlString, "", "GET")
+	statusCode, body, err := g.sendReq(context.Background(), urlString, "", "GET")
 	if err != nil {
 		return nil, fmt.Errorf("ошибка при выполнении запроса: %w", err)
 	}

@@ -1,6 +1,7 @@
 package gitea
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -31,7 +32,7 @@ func (g *API) GetFileContent(fileName string) ([]byte, error) {
 		urlString = fmt.Sprintf("%s/api/%s/repos/%s/%s/contents/%s", g.GiteaURL, constants.APIVersion, g.Owner, g.Repo, fileName)
 	}
 
-	statusCode, body, err := g.sendReq(urlString, "", "GET")
+	statusCode, body, err := g.sendReq(context.Background(), urlString, "", "GET")
 	if err != nil {
 		return nil, fmt.Errorf("ошибка при выполнении запроса: %w", err)
 	}
@@ -75,7 +76,7 @@ func (g *API) GetFileContent(fileName string) ([]byte, error) {
 func (g *API) GetRepositoryContents(filepath, branch string) ([]FileInfo, error) {
 	urlString := fmt.Sprintf("%s/api/%s/repos/%s/%s/contents/%s?ref=%s", g.GiteaURL, constants.APIVersion, g.Owner, g.Repo, filepath, branch)
 
-	statusCode, body, err := g.sendReq(urlString, "", "GET")
+	statusCode, body, err := g.sendReq(context.Background(), urlString, "", "GET")
 	if err != nil {
 		return nil, fmt.Errorf("ошибка при выполнении запроса: %w", err)
 	}
@@ -135,7 +136,7 @@ func (g *API) SetRepositoryState(l *slog.Logger, operations []ChangeFileOperatio
 
 	l.Debug("Выполнение batch запроса", "url", urlString, "body", string(requestBody))
 	// Выполняем POST запрос
-	statusCode, responseBody, err := g.sendReq(urlString, string(requestBody), "POST")
+	statusCode, responseBody, err := g.sendReq(context.Background(), urlString, string(requestBody), "POST")
 	if err != nil {
 		return fmt.Errorf("ошибка при выполнении batch запроса: %w", err)
 	}
@@ -221,7 +222,7 @@ func (g *API) SetRepositoryStateWithNewBranch(l *slog.Logger, operations []Chang
 
 	l.Debug("Выполнение batch запроса с новой веткой", "url", urlString, "newBranch", newBranch)
 	// Выполняем POST запрос
-	statusCode, responseBody, err := g.sendReq(urlString, string(requestBody), "POST")
+	statusCode, responseBody, err := g.sendReq(context.Background(), urlString, string(requestBody), "POST")
 	if err != nil {
 		return "", fmt.Errorf("ошибка при выполнении batch запроса: %w", err)
 	}
@@ -293,7 +294,7 @@ func (g *API) GetConfigData(l *slog.Logger, filename string) ([]byte, error) {
 
 	// Make HTTP request
 	l.Debug("Creating HTTP request", "fileURL", fileURL, "filename", filename)
-	statusCode, respBody, err := g.sendReq(fileURL, "", "GET")
+	statusCode, respBody, err := g.sendReq(context.Background(), fileURL, "", "GET")
 	if err != nil {
 		l.Error("Failed to create HTTP request",
 			"filename", filename,
@@ -371,7 +372,7 @@ func (g *API) GetConfigData(l *slog.Logger, filename string) ([]byte, error) {
 func (g *API) GetConfigDataBad(filenamePrefix string) ([]byte, error) {
 	// Если это прямая ссылка, загружаем напрямую
 	if strings.HasPrefix(filenamePrefix, "http://") || strings.HasPrefix(filenamePrefix, "https://") {
-		statusCode, body, err := g.sendReq(filenamePrefix, "", "GET")
+		statusCode, body, err := g.sendReq(context.Background(), filenamePrefix, "", "GET")
 
 		if err != nil {
 			return nil, fmt.Errorf("ошибка загрузки по URL %s: %w", filenamePrefix, err)
@@ -397,7 +398,7 @@ func (g *API) GetConfigDataBad(filenamePrefix string) ([]byte, error) {
 			urlString := fmt.Sprintf("%s/api/%s/repos/%s/%s/contents/%s?ref=%s",
 				g.GiteaURL, constants.APIVersion, g.Owner, g.Repo, file.Path, g.BaseBranch)
 
-			statusCode, body, err := g.sendReq(urlString, "", "GET")
+			statusCode, body, err := g.sendReq(context.Background(), urlString, "", "GET")
 			if err != nil {
 				return nil, fmt.Errorf("ошибка выполнения запроса: %w", err)
 			}

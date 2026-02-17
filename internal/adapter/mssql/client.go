@@ -9,7 +9,7 @@ import (
 	"time"
 
 	// blank import для драйвера SQL Server
-	_ "github.com/denisenkom/go-mssqldb"
+	_ "github.com/microsoft/go-mssqldb"
 )
 
 // dbaDatabase — имя базы данных DBA для получения статистики восстановления.
