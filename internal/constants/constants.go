@@ -145,6 +145,9 @@ const (
 	ActNRMigrate = "nr-migrate"
 	// ActNRDeprecatedAudit - действие аудита deprecated кода в проекте (NR-команда)
 	ActNRDeprecatedAudit = "nr-deprecated-audit"
+
+	// ActNRExtensionPublish - действие публикации расширения 1C (NR-команда)
+	ActNRExtensionPublish = "nr-extension-publish"
 )
 
 // Константы переменных окружения
