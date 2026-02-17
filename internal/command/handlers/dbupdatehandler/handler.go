@@ -48,6 +48,7 @@ const (
 )
 
 func RegisterCmd() error {
+	// Deprecated: alias "dbupdate" retained for backward compatibility. Remove in v2.0.0 (Epic 7).
 	return command.RegisterWithAlias(&DbUpdateHandler{}, constants.ActDbupdate)
 }
 

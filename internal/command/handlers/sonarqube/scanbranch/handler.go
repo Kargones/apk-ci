@@ -33,6 +33,7 @@ const (
 )
 
 func RegisterCmd() error {
+	// Deprecated: alias "sq-scan-branch" retained for backward compatibility. Remove in v2.0.0 (Epic 7).
 	return command.RegisterWithAlias(&ScanBranchHandler{}, constants.ActSQScanBranch)
 }
 

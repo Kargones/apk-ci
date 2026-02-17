@@ -10,6 +10,7 @@ import (
 )
 
 func RegisterCmd() error {
+	// Deprecated: alias "extension-publish" retained for backward compatibility. Remove in v2.0.0 (Epic 7).
 	return command.RegisterWithAlias(&ExtensionPublishHandler{}, constants.ActExtensionPublish)
 }
 

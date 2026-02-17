@@ -59,7 +59,7 @@ func (s *SummaryInfo) AddWarning(msg string) {
 }
 
 // BuildBasicSummary создаёт базовый summary.
-// Deprecated: используйте NewSummaryInfo() — функции идентичны.
+// Deprecated: since v1.0. Use NewSummaryInfo() instead. Remove in v2.0.0.
 // AC-7: Если handler не предоставляет SummaryData — выводится базовый summary.
 // Примечание: duration вычисляется из Metadata.DurationMs автоматически.
 func BuildBasicSummary() *SummaryInfo {

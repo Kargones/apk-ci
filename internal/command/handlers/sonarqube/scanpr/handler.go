@@ -39,6 +39,7 @@ const (
 // Зависит от инициализации пакетов command и constants.
 func RegisterCmd() error {
 	// ActSQScanPR — deprecated alias для обратной совместимости
+	// Deprecated: alias "sq-scan-pr" retained for backward compatibility. Remove in v2.0.0 (Epic 7).
 	return command.RegisterWithAlias(&ScanPRHandler{}, constants.ActSQScanPR)
 }
 

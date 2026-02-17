@@ -29,6 +29,7 @@ const DefaultTimeout = 300 * time.Second
 var _ command.Handler = (*ExecuteEpfHandler)(nil)
 
 func RegisterCmd() error {
+	// Deprecated: alias "execute-epf" retained for backward compatibility. Remove in v2.0.0 (Epic 7).
 	return command.RegisterWithAlias(&ExecuteEpfHandler{}, constants.ActExecuteEpf)
 }
 

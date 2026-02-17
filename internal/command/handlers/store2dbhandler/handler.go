@@ -26,6 +26,7 @@ const storeVersionLatest = "latest"
 var _ command.Handler = (*Store2DbHandler)(nil)
 
 func RegisterCmd() error {
+	// Deprecated: alias "store2db" retained for backward compatibility. Remove in v2.0.0 (Epic 7).
 	return command.RegisterWithAlias(&Store2DbHandler{}, constants.ActStore2db)
 }
 
