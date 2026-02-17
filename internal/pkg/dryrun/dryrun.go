@@ -86,6 +86,8 @@ func BuildPlanWithSummary(command string, steps []output.PlanStep, summary strin
 // passwordRegexes — скомпилированные регулярные выражения для поиска паролей.
 // H-2 fix: поддерживаем несколько форматов паролей для полного покрытия.
 // H-4 fix: /P и -P работают и в начале строки (опциональный пробел перед ними).
+// passwordRegexes is effectively constant (compiled once, never modified).
+// Cannot be const: Go does not support const slices.
 var passwordRegexes = []*regexp.Regexp{
 	// Формат: /P password или /P "password" или /P 'password' (может быть в начале строки)
 	regexp.MustCompile(`(?i)(^|[ ])(/P )("[^"]*"|'[^']*'|[^\s]+)`),

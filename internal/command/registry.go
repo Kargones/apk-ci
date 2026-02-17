@@ -6,6 +6,9 @@ import (
 	"sync"
 )
 
+// Package-level state: registry is a mutable map protected by mu (sync.RWMutex).
+// This is the standard Go pattern for a concurrent-safe service registry.
+// commandNamePattern is effectively constant (compiled once, never reassigned).
 var (
 	// registry хранит зарегистрированные обработчики команд.
 	// Ключ — имя команды, значение — обработчик.

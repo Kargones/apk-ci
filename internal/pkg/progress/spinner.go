@@ -7,6 +7,8 @@ import (
 )
 
 // spinnerFrames — кадры анимации spinner (braille).
+// spinnerFrames is effectively constant (initialized once, never modified).
+// Cannot be const: Go does not support const slices.
 var spinnerFrames = []rune{'⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'}
 
 // nonTTYReportInterval — интервал вывода прогресса для non-TTY режима (LOW-1 fix).

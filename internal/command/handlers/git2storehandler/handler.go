@@ -48,6 +48,7 @@ const (
 )
 
 // allStages содержит все этапы workflow в порядке выполнения.
+// Effectively constant. Cannot be const: Go does not support const slices.
 var allStages = []string{
 	StageValidating,
 	StageCreatingBackup,

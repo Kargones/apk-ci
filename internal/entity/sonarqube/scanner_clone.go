@@ -27,7 +27,7 @@ func (s *SonarScannerEntity) Download(ctx context.Context, scannerURL string, sc
 	}
 
 	// #nosec G204 - scannerVersion и scannerURL валидируются в вызывающем коде
-	cmd := exec.CommandContext(ctx, "git", "clone", "--branch", scannerVersion, "--depth", "1", scannerURL, cloneDir)
+	cmd := exec.CommandContext(ctx, "git", "clone", "--branch", scannerVersion, "--depth", "1", scannerURL, cloneDir) // #nosec G204 - git is hardcoded, scannerVersion/URL from validated config
 	cmd.Stdout = nil
 	cmd.Stderr = nil
 

@@ -25,6 +25,7 @@ type Replacement struct {
 // Формат 2: BR_COMMAND=value (inline в run)
 // Review #32: regex намеренно case-sensitive ([a-z]) — все валидные имена команд
 // в constants.go строго lowercase. Uppercase не является валидным значением BR_COMMAND.
+// Compiled regex patterns below are effectively constant (compiled once, never reassigned).
 var brCommandEnvPattern = regexp.MustCompile(
 	`^(\s*BR_COMMAND\s*:\s*)("?)([a-z][a-z0-9-]*)("?.*)$`,
 )

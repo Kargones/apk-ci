@@ -270,7 +270,7 @@ func (b *BranchScannerEntity) ValidateBranch(ctx context.Context, branchName str
 
 // getGitCommitHash retrieves the commit hash for the specified branch.
 func (b *BranchScannerEntity) getGitCommitHash(ctx context.Context, branchName string) (string, error) {
-	cmd := exec.CommandContext(ctx, "git", "rev-parse", branchName)
+	cmd := exec.CommandContext(ctx, "git", "rev-parse", branchName) // #nosec G204 - git is hardcoded, branchName from trusted Git refs
 	cmd.Dir = b.workDir
 
 	output, err := cmd.Output()
@@ -283,7 +283,7 @@ func (b *BranchScannerEntity) getGitCommitHash(ctx context.Context, branchName s
 
 // getGitCommitMessage retrieves the commit message for the specified branch.
 func (b *BranchScannerEntity) getGitCommitMessage(ctx context.Context, branchName string) (string, error) {
-	cmd := exec.CommandContext(ctx, "git", "log", "-1", "--pretty=format:%s", branchName)
+	cmd := exec.CommandContext(ctx, "git", "log", "-1", "--pretty=format:%s", branchName) // #nosec G204 - git is hardcoded, branchName from trusted Git refs
 	cmd.Dir = b.workDir
 
 	output, err := cmd.Output()
@@ -296,7 +296,7 @@ func (b *BranchScannerEntity) getGitCommitMessage(ctx context.Context, branchNam
 
 // getGitCommitAuthor retrieves the commit author for the specified branch.
 func (b *BranchScannerEntity) getGitCommitAuthor(ctx context.Context, branchName string) (string, error) {
-	cmd := exec.CommandContext(ctx, "git", "log", "-1", "--pretty=format:%an <%ae>", branchName)
+	cmd := exec.CommandContext(ctx, "git", "log", "-1", "--pretty=format:%an <%ae>", branchName) // #nosec G204 - git is hardcoded, branchName from trusted Git refs
 	cmd.Dir = b.workDir
 
 	output, err := cmd.Output()
@@ -309,7 +309,7 @@ func (b *BranchScannerEntity) getGitCommitAuthor(ctx context.Context, branchName
 
 // getGitCommitTimestamp retrieves the commit timestamp for the specified branch.
 func (b *BranchScannerEntity) getGitCommitTimestamp(ctx context.Context, branchName string) (time.Time, error) {
-	cmd := exec.CommandContext(ctx, "git", "log", "-1", "--pretty=format:%ct", branchName)
+	cmd := exec.CommandContext(ctx, "git", "log", "-1", "--pretty=format:%ct", branchName) // #nosec G204 - git is hardcoded, branchName from trusted Git refs
 	cmd.Dir = b.workDir
 
 	output, err := cmd.Output()
@@ -366,7 +366,7 @@ func (b *BranchScannerEntity) branchExists(ctx context.Context, branchName strin
 
 // isGitRepository checks if the working directory is a Git repository.
 func (b *BranchScannerEntity) isGitRepository(ctx context.Context) (bool, error) {
-	cmd := exec.CommandContext(ctx, "git", "rev-parse", "--git-dir")
+	cmd := exec.CommandContext(ctx, "git", "rev-parse", "--git-dir") // #nosec G204 - git is hardcoded, all args hardcoded
 	cmd.Dir = b.workDir
 
 	err := cmd.Run()

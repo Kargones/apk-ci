@@ -20,10 +20,8 @@ const (
 	GitCommand = "git"
 )
 
-var (
-	// cloneOk = "Cloning into"
-	resetOk = "HEAD is now at"
-)
+// resetOk is used to verify git reset output (effectively constant).
+const resetOk = "HEAD is now at"
 
 // NewConfigs создает новый экземпляр конфигурации Git.
 // Инициализирует структуру с настройками по умолчанию для работы

@@ -95,7 +95,7 @@ func SwitchOrCreateBranch(ctx context.Context, repoPath, branchName string) erro
 
 	// Проверяем существование локальной ветки
 	slog.Debug("Проверяем существование локальной ветки", slog.String("branch", branchName))
-	cmdCheck := exec.CommandContext(ctx, GitCommand, "rev-parse", "--verify", branchName)
+	cmdCheck := exec.CommandContext(ctx, GitCommand, "rev-parse", "--verify", branchName) // #nosec G204 - GitCommand is constant, branchName from trusted refs
 	if err := cmdCheck.Run(); err == nil {
 		// Локальная ветка существует, переключаемся на неё
 		slog.Debug("Локальная ветка существует, переключаемся на неё", slog.String("branch", branchName))
@@ -113,7 +113,7 @@ func SwitchOrCreateBranch(ctx context.Context, repoPath, branchName string) erro
 			slog.String("checkError", err.Error()))
 
 		// Проверяем существование удаленной ветки origin/branchName
-		cmdCheckRemote := exec.CommandContext(ctx, GitCommand, "rev-parse", "--verify", "origin/"+branchName)
+		cmdCheckRemote := exec.CommandContext(ctx, GitCommand, "rev-parse", "--verify", "origin/"+branchName) // #nosec G204 - GitCommand is constant, branchName from trusted refs
 		if err := cmdCheckRemote.Run(); err == nil {
 			// Удаленная ветка существует - создаем локальную от неё
 			slog.Debug("Удаленная ветка существует, создаем локальную ветку от неё",
@@ -240,7 +240,7 @@ func getRemoteBranches(timeout time.Duration) ([]string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
-	cmd := exec.CommandContext(ctx, GitCommand, "branch", "-r")
+	cmd := exec.CommandContext(ctx, GitCommand, "branch", "-r") // #nosec G204 - GitCommand is constant, all args hardcoded
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		if ctx.Err() == context.DeadlineExceeded {

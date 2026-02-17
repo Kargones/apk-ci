@@ -70,7 +70,7 @@ func executeGitCommandWithRetry(repoPath string, args []string) error {
 			slog.Int("Попытка", attempt),
 			slog.String("Команда", strings.Join(args, " ")))
 
-		cmd := exec.Command("git", args...)
+		cmd := exec.Command("git", args...) // #nosec G204 - git is hardcoded, args from programmatic construction
 		cmd.Dir = repoPath
 		output, err := cmd.CombinedOutput()
 
@@ -139,7 +139,7 @@ func getGitStatus(repoPath string) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 	defer cancel()
 
-	cmd := exec.CommandContext(ctx, GitCommand, "status", "--porcelain")
+	cmd := exec.CommandContext(ctx, GitCommand, "status", "--porcelain") // #nosec G204 - GitCommand is constant, all args hardcoded
 	cmd.Dir = repoPath
 
 	output, err := cmd.Output()
@@ -173,7 +173,7 @@ func waitForGitSync(repoPath string) error {
 		// Проверяем, что Git репозиторий готов к работе
 		// Используем простую команду git status для проверки готовности
 		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
-		cmd := exec.CommandContext(ctx, GitCommand, "status", "--porcelain")
+		cmd := exec.CommandContext(ctx, GitCommand, "status", "--porcelain") // #nosec G204 - GitCommand is constant, all args hardcoded
 		cmd.Dir = repoPath
 
 		slog.Debug("Выполняем команду git status --porcelain",

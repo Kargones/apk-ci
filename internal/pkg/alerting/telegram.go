@@ -167,6 +167,7 @@ func (t *TelegramAlerter) formatMessage(alert Alert) string {
 // Создаётся один раз на уровне пакета для избежания аллокаций при каждом вызове.
 // Backslash экранируется ПЕРВЫМ, чтобы не удваивать экранирование остальных символов.
 // M-1/Review #10: добавлен ">" для защиты от цитирования в Markdown v1.
+// markdownReplacer is effectively constant (initialized once, never reassigned).
 var markdownReplacer = strings.NewReplacer(
 	`\`, `\\`,
 	"_", "\\_",
