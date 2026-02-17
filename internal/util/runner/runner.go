@@ -11,6 +11,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 )
 
 const maxConsoleOut = 2048
@@ -241,7 +242,7 @@ func DisplayConfig(l *slog.Logger) error {
 	// l.Debug("Config", "Xvfb запущен", slog.Int("PID", xvfbPID))
 
 	// Ожидание запуска Xvfb
-	_ = exec.Command("sleep", "3").Run()
+	time.Sleep(3 * time.Second)
 
 	// Проверка запуска Xvfb
 	if xvfbPID <= 0 {
@@ -267,7 +268,9 @@ func DisplayConfig(l *slog.Logger) error {
 	// Создание файла авторизации X11
 	// l.Debug("Config", slog.String("action", "Создание файла авторизации X11"))
 	touchCmd := exec.Command("touch", "/tmp/.Xauth99")
-	_ = touchCmd.Run()
+	if err := touchCmd.Run(); err != nil {
+		l.Warn("failed to create Xauth file", slog.String("error", err.Error()))
+	}
 
 	// Генерация случайного ключа для xauth
 	randCmd := exec.Command("xxd", "-l", "16", "-p", "/dev/urandom")
@@ -292,8 +295,10 @@ func DisplayConfig(l *slog.Logger) error {
 
 		// Альтернативный запуск с другими параметрами
 		killCmd2 := exec.Command("pkill", "-f", "Xvfb")
-		_ = killCmd2.Run()
-		_ = exec.Command("sleep", "2").Run()
+		if err := killCmd2.Run(); err != nil {
+			l.Debug("pkill Xvfb retry (may not be running)", slog.String("error", err.Error()))
+		}
+		time.Sleep(2 * time.Second)
 
 		startCmd2 := exec.Command("Xvfb", ":99", "-screen", "0", "1920x1080x24", "-dpi", "96", "-ac", "+extension", "RANDR")
 		startCmd2.Stdout = nil
@@ -301,7 +306,7 @@ func DisplayConfig(l *slog.Logger) error {
 		if err := startCmd2.Start(); err != nil {
 			return fmt.Errorf("failed to restart Xvfb: %w", err)
 		}
-		_ = exec.Command("sleep", "3").Run()
+		time.Sleep(3 * time.Second)
 
 		testCmd2 := exec.Command("xdpyinfo", "-display", ":99")
 		testCmd2.Stdout = nil
