@@ -1,6 +1,7 @@
 package filer
 
 import (
+	"github.com/Kargones/apk-ci/internal/constants"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -113,8 +114,8 @@ func (pu *PathUtils) EnsureDir(path string) error {
 		return nil // Директория уже существует
 	}
 
-	// Создание директории с правами 0750
-	if err := os.MkdirAll(normalizedPath, 0750); err != nil {
+	// Создание директории с правами constants.DirPermStandard
+	if err := os.MkdirAll(normalizedPath, constants.DirPermStandard); err != nil {
 		return fmt.Errorf("не удалось создать директорию: %w", err)
 	}
 

@@ -389,7 +389,7 @@ func (odb *OneDb) DumpAdd(ctx context.Context, l *slog.Logger, cfg *config.Confi
 func GetDbName(ctx context.Context, l *slog.Logger, cfg *config.Config) (string, error) {
 	if cfg.Connect != "" {
 		dbPath := path.Join(cfg.TmpDir, cfg.Connect)
-		err := os.Mkdir(dbPath, 0750)
+		err := os.Mkdir(dbPath, constants.DirPermStandard)
 		if err != nil {
 			l.Error("Не удалось создать временный каталог",
 				slog.String("Корень временных каталогов", cfg.TmpDir),

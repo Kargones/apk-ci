@@ -2,6 +2,7 @@
 package edt
 
 import (
+	"github.com/Kargones/apk-ci/internal/constants"
 	"context"
 	"errors"
 	"fmt"
@@ -209,7 +210,7 @@ func (c *Convert) Convert(ctx context.Context, l *slog.Logger, cfg *config.Confi
 				)
 				return fmt.Errorf("не удалось очистить каталог приемник %s: %w", r.PathOut, err)
 			}
-			err = os.MkdirAll(r.PathOut, 0750)
+			err = os.MkdirAll(r.PathOut, constants.DirPermStandard)
 			if err != nil {
 				l.Error("Не удалось создать каталог после очистки",
 					slog.String("Каталог", r.PathOut),
@@ -220,7 +221,7 @@ func (c *Convert) Convert(ctx context.Context, l *slog.Logger, cfg *config.Confi
 				slog.String("Путь очистки", r.PathOut),
 			)
 		}
-		err = os.MkdirAll(r.PathOut, 0750)
+		err = os.MkdirAll(r.PathOut, constants.DirPermStandard)
 		if err != nil {
 			l.Error("Не удалось создать каталог",
 				slog.String("Каталог", r.PathOut),

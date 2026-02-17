@@ -677,7 +677,7 @@ func (cc *Config) Save(ctx context.Context, _ *slog.Logger, _ *config.Config, co
 	if err != nil {
 		return fmt.Errorf("ошибка сериализации конфигурации: %w", err)
 	}
-	err = os.WriteFile(configPath, ocJSON, 0600)
+	err = os.WriteFile(configPath, ocJSON, constants.FilePermPrivate)
 	return err
 }
 

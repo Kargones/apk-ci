@@ -520,7 +520,7 @@ func createWorkDirectories(cfg *Config) error {
 	}
 
 	// Создаем рабочую директорию
-	if err := os.MkdirAll(workDir, 0750); err != nil {
+	if err := os.MkdirAll(workDir, constants.DirPermStandard); err != nil {
 		return fmt.Errorf("ошибка создания рабочей директории %s: %w", workDir, err)
 	}
 
@@ -528,7 +528,7 @@ func createWorkDirectories(cfg *Config) error {
 	if tmpDir == "" {
 		tmpDir = workDir + "/temp"
 	}
-	if err := os.MkdirAll(tmpDir, 0750); err != nil {
+	if err := os.MkdirAll(tmpDir, constants.DirPermStandard); err != nil {
 		return fmt.Errorf("ошибка создания временной директории %s: %w", tmpDir, err)
 	}
 

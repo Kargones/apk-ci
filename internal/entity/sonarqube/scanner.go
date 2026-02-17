@@ -4,6 +4,7 @@
 package sonarqube
 
 import (
+	"github.com/Kargones/apk-ci/internal/constants"
 	"context"
 	"fmt"
 	"log/slog"
@@ -52,14 +53,14 @@ func (s *SonarScannerEntity) Configure(config *ScannerConfig) error {
 
 	if config.WorkDir != "" {
 		s.workDir = config.WorkDir
-		if err := os.MkdirAll(s.workDir, 0750); err != nil {
+		if err := os.MkdirAll(s.workDir, constants.DirPermStandard); err != nil {
 			return fmt.Errorf("failed to create working directory: %w", err)
 		}
 	}
 
 	if config.TempDir != "" {
 		s.tempDir = config.TempDir
-		if err := os.MkdirAll(s.tempDir, 0750); err != nil {
+		if err := os.MkdirAll(s.tempDir, constants.DirPermStandard); err != nil {
 			return fmt.Errorf("failed to create temporary directory: %w", err)
 		}
 	}

@@ -200,7 +200,7 @@ func (h *CreateTempDbHandler) Execute(ctx context.Context, cfg *config.Config) e
 
 	// M3 fix: создание родительской директории если не существует
 	parentDir := filepath.Dir(dbPath)
-	if err := os.MkdirAll(parentDir, 0755); err != nil {
+	if err := os.MkdirAll(parentDir, constants.DirPermExec); err != nil {
 		log.Error("Не удалось создать директорию для БД", slog.String("path", parentDir), slog.String("error", err.Error()))
 		return h.writeError(format, traceID, start, ErrCreateTempDbValidation,
 			fmt.Sprintf("не удалось создать директорию %s: %s", parentDir, err.Error()))
