@@ -53,7 +53,7 @@ func (s *Store) ReadReport(ctx context.Context, l *slog.Logger, dbConnectString 
 		l.Error("Ошибка формирования отчета", slog.String("storeName", s.Name), slog.String("output", string(bOut)))
 	}
 	records, userList, maxVersion, err := ParseReport(repPath)
-	return records, userList, maxVersion, err
+	return records, userList, maxVersion, nil
 }
 
 // ParseReport парсит отчет хранилища конфигурации из файла.
@@ -140,8 +140,13 @@ func ParseReport(path string) ([]Record, []User, int, error) {
 		}
 	}
 
+	// Append the last record if it exists
+	if sr.Version != 0 {
+		records = append(records, sr)
+	}
+
 	if scanErr := scanner.Err(); scanErr != nil {
 		return nil, nil, 0, fmt.Errorf("scanner error: %w", scanErr)
 	}
-	return records, userList, maxVersion, err
+	return records, userList, maxVersion, nil
 }
