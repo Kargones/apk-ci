@@ -20,7 +20,7 @@ import (
 // Compile-time interface check (AC-1).
 var _ command.Handler = (*Git2StoreHandler)(nil)
 
-func init() {
+func RegisterCmd() {
 	// AC-6: Deprecated alias через DeprecatedBridge
 	command.RegisterWithAlias(&Git2StoreHandler{}, constants.ActGit2store)
 }

@@ -32,7 +32,7 @@ const (
 	errConfigMissing       = shared.ErrConfigMissing
 )
 
-func init() {
+func RegisterCmd() {
 	command.RegisterWithAlias(&ScanBranchHandler{}, constants.ActSQScanBranch)
 }
 

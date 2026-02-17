@@ -35,7 +35,7 @@ const (
 // maxDescriptionLength — максимальная длина описания для SonarQube API.
 const maxDescriptionLength = 500
 
-func init() {
+func RegisterCmd() {
 	// Deprecated alias: "sq-project-update" -> "nr-sq-project-update"
 	// Legacy команда сохраняется для обратной совместимости до полной миграции на NR.
 	// TODO: Удалить deprecated alias ActSQProjectUpdate после миграции всех workflows на NR-команды.

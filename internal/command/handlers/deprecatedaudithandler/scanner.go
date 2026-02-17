@@ -81,6 +81,7 @@ func deriveHandlerPackage(nrName string) string {
 		"nr-sq-project-update":    "projectupdate",
 		"nr-test-merge":           "testmerge",
 		"nr-action-menu-build":    "actionmenu",
+		"nr-extension-publish":    "extensionpublishhandler",
 	}
 
 	if pkg, ok := packageMap[nrName]; ok {

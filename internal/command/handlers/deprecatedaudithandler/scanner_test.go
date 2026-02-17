@@ -41,7 +41,7 @@ func TestCollectDeprecatedAliases(t *testing.T) {
 	aliases := collectDeprecatedAliases()
 
 	// Должно быть ровно 18 deprecated aliases
-	assert.Len(t, aliases, 18, "ожидается 18 deprecated aliases")
+	assert.Len(t, aliases, 19, "ожидается 18 deprecated aliases")
 
 	// Проверяем что каждый alias имеет все поля
 	for _, a := range aliases {

@@ -32,7 +32,7 @@ const (
 	errMissingOwnerRepo = shared.ErrMissingOwnerRepo
 )
 
-func init() {
+func RegisterCmd() {
 	// Deprecated alias: "sq-report-branch" -> "nr-sq-report-branch"
 	// Legacy команда сохраняется для обратной совместимости до полной миграции на NR.
 	// TODO: Удалить deprecated alias ActSQReportBranch после миграции всех workflows на NR-команды.

@@ -22,7 +22,7 @@ import (
 	errhandler "github.com/Kargones/apk-ci/internal/command/handlers/shared"
 )
 
-func init() {
+func RegisterCmd() {
 	command.Register(&ForceDisconnectHandler{})
 }
 

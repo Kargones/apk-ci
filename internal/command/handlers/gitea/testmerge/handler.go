@@ -43,7 +43,7 @@ const (
 // init регистрирует команду nr-test-merge с deprecated alias test-merge.
 // TODO: Deprecated alias "test-merge" будет удалён в v2.0.0 / Epic 7.
 // После полной миграции на NR-архитектуру, использовать только "nr-test-merge".
-func init() {
+func RegisterCmd() {
 	command.RegisterWithAlias(&TestMergeHandler{}, constants.ActTestMerge)
 }
 

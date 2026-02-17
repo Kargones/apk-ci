@@ -33,7 +33,7 @@ func TestServiceModeDisableHandler_Description(t *testing.T) {
 }
 
 func TestServiceModeDisableHandler_Registration(t *testing.T) {
-	// init() уже вызван при импорте пакета — проверяем что handler зарегистрирован
+	// RegisterCmd() вызван в TestMain — проверяем что handler зарегистрирован
 	h, ok := command.Get("nr-service-mode-disable")
 	require.True(t, ok, "handler nr-service-mode-disable должен быть зарегистрирован в registry")
 	assert.Equal(t, constants.ActNRServiceModeDisable, h.Name())

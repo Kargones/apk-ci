@@ -22,27 +22,7 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 
-	// NR-команды: blank import для self-registration через init()
-	_ "github.com/Kargones/apk-ci/internal/command/handlers/converthandler"
-	_ "github.com/Kargones/apk-ci/internal/command/handlers/createstoreshandler"
-	_ "github.com/Kargones/apk-ci/internal/command/handlers/createtempdbhandler"
-	_ "github.com/Kargones/apk-ci/internal/command/handlers/deprecatedaudithandler"
-	_ "github.com/Kargones/apk-ci/internal/command/handlers/executeepfhandler"
-	_ "github.com/Kargones/apk-ci/internal/command/handlers/extensionpublishhandler"
-	_ "github.com/Kargones/apk-ci/internal/command/handlers/forcedisconnecthandler"
-	_ "github.com/Kargones/apk-ci/internal/command/handlers/git2storehandler"
-	_ "github.com/Kargones/apk-ci/internal/command/handlers/help"
-	_ "github.com/Kargones/apk-ci/internal/command/handlers/migratehandler"
-	_ "github.com/Kargones/apk-ci/internal/command/handlers/servicemodedisablehandler"
-	_ "github.com/Kargones/apk-ci/internal/command/handlers/servicemodeenablehandler"
-	_ "github.com/Kargones/apk-ci/internal/command/handlers/servicemodestatushandler"
-	_ "github.com/Kargones/apk-ci/internal/command/handlers/sonarqube/projectupdate"
-	_ "github.com/Kargones/apk-ci/internal/command/handlers/sonarqube/reportbranch"
-	_ "github.com/Kargones/apk-ci/internal/command/handlers/sonarqube/scanbranch"
-	_ "github.com/Kargones/apk-ci/internal/command/handlers/sonarqube/scanpr"
-	_ "github.com/Kargones/apk-ci/internal/command/handlers/store2dbhandler"
-	_ "github.com/Kargones/apk-ci/internal/command/handlers/storebindhandler"
-	_ "github.com/Kargones/apk-ci/internal/command/handlers/version"
+	"github.com/Kargones/apk-ci/internal/command/handlers"
 )
 
 // recordMetrics записывает результат выполнения команды и отправляет метрики в Pushgateway.
@@ -58,6 +38,9 @@ func main() {
 // run содержит основную логику приложения и возвращает exit code.
 // Все команды маршрутизируются через command registry.
 func run() int {
+	// Explicit handler registration (replaces init()-based blank imports).
+	handlers.RegisterAll()
+
 	var err error
 	ctx := context.Background()
 	cfg, err := config.MustLoad()

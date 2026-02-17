@@ -22,7 +22,7 @@ import (
 // Compile-time interface check (AC-7: 5.7).
 var _ command.Handler = (*StorebindHandler)(nil)
 
-func init() {
+func RegisterCmd() {
 	// AC-5: Deprecated alias через DeprecatedBridge
 	command.RegisterWithAlias(&StorebindHandler{}, constants.ActStoreBind)
 }

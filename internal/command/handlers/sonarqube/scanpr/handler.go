@@ -37,7 +37,7 @@ const (
 
 // init регистрирует команду nr-sq-scan-pr с deprecated alias sq-scan-pr.
 // Зависит от инициализации пакетов command и constants.
-func init() {
+func RegisterCmd() {
 	// ActSQScanPR — deprecated alias для обратной совместимости
 	command.RegisterWithAlias(&ScanPRHandler{}, constants.ActSQScanPR)
 }

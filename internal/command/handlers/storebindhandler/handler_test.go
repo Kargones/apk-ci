@@ -97,7 +97,7 @@ func TestStorebindHandler_Description(t *testing.T) {
 // === AC-5: Registration и Deprecated Alias ===
 
 func TestStorebindHandler_Registration(t *testing.T) {
-	// init() уже вызван при импорте пакета — проверяем что handler зарегистрирован
+	// RegisterCmd() вызван в TestMain — проверяем что handler зарегистрирован
 	h, ok := command.Get("nr-storebind")
 	require.True(t, ok, "handler nr-storebind должен быть зарегистрирован в registry")
 	assert.Equal(t, constants.ActNRStorebind, h.Name())

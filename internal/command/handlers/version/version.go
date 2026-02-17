@@ -20,7 +20,7 @@ import (
 	"github.com/Kargones/apk-ci/internal/pkg/tracing"
 )
 
-func init() {
+func RegisterCmd() {
 	command.Register(&VersionHandler{})
 }
 

@@ -42,7 +42,7 @@ const (
 	statisticPeriodDays = 120
 )
 
-func init() {
+func RegisterCmd() {
 	command.RegisterWithAlias(&DbRestoreHandler{}, constants.ActDbrestore)
 }
 

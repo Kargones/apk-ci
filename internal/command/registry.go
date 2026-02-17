@@ -19,7 +19,7 @@ var (
 )
 
 // Register регистрирует обработчик команды в глобальном реестре.
-// Вызывается из init() функций пакетов-обработчиков.
+// Вызывается из RegisterCmd() функций пакетов-обработчиков.
 //
 // Паникует если:
 //   - h == nil (programming error)
@@ -32,7 +32,7 @@ var (
 //
 // Пример использования:
 //
-//	func init() {
+//	func RegisterCmd() {
 //	    command.Register(&MyHandler{})
 //	}
 func Register(h Handler) {
@@ -109,7 +109,7 @@ func Names() []string {
 //
 // Пример использования:
 //
-//	func init() {
+//	func RegisterCmd() {
 //	    // Регистрирует "nr-version" и "version" (deprecated)
 //	    command.RegisterWithAlias(&VersionHandler{}, "version")
 //	}

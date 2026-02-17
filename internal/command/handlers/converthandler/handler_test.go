@@ -64,7 +64,7 @@ func TestConvertHandler_Description(t *testing.T) {
 // === AC-6: Registration и Deprecated Alias ===
 
 func TestConvertHandler_Registration(t *testing.T) {
-	// init() уже вызван при импорте пакета — проверяем что handler зарегистрирован
+	// RegisterCmd() вызван в TestMain — проверяем что handler зарегистрирован
 	h, ok := command.Get("nr-convert")
 	require.True(t, ok, "handler nr-convert должен быть зарегистрирован в registry")
 	assert.Equal(t, constants.ActNRConvert, h.Name())

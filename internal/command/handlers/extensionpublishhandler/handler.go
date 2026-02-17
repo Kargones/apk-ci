@@ -9,7 +9,7 @@ import (
 	"github.com/Kargones/apk-ci/internal/constants"
 )
 
-func init() {
+func RegisterCmd() {
 	command.RegisterWithAlias(&ExtensionPublishHandler{}, constants.ActExtensionPublish)
 }
 
