@@ -10,13 +10,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
-
-// TestNewSlogAdapter_NilLogger_Panics проверяет что nil logger вызывает panic.
-// Review #35 fix: тест для nil-проверки добавленной в Review #34.
-func TestNewSlogAdapter_NilLogger_Panics(t *testing.T) {
-	assert.PanicsWithValue(t, "logging: nil slog.Logger passed to NewSlogAdapter", func() {
-		NewSlogAdapter(nil)
-	}, "nil logger должен вызвать panic")
+// TestNewSlogAdapter_NilLogger_UsesDefault проверяет что nil logger использует default.
+func TestNewSlogAdapter_NilLogger_UsesDefault(t *testing.T) {
+	adapter := NewSlogAdapter(nil)
+	assert.NotNil(t, adapter, "nil logger должен вернуть adapter с default logger")
 }
 
 // TestSlogAdapter_Debug проверяет что Debug() логирует с level=DEBUG.

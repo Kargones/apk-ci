@@ -35,8 +35,8 @@ const (
 // init регистрирует команду nr-action-menu-build с deprecated alias action-menu-build.
 // TODO(#61): Deprecated alias "action-menu-build" будет удалён в v2.0.0 / Epic 7.
 // После полной миграции на NR-архитектуру, использовать только "nr-action-menu-build".
-func RegisterCmd() {
-	command.RegisterWithAlias(&ActionMenuHandler{}, constants.ActionMenuBuildName)
+func RegisterCmd() error {
+	return command.RegisterWithAlias(&ActionMenuHandler{}, constants.ActionMenuBuildName)
 }
 
 // ActionMenuData содержит результат построения меню действий.

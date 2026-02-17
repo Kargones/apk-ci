@@ -22,8 +22,8 @@ import (
 	errhandler "github.com/Kargones/apk-ci/internal/command/handlers/shared"
 )
 
-func RegisterCmd() {
-	command.Register(&ForceDisconnectHandler{})
+func RegisterCmd() error {
+	return command.Register(&ForceDisconnectHandler{})
 }
 
 // DisconnectedSessionInfo содержит информацию о завершённой сессии.

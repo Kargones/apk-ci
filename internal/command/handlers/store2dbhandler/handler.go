@@ -25,8 +25,8 @@ const storeVersionLatest = "latest"
 // Compile-time interface check (M-3 fix).
 var _ command.Handler = (*Store2DbHandler)(nil)
 
-func RegisterCmd() {
-	command.RegisterWithAlias(&Store2DbHandler{}, constants.ActStore2db)
+func RegisterCmd() error {
+	return command.RegisterWithAlias(&Store2DbHandler{}, constants.ActStore2db)
 }
 
 // Store2DbData содержит данные ответа о загрузке конфигурации из хранилища.

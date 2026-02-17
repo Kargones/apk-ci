@@ -21,8 +21,8 @@ import (
 	errhandler "github.com/Kargones/apk-ci/internal/command/handlers/shared"
 )
 
-func RegisterCmd() {
-	command.RegisterWithAlias(&ServiceModeStatusHandler{}, constants.ActServiceModeStatus)
+func RegisterCmd() error {
+	return command.RegisterWithAlias(&ServiceModeStatusHandler{}, constants.ActServiceModeStatus)
 }
 
 // SessionInfoData содержит данные о сессии пользователя для JSON-сериализации.

@@ -39,8 +39,8 @@ const (
 	statisticPeriodDays = 120
 )
 
-func RegisterCmd() {
-	command.RegisterWithAlias(&DbRestoreHandler{}, constants.ActDbrestore)
+func RegisterCmd() error {
+	return command.RegisterWithAlias(&DbRestoreHandler{}, constants.ActDbrestore)
 }
 
 // DbRestoreData содержит данные ответа о результате восстановления.

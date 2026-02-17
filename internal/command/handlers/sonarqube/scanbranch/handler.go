@@ -32,8 +32,8 @@ const (
 	errConfigMissing       = shared.ErrConfigMissing
 )
 
-func RegisterCmd() {
-	command.RegisterWithAlias(&ScanBranchHandler{}, constants.ActSQScanBranch)
+func RegisterCmd() error {
+	return command.RegisterWithAlias(&ScanBranchHandler{}, constants.ActSQScanBranch)
 }
 
 // ScanBranchData содержит результат сканирования ветки.

@@ -19,8 +19,8 @@ import (
 	"github.com/Kargones/apk-ci/internal/pkg/tracing"
 )
 
-func RegisterCmd() {
-	command.Register(&DeprecatedAuditHandler{})
+func RegisterCmd() error {
+	return command.Register(&DeprecatedAuditHandler{})
 }
 
 // DeprecatedAuditHandler обрабатывает команду nr-deprecated-audit —

@@ -20,9 +20,9 @@ import (
 // Compile-time interface check (AC-1).
 var _ command.Handler = (*Git2StoreHandler)(nil)
 
-func RegisterCmd() {
+func RegisterCmd() error {
 	// AC-6: Deprecated alias через DeprecatedBridge
-	command.RegisterWithAlias(&Git2StoreHandler{}, constants.ActGit2store)
+	return command.RegisterWithAlias(&Git2StoreHandler{}, constants.ActGit2store)
 }
 
 // Stage constants для workflow (AC-2, AC-3).

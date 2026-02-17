@@ -22,9 +22,9 @@ import (
 // Compile-time interface check (AC-7).
 var _ command.Handler = (*CreateStoresHandler)(nil)
 
-func RegisterCmd() {
+func RegisterCmd() error {
 	// AC-5: Deprecated alias через DeprecatedBridge
-	command.RegisterWithAlias(&CreateStoresHandler{}, constants.ActCreateStores)
+	return command.RegisterWithAlias(&CreateStoresHandler{}, constants.ActCreateStores)
 }
 
 // CreateStoresData содержит данные ответа о создании хранилищ (AC-3, AC-11).

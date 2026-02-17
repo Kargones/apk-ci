@@ -26,42 +26,43 @@ func TestRegister_Success(t *testing.T) {
 	clearRegistry()
 
 	h := &mockHandler{name: "test-command"}
-	Register(h)
+	err := Register(h)
+	assert.NoError(t, err)
 
 	got, ok := Get("test-command")
 	assert.True(t, ok, "команда должна быть найдена в реестре")
 	assert.Equal(t, h, got, "должен вернуться тот же handler")
 }
 
-func TestRegister_Duplicate_Panics(t *testing.T) {
+func TestRegister_Duplicate_ReturnsError(t *testing.T) {
 	clearRegistry()
 
 	h1 := &mockHandler{name: "dup-command"}
 	h2 := &mockHandler{name: "dup-command"}
 
-	Register(h1)
+	err := Register(h1)
+	assert.NoError(t, err)
 
-	assert.PanicsWithValue(t, "command: duplicate handler registration for dup-command", func() {
-		Register(h2)
-	}, "повторная регистрация должна вызвать panic")
+	err = Register(h2)
+	assert.EqualError(t, err, "command: duplicate handler registration for dup-command", "повторная регистрация должна вернуть ошибку")
 }
 
-func TestRegister_NilHandler_Panics(t *testing.T) {
+func TestRegister_NilHandler_ReturnsError(t *testing.T) {
 	clearRegistry()
 
-	assert.PanicsWithValue(t, "command: nil handler", func() {
-		Register(nil)
-	}, "nil handler должен вызвать panic")
+	err := Register(nil)
+	assert.EqualError(t, err, "command: nil handler",
+		"nil handler должен вызвать panic")
 }
 
-func TestRegister_EmptyName_Panics(t *testing.T) {
+func TestRegister_EmptyName_ReturnsError(t *testing.T) {
 	clearRegistry()
 
 	h := &mockHandler{name: ""}
 
-	assert.PanicsWithValue(t, "command: empty handler name", func() {
-		Register(h)
-	}, "пустое имя должно вызвать panic")
+	err := Register(h)
+	assert.EqualError(t, err, "command: empty handler name",
+		"пустое имя должно вызвать panic")
 }
 
 func TestGet_NotFound(t *testing.T) {
@@ -76,7 +77,7 @@ func TestGet_Found(t *testing.T) {
 	clearRegistry()
 
 	h := &mockHandler{name: "existing"}
-	Register(h)
+	_ = Register(h)
 
 	got, ok := Get("existing")
 	assert.True(t, ok, "зарегистрированная команда должна быть найдена")
@@ -96,7 +97,7 @@ func TestConcurrentAccess(t *testing.T) {
 			defer wg.Done()
 			// Используем fmt.Sprintf для корректной генерации уникальных имён
 			h := &mockHandler{name: fmt.Sprintf("concurrent-cmd-%d", idx)}
-			Register(h)
+			_ = Register(h)
 		}(i)
 	}
 
@@ -130,7 +131,7 @@ func TestMultipleRegistrations(t *testing.T) {
 	}
 
 	for _, h := range handlers {
-		Register(h)
+		_ = Register(h)
 	}
 
 	for _, h := range handlers {
@@ -149,7 +150,7 @@ func TestRegistryPath_AC5(t *testing.T) {
 	// Регистрируем тестовую команду
 	registeredCmd := "test-registry-path"
 	h := &mockHandler{name: registeredCmd}
-	Register(h)
+	_ = Register(h)
 
 	tests := []struct {
 		name         string
@@ -193,41 +194,41 @@ func TestRegistryPath_AC5(t *testing.T) {
 }
 
 // TestRegister_InvalidNameFormat_Panics тестирует валидацию формата имени команды.
-func TestRegister_InvalidNameFormat_Panics(t *testing.T) {
+func TestRegister_InvalidNameFormat_ReturnsError(t *testing.T) {
 	tests := []struct {
 		name        string
 		handlerName string
-		wantPanic   string
+		wantError   string
 	}{
 		{
 			name:        "имя с пробелами",
 			handlerName: "my command",
-			wantPanic:   "command: invalid handler name format (must be kebab-case): my command",
+			wantError:   "command: invalid handler name format (must be kebab-case): my command",
 		},
 		{
 			name:        "имя с заглавными буквами",
 			handlerName: "MyCommand",
-			wantPanic:   "command: invalid handler name format (must be kebab-case): MyCommand",
+			wantError:   "command: invalid handler name format (must be kebab-case): MyCommand",
 		},
 		{
 			name:        "имя начинается с цифры",
 			handlerName: "1command",
-			wantPanic:   "command: invalid handler name format (must be kebab-case): 1command",
+			wantError:   "command: invalid handler name format (must be kebab-case): 1command",
 		},
 		{
 			name:        "имя начинается с дефиса",
 			handlerName: "-command",
-			wantPanic:   "command: invalid handler name format (must be kebab-case): -command",
+			wantError:   "command: invalid handler name format (must be kebab-case): -command",
 		},
 		{
 			name:        "имя с подчёркиванием",
 			handlerName: "my_command",
-			wantPanic:   "command: invalid handler name format (must be kebab-case): my_command",
+			wantError:   "command: invalid handler name format (must be kebab-case): my_command",
 		},
 		{
 			name:        "имя со спецсимволами",
 			handlerName: "cmd!@#",
-			wantPanic:   "command: invalid handler name format (must be kebab-case): cmd!@#",
+			wantError:   "command: invalid handler name format (must be kebab-case): cmd!@#",
 		},
 	}
 
@@ -235,9 +236,9 @@ func TestRegister_InvalidNameFormat_Panics(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			clearRegistry()
 			h := &mockHandler{name: tt.handlerName}
-			assert.PanicsWithValue(t, tt.wantPanic, func() {
-				Register(h)
-			}, "некорректный формат имени должен вызвать panic")
+			err := Register(h)
+			assert.EqualError(t, err, tt.wantError,
+				"некорректный формат имени должен вернуть ошибку")
 		})
 	}
 }
@@ -261,7 +262,7 @@ func TestRegister_ValidNameFormats(t *testing.T) {
 			h := &mockHandler{name: name}
 			// Не должно паниковать
 			assert.NotPanics(t, func() {
-				Register(h)
+				_ = Register(h)
 			}, "валидное имя %s не должно вызывать panic", name)
 
 			// Проверяем, что зарегистрировалось
@@ -280,9 +281,9 @@ func TestAll(t *testing.T) {
 	h1 := &mockHandler{name: "cmd-alpha"}
 	h2 := &mockHandler{name: "cmd-beta"}
 	h3 := &mockHandler{name: "cmd-gamma"}
-	Register(h1)
-	Register(h2)
-	Register(h3)
+	_ = Register(h1)
+	_ = Register(h2)
+	_ = Register(h3)
 
 	all := All()
 
@@ -314,9 +315,9 @@ func TestNames(t *testing.T) {
 	clearRegistry()
 
 	// Регистрируем несколько команд
-	Register(&mockHandler{name: "cmd-alpha"})
-	Register(&mockHandler{name: "cmd-beta"})
-	Register(&mockHandler{name: "cmd-gamma"})
+	_ = Register(&mockHandler{name: "cmd-alpha"})
+	_ = Register(&mockHandler{name: "cmd-beta"})
+	_ = Register(&mockHandler{name: "cmd-gamma"})
 
 	names := Names()
 
@@ -342,13 +343,13 @@ func TestListAllWithAliases_ReturnsCompleteMapping(t *testing.T) {
 
 	// Регистрируем команды: с алиасом и без
 	h1 := &mockHandler{name: "nr-cmd-one"}
-	RegisterWithAlias(h1, "cmd-one")
+	_ = RegisterWithAlias(h1, "cmd-one")
 
 	h2 := &mockHandler{name: "nr-cmd-two"}
-	RegisterWithAlias(h2, "cmd-two")
+	_ = RegisterWithAlias(h2, "cmd-two")
 
 	h3 := &mockHandler{name: "nr-standalone"}
-	Register(h3)
+	_ = Register(h3)
 
 	result := ListAllWithAliases()
 
@@ -390,7 +391,7 @@ func TestConcurrentReadWrite(t *testing.T) {
 	go func() {
 		defer wg.Done()
 		h := &mockHandler{name: targetCmd}
-		Register(h)
+		_ = Register(h)
 	}()
 
 	// Запускаем несколько горутин чтения
