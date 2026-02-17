@@ -1,8 +1,6 @@
-// Package edt предоставляет функциональность для работы с EDT (Enterprise Development Tools)
 package edt
 
 import (
-	"github.com/Kargones/apk-ci/internal/constants"
 	"context"
 	"errors"
 	"fmt"
@@ -14,63 +12,10 @@ import (
 	"strings"
 
 	"github.com/Kargones/apk-ci/internal/config"
+	"github.com/Kargones/apk-ci/internal/constants"
 	"github.com/Kargones/apk-ci/internal/git"
 	"github.com/Kargones/apk-ci/internal/util/runner"
 )
-
-const (
-	// XML2edt - путь к утилите xml2edt.
-	XML2edt string = "xml2edt"
-	// Edt2xml - путь к утилите edt2xml.
-	Edt2xml   string = "edt2xml"
-	formatXML string = "xml"
-	formatEDT string = "edt"
-)
-
-// Convert представляет конфигурацию для конвертации между форматами EDT и XML.
-// Содержит информацию о коммите, источнике, приемнике и сопоставлениях путей
-// для выполнения процесса конвертации проекта.
-type Convert struct {
-	CommitSha1  string    `json:"Хеш коммита"`
-	Source      Data      `json:"Источник"`
-	Distination Data      `json:"Приемник"`
-	Mappings    []Mapping `json:"Сопоставление путей"`
-}
-
-// Data представляет данные источника или приемника конвертации.
-// Содержит информацию о формате данных и ветке репозитория
-// для процесса конвертации.
-type Data struct {
-	Format string `json:"Формат"`
-	Branch string `json:"Ветка"`
-}
-
-// Mapping представляет сопоставление путей для конвертации.
-// Определяет соответствие между путями источника и приемника
-// в процессе конвертации файлов проекта.
-type Mapping struct {
-	SourcePath      string `json:"Путь источника"`
-	DistinationPath string `json:"Путь приемника"`
-}
-
-// Cli представляет интерфейс командной строки для работы с EDT.
-// Содержит настройки путей, направления конвертации, рабочей области
-// и информацию о последней ошибке выполнения операций.
-// EdtCli представляет клиент командной строки для работы с EDT.
-// Содержит настройки путей, направления конвертации, рабочей области
-// и информацию о последней ошибке выполнения операций.
-// Cli представляет клиент командной строки для работы с EDT.
-// Содержит настройки путей, направления конвертации, рабочей области
-// и информацию о последней ошибке выполнения операций.
-type Cli struct {
-	CliPath   string
-	Direction string
-	PathIn    string
-	PathOut   string
-	WorkSpace string
-	Operation string
-	LastErr   error
-}
 
 func cleanDirectoryPreservingHidden(targetDir string, l *slog.Logger) error {
 	// 1. Проверяем, существует ли указанный путь и является ли он каталогом
@@ -307,79 +252,6 @@ func (c *Convert) Convert(ctx context.Context, l *slog.Logger, cfg *config.Confi
 	return nil
 }
 
-// MoveDirContents перемещает содержимое одного каталога в другой.
-// Функция читает все элементы из исходного каталога и перемещает их
-// в целевой каталог, используя операцию переименования.
-// Параметры:
-//   - src: путь к исходному каталогу
-//   - dst: путь к целевому каталогу
-//
-// Возвращает:
-//   - error: ошибку, если операция не удалась
-func MoveDirContents(src, dst string) error {
-	// Получаем список элементов в исходном каталоге
-	entries, err := os.ReadDir(src)
-	if err != nil {
-		return fmt.Errorf("не удалось прочитать исходный каталог: %v", err)
-	}
-
-	for _, entry := range entries {
-		srcPath := filepath.Join(src, entry.Name())
-		dstPath := filepath.Join(dst, entry.Name())
-
-		// Просто переименовываем (перемещаем) каждый элемент
-		if err := os.Rename(srcPath, dstPath); err != nil {
-			return fmt.Errorf("не удалось переместить %s: %v", srcPath, err)
-		}
-	}
-
-	return nil
-}
-
-// GetComment возвращает комментарий для коммита.
-// Функция генерирует стандартный комментарий для автоматических коммитов
-// в процессе конвертации проекта.
-// Параметры:
-//   - _: конфигурация конвертации (не используется)
-//
-// Возвращает:
-//   - string: текст комментария для коммита
-func GetComment(_ *Convert) string {
-	return "Конвертирован автоматически"
-}
-
-// MustLoad загружает конфигурацию конвертации с настройками по умолчанию
-func (c *Convert) MustLoad(_ *slog.Logger, cfg *config.Config) error {
-	var err error
-
-	c.CommitSha1 = ""
-	c.Source = Data{
-		Format: "edt",
-		Branch: "main",
-	}
-	c.Distination = Data{
-		Format: "xml",
-		Branch: "xml",
-	}
-
-	c.Mappings = []Mapping{
-		{
-			SourcePath:      cfg.ProjectName,
-			DistinationPath: "src/cfg",
-		},
-	}
-	for _, v := range cfg.AddArray {
-		// ToDo: Добавить проверку на вхождение расширения в список запрещенных для этой информационной базы
-		c.Mappings = append(c.Mappings, Mapping{
-			SourcePath:      cfg.ProjectName + "." + v,
-			DistinationPath: "src/cfe/" + v,
-		})
-	}
-	return err
-}
-
-// Init - устаревшая функция, оставлена для обратной совместимости
-// Рекомендуется использовать InitWithEdtConfig
 // Init инициализирует EDT CLI с настройками конфигурации
 func (e *Cli) Init(cfg *config.Config) {
 	e.CliPath = cfg.AppConfig.Paths.EdtCli
@@ -488,15 +360,4 @@ func (e *Cli) Convert(ctx context.Context, l *slog.Logger, cfg *config.Config) {
 
 	l.Debug("Команда EDT выполнена успешно",
 		slog.String("Операция", e.Operation))
-}
-
-func exists(path string) (bool, error) {
-	_, err := os.Stat(path)
-	if err == nil {
-		return true, nil
-	}
-	if os.IsNotExist(err) {
-		return false, nil
-	}
-	return false, err
 }
