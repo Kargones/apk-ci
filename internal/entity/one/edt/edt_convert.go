@@ -200,10 +200,10 @@ func (c *Convert) Convert(ctx context.Context, l *slog.Logger, cfg *config.Confi
 	g.Branch = c.Distination.Branch
 	if switchErr := g.Switch(ctx, l); switchErr != nil {
 		l.Error("Ошибка переключения на целевую ветку",
-			slog.String("Описание ошибки", err.Error()),
+			slog.String("Описание ошибки", switchErr.Error()),
 			slog.String("Ветка", c.Distination.Branch),
 		)
-		return err
+		return switchErr
 	}
 	err = cleanDirectoryPreservingHidden(repSourcePath, l)
 	if err != nil {

@@ -61,8 +61,8 @@ func SwitchOrCreateBranch(ctx context.Context, repoPath, branchName string) erro
 	if chdirErr := os.Chdir(repoPath); chdirErr != nil {
 		slog.Error("Не удалось перейти в директорию репозитория",
 			slog.String("repoPath", repoPath),
-			slog.String("error", err.Error()))
-		return fmt.Errorf("failed to change to repository directory: %w", err)
+			slog.String("error", chdirErr.Error()))
+		return fmt.Errorf("failed to change to repository directory: %w", chdirErr)
 	}
 
 	// Используем defer для восстановления исходной директории
@@ -70,7 +70,7 @@ func SwitchOrCreateBranch(ctx context.Context, repoPath, branchName string) erro
 		if restoreErr := os.Chdir(originalDir); restoreErr != nil {
 			// Логируем ошибку, но не возвращаем её, чтобы не перезаписать основную ошибку
 			// Используем slog вместо fmt.Printf для соответствия forbidigo
-			slog.Warn("Failed to restore original directory", slog.String("error", err.Error()))
+			slog.Warn("Failed to restore original directory", slog.String("error", restoreErr.Error()))
 		}
 	}()
 
