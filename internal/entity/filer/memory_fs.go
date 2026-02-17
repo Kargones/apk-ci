@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"sort"
@@ -434,8 +435,7 @@ func (fs *MemoryFileSystem) ReadFile(filename string) ([]byte, error) {
 	}
 	defer func() {
 		if closeErr := file.Close(); closeErr != nil {
-			// Логируем ошибку закрытия файла, но не возвращаем её
-			_ = closeErr
+slog.Warn("failed to close memory file", slog.String("error", closeErr.Error()))
 		}
 	}()
 	
@@ -450,8 +450,7 @@ func (fs *MemoryFileSystem) WriteFile(filename string, data []byte, perm os.File
 	}
 	defer func() {
 		if closeErr := file.Close(); closeErr != nil {
-			// Логируем ошибку закрытия файла, но не возвращаем её
-			_ = closeErr
+slog.Warn("failed to close memory file", slog.String("error", closeErr.Error()))
 		}
 	}()
 	

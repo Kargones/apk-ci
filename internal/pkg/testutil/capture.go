@@ -21,7 +21,7 @@ func CaptureStdout(t *testing.T, fn func()) string {
 
 	fn()
 
-	_ = w.Close()
+	_ = w.Close() //nolint:errcheck // test helper pipe close
 
 	var buf bytes.Buffer
 	_, err = buf.ReadFrom(r)

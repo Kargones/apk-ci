@@ -123,7 +123,9 @@ func (c *client) Connect(ctx context.Context) error {
 	// Проверяем подключение
 	// H-1 fix: проверяем ctx.Err() для более точной диагностики причины ошибки
 	if err := db.PingContext(ctx); err != nil {
-		_ = db.Close()
+		if closeErr := db.Close(); closeErr != nil {
+			// best-effort close; original error is more important
+		}
 		if ctx.Err() != nil {
 			return fmt.Errorf("%s: context cancelled during ping: %w", ErrMSSQLConnect, ctx.Err())
 		}

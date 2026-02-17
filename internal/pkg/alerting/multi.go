@@ -74,7 +74,9 @@ func (m *MultiChannelAlerter) Send(ctx context.Context, alert Alert) error {
 			continue
 		}
 
-		_ = ch.Send(ctx, alert) // Ошибки логируются внутри каждого канала
+		if sendErr := ch.Send(ctx, alert); sendErr != nil {
+			m.logger.Warn("alert channel send failed", "channel", name, "error", sendErr)
+		}
 		sentCount++
 	}
 

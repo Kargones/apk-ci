@@ -179,8 +179,7 @@ func SyncRepoBranches(repoPath string) error {
 	}
 	defer func() {
 		if chdirErr := os.Chdir(originalDir); chdirErr != nil {
-			// Игнорируем ошибку восстановления директории
-			_ = chdirErr
+slog.Warn("failed to restore working directory", slog.String("error", chdirErr.Error()))
 		}
 	}()
 
@@ -215,8 +214,7 @@ func SyncRepoBranches(repoPath string) error {
 
 		localBranch := strings.TrimPrefix(branch, "origin/")
 		if err := createTrackingBranch(localBranch, branch); err != nil {
-			// Игнорируем ошибку создания tracking branch
-			_ = err
+slog.Warn("failed to create tracking branch", slog.String("branch", localBranch), slog.String("error", err.Error()))
 		}
 	}
 

@@ -231,7 +231,7 @@ func (w *WebhookAlerter) sendRequest(ctx context.Context, url string, payload We
 	// 2xx — успех. Дренируем body для корректного переиспользования HTTP keep-alive соединений.
 	// H-2/Review #10: ограничиваем размер drain для защиты от OOM при аномально большом ответе.
 	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
-		_, _ = io.Copy(io.Discard, io.LimitReader(resp.Body, maxResponseBodySize))
+		_, _ = io.Copy(io.Discard, io.LimitReader(resp.Body, maxResponseBodySize)) //nolint:errcheck // best-effort drain
 		return nil
 	}
 

@@ -272,7 +272,9 @@ func (h *TestMergeHandler) Execute(ctx context.Context, cfg *config.Config) erro
 	log.Debug("Найдено открытых PR", slog.Int("count", len(activePRs)))
 
 	// 4. Cleanup + создание тестовой ветки (AC: #3, #10)
-	_ = client.DeleteBranch(ctx, testBranchName) // Ignore error — ветка может не существовать
+	if delErr := client.DeleteBranch(ctx, testBranchName); delErr != nil {
+		log.Debug("test branch cleanup (may not exist)", slog.String("error", delErr.Error()))
+	}
 	err = client.CreateBranch(ctx, testBranchName, baseBranch)
 	if err != nil {
 		log.Error("Не удалось создать тестовую ветку", slog.String("error", err.Error()))
