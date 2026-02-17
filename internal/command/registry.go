@@ -1,6 +1,7 @@
 package command
 
 import (
+	"fmt"
 	"regexp"
 	"sort"
 	"sync"
@@ -24,7 +25,7 @@ var (
 // Register регистрирует обработчик команды в глобальном реестре.
 // Вызывается из RegisterCmd() функций пакетов-обработчиков.
 //
-// Паникует если:
+// Возвращает ошибку если:
 //   - h == nil (programming error)
 //   - h.Name() == "" (programming error)
 //   - h.Name() не соответствует формату kebab-case (programming error)
@@ -35,28 +36,29 @@ var (
 //
 // Пример использования:
 //
-//	func RegisterCmd() {
-//	    command.Register(&MyHandler{})
+//	func RegisterCmd() error {
+//	    return command.Register(&MyHandler{})
 //	}
-func Register(h Handler) {
+func Register(h Handler) error {
 	if h == nil {
-		panic("command: nil handler")
+		return fmt.Errorf("command: nil handler")
 	}
 	name := h.Name()
 	if name == "" {
-		panic("command: empty handler name")
+		return fmt.Errorf("command: empty handler name")
 	}
 	if !commandNamePattern.MatchString(name) {
-		panic("command: invalid handler name format (must be kebab-case): " + name)
+		return fmt.Errorf("command: invalid handler name format (must be kebab-case): %s", name)
 	}
 
 	mu.Lock()
 	defer mu.Unlock()
 
 	if _, exists := registry[name]; exists {
-		panic("command: duplicate handler registration for " + name)
+		return fmt.Errorf("command: duplicate handler registration for %s", name)
 	}
 	registry[name] = h
+	return nil
 }
 
 // Get возвращает обработчик команды по имени.
@@ -106,32 +108,30 @@ func Names() []string {
 //   - Регистрирует handler под его Name()
 //   - Создаёт DeprecatedBridge и регистрирует под deprecated именем
 //
-// Паникует если:
+// Возвращает ошибку если:
 //   - h == nil (programming error)
 //   - deprecated == h.Name() (бессмысленная регистрация)
 //
 // Пример использования:
 //
-//	func RegisterCmd() {
+//	func RegisterCmd() error {
 //	    // Регистрирует "nr-version" и "version" (deprecated)
-//	    command.RegisterWithAlias(&VersionHandler{}, "version")
+//	    return command.RegisterWithAlias(&VersionHandler{}, "version")
 //	}
-func RegisterWithAlias(h Handler, deprecated string) {
+func RegisterWithAlias(h Handler, deprecated string) error {
 	if h == nil {
-		panic("command: nil handler")
+		return fmt.Errorf("command: nil handler")
 	}
 
 	// Регистрируем под основным именем.
-	// NOTE: Register() захватывает и освобождает mu внутри.
-	// Это безопасно, т.к. функция вызывается только в init() — однопоточно.
-	// Между Register() и повторным захватом mu ниже есть теоретическое окно,
-	// но в init() конкуренции нет.
-	Register(h)
+	if err := Register(h); err != nil {
+		return err
+	}
 
 	// Если deprecated указан — создаём bridge
 	if deprecated != "" {
 		if deprecated == h.Name() {
-			panic("command: deprecated name cannot be same as handler name: " + deprecated)
+			return fmt.Errorf("command: deprecated name cannot be same as handler name: %s", deprecated)
 		}
 		bridge := &DeprecatedBridge{
 			actual:     h,
@@ -144,10 +144,11 @@ func RegisterWithAlias(h Handler, deprecated string) {
 		mu.Lock()
 		defer mu.Unlock()
 		if _, exists := registry[deprecated]; exists {
-			panic("command: duplicate handler registration for " + deprecated)
+			return fmt.Errorf("command: duplicate handler registration for %s", deprecated)
 		}
 		registry[deprecated] = bridge
 	}
+	return nil
 }
 
 // Info содержит информацию о зарегистрированной команде

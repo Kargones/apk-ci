@@ -41,8 +41,8 @@ const (
 	maxExtensions = 50
 )
 
-func RegisterCmd() {
-	command.RegisterWithAlias(&CreateTempDbHandler{}, constants.ActCreateTempDb)
+func RegisterCmd() error {
+	return command.RegisterWithAlias(&CreateTempDbHandler{}, constants.ActCreateTempDb)
 }
 
 // CreateTempDbData содержит результат создания временной БД для JSON вывода.

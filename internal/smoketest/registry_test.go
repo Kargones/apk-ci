@@ -9,36 +9,17 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	// Blank imports для активации init() — регистрация всех handlers.
-	// Каждый handler-пакет регистрирует себя через command.Register() или
-	// command.RegisterWithAlias() в init().
-	_ "github.com/Kargones/apk-ci/internal/command/handlers/converthandler"
-	_ "github.com/Kargones/apk-ci/internal/command/handlers/createstoreshandler"
-	_ "github.com/Kargones/apk-ci/internal/command/handlers/createtempdbhandler"
-	_ "github.com/Kargones/apk-ci/internal/command/handlers/deprecatedaudithandler"
-	_ "github.com/Kargones/apk-ci/internal/command/handlers/dbrestorehandler"
-	_ "github.com/Kargones/apk-ci/internal/command/handlers/dbupdatehandler"
-	_ "github.com/Kargones/apk-ci/internal/command/handlers/executeepfhandler"
-	_ "github.com/Kargones/apk-ci/internal/command/handlers/forcedisconnecthandler"
-	_ "github.com/Kargones/apk-ci/internal/command/handlers/git2storehandler"
-	_ "github.com/Kargones/apk-ci/internal/command/handlers/gitea/actionmenu"
-	_ "github.com/Kargones/apk-ci/internal/command/handlers/gitea/testmerge"
-	_ "github.com/Kargones/apk-ci/internal/command/handlers/help"
-	_ "github.com/Kargones/apk-ci/internal/command/handlers/migratehandler"
-	_ "github.com/Kargones/apk-ci/internal/command/handlers/servicemodedisablehandler"
-	_ "github.com/Kargones/apk-ci/internal/command/handlers/servicemodeenablehandler"
-	_ "github.com/Kargones/apk-ci/internal/command/handlers/servicemodestatushandler"
-	_ "github.com/Kargones/apk-ci/internal/command/handlers/sonarqube/projectupdate"
-	_ "github.com/Kargones/apk-ci/internal/command/handlers/sonarqube/reportbranch"
-	_ "github.com/Kargones/apk-ci/internal/command/handlers/sonarqube/scanbranch"
-	_ "github.com/Kargones/apk-ci/internal/command/handlers/sonarqube/scanpr"
-	_ "github.com/Kargones/apk-ci/internal/command/handlers/store2dbhandler"
-	_ "github.com/Kargones/apk-ci/internal/command/handlers/storebindhandler"
-	_ "github.com/Kargones/apk-ci/internal/command/handlers/version"
+	"github.com/Kargones/apk-ci/internal/command/handlers"
 )
 
 // allNRCommands — полный список NR-команд и help (23 шт.: 22 NR + help).
 // Каждый элемент: {константа из constants.go, ожидаемое строковое значение}.
+func init() {
+	if err := handlers.RegisterAll(); err != nil {
+		panic("smoketest: failed to register handlers: " + err.Error())
+	}
+}
+
 var allNRCommands = []struct {
 	constant string
 	name     string

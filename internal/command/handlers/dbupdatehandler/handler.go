@@ -47,8 +47,8 @@ const (
 	racOperationTimeout = 60 * time.Second
 )
 
-func RegisterCmd() {
-	command.RegisterWithAlias(&DbUpdateHandler{}, constants.ActDbupdate)
+func RegisterCmd() error {
+	return command.RegisterWithAlias(&DbUpdateHandler{}, constants.ActDbupdate)
 }
 
 // DbUpdateData содержит данные ответа о результате обновления.

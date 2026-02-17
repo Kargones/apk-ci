@@ -32,29 +32,79 @@ import (
 
 // RegisterAll explicitly registers all command handlers in the global registry.
 // Call this once from main() before using any commands.
-func RegisterAll() {
-	converthandler.RegisterCmd()
-	createstoreshandler.RegisterCmd()
-	createtempdbhandler.RegisterCmd()
-	dbrestorehandler.RegisterCmd()
-	dbupdatehandler.RegisterCmd()
-	deprecatedaudithandler.RegisterCmd()
-	executeepfhandler.RegisterCmd()
-	extensionpublishhandler.RegisterCmd()
-	forcedisconnecthandler.RegisterCmd()
-	git2storehandler.RegisterCmd()
-	actionmenu.RegisterCmd()
-	testmerge.RegisterCmd()
-	help.RegisterCmd()
-	migratehandler.RegisterCmd()
-	servicemodedisablehandler.RegisterCmd()
-	servicemodeenablehandler.RegisterCmd()
-	servicemodestatushandler.RegisterCmd()
-	projectupdate.RegisterCmd()
-	reportbranch.RegisterCmd()
-	scanbranch.RegisterCmd()
-	scanpr.RegisterCmd()
-	store2dbhandler.RegisterCmd()
-	storebindhandler.RegisterCmd()
-	version.RegisterCmd()
+// Returns an error if any handler registration fails.
+func RegisterAll() error {
+	if err := converthandler.RegisterCmd(); err != nil {
+		return err
+	}
+	if err := createstoreshandler.RegisterCmd(); err != nil {
+		return err
+	}
+	if err := createtempdbhandler.RegisterCmd(); err != nil {
+		return err
+	}
+	if err := dbrestorehandler.RegisterCmd(); err != nil {
+		return err
+	}
+	if err := dbupdatehandler.RegisterCmd(); err != nil {
+		return err
+	}
+	if err := deprecatedaudithandler.RegisterCmd(); err != nil {
+		return err
+	}
+	if err := executeepfhandler.RegisterCmd(); err != nil {
+		return err
+	}
+	if err := extensionpublishhandler.RegisterCmd(); err != nil {
+		return err
+	}
+	if err := forcedisconnecthandler.RegisterCmd(); err != nil {
+		return err
+	}
+	if err := git2storehandler.RegisterCmd(); err != nil {
+		return err
+	}
+	if err := actionmenu.RegisterCmd(); err != nil {
+		return err
+	}
+	if err := testmerge.RegisterCmd(); err != nil {
+		return err
+	}
+	if err := help.RegisterCmd(); err != nil {
+		return err
+	}
+	if err := migratehandler.RegisterCmd(); err != nil {
+		return err
+	}
+	if err := servicemodedisablehandler.RegisterCmd(); err != nil {
+		return err
+	}
+	if err := servicemodeenablehandler.RegisterCmd(); err != nil {
+		return err
+	}
+	if err := servicemodestatushandler.RegisterCmd(); err != nil {
+		return err
+	}
+	if err := projectupdate.RegisterCmd(); err != nil {
+		return err
+	}
+	if err := reportbranch.RegisterCmd(); err != nil {
+		return err
+	}
+	if err := scanbranch.RegisterCmd(); err != nil {
+		return err
+	}
+	if err := scanpr.RegisterCmd(); err != nil {
+		return err
+	}
+	if err := store2dbhandler.RegisterCmd(); err != nil {
+		return err
+	}
+	if err := storebindhandler.RegisterCmd(); err != nil {
+		return err
+	}
+	if err := version.RegisterCmd(); err != nil {
+		return err
+	}
+	return nil
 }

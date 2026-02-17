@@ -22,9 +22,9 @@ import (
 // Compile-time interface check (AC-7: 5.7).
 var _ command.Handler = (*StorebindHandler)(nil)
 
-func RegisterCmd() {
+func RegisterCmd() error {
 	// AC-5: Deprecated alias через DeprecatedBridge
-	command.RegisterWithAlias(&StorebindHandler{}, constants.ActStoreBind)
+	return command.RegisterWithAlias(&StorebindHandler{}, constants.ActStoreBind)
 }
 
 // StorebindData содержит данные ответа о привязке хранилища (AC-3, Task 2).

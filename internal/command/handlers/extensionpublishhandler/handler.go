@@ -9,8 +9,8 @@ import (
 	"github.com/Kargones/apk-ci/internal/constants"
 )
 
-func RegisterCmd() {
-	command.RegisterWithAlias(&ExtensionPublishHandler{}, constants.ActExtensionPublish)
+func RegisterCmd() error {
+	return command.RegisterWithAlias(&ExtensionPublishHandler{}, constants.ActExtensionPublish)
 }
 
 // ExtensionPublishHandler — handler для публикации расширений 1C.

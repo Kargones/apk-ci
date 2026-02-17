@@ -19,8 +19,8 @@ import (
 	"github.com/Kargones/apk-ci/internal/pkg/tracing"
 )
 
-func RegisterCmd() {
-	command.Register(&Handler{})
+func RegisterCmd() error {
+	return command.Register(&Handler{})
 }
 
 // Data содержит информацию обо всех доступных командах.

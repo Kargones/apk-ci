@@ -32,12 +32,12 @@ const (
 	errMissingOwnerRepo = shared.ErrMissingOwnerRepo
 )
 
-func RegisterCmd() {
+func RegisterCmd() error {
 	// Deprecated alias: "sq-report-branch" -> "nr-sq-report-branch"
 	// Legacy команда сохраняется для обратной совместимости до полной миграции на NR.
 	// TODO(#61): Удалить deprecated alias ActSQReportBranch после миграции всех workflows на NR-команды.
 	// Планируемая версия удаления: v2.0.0 или после завершения Epic 7.
-	command.RegisterWithAlias(&ReportBranchHandler{}, constants.ActSQReportBranch)
+	return command.RegisterWithAlias(&ReportBranchHandler{}, constants.ActSQReportBranch)
 }
 
 // BranchReportData содержит отчёт о качестве ветки.

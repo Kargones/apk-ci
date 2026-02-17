@@ -41,7 +41,10 @@ func main() {
 // Все команды маршрутизируются через command registry.
 func run() int {
 	// Explicit handler registration (replaces init()-based blank imports).
-	handlers.RegisterAll()
+	if err := handlers.RegisterAll(); err != nil {
+		fmt.Fprintf(os.Stderr, "Ошибка регистрации команд: %v\n", err)
+		return 1
+	}
 
 	var err error
 	ctx := context.Background()

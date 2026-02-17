@@ -126,7 +126,7 @@ func TestRegisterWithAlias_EmptyDeprecated(t *testing.T) {
 	clearRegistry()
 
 	handler := &testDeprecatedHandler{name: "my-cmd"}
-	RegisterWithAlias(handler, "")
+	_ = RegisterWithAlias(handler, "")
 
 	// Должен быть зарегистрирован только под основным именем
 	h, ok := Get("my-cmd")
@@ -143,7 +143,7 @@ func TestRegisterWithAlias_CreatesDeprecatedBridge(t *testing.T) {
 	clearRegistry()
 
 	handler := &testDeprecatedHandler{name: "new-cmd"}
-	RegisterWithAlias(handler, "old-cmd")
+	_ = RegisterWithAlias(handler, "old-cmd")
 
 	// Основное имя — оригинальный handler
 	h1, ok := Get("new-cmd")
@@ -162,42 +162,36 @@ func TestRegisterWithAlias_CreatesDeprecatedBridge(t *testing.T) {
 }
 
 // TestRegisterWithAlias_SameNamePanics — panic если deprecated == Name().
-func TestRegisterWithAlias_SameNamePanics(t *testing.T) {
+func TestRegisterWithAlias_SameName_ReturnsError(t *testing.T) {
 	clearRegistry()
 
 	handler := &testDeprecatedHandler{name: "same-name"}
 
-	assert.PanicsWithValue(t,
-		"command: deprecated name cannot be same as handler name: same-name",
-		func() {
-			RegisterWithAlias(handler, "same-name")
-		},
+	err := RegisterWithAlias(handler, "same-name")
+	assert.EqualError(t, err, "command: deprecated name cannot be same as handler name: same-name",
 		"регистрация с одинаковым deprecated и основным именем должна вызвать panic")
 }
 
 // TestRegisterWithAlias_NilHandlerPanics — panic для nil handler.
-func TestRegisterWithAlias_NilHandlerPanics(t *testing.T) {
+func TestRegisterWithAlias_NilHandler_ReturnsError(t *testing.T) {
 	clearRegistry()
 
-	assert.PanicsWithValue(t, "command: nil handler", func() {
-		RegisterWithAlias(nil, "old-cmd")
-	}, "nil handler должен вызвать panic")
+	err := RegisterWithAlias(nil, "old-cmd")
+	assert.EqualError(t, err, "command: nil handler",
+		"nil handler должен вызвать panic")
 }
 
 // TestRegisterWithAlias_DuplicateDeprecatedPanics — panic при дублировании deprecated имени.
-func TestRegisterWithAlias_DuplicateDeprecatedPanics(t *testing.T) {
+func TestRegisterWithAlias_DuplicateDeprecated_ReturnsError(t *testing.T) {
 	clearRegistry()
 
 	h1 := &testDeprecatedHandler{name: "cmd-one"}
 	h2 := &testDeprecatedHandler{name: "cmd-two"}
 
-	RegisterWithAlias(h1, "legacy-name")
+	_ = RegisterWithAlias(h1, "legacy-name")
 
-	assert.PanicsWithValue(t,
-		"command: duplicate handler registration for legacy-name",
-		func() {
-			RegisterWithAlias(h2, "legacy-name")
-		},
+	err := RegisterWithAlias(h2, "legacy-name")
+	assert.EqualError(t, err, "command: duplicate handler registration for legacy-name",
 		"повторная регистрация deprecated имени должна вызвать panic")
 }
 
@@ -248,7 +242,7 @@ func TestRegisterWithAlias_LegacyNameFormat(t *testing.T) {
 
 	handler := &testDeprecatedHandler{name: "nr-service-mode"}
 	// Legacy имя с подчёркиванием (не kebab-case)
-	RegisterWithAlias(handler, "service_mode")
+	_ = RegisterWithAlias(handler, "service_mode")
 
 	// Оба имени должны быть зарегистрированы
 	h1, ok := Get("nr-service-mode")
@@ -337,9 +331,9 @@ func TestRegisterWithAlias_SpecialCharsInDeprecated(t *testing.T) {
 			handler := &testDeprecatedHandler{name: tt.handlerName}
 
 			// Не должно паниковать — deprecated имена могут быть любыми
-			assert.NotPanics(t, func() {
-				RegisterWithAlias(handler, tt.deprecatedName)
-			}, "спецсимволы в deprecated имени не должны вызывать panic")
+			err := RegisterWithAlias(handler, tt.deprecatedName)
+			assert.NoError(t, err,
+				"спецсимволы в deprecated имени не должны вызывать panic")
 
 			// Проверяем регистрацию
 			h1, ok := Get(tt.handlerName)

@@ -20,8 +20,8 @@ import (
 	"github.com/Kargones/apk-ci/internal/pkg/tracing"
 )
 
-func RegisterCmd() {
-	command.Register(&VersionHandler{})
+func RegisterCmd() error {
+	return command.Register(&VersionHandler{})
 }
 
 // VersionData содержит информацию о версии приложения.

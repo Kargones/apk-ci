@@ -28,8 +28,8 @@ const DefaultTimeout = 300 * time.Second
 // Compile-time interface check.
 var _ command.Handler = (*ExecuteEpfHandler)(nil)
 
-func RegisterCmd() {
-	command.RegisterWithAlias(&ExecuteEpfHandler{}, constants.ActExecuteEpf)
+func RegisterCmd() error {
+	return command.RegisterWithAlias(&ExecuteEpfHandler{}, constants.ActExecuteEpf)
 }
 
 // ExecuteEpfData содержит данные ответа о выполнении внешней обработки.

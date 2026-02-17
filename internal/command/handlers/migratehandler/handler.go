@@ -19,8 +19,8 @@ import (
 	"github.com/Kargones/apk-ci/internal/pkg/tracing"
 )
 
-func RegisterCmd() {
-	command.Register(&MigrateHandler{})
+func RegisterCmd() error {
+	return command.Register(&MigrateHandler{})
 }
 
 // MigrateHandler обрабатывает команду nr-migrate — миграция workflow-файлов

@@ -10,10 +10,11 @@ type SlogAdapter struct {
 
 // NewSlogAdapter создаёт новый SlogAdapter с указанным slog.Logger.
 // Для создания с конфигурацией используйте NewLogger().
-// Паникует если logger == nil (programming error, Review #34 fix).
+// При nil logger используется slog.Default() с предупреждением.
 func NewSlogAdapter(logger *slog.Logger) *SlogAdapter {
 	if logger == nil {
-		panic("logging: nil slog.Logger passed to NewSlogAdapter")
+		logger = slog.Default()
+		logger.Warn("logging: nil slog.Logger passed to NewSlogAdapter, using default")
 	}
 	return &SlogAdapter{logger: logger}
 }

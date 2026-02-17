@@ -21,8 +21,8 @@ import (
 	errhandler "github.com/Kargones/apk-ci/internal/command/handlers/shared"
 )
 
-func RegisterCmd() {
-	command.RegisterWithAlias(&ServiceModeEnableHandler{}, constants.ActServiceModeEnable)
+func RegisterCmd() error {
+	return command.RegisterWithAlias(&ServiceModeEnableHandler{}, constants.ActServiceModeEnable)
 }
 
 // ServiceModeEnableData содержит данные ответа о включении сервисного режима.
