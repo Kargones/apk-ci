@@ -139,7 +139,7 @@ func (h *ServiceModeStatusHandler) Execute(ctx context.Context, cfg *config.Conf
 		return dryrun.WritePlanOnlyUnsupported(os.Stdout, constants.ActNRServiceModeStatus)
 	}
 
-	// TODO: Использовать DI-инжектированный logger вместо slog.Default().
+	// TODO(#59): Использовать DI-инжектированный logger вместо slog.Default().
 	// slog.Default() игнорирует LoggingConfig (format, output, file path).
 	// Требуется рефакторинг: handlers должны получать logging.Logger через DI.
 	log := slog.Default().With(slog.String("trace_id", traceID), slog.String("command", constants.ActNRServiceModeStatus))

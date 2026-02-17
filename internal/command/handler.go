@@ -13,7 +13,7 @@ import (
 // Каждая команда приложения должна реализовывать этот интерфейс.
 // Регистрация обработчиков происходит через функцию Register() в init().
 //
-// TODO: Все handlers используют slog.Default() для логирования,
+// TODO(#59): Все handlers используют slog.Default() для логирования,
 // игнорируя LoggingConfig (format, output, file path). Необходим рефакторинг:
 // добавить logging.Logger в Handler interface или передавать через config.Config,
 // чтобы handlers использовали DI-инжектированный logger вместо глобального slog.Default().

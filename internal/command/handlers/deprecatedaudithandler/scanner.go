@@ -13,6 +13,7 @@ import (
 )
 
 // todoH7Pattern ищет TODO(H-7) комментарии в Go-файлах.
+// Compiled regex patterns are effectively constant (initialized once, never reassigned).
 var todoH7Pattern = regexp.MustCompile(`//\s*TODO\s*\(H-7\)(.*)`)
 
 // deprecatedGoPattern ищет стандартный Go маркер deprecated.

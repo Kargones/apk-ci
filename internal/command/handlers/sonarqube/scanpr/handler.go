@@ -69,7 +69,7 @@ type ScanPRData struct {
 }
 
 // ScanResult содержит результат анализа качества.
-// TODO: Добавить получение метрик NewIssues, NewBugs, NewVulnerabilities, NewCodeSmells
+// TODO(#58): Добавить получение метрик NewIssues, NewBugs, NewVulnerabilities, NewCodeSmells
 // через sonarqube.GetMeasures() API. Текущая реализация возвращает только QualityGateStatus.
 type ScanResult struct {
 	// AnalysisID — ID анализа в SonarQube
@@ -231,7 +231,7 @@ func (h *ScanPRHandler) Execute(ctx context.Context, cfg *config.Config) error {
 	}
 
 	// Получение Gitea клиента
-	// TODO: Реализовать фабрику createGiteaClient(cfg) для создания реального клиента.
+	// TODO(#58): Реализовать фабрику createGiteaClient(cfg) для создания реального клиента.
 	// Текущая реализация требует DI через поле giteaClient (используется в тестах).
 	giteaClient := h.giteaClient
 	if giteaClient == nil {
@@ -242,7 +242,7 @@ func (h *ScanPRHandler) Execute(ctx context.Context, cfg *config.Config) error {
 	}
 
 	// Получение SonarQube клиента
-	// TODO: Реализовать фабрику createSonarQubeClient(cfg) для создания реального клиента.
+	// TODO(#58): Реализовать фабрику createSonarQubeClient(cfg) для создания реального клиента.
 	sqClient := h.sonarqubeClient
 	if sqClient == nil {
 		log.Error("SonarQube клиент не настроен")
@@ -357,7 +357,7 @@ func (h *ScanPRHandler) Execute(ctx context.Context, cfg *config.Config) error {
 	if len(commitSHA) > 7 {
 		shortSHA = commitSHA[:7]
 	}
-	// TODO: SourcePath не заполняется — требуется добавить cfg.WorkDir или cfg.SourcePath
+	// TODO(#58): SourcePath не заполняется — требуется добавить cfg.WorkDir или cfg.SourcePath
 	result, err := sqClient.RunAnalysis(ctx, sonarqube.RunAnalysisOptions{
 		ProjectKey: projectKey,
 		Branch:     headBranch,

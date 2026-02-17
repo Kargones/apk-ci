@@ -41,7 +41,7 @@ const (
 )
 
 // init регистрирует команду nr-test-merge с deprecated alias test-merge.
-// TODO: Deprecated alias "test-merge" будет удалён в v2.0.0 / Epic 7.
+// TODO(#61): Deprecated alias "test-merge" будет удалён в v2.0.0 / Epic 7.
 // После полной миграции на NR-архитектуру, использовать только "nr-test-merge".
 func RegisterCmd() {
 	command.RegisterWithAlias(&TestMergeHandler{}, constants.ActTestMerge)
@@ -237,7 +237,7 @@ func (h *TestMergeHandler) Execute(ctx context.Context, cfg *config.Config) erro
 		slog.String("base_branch", baseBranch))
 
 	// Получение Gitea клиента (AC: #9)
-	// TODO: Реализовать фабрику createGiteaClient(cfg) для создания реального клиента.
+	// TODO(#58): Реализовать фабрику createGiteaClient(cfg) для создания реального клиента.
 	// Текущая реализация требует DI через поле giteaClient (используется в тестах).
 	client := h.giteaClient
 	if client == nil {

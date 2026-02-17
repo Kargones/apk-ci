@@ -220,16 +220,19 @@ func TrimOut(b []byte) string {
 func DisplayConfig(l *slog.Logger) error {
 	// Остановка существующих процессов Xvfb
 	// l.Debug("Config", slog.String("action", "Остановка существующих процессов Xvfb"))
+	// #nosec G204 - all arguments are hardcoded constants
 	killCmd := exec.Command("pkill", "-f", "Xvfb")
 	_ = killCmd.Run() // Игнорируем ошибки
 
 	// Очистка lock файлов
 	// l.Debug("Config", slog.String("action", "Очистка lock файлов"))
+	// #nosec G204 - all arguments are hardcoded constants
 	removeCmd := exec.Command("rm", "-f", "/tmp/.X99-lock", "/tmp/.X*-lock")
 	_ = removeCmd.Run() // Игнорируем ошибки
 
 	// Запуск виртуального дисплея
 	// l.Debug("Config", slog.String("action", "Запуск виртуального дисплея :99"))
+	// #nosec G204 - all arguments are hardcoded constants
 	startCmd := exec.Command("Xvfb", ":99", "-screen", "0", "1920x1080x24", "-ac", "+extension", "GLX", "+render", "-noreset")
 	startCmd.Stdout = nil
 	startCmd.Stderr = nil
@@ -267,12 +270,14 @@ func DisplayConfig(l *slog.Logger) error {
 
 	// Создание файла авторизации X11
 	// l.Debug("Config", slog.String("action", "Создание файла авторизации X11"))
+	// #nosec G204 - all arguments are hardcoded constants
 	touchCmd := exec.Command("touch", "/tmp/.Xauth99")
 	if err := touchCmd.Run(); err != nil {
 		l.Warn("failed to create Xauth file", slog.String("error", err.Error()))
 	}
 
 	// Генерация случайного ключа для xauth
+	// #nosec G204 - all arguments are hardcoded constants
 	randCmd := exec.Command("xxd", "-l", "16", "-p", "/dev/urandom")
 	randOutput, err := randCmd.Output()
 	if err == nil {
@@ -287,6 +292,7 @@ func DisplayConfig(l *slog.Logger) error {
 
 	// Проверка подключения к дисплею
 	// l.Debug("Config", slog.String("action", "Проверка подключения к дисплею"))
+	// #nosec G204 - all arguments are hardcoded constants
 	testCmd := exec.Command("xdpyinfo", "-display", ":99")
 	testCmd.Stdout = nil
 	testCmd.Stderr = nil
@@ -294,12 +300,14 @@ func DisplayConfig(l *slog.Logger) error {
 		// l.Debug("Config", slog.String("action", "Не удается подключиться к дисплею :99, попытка исправления"))
 
 		// Альтернативный запуск с другими параметрами
+		// #nosec G204 - all arguments are hardcoded constants
 		killCmd2 := exec.Command("pkill", "-f", "Xvfb")
 		if err := killCmd2.Run(); err != nil {
 			l.Debug("pkill Xvfb retry (may not be running)", slog.String("error", err.Error()))
 		}
 		time.Sleep(2 * time.Second)
 
+		// #nosec G204 - all arguments are hardcoded constants
 		startCmd2 := exec.Command("Xvfb", ":99", "-screen", "0", "1920x1080x24", "-dpi", "96", "-ac", "+extension", "RANDR")
 		startCmd2.Stdout = nil
 		startCmd2.Stderr = nil
@@ -308,6 +316,7 @@ func DisplayConfig(l *slog.Logger) error {
 		}
 		time.Sleep(3 * time.Second)
 
+		// #nosec G204 - all arguments are hardcoded constants
 		testCmd2 := exec.Command("xdpyinfo", "-display", ":99")
 		testCmd2.Stdout = nil
 		testCmd2.Stderr = nil

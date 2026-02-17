@@ -67,7 +67,7 @@ type RestoreStats struct {
 // В текущей версии интерфейс BackupInfoProvider.GetBackupSize возвращает только int64.
 // При необходимости расширения (дата создания, тип бэкапа, путь к файлу)
 // следует изменить сигнатуру GetBackupSize на GetBackupInfo() (*BackupInfo, error).
-// TODO: рассмотреть удаление если не используется в следующих эпиках.
+// Может быть удалён при рефакторинге адаптеров.
 type BackupInfo struct {
 	// SizeBytes — размер резервной копии в байтах
 	SizeBytes int64

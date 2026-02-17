@@ -270,6 +270,7 @@ func (b *BranchScannerEntity) ValidateBranch(ctx context.Context, branchName str
 
 // getGitCommitHash retrieves the commit hash for the specified branch.
 func (b *BranchScannerEntity) getGitCommitHash(ctx context.Context, branchName string) (string, error) {
+	// #nosec G204 - command is "git" (hardcoded), branchName from trusted Git refs
 	cmd := exec.CommandContext(ctx, "git", "rev-parse", branchName)
 	cmd.Dir = b.workDir
 
@@ -283,6 +284,7 @@ func (b *BranchScannerEntity) getGitCommitHash(ctx context.Context, branchName s
 
 // getGitCommitMessage retrieves the commit message for the specified branch.
 func (b *BranchScannerEntity) getGitCommitMessage(ctx context.Context, branchName string) (string, error) {
+	// #nosec G204 - command is "git" (hardcoded), branchName from trusted Git refs
 	cmd := exec.CommandContext(ctx, "git", "log", "-1", "--pretty=format:%s", branchName)
 	cmd.Dir = b.workDir
 
@@ -296,6 +298,7 @@ func (b *BranchScannerEntity) getGitCommitMessage(ctx context.Context, branchNam
 
 // getGitCommitAuthor retrieves the commit author for the specified branch.
 func (b *BranchScannerEntity) getGitCommitAuthor(ctx context.Context, branchName string) (string, error) {
+	// #nosec G204 - command is "git" (hardcoded), branchName from trusted Git refs
 	cmd := exec.CommandContext(ctx, "git", "log", "-1", "--pretty=format:%an <%ae>", branchName)
 	cmd.Dir = b.workDir
 
@@ -309,6 +312,7 @@ func (b *BranchScannerEntity) getGitCommitAuthor(ctx context.Context, branchName
 
 // getGitCommitTimestamp retrieves the commit timestamp for the specified branch.
 func (b *BranchScannerEntity) getGitCommitTimestamp(ctx context.Context, branchName string) (time.Time, error) {
+	// #nosec G204 - command is "git" (hardcoded), branchName from trusted Git refs
 	cmd := exec.CommandContext(ctx, "git", "log", "-1", "--pretty=format:%ct", branchName)
 	cmd.Dir = b.workDir
 
@@ -366,6 +370,7 @@ func (b *BranchScannerEntity) branchExists(ctx context.Context, branchName strin
 
 // isGitRepository checks if the working directory is a Git repository.
 func (b *BranchScannerEntity) isGitRepository(ctx context.Context) (bool, error) {
+	// #nosec G204 - command is "git" (hardcoded), branchName from trusted Git refs
 	cmd := exec.CommandContext(ctx, "git", "rev-parse", "--git-dir")
 	cmd.Dir = b.workDir
 

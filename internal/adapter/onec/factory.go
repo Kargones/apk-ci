@@ -66,7 +66,7 @@ func (f *Factory) NewConfigExporter() (ConfigExporter, error) {
 			f.cfg.AppConfig.Paths.BinIbcmd,
 		), nil
 	case ImplNative:
-		// TODO: реализовать native exporter в будущем (Epic 4 Story 4.5 nr-convert)
+		// TODO(#42): реализовать native exporter в будущем (Epic 4 Story 4.5 nr-convert)
 		return nil, fmt.Errorf("%w: native config_export not implemented yet", ErrInvalidImplementation)
 	default:
 		return nil, fmt.Errorf("%w: unknown config_export implementation '%s', valid: 1cv8, ibcmd, native",

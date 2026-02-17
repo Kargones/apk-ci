@@ -82,7 +82,7 @@ func NewTracerProvider(cfg Config, logger logging.Logger) (func(context.Context)
 	)
 
 	// Регистрируем глобально.
-	// TODO: Global state — otel.SetTracerProvider() без sync.Once.
+	// TODO(#43): Global state — otel.SetTracerProvider() без sync.Once.
 	// Для CLI допустимо (однократный вызов), но тесты не могут использовать t.Parallel().
 	otel.SetTracerProvider(tp)
 

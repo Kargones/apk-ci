@@ -48,6 +48,7 @@ const (
 )
 
 // allStages содержит все этапы workflow в порядке выполнения.
+// Effectively constant (initialized once, never modified). Cannot be const due to Go slice limitation.
 var allStages = []string{
 	StageValidating,
 	StageCreatingBackup,
@@ -159,7 +160,7 @@ type ConvertConfigFactory interface {
 
 // Git2StoreHandler обрабатывает команду nr-git2store.
 //
-// TODO: Рефакторинг: вынести фабрики (gitFactory, convertConfigFactory,
+// TODO(#58): Рефакторинг: вынести фабрики (gitFactory, convertConfigFactory,
 // backupCreator, tempDbCreator) в общий пакет internal/factory или использовать
 // Wire для DI. H-2 (createRACClient) уже решён — см. racutil.NewClient().
 type Git2StoreHandler struct {
