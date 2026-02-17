@@ -25,6 +25,7 @@ type Replacement struct {
 // Формат 2: BR_COMMAND=value (inline в run)
 // Review #32: regex намеренно case-sensitive ([a-z]) — все валидные имена команд
 // в constants.go строго lowercase. Uppercase не является валидным значением BR_COMMAND.
+// Compiled regex patterns are effectively constant (initialized once, never reassigned).
 var brCommandEnvPattern = regexp.MustCompile(
 	`^(\s*BR_COMMAND\s*:\s*)("?)([a-z][a-z0-9-]*)("?.*)$`,
 )
@@ -122,7 +123,7 @@ func scanFile(path string, legacyToNR map[string]string) ([]Replacement, error) 
 		}
 
 		// Формат 2: BR_COMMAND=value (inline в run-блоках, с опциональными кавычками)
-		// TODO: FindStringSubmatch находит только первое вхождение.
+		// TODO(#58): FindStringSubmatch находит только первое вхождение.
 		// Если на одной строке несколько BR_COMMAND= (крайне маловероятно в Gitea Actions),
 		// только первое будет обработано. Для полного покрытия нужен FindAllStringSubmatch
 		// + поддержка множественных Replacement на строку в applyReplacements.

@@ -41,7 +41,7 @@ const defaultEdtTimeout = 30 * time.Minute
 // Возвращает ошибку если путь содержит опасные компоненты.
 //
 // Ограничение: не проверяет symlinks — /tmp/symlink_to_etc пройдёт валидацию.
-// TODO: Для полной защиты вызывающий код должен использовать filepath.EvalSymlinks()
+// TODO(#41): Для полной защиты вызывающий код должен использовать filepath.EvalSymlinks()
 // после validatePath для существующих путей (Review #34).
 func validatePath(path string) error {
 	// Путь должен быть абсолютным

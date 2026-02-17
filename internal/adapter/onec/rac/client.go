@@ -489,7 +489,7 @@ func (c *racClient) EnableServiceMode(ctx context.Context, clusterUUID, infobase
 	c.logger.Debug("Сервисный режим включён")
 
 	if terminateSessions {
-		// TODO: Рассмотреть возврат ошибки или partial success статуса вместо swallow.
+		// TODO(#42): Рассмотреть возврат ошибки или partial success статуса вместо swallow.
 		// Текущее поведение: сервисный режим уже включён, ошибка завершения сессий
 		// не должна приводить к откату - это legacy паттерн для обратной совместимости.
 		if err := c.TerminateAllSessions(ctx, clusterUUID, infobaseUUID); err != nil {

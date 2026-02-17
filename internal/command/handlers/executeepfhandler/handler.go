@@ -254,7 +254,7 @@ func (h *ExecuteEpfHandler) writeError(format, traceID string, start time.Time, 
 
 // isValidURL проверяет что строка является валидным HTTP(S) URL.
 // Review #34 fix: используем url.Parse для более строгой валидации вместо HasPrefix.
-// TODO: дублирует логику enterprise.EpfExecutor.validateEpfURL().
+// TODO(#58): дублирует логику enterprise.EpfExecutor.validateEpfURL().
 // При рефакторинге вынести в общую утилиту internal/pkg/validation/.
 func isValidURL(rawURL string) bool {
 	parsed, err := url.Parse(rawURL)

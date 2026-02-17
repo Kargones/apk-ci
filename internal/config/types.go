@@ -206,7 +206,7 @@ type Config struct {
 	PRNumber      int64 `env:"BR_PR_NUMBER" env-default:"0"`
 
 	// Устаревшие поля (сохранены для обратной совместимости)
-	// TODO: Удалить после полной миграции
+	// TODO(#44): Удалить после полной миграции
 	Connect     string `env:"Connect_String" env-default:""`
 	RepPath     string `env:"RepPath" env-default:"/tmp/apk-ci/rep"`
 	WorkDir     string `env:"WorkDir" env-default:"/tmp/apk-ci"`

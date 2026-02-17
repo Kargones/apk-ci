@@ -23,6 +23,7 @@ import (
 )
 
 // fallbackCounter используется для генерации уникальных fallback ID.
+// Является atomic-счётчиком, не может быть константой.
 var fallbackCounter atomic.Uint64
 
 // GenerateTraceID генерирует уникальный trace ID.

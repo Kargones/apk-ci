@@ -38,7 +38,7 @@ const maxDescriptionLength = 500
 func RegisterCmd() {
 	// Deprecated alias: "sq-project-update" -> "nr-sq-project-update"
 	// Legacy команда сохраняется для обратной совместимости до полной миграции на NR.
-	// TODO: Удалить deprecated alias ActSQProjectUpdate после миграции всех workflows на NR-команды.
+	// TODO(#61): Удалить deprecated alias ActSQProjectUpdate после миграции всех workflows на NR-команды.
 	// Планируемая версия удаления: v2.0.0 или после завершения Epic 7.
 	command.RegisterWithAlias(&ProjectUpdateHandler{}, constants.ActSQProjectUpdate)
 }
@@ -334,7 +334,7 @@ func (h *ProjectUpdateHandler) syncAdministrators(
 
 	// Обновление в SonarQube (если есть администраторы)
 	if len(administrators) > 0 {
-		// TODO: Реализовать через sqClient.SetProjectPermissions когда метод будет доступен.
+		// TODO(#58): Реализовать через sqClient.SetProjectPermissions когда метод будет доступен.
 		// Пока только логируем найденных администраторов.
 		log.Info("Найдены администраторы для синхронизации",
 			slog.Int("count", len(administrators)),

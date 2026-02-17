@@ -309,12 +309,12 @@ func (e *EmailAlerter) buildMessage(subject, body string) string {
 // encodeRFC2047 кодирует строку в формате RFC 2047 для использования в email headers.
 // Использует Base64 encoding для поддержки любых Unicode символов.
 //
-// TODO: RFC 2047 ограничивает длину encoded-word до 75 символов.
+// TODO(#59): RFC 2047 ограничивает длину encoded-word до 75 символов.
 // При длинных subject (>~40 символов non-ASCII) необходимо разбивать на несколько
 // encoded-word блоков. На практике apk-ci использует короткие subject
 // (error_code + command), поэтому лимит не превышается.
 //
-// TODO: ASCII строки содержащие последовательность "=?" могут быть
+// TODO(#59): ASCII строки содержащие последовательность "=?" могут быть
 // ошибочно интерпретированы как начало encoded-word. При необходимости — кодировать
 // такие строки принудительно.
 func encodeRFC2047(s string) string {

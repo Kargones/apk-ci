@@ -96,7 +96,7 @@ type EmailChannelConfig struct {
 	SMTPPassword string `yaml:"smtpPassword" env:"BR_ALERTING_SMTP_PASSWORD"`
 
 	// UseTLS — использовать TLS (StartTLS для 587, implicit для 465).
-	// TODO: bool с env-default:"true" — аналогично Compress,
+	// NB: bool с env-default в cleanenv не поддерживает false через YAML.
 	// YAML false может быть перезаписан cleanenv.ReadEnv. Для YAML-source
 	// используется getDefaultAlertingConfig() где UseTLS=true.
 	UseTLS bool `yaml:"useTLS" env:"BR_ALERTING_SMTP_TLS" env-default:"true"`
@@ -141,7 +141,7 @@ type WebhookChannelConfig struct {
 
 	// Headers — дополнительные HTTP заголовки.
 	// Используется для Authorization, X-Api-Key и т.д.
-	// TODO: Headers доступны только через YAML, не через env.
+	// NB: Headers доступны только через YAML, не через env.
 	// cleanenv не поддерживает map[string]string из env переменных.
 	// Для CI/CD использовать YAML или добавить парсинг "Key=Val,Key2=Val2" из env.
 	Headers map[string]string `yaml:"headers"`

@@ -46,7 +46,7 @@ func (h *Git2StoreHandler) createTempDb(ctx context.Context, l *slog.Logger, cfg
 
 // createBackupProduction создаёт резервную копию хранилища (production реализация).
 //
-// TODO: Реализовать полноценный backup хранилища 1C.
+// TODO(#45): Реализовать полноценный backup хранилища 1C.
 // Текущая реализация создаёт только метаданные (backup_info.txt) с информацией
 // для ручного восстановления. Полный backup требует:
 // 1. Вызов 1cv8 DESIGNER /ConfigurationRepositoryDumpCfg для экспорта конфигурации
