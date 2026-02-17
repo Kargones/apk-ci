@@ -21,7 +21,7 @@ import (
 var _ command.Handler = (*Git2StoreHandler)(nil)
 
 func RegisterCmd() error {
-	// AC-6: Deprecated alias через DeprecatedBridge
+	// Deprecated: alias "git2store" retained for backward compatibility. Remove in v2.0.0 (Epic 7).
 	return command.RegisterWithAlias(&Git2StoreHandler{}, constants.ActGit2store)
 }
 

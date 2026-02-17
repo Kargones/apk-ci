@@ -22,6 +22,7 @@ import (
 )
 
 func RegisterCmd() error {
+	// Deprecated: alias "service-mode-status" retained for backward compatibility. Remove in v2.0.0 (Epic 7).
 	return command.RegisterWithAlias(&ServiceModeStatusHandler{}, constants.ActServiceModeStatus)
 }
 

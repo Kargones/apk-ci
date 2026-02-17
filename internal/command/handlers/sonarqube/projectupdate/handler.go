@@ -36,10 +36,9 @@ const (
 const maxDescriptionLength = 500
 
 func RegisterCmd() error {
-	// Deprecated alias: "sq-project-update" -> "nr-sq-project-update"
 	// Legacy команда сохраняется для обратной совместимости до полной миграции на NR.
-	// TODO(#61): Удалить deprecated alias ActSQProjectUpdate после миграции всех workflows на NR-команды.
 	// Планируемая версия удаления: v2.0.0 или после завершения Epic 7.
+	// Deprecated: alias "sq-project-update" retained for backward compatibility. Remove in v2.0.0 (Epic 7).
 	return command.RegisterWithAlias(&ProjectUpdateHandler{}, constants.ActSQProjectUpdate)
 }
 

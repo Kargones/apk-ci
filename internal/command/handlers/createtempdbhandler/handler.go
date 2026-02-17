@@ -42,6 +42,7 @@ const (
 )
 
 func RegisterCmd() error {
+	// Deprecated: alias "create-temp-db" retained for backward compatibility. Remove in v2.0.0 (Epic 7).
 	return command.RegisterWithAlias(&CreateTempDbHandler{}, constants.ActCreateTempDb)
 }
 

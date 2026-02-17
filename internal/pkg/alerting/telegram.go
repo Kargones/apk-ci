@@ -17,7 +17,7 @@ import (
 const TelegramAPIBaseURL = "https://api.telegram.org/bot"
 
 // TelegramParseMode — режим парсинга сообщений (Markdown или MarkdownV2).
-// Markdown v1 deprecated в Telegram API, но v2 требует другого escaping.
+// Markdown v1 deprecated since Telegram Bot API v4.5. Migrate to MarkdownV2. Remove in v2.0.0.
 const TelegramParseMode = "Markdown"
 
 // maxTelegramResponseSize — максимальный размер тела ответа Telegram API (1 KB).

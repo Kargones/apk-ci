@@ -40,6 +40,7 @@ const (
 )
 
 func RegisterCmd() error {
+	// Deprecated: alias "dbrestore" retained for backward compatibility. Remove in v2.0.0 (Epic 7).
 	return command.RegisterWithAlias(&DbRestoreHandler{}, constants.ActDbrestore)
 }
 
