@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"time"
 	"fmt"
 	"log/slog"
 	"path/filepath"
@@ -69,7 +70,9 @@ func CreateStores(l *slog.Logger, cfg *config.Config, storeRoot string, dbConnec
 	r.Params = append(r.Params, "/Out")
 	r.Params = append(r.Params, "/c Создание хранилища конфигурации")
 
-	_, err := r.RunCommand(context.Background(), l)
+	cmdCtx, cmdCancel := context.WithTimeout(context.Background(), 5*time.Minute)
+	defer cmdCancel()
+	_, err := r.RunCommand(cmdCtx, l)
 	if err != nil {
 		l.Error("Ошибка создания хранилища конфигурации",
 			slog.String("Путь", mainStore.Path),
@@ -139,7 +142,9 @@ func CreateStores(l *slog.Logger, cfg *config.Config, storeRoot string, dbConnec
 		rAdd.Params = append(rAdd.Params, "/Out")
 		rAdd.Params = append(rAdd.Params, "/c Создание хранилища конфигурации")
 
-		_, err := rAdd.RunCommand(context.Background(), l)
+		cmdCtx, cmdCancel := context.WithTimeout(context.Background(), 5*time.Minute)
+		defer cmdCancel()
+		_, err := rAdd.RunCommand(cmdCtx, l)
 		if err != nil {
 			l.Error("Ошибка создания хранилища конфигурации",
 				slog.String("Путь", addStore.Path),

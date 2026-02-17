@@ -112,7 +112,7 @@ func (s *SonarScannerEntity) parseOutput(output string, result *ScanResult) erro
 			}
 		}
 
-		if strings.HasPrefix(line, "INFO:") && s.logger.Enabled(context.Background(), slog.LevelDebug) {
+		if strings.HasPrefix(line, "INFO:") && s.logger.Enabled(context.TODO(), slog.LevelDebug) {
 			infoMsg := strings.TrimSpace(strings.TrimPrefix(line, "INFO:"))
 			if infoMsg != "" {
 				s.logger.Debug("Scanner info", "message", infoMsg)
