@@ -386,7 +386,7 @@ func (odb *OneDb) DumpAdd(ctx context.Context, l *slog.Logger, cfg *config.Confi
 // Возвращает:
 //   - string: путь к созданной временной базе данных
 //   - error: ошибка создания каталога или nil при успехе
-func GetDbName(_ context.Context, l *slog.Logger, cfg *config.Config) (string, error) {
+func GetDbName(ctx context.Context, l *slog.Logger, cfg *config.Config) (string, error) {
 	if cfg.Connect != "" {
 		dbPath := path.Join(cfg.TmpDir, cfg.Connect)
 		err := os.Mkdir(dbPath, 0750)

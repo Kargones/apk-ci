@@ -422,7 +422,7 @@ func (b *BranchScannerEntity) configureScannerForBranch(branchName, projectKey s
 }
 
 // processScanResults processes the scan results and updates SonarQube project metadata.
-func (b *BranchScannerEntity) processScanResults(_ context.Context, scanResult *ScanResult, _ *BranchMetadata) error {
+func (b *BranchScannerEntity) processScanResults(ctx context.Context, scanResult *ScanResult, _ *BranchMetadata) error {
 	b.logger.Debug("Processing scan results", "analysisID", scanResult.AnalysisID)
 
 	// ToDo: Implement SonarQube API integration for result processing

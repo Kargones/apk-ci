@@ -38,12 +38,12 @@ func NewAPIClientWithLogger(api *entity_gitea.API, logger *slog.Logger) *APIClie
 // PRReader
 // -------------------------------------------------------------------
 
-func (c *APIClient) GetPR(_ context.Context, prNumber int64) (*PRResponse, error) {
+func (c *APIClient) GetPR(ctx context.Context, prNumber int64) (*PRResponse, error) {
 	// entity API не имеет GetPR — используем workaround через список PR
 	return nil, NewGiteaError(ErrGiteaAPI, "GetPR not directly supported by entity API, use ListOpenPRs", nil)
 }
 
-func (c *APIClient) ListOpenPRs(_ context.Context) ([]PR, error) {
+func (c *APIClient) ListOpenPRs(ctx context.Context) ([]PR, error) {
 	entityPRs, err := c.api.ActivePR()
 	if err != nil {
 		return nil, NewGiteaError(ErrGiteaAPI, "ListOpenPRs failed", err)
@@ -55,11 +55,11 @@ func (c *APIClient) ListOpenPRs(_ context.Context) ([]PR, error) {
 	return result, nil
 }
 
-func (c *APIClient) ConflictPR(_ context.Context, prNumber int64) (bool, error) {
+func (c *APIClient) ConflictPR(ctx context.Context, prNumber int64) (bool, error) {
 	return c.api.ConflictPR(prNumber)
 }
 
-func (c *APIClient) ConflictFilesPR(_ context.Context, prNumber int64) ([]string, error) {
+func (c *APIClient) ConflictFilesPR(ctx context.Context, prNumber int64) ([]string, error) {
 	return c.api.ConflictFilesPR(prNumber)
 }
 
@@ -67,7 +67,7 @@ func (c *APIClient) ConflictFilesPR(_ context.Context, prNumber int64) ([]string
 // CommitReader
 // -------------------------------------------------------------------
 
-func (c *APIClient) GetCommits(_ context.Context, branch string, limit int) ([]Commit, error) {
+func (c *APIClient) GetCommits(ctx context.Context, branch string, limit int) ([]Commit, error) {
 	entityCommits, err := c.api.GetCommits(branch, limit)
 	if err != nil {
 		return nil, err
@@ -75,7 +75,7 @@ func (c *APIClient) GetCommits(_ context.Context, branch string, limit int) ([]C
 	return convertCommits(entityCommits), nil
 }
 
-func (c *APIClient) GetLatestCommit(_ context.Context, branch string) (*Commit, error) {
+func (c *APIClient) GetLatestCommit(ctx context.Context, branch string) (*Commit, error) {
 	ec, err := c.api.GetLatestCommit(branch)
 	if err != nil {
 		return nil, err
@@ -84,7 +84,7 @@ func (c *APIClient) GetLatestCommit(_ context.Context, branch string) (*Commit, 
 	return &result, nil
 }
 
-func (c *APIClient) GetCommitFiles(_ context.Context, commitSHA string) ([]CommitFile, error) {
+func (c *APIClient) GetCommitFiles(ctx context.Context, commitSHA string) ([]CommitFile, error) {
 	entityFiles, err := c.api.GetCommitFiles(commitSHA)
 	if err != nil {
 		return nil, err
@@ -92,7 +92,7 @@ func (c *APIClient) GetCommitFiles(_ context.Context, commitSHA string) ([]Commi
 	return convertCommitFiles(entityFiles), nil
 }
 
-func (c *APIClient) GetCommitsBetween(_ context.Context, baseSHA, headSHA string) ([]Commit, error) {
+func (c *APIClient) GetCommitsBetween(ctx context.Context, baseSHA, headSHA string) ([]Commit, error) {
 	entityCommits, err := c.api.GetCommitsBetween(baseSHA, headSHA)
 	if err != nil {
 		return nil, err
@@ -100,7 +100,7 @@ func (c *APIClient) GetCommitsBetween(_ context.Context, baseSHA, headSHA string
 	return convertCommits(entityCommits), nil
 }
 
-func (c *APIClient) GetFirstCommitOfBranch(_ context.Context, branch, baseBranch string) (*Commit, error) {
+func (c *APIClient) GetFirstCommitOfBranch(ctx context.Context, branch, baseBranch string) (*Commit, error) {
 	ec, err := c.api.GetFirstCommitOfBranch(branch, baseBranch)
 	if err != nil {
 		return nil, err
@@ -109,7 +109,7 @@ func (c *APIClient) GetFirstCommitOfBranch(_ context.Context, branch, baseBranch
 	return &result, nil
 }
 
-func (c *APIClient) GetBranchCommitRange(_ context.Context, branch string) (*BranchCommitRange, error) {
+func (c *APIClient) GetBranchCommitRange(ctx context.Context, branch string) (*BranchCommitRange, error) {
 	ecr, err := c.api.GetBranchCommitRange(branch)
 	if err != nil {
 		return nil, err
@@ -121,11 +121,11 @@ func (c *APIClient) GetBranchCommitRange(_ context.Context, branch string) (*Bra
 // FileReader
 // -------------------------------------------------------------------
 
-func (c *APIClient) GetFileContent(_ context.Context, fileName string) ([]byte, error) {
+func (c *APIClient) GetFileContent(ctx context.Context, fileName string) ([]byte, error) {
 	return c.api.GetFileContent(fileName)
 }
 
-func (c *APIClient) GetRepositoryContents(_ context.Context, filepath, branch string) ([]FileInfo, error) {
+func (c *APIClient) GetRepositoryContents(ctx context.Context, filepath, branch string) ([]FileInfo, error) {
 	entityFiles, err := c.api.GetRepositoryContents(filepath, branch)
 	if err != nil {
 		return nil, err
@@ -133,7 +133,7 @@ func (c *APIClient) GetRepositoryContents(_ context.Context, filepath, branch st
 	return convertFileInfos(entityFiles), nil
 }
 
-func (c *APIClient) AnalyzeProjectStructure(_ context.Context, branch string) ([]string, error) {
+func (c *APIClient) AnalyzeProjectStructure(ctx context.Context, branch string) ([]string, error) {
 	return c.api.AnalyzeProjectStructure(branch)
 }
 
@@ -141,7 +141,7 @@ func (c *APIClient) AnalyzeProjectStructure(_ context.Context, branch string) ([
 // BranchManager
 // -------------------------------------------------------------------
 
-func (c *APIClient) GetBranches(_ context.Context, repo string) ([]Branch, error) {
+func (c *APIClient) GetBranches(ctx context.Context, repo string) ([]Branch, error) {
 	entityBranches, err := c.api.GetBranches(repo)
 	if err != nil {
 		return nil, err
@@ -149,12 +149,12 @@ func (c *APIClient) GetBranches(_ context.Context, repo string) ([]Branch, error
 	return convertBranches(entityBranches), nil
 }
 
-func (c *APIClient) CreateBranch(_ context.Context, _, _ string) error {
+func (c *APIClient) CreateBranch(ctx context.Context, _, _ string) error {
 	// entity API CreateTestBranch uses pre-configured branch names
 	return c.api.CreateTestBranch()
 }
 
-func (c *APIClient) DeleteBranch(_ context.Context, _ string) error {
+func (c *APIClient) DeleteBranch(ctx context.Context, _ string) error {
 	// entity API DeleteTestBranch uses pre-configured branch name
 	return c.api.DeleteTestBranch()
 }
@@ -163,7 +163,7 @@ func (c *APIClient) DeleteBranch(_ context.Context, _ string) error {
 // ReleaseReader
 // -------------------------------------------------------------------
 
-func (c *APIClient) GetLatestRelease(_ context.Context) (*Release, error) {
+func (c *APIClient) GetLatestRelease(ctx context.Context) (*Release, error) {
 	er, err := c.api.GetLatestRelease()
 	if err != nil {
 		return nil, err
@@ -172,7 +172,7 @@ func (c *APIClient) GetLatestRelease(_ context.Context) (*Release, error) {
 	return &result, nil
 }
 
-func (c *APIClient) GetReleaseByTag(_ context.Context, tag string) (*Release, error) {
+func (c *APIClient) GetReleaseByTag(ctx context.Context, tag string) (*Release, error) {
 	er, err := c.api.GetReleaseByTag(tag)
 	if err != nil {
 		return nil, err
@@ -185,7 +185,7 @@ func (c *APIClient) GetReleaseByTag(_ context.Context, tag string) (*Release, er
 // IssueManager
 // -------------------------------------------------------------------
 
-func (c *APIClient) GetIssue(_ context.Context, issueNumber int64) (*Issue, error) {
+func (c *APIClient) GetIssue(ctx context.Context, issueNumber int64) (*Issue, error) {
 	ei, err := c.api.GetIssue(issueNumber)
 	if err != nil {
 		return nil, err
@@ -194,11 +194,11 @@ func (c *APIClient) GetIssue(_ context.Context, issueNumber int64) (*Issue, erro
 	return &result, nil
 }
 
-func (c *APIClient) AddIssueComment(_ context.Context, issueNumber int64, commentText string) error {
+func (c *APIClient) AddIssueComment(ctx context.Context, issueNumber int64, commentText string) error {
 	return c.api.AddIssueComment(issueNumber, commentText)
 }
 
-func (c *APIClient) CloseIssue(_ context.Context, issueNumber int64) error {
+func (c *APIClient) CloseIssue(ctx context.Context, issueNumber int64) error {
 	return c.api.CloseIssue(issueNumber)
 }
 
@@ -206,7 +206,7 @@ func (c *APIClient) CloseIssue(_ context.Context, issueNumber int64) error {
 // PRManager
 // -------------------------------------------------------------------
 
-func (c *APIClient) CreatePR(_ context.Context, head string) (PR, error) {
+func (c *APIClient) CreatePR(ctx context.Context, head string) (PR, error) {
 	ep, err := c.api.CreatePR(head)
 	if err != nil {
 		return PR{}, err
@@ -214,7 +214,7 @@ func (c *APIClient) CreatePR(_ context.Context, head string) (PR, error) {
 	return convertPR(ep), nil
 }
 
-func (c *APIClient) CreatePRWithOptions(_ context.Context, opts CreatePROptions) (*PRResponse, error) {
+func (c *APIClient) CreatePRWithOptions(ctx context.Context, opts CreatePROptions) (*PRResponse, error) {
 	entityOpts := entity_gitea.CreatePROptions{
 		Title:     opts.Title,
 		Body:      opts.Body,
@@ -231,11 +231,11 @@ func (c *APIClient) CreatePRWithOptions(_ context.Context, opts CreatePROptions)
 	return &result, nil
 }
 
-func (c *APIClient) MergePR(_ context.Context, prNumber int64) error {
+func (c *APIClient) MergePR(ctx context.Context, prNumber int64) error {
 	return c.api.MergePR(prNumber, c.logger)
 }
 
-func (c *APIClient) ClosePR(_ context.Context, prNumber int64) error {
+func (c *APIClient) ClosePR(ctx context.Context, prNumber int64) error {
 	return c.api.ClosePR(prNumber)
 }
 
@@ -243,7 +243,7 @@ func (c *APIClient) ClosePR(_ context.Context, prNumber int64) error {
 // RepositoryWriter
 // -------------------------------------------------------------------
 
-func (c *APIClient) SetRepositoryState(_ context.Context, operations []BatchOperation, branch, commitMessage string) error {
+func (c *APIClient) SetRepositoryState(ctx context.Context, operations []BatchOperation, branch, commitMessage string) error {
 	entityOps := make([]entity_gitea.ChangeFileOperation, len(operations))
 	for i, op := range operations {
 		entityOps[i] = entity_gitea.ChangeFileOperation{
@@ -261,11 +261,11 @@ func (c *APIClient) SetRepositoryState(_ context.Context, operations []BatchOper
 // TeamReader
 // -------------------------------------------------------------------
 
-func (c *APIClient) IsUserInTeam(_ context.Context, username, orgName, teamName string) (bool, error) {
+func (c *APIClient) IsUserInTeam(ctx context.Context, username, orgName, teamName string) (bool, error) {
 	return c.api.IsUserInTeam(c.logger, username, orgName, teamName)
 }
 
-func (c *APIClient) GetTeamMembers(_ context.Context, orgName, teamName string) ([]string, error) {
+func (c *APIClient) GetTeamMembers(ctx context.Context, orgName, teamName string) ([]string, error) {
 	return c.api.GetTeamMembers(orgName, teamName)
 }
 
@@ -273,7 +273,7 @@ func (c *APIClient) GetTeamMembers(_ context.Context, orgName, teamName string) 
 // OrgReader
 // -------------------------------------------------------------------
 
-func (c *APIClient) SearchOrgRepos(_ context.Context, orgName string) ([]Repository, error) {
+func (c *APIClient) SearchOrgRepos(ctx context.Context, orgName string) ([]Repository, error) {
 	entityRepos, err := c.api.SearchOrgRepos(orgName)
 	if err != nil {
 		return nil, err
