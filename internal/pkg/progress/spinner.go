@@ -100,7 +100,7 @@ func (p *SpinnerProgress) Finish() {
 	if p.isTTY {
 		if p.opts.Output != nil {
 			// Очищаем строку и выводим финальный статус
-			_, _ = fmt.Fprintf(p.opts.Output, "\r✓ %s (завершено за %s)\033[K\n", p.message, FormatDuration(duration))
+			_, _ = fmt.Fprintf(p.opts.Output, "\r✓ %s (завершено за %s)\033[K\n", p.message, FormatDuration(duration)) //nolint:errcheck // terminal output
 		}
 	} else {
 		// Non-TTY режим: используем slog (CRITICAL-2 consistency fix)
@@ -118,5 +118,5 @@ func (p *SpinnerProgress) draw() {
 	frame := spinnerFrames[p.frameIndex]
 
 	// Формат: ⠋ Restoring... (elapsed: 1m 30s)
-	_, _ = fmt.Fprintf(p.opts.Output, "\r%c %s (время: %s)\033[K", frame, p.message, FormatDuration(elapsed))
+	_, _ = fmt.Fprintf(p.opts.Output, "\r%c %s (время: %s)\033[K", frame, p.message, FormatDuration(elapsed)) //nolint:errcheck // terminal output
 }

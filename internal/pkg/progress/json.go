@@ -82,7 +82,9 @@ func (p *JSONProgress) Update(current int64, message string) {
 		ETASeconds: etaPtr,
 		Message:    message,
 	}
-	_ = p.encoder.Encode(event)
+	if err := p.encoder.Encode(event); err != nil {
+		fmt.Fprintf(os.Stderr, "progress: encode error: %v\n", err)
+	}
 }
 
 // SetTotal устанавливает общее количество единиц работы.
@@ -102,7 +104,9 @@ func (p *JSONProgress) Finish() {
 		Type:       "progress_end",
 		DurationMs: duration.Milliseconds(),
 	}
-	_ = p.encoder.Encode(event)
+	if err := p.encoder.Encode(event); err != nil {
+		fmt.Fprintf(os.Stderr, "progress: encode error: %v\n", err)
+	}
 }
 
 // calculateETASeconds вычисляет оставшееся время в секундах.

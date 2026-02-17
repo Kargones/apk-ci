@@ -48,7 +48,9 @@ import (
 // recordMetrics записывает результат выполнения команды и отправляет метрики в Pushgateway.
 func recordMetrics(collector metrics.Collector, ctx context.Context, command, infobase string, start time.Time, success bool) {
 	collector.RecordCommandEnd(command, infobase, time.Since(start), success)
-	_ = collector.Push(ctx) // Ошибки push логируются внутри, не критичны
+	if pushErr := collector.Push(ctx); pushErr != nil {
+		slog.Warn("failed to push metrics", slog.String("error", pushErr.Error()))
+	}
 }
 
 func main() {
@@ -125,7 +127,7 @@ func run() int {
 		)
 		recordMetrics(metricsCollector, ctx, cfg.Command, cfg.InfobaseName, start, false)
 
-		_ = alerter.Send(ctx, alerting.Alert{
+		if sendErr := alerter.Send(ctx, alerting.Alert{
 			ErrorCode: "UNKNOWN_COMMAND",
 			Message:   fmt.Sprintf("Неизвестная команда: %s", cfg.Command),
 			Command:   cfg.Command,
@@ -133,7 +135,9 @@ func run() int {
 			TraceID:   traceID,
 			Timestamp: time.Now(),
 			Severity:  alerting.SeverityWarning,
-		})
+		}); sendErr != nil {
+			l.Warn("failed to send alert", slog.String("error", sendErr.Error()))
+		}
 
 		return 2
 	}
@@ -154,7 +158,7 @@ func run() int {
 		)
 
 		// Отправляем алерт о неудачном выполнении команды
-		_ = alerter.Send(ctx, alerting.Alert{
+		if sendErr := alerter.Send(ctx, alerting.Alert{
 			ErrorCode: "COMMAND_FAILED",
 			Message:   fmt.Sprintf("Команда %s завершилась с ошибкой: %s", cfg.Command, execErr.Error()),
 			Command:   cfg.Command,
@@ -162,7 +166,9 @@ func run() int {
 			TraceID:   traceID,
 			Timestamp: time.Now(),
 			Severity:  alerting.SeverityCritical,
-		})
+		}); sendErr != nil {
+			l.Warn("failed to send alert", slog.String("error", sendErr.Error()))
+		}
 
 		return 8
 	}

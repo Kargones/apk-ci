@@ -70,7 +70,7 @@ func (p *TTYProgress) Finish() {
 
 	// Переход на новую строку
 	if p.opts.Output != nil {
-		_, _ = fmt.Fprintln(p.opts.Output)
+		_, _ = fmt.Fprintln(p.opts.Output) //nolint:errcheck // terminal output
 	}
 }
 
@@ -105,7 +105,7 @@ func (p *TTYProgress) draw() {
 	// Очистка до конца строки (ANSI escape)
 	line += "\033[K"
 
-	_, _ = fmt.Fprint(p.opts.Output, line)
+	_, _ = fmt.Fprint(p.opts.Output, line) //nolint:errcheck // terminal output
 }
 
 // renderBar создаёт визуальное представление progress bar.

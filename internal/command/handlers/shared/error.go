@@ -8,6 +8,6 @@ import (
 // HandleError writes a standardized error message to stdout and returns a formatted error.
 // Used by handlers to report errors in a consistent format.
 func HandleError(message, code string) error {
-	_, _ = fmt.Fprintf(os.Stdout, "Ошибка: %s\nКод: %s\n", message, code)
+	_, _ = fmt.Fprintf(os.Stdout, "Ошибка: %s\nКод: %s\n", message, code) //nolint:errcheck // intentional stdout
 	return fmt.Errorf("%s: %s", code, message)
 }

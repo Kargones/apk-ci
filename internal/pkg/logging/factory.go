@@ -32,7 +32,7 @@ func NewLogger(config Config) Logger {
 		w = os.Stderr
 	default:
 		// M-10/Review #16: логируем предупреждение о неизвестном output, чтобы не терять логи молча
-		_, _ = os.Stderr.WriteString(fmt.Sprintf(
+		_, _ = os.Stderr.WriteString(fmt.Sprintf( //nolint:errcheck // bootstrap stderr
 			"WARNING: неизвестный logging output %q, falling back to stderr\n", config.Output))
 		w = os.Stderr
 	}
@@ -47,7 +47,7 @@ func newLumberjackWriter(config Config) io.Writer {
 	// Валидация: если FilePath пустой, fallback на stderr (AC2 safety)
 	// M-2 fix: логируем warning через stderr, чтобы пользователь знал о fallback
 	if config.FilePath == "" {
-		_, _ = os.Stderr.WriteString("WARNING: logging output=file but filePath is empty, falling back to stderr\n")
+		_, _ = os.Stderr.WriteString("WARNING: logging output=file but filePath is empty, falling back to stderr\n") //nolint:errcheck // bootstrap stderr
 		return os.Stderr
 	}
 
@@ -55,7 +55,7 @@ func newLumberjackWriter(config Config) io.Writer {
 	dir := filepath.Dir(config.FilePath)
 	if dir != "" && dir != "." {
 		if err := os.MkdirAll(dir, 0750); err != nil {
-			_, _ = os.Stderr.WriteString(fmt.Sprintf(
+			_, _ = os.Stderr.WriteString(fmt.Sprintf( //nolint:errcheck // bootstrap stderr
 				"WARNING: не удалось создать директорию логов %q: %v, falling back to stderr\n", dir, err))
 			return os.Stderr
 		}

@@ -2,6 +2,7 @@ package filer
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"runtime"
 	"sync"
@@ -264,8 +265,7 @@ func (tm *TempManager) GetStats() map[string]interface{} {
 // cleanup выполняет финальную очистку при уничтожении объекта.
 func (tm *TempManager) cleanup() {
 	if err := tm.CleanupAll(); err != nil {
-		// Логируем ошибку очистки, но не можем её вернуть из cleanup
-		_ = err
+slog.Warn("cleanup error in finalizer", slog.String("error", err.Error()))
 	}
 	close(tm.cleanupDone)
 }

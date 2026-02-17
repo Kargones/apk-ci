@@ -2,6 +2,7 @@ package filer
 
 import (
 	"fmt"
+	"log/slog"
 )
 
 // Factory представляет фабрику для создания файловых систем.
@@ -65,8 +66,7 @@ func (f *Factory) CreateTempFileSystem(fsType FSType) (FileSystem, error) {
 	if err != nil {
 		// Очистка временной директории в случае ошибки
 		if cleanupErr := f.tempManager.RemoveTempDir(tempDir); cleanupErr != nil {
-			// Логируем ошибку очистки, но возвращаем исходную ошибку
-			_ = cleanupErr
+slog.Warn("failed to cleanup temp dir", slog.String("error", cleanupErr.Error()))
 		}
 		return nil, err
 	}
