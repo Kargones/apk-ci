@@ -3,6 +3,12 @@
 // including API errors, scanner errors, and validation errors.
 package sonarqube
 
+import (
+	"fmt"
+
+	"github.com/Kargones/apk-ci/internal/pkg/apperrors"
+)
+
 // Error represents errors from SonarQube API.
 // This error type is used when SonarQube API returns an error response.
 type Error struct {
@@ -46,4 +52,73 @@ type ValidationError struct {
 // Error returns the error message for ValidationError.
 func (e *ValidationError) Error() string {
 	return e.Message
+}
+
+// ErrorCode возвращает машиночитаемый код ошибки.
+// Реализует интерфейс apperrors.Coded.
+func (e *Error) ErrorCode() string {
+	return fmt.Sprintf("SONARQUBE.API_ERROR_%d", e.Code)
+}
+
+// Unwrap returns nil (Error does not wrap another error).
+func (e *Error) Unwrap() error {
+	return nil
+}
+
+// As поддерживает преобразование Error в apperrors.AppError через errors.As.
+func (e *Error) As(target interface{}) bool {
+	if t, ok := target.(**apperrors.AppError); ok {
+		*t = &apperrors.AppError{
+			Code:    e.ErrorCode(),
+			Message: e.Message,
+		}
+		return true
+	}
+	return false
+}
+
+// ErrorCode возвращает машиночитаемый код ошибки сканера.
+// Реализует интерфейс apperrors.Coded.
+func (e *ScannerError) ErrorCode() string {
+	return "SONARQUBE.SCANNER_FAILED"
+}
+
+// Unwrap returns nil (ScannerError does not wrap another error).
+func (e *ScannerError) Unwrap() error {
+	return nil
+}
+
+// As поддерживает преобразование ScannerError в apperrors.AppError через errors.As.
+func (e *ScannerError) As(target interface{}) bool {
+	if t, ok := target.(**apperrors.AppError); ok {
+		*t = &apperrors.AppError{
+			Code:    e.ErrorCode(),
+			Message: e.Error(),
+		}
+		return true
+	}
+	return false
+}
+
+// ErrorCode возвращает машиночитаемый код ошибки валидации.
+// Реализует интерфейс apperrors.Coded.
+func (e *ValidationError) ErrorCode() string {
+	return "SONARQUBE.VALIDATION_FAILED"
+}
+
+// Unwrap returns nil (ValidationError does not wrap another error).
+func (e *ValidationError) Unwrap() error {
+	return nil
+}
+
+// As поддерживает преобразование ValidationError в apperrors.AppError через errors.As.
+func (e *ValidationError) As(target interface{}) bool {
+	if t, ok := target.(**apperrors.AppError); ok {
+		*t = &apperrors.AppError{
+			Code:    e.ErrorCode(),
+			Message: e.Message,
+		}
+		return true
+	}
+	return false
 }
