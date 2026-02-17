@@ -329,16 +329,16 @@ func (h *ReportBranchHandler) Execute(ctx context.Context, cfg *config.Config) e
 	log.Info("Запуск генерации отчёта о качестве ветки")
 
 	// 5. Получение SonarQube клиента
-	// TODO(#58): Реализовать фабрику createSonarQubeClient(cfg) для создания реального клиента.
-	// Текущая реализация требует DI через поле sonarqubeClient (используется в тестах).
-	// Для production необходимо создать реализацию sonarqube.Client на основе internal/entity/sonarqube
-	// или написать новую реализацию в internal/adapter/sonarqube/client.go.
 	sqClient := h.sonarqubeClient
 	if sqClient == nil {
-		log.Error("SonarQube клиент не настроен")
-		return h.writeError(format, traceID, start,
-			errConfigMissing,
-			"SonarQube клиент не настроен — требуется реализация фабрики createSonarQubeClient()")
+		var clientErr error
+		sqClient, clientErr = errhandler.CreateSonarQubeClient(cfg)
+		if clientErr != nil {
+			log.Error("Не удалось создать SonarQube клиент", slog.String("error", clientErr.Error()))
+			return h.writeError(format, traceID, start,
+				errConfigMissing,
+				"Не удалось создать SonarQube клиент: "+clientErr.Error())
+		}
 	}
 
 	// 6. Проверка существования проекта

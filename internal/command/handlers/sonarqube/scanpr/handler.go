@@ -69,7 +69,6 @@ type ScanPRData struct {
 }
 
 // ScanResult содержит результат анализа качества.
-// TODO(#58): Добавить получение метрик NewIssues, NewBugs, NewVulnerabilities, NewCodeSmells
 // через sonarqube.GetMeasures() API. Текущая реализация возвращает только QualityGateStatus.
 type ScanResult struct {
 	// AnalysisID — ID анализа в SonarQube
@@ -231,24 +230,29 @@ func (h *ScanPRHandler) Execute(ctx context.Context, cfg *config.Config) error {
 	}
 
 	// Получение Gitea клиента
-	// TODO(#58): Реализовать фабрику createGiteaClient(cfg) для создания реального клиента.
-	// Текущая реализация требует DI через поле giteaClient (используется в тестах).
 	giteaClient := h.giteaClient
 	if giteaClient == nil {
-		log.Error("Gitea клиент не настроен")
-		return h.writeError(format, traceID, start,
-			errConfigMissing,
-			"Gitea клиент не настроен — требуется реализация фабрики createGiteaClient()")
+		var clientErr error
+		giteaClient, clientErr = errhandler.CreateGiteaClient(cfg)
+		if clientErr != nil {
+			log.Error("Не удалось создать Gitea клиент", slog.String("error", clientErr.Error()))
+			return h.writeError(format, traceID, start,
+				errConfigMissing,
+				"Не удалось создать Gitea клиент: "+clientErr.Error())
+		}
 	}
 
 	// Получение SonarQube клиента
-	// TODO(#58): Реализовать фабрику createSonarQubeClient(cfg) для создания реального клиента.
 	sqClient := h.sonarqubeClient
 	if sqClient == nil {
-		log.Error("SonarQube клиент не настроен")
-		return h.writeError(format, traceID, start,
-			errConfigMissing,
-			"SonarQube клиент не настроен — требуется реализация фабрики createSonarQubeClient()")
+		var clientErr error
+		sqClient, clientErr = errhandler.CreateSonarQubeClient(cfg)
+		if clientErr != nil {
+			log.Error("Не удалось создать SonarQube клиент", slog.String("error", clientErr.Error()))
+			return h.writeError(format, traceID, start,
+				errConfigMissing,
+				"Не удалось создать SonarQube клиент: "+clientErr.Error())
+		}
 	}
 
 	// Получение информации о PR из Gitea (AC: #3)
@@ -357,7 +361,6 @@ func (h *ScanPRHandler) Execute(ctx context.Context, cfg *config.Config) error {
 	if len(commitSHA) > 7 {
 		shortSHA = commitSHA[:7]
 	}
-	// TODO(#58): SourcePath не заполняется — требуется добавить cfg.WorkDir или cfg.SourcePath
 	result, err := sqClient.RunAnalysis(ctx, sonarqube.RunAnalysisOptions{
 		ProjectKey: projectKey,
 		Branch:     headBranch,

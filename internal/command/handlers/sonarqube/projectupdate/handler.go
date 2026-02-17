@@ -241,18 +241,26 @@ func (h *ProjectUpdateHandler) Execute(ctx context.Context, cfg *config.Config) 
 	// 4. Проверка nil клиентов
 	sqClient := h.sonarqubeClient
 	if sqClient == nil {
-		log.Error("SonarQube клиент не настроен")
-		return h.writeError(format, traceID, start,
-			errConfigMissing,
-			"SonarQube клиент не настроен — требуется реализация фабрики createSonarQubeClient()")
+		var clientErr error
+		sqClient, clientErr = errhandler.CreateSonarQubeClient(cfg)
+		if clientErr != nil {
+			log.Error("Не удалось создать SonarQube клиент", slog.String("error", clientErr.Error()))
+			return h.writeError(format, traceID, start,
+				errConfigMissing,
+				"Не удалось создать SonarQube клиент: "+clientErr.Error())
+		}
 	}
 
 	gClient := h.giteaClient
 	if gClient == nil {
-		log.Error("Gitea клиент не настроен")
-		return h.writeError(format, traceID, start,
-			errConfigMissing,
-			"Gitea клиент не настроен — требуется реализация фабрики createGiteaClient()")
+		var clientErr error
+		gClient, clientErr = errhandler.CreateGiteaClient(cfg)
+		if clientErr != nil {
+			log.Error("Не удалось создать Gitea клиент", slog.String("error", clientErr.Error()))
+			return h.writeError(format, traceID, start,
+				errConfigMissing,
+				"Не удалось создать Gitea клиент: "+clientErr.Error())
+		}
 	}
 
 	// 5. Проверка существования проекта
@@ -334,7 +342,6 @@ func (h *ProjectUpdateHandler) syncAdministrators(
 
 	// Обновление в SonarQube (если есть администраторы)
 	if len(administrators) > 0 {
-		// TODO(#58): Реализовать через sqClient.SetProjectPermissions когда метод будет доступен.
 		// Пока только логируем найденных администраторов.
 		log.Info("Найдены администраторы для синхронизации",
 			slog.Int("count", len(administrators)),
