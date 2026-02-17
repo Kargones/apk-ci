@@ -58,19 +58,19 @@ func SwitchOrCreateBranch(ctx context.Context, repoPath, branchName string) erro
 	slog.Debug("Переходим в директорию репозитория",
 		slog.String("from", originalDir),
 		slog.String("to", repoPath))
-	if err := os.Chdir(repoPath); err != nil {
+	if chdirErr := os.Chdir(repoPath); chdirErr != nil {
 		slog.Error("Не удалось перейти в директорию репозитория",
 			slog.String("repoPath", repoPath),
-			slog.String("error", err.Error()))
-		return fmt.Errorf("failed to change to repository directory: %w", err)
+			slog.String("error", chdirErr.Error()))
+		return fmt.Errorf("failed to change to repository directory: %w", chdirErr)
 	}
 
 	// Используем defer для восстановления исходной директории
 	defer func() {
-		if err := os.Chdir(originalDir); err != nil {
+		if restoreErr := os.Chdir(originalDir); restoreErr != nil {
 			// Логируем ошибку, но не возвращаем её, чтобы не перезаписать основную ошибку
 			// Используем slog вместо fmt.Printf для соответствия forbidigo
-			slog.Warn("Failed to restore original directory", slog.String("error", err.Error()))
+			slog.Warn("Failed to restore original directory", slog.String("error", restoreErr.Error()))
 		}
 	}()
 
@@ -97,37 +97,37 @@ func SwitchOrCreateBranch(ctx context.Context, repoPath, branchName string) erro
 	slog.Debug("Проверяем существование локальной ветки", slog.String("branch", branchName))
 	// #nosec G204 - GitCommand is a constant, branchName from trusted Git refs
 	cmdCheck := exec.CommandContext(ctx, GitCommand, "rev-parse", "--verify", branchName)
-	if err := cmdCheck.Run(); err == nil {
+	if runErr := cmdCheck.Run(); runErr == nil {
 		// Локальная ветка существует, переключаемся на неё
 		slog.Debug("Локальная ветка существует, переключаемся на неё", slog.String("branch", branchName))
-		if err := executeGitCommandWithRetry(repoPath, []string{"checkout", branchName}); err != nil {
+		if checkoutErr := executeGitCommandWithRetry(repoPath, []string{"checkout", branchName}); checkoutErr != nil {
 			slog.Error("Не удалось переключиться на существующую ветку",
 				slog.String("branch", branchName),
-				slog.String("error", err.Error()))
-			return fmt.Errorf("failed to switch to branch %s: %w", branchName, err)
+				slog.String("error", checkoutErr.Error()))
+			return fmt.Errorf("failed to switch to branch %s: %w", branchName, checkoutErr)
 		}
 		slog.Info("Успешно переключились на существующую ветку", slog.String("branch", branchName))
 	} else {
 		// Локальная ветка не существует - проверяем удаленную
 		slog.Debug("Локальная ветка не существует, проверяем удаленную ветку",
 			slog.String("branch", branchName),
-			slog.String("checkError", err.Error()))
+			slog.String("checkError", runErr.Error()))
 
 		// Проверяем существование удаленной ветки origin/branchName
 		// #nosec G204 - GitCommand is a constant, branchName from trusted Git refs
 		cmdCheckRemote := exec.CommandContext(ctx, GitCommand, "rev-parse", "--verify", "origin/"+branchName)
-		if err := cmdCheckRemote.Run(); err == nil {
+		if remoteErr := cmdCheckRemote.Run(); remoteErr == nil {
 			// Удаленная ветка существует - создаем локальную от неё
 			slog.Debug("Удаленная ветка существует, создаем локальную ветку от неё",
 				slog.String("branch", branchName),
 				slog.String("remote", "origin/"+branchName))
 
-			if err := executeGitCommandWithRetry(repoPath, []string{"checkout", "-b", branchName, "origin/" + branchName}); err != nil {
+			if createErr := executeGitCommandWithRetry(repoPath, []string{"checkout", "-b", branchName, "origin/" + branchName}); createErr != nil {
 				slog.Error("Не удалось создать локальную ветку от удаленной",
 					slog.String("branch", branchName),
 					slog.String("remote", "origin/"+branchName),
-					slog.String("error", err.Error()))
-				return fmt.Errorf("failed to create branch %s from origin/%s: %w", branchName, branchName, err)
+					slog.String("error", createErr.Error()))
+				return fmt.Errorf("failed to create branch %s from origin/%s: %w", branchName, branchName, createErr)
 			}
 			slog.Info("Успешно создали локальную ветку от удаленной",
 				slog.String("branch", branchName),
@@ -136,13 +136,13 @@ func SwitchOrCreateBranch(ctx context.Context, repoPath, branchName string) erro
 			// Ни локальная, ни удаленная ветка не существуют - создаем новую
 			slog.Debug("Ни локальная, ни удаленная ветка не существуют, создаем новую ветку",
 				slog.String("branch", branchName),
-				slog.String("remoteCheckError", err.Error()))
+				slog.String("remoteCheckError", remoteErr.Error()))
 
-			if err := executeGitCommandWithRetry(repoPath, []string{"checkout", "-b", branchName}); err != nil {
+			if newBranchErr := executeGitCommandWithRetry(repoPath, []string{"checkout", "-b", branchName}); newBranchErr != nil {
 				slog.Error("Не удалось создать новую ветку",
 					slog.String("branch", branchName),
-					slog.String("error", err.Error()))
-				return fmt.Errorf("failed to create and switch to branch %s: %w", branchName, err)
+					slog.String("error", newBranchErr.Error()))
+				return fmt.Errorf("failed to create and switch to branch %s: %w", branchName, newBranchErr)
 			}
 			slog.Info("Успешно создали новую ветку", slog.String("branch", branchName))
 		}

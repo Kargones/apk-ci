@@ -278,9 +278,9 @@ func (h *CreateTempDbHandler) Execute(ctx context.Context, cfg *config.Config) e
 	prog.Start("Создание временной базы данных...")
 	defer prog.Finish()
 
-	if err := ctx.Err(); err != nil {
-		ec.log.Warn("Context отменён перед созданием БД", slog.String("error", err.Error()))
-		return h.writeError(ec.format, ec.traceID, ec.start, ErrContextCancelled, "операция отменена: "+err.Error())
+	if ctxErr := ctx.Err(); ctxErr != nil {
+		ec.log.Warn("Context отменён перед созданием БД", slog.String("error", ctxErr.Error()))
+		return h.writeError(ec.format, ec.traceID, ec.start, ErrContextCancelled, "операция отменена: "+ctxErr.Error())
 	}
 
 	opts := onec.CreateTempDBOptions{
