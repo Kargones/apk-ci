@@ -1,6 +1,7 @@
 package sonarqube
 
 import (
+	"github.com/Kargones/apk-ci/internal/constants"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -56,11 +57,11 @@ func (s *SonarScannerEntity) FixBSLTokenizationIssues(filePath string) error {
 
 	if fixedContent != originalContent {
 		backupPath := filePath + ".backup"
-		if bErr := os.WriteFile(backupPath, content, 0644); bErr != nil {
+		if bErr := os.WriteFile(backupPath, content, constants.FilePermReadWrite); bErr != nil {
 			s.logger.Warn("Failed to create backup", "file", filePath, "backup", backupPath, "error", bErr)
 		}
 
-		if wErr := os.WriteFile(filePath, []byte(fixedContent), 0644); wErr != nil {
+		if wErr := os.WriteFile(filePath, []byte(fixedContent), constants.FilePermReadWrite); wErr != nil {
 			return fmt.Errorf("failed to write fixed BSL file %s: %w", filePath, wErr)
 		}
 

@@ -1,6 +1,9 @@
 package filer
 
-import "os"
+import (
+	"os"
+	"github.com/Kargones/apk-ci/internal/constants"
+)
 
 // FSType представляет тип файловой системы.
 type FSType int
@@ -53,7 +56,7 @@ const (
 	DefaultDir = "filer"
 	
 	// DefaultPerm - права доступа по умолчанию для создаваемых файлов и директорий
-	DefaultPerm = 0700
+	DefaultPerm = constants.DirPermPrivate
 	
 	// RAMDiskPath - путь к RAM-диску на Linux системах
 	RAMDiskPath = "/dev/shm"
@@ -74,11 +77,11 @@ const (
 // FileMode константы для различных типов файлов
 const (
 	// DirMode - права доступа по умолчанию для директорий
-	DirMode os.FileMode = 0755
+	DirMode os.FileMode = constants.DirPermExec
 	
 	// FileMode - права доступа по умолчанию для файлов
-	FileMode os.FileMode = 0644
+	FileMode os.FileMode = constants.FilePermReadWrite
 	
 	// TempMode - права доступа для временных файлов и директорий
-	TempMode os.FileMode = 0700
+	TempMode os.FileMode = constants.DirPermPrivate
 )

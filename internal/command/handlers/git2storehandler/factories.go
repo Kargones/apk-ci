@@ -2,6 +2,7 @@
 package git2storehandler
 
 import (
+	"github.com/Kargones/apk-ci/internal/constants"
 	"context"
 	"fmt"
 	"log/slog"
@@ -55,7 +56,7 @@ func (h *Git2StoreHandler) createTempDb(ctx context.Context, l *slog.Logger, cfg
 // Это требует расширения convert.Config или отдельного BackupService.
 func createBackupProduction(cfg *config.Config, storeRoot string) (string, error) {
 	backupDir := filepath.Join(cfg.TmpDir, "backup_"+time.Now().Format("20060102_150405"))
-	if err := os.MkdirAll(backupDir, 0755); err != nil {
+	if err := os.MkdirAll(backupDir, constants.DirPermExec); err != nil {
 		return "", fmt.Errorf("не удалось создать директорию backup: %w", err)
 	}
 
@@ -70,7 +71,7 @@ func createBackupProduction(cfg *config.Config, storeRoot string) (string, error
 		"Для восстановления используйте 1cv8 DESIGNER или ibcmd.\n",
 		storeRoot, time.Now().Format(time.RFC3339),
 		cfg.InfobaseName, cfg.Owner, cfg.Repo)
-	if err := os.WriteFile(backupInfoPath, []byte(backupInfo), 0644); err != nil {
+	if err := os.WriteFile(backupInfoPath, []byte(backupInfo), constants.FilePermReadWrite); err != nil {
 		return "", fmt.Errorf("не удалось записать информацию о backup: %w", err)
 	}
 

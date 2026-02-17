@@ -178,13 +178,13 @@ func (h *CreateTempDbHandler) writeTTLMetadata(dbPath string, ttlHours int, crea
 	// Проверяем существование родительской директории
 	parentDir := filepath.Dir(ttlPath)
 	if _, err := os.Stat(parentDir); os.IsNotExist(err) {
-		if mkdirErr := os.MkdirAll(parentDir, 0755); mkdirErr != nil {
+		if mkdirErr := os.MkdirAll(parentDir, constants.DirPermExec); mkdirErr != nil {
 			return fmt.Errorf("создание директории для TTL: %w", mkdirErr)
 		}
 	}
 
-	// Используем 0600 для метаданных (только владелец может читать/писать)
-	if err := os.WriteFile(ttlPath, data, 0600); err != nil {
+	// Используем constants.FilePermPrivate для метаданных (только владелец может читать/писать)
+	if err := os.WriteFile(ttlPath, data, constants.FilePermPrivate); err != nil {
 		return fmt.Errorf("запись TTL metadata: %w", err)
 	}
 

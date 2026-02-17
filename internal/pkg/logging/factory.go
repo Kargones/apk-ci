@@ -1,6 +1,7 @@
 package logging
 
 import (
+	"github.com/Kargones/apk-ci/internal/constants"
 	"fmt"
 	"io"
 	"log/slog"
@@ -54,7 +55,7 @@ func newLumberjackWriter(config Config) io.Writer {
 	// Создаём директорию если не существует (AC10)
 	dir := filepath.Dir(config.FilePath)
 	if dir != "" && dir != "." {
-		if err := os.MkdirAll(dir, 0750); err != nil {
+		if err := os.MkdirAll(dir, constants.DirPermStandard); err != nil {
 			_, _ = os.Stderr.WriteString(fmt.Sprintf( //nolint:errcheck // bootstrap stderr
 				"WARNING: не удалось создать директорию логов %q: %v, falling back to stderr\n", dir, err))
 			return os.Stderr

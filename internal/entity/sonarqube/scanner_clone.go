@@ -1,6 +1,7 @@
 package sonarqube
 
 import (
+	"github.com/Kargones/apk-ci/internal/constants"
 	"context"
 	"fmt"
 	"os"
@@ -17,7 +18,7 @@ func (s *SonarScannerEntity) Download(ctx context.Context, scannerURL string, sc
 		s.tempDir = os.TempDir()
 	}
 
-	if err := os.MkdirAll(s.tempDir, 0750); err != nil {
+	if err := os.MkdirAll(s.tempDir, constants.DirPermStandard); err != nil {
 		return "", fmt.Errorf("failed to create parent directories: %w", err)
 	}
 

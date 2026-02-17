@@ -1,6 +1,7 @@
 package filer
 
 import (
+	"github.com/Kargones/apk-ci/internal/constants"
 	"errors"
 	"fmt"
 	"io"
@@ -43,7 +44,7 @@ func NewMemoryFileSystem(root string) *MemoryFileSystem {
 	// Создаем корневую директорию
 	fs.dirs[fs.root] = &MemoryDir{
 		name:    filepath.Base(fs.root),
-		mode:    0755,
+		mode:    constants.DirPermExec,
 		modTime: time.Now(),
 		parent:  "",
 	}
@@ -68,7 +69,7 @@ func (fs *MemoryFileSystem) Create(name string) (File, error) {
 	}
 	
 	// Создаем файл
-	file := NewMemoryFile(path, 0644)
+	file := NewMemoryFile(path, constants.FilePermReadWrite)
 	fs.files[path] = file
 	
 	return file, nil
@@ -99,7 +100,7 @@ func (fs *MemoryFileSystem) CreateTemp(dir, pattern string) (File, error) {
 	}
 	
 	// Создаем временный файл
-	file := NewMemoryFile(tempPath, 0600)
+	file := NewMemoryFile(tempPath, constants.FilePermPrivate)
 	fs.files[tempPath] = file
 	
 	return file, nil
@@ -216,7 +217,7 @@ func (fs *MemoryFileSystem) MkdirTemp(dir, pattern string) (string, error) {
 	// Создаем временную директорию
 	fs.dirs[tempPath] = &MemoryDir{
 		name:    tempName,
-		mode:    0700,
+		mode:    constants.DirPermPrivate,
 		modTime: time.Now(),
 		parent:  path,
 	}
@@ -580,7 +581,7 @@ func (fs *MemoryFileSystem) mkdirAllLocked(path string) error {
 	// Создаем текущую директорию
 	fs.dirs[path] = &MemoryDir{
 		name:    filepath.Base(path),
-		mode:    0755,
+		mode:    constants.DirPermExec,
 		modTime: time.Now(),
 		parent:  parentDir,
 	}

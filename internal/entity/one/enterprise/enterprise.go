@@ -2,6 +2,7 @@
 package enterprise
 
 import (
+	"github.com/Kargones/apk-ci/internal/constants"
 	"context"
 	"fmt"
 	"log/slog"
@@ -90,7 +91,7 @@ func (e *EpfExecutor) validateEpfURL(url string) error {
 // ensureTempDirectory создает временную директорию если необходимо
 func (e *EpfExecutor) ensureTempDirectory(cfg *config.Config) error {
 	if cfg.AppConfig != nil && cfg.AppConfig.TmpDir != "" {
-		if err := os.MkdirAll(cfg.AppConfig.TmpDir, 0700); err != nil {
+		if err := os.MkdirAll(cfg.AppConfig.TmpDir, constants.DirPermPrivate); err != nil {
 			e.logger.Error("Ошибка создания временной директории",
 				slog.String("tmpDir", cfg.AppConfig.TmpDir),
 				slog.String("error", err.Error()),
