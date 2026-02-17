@@ -28,7 +28,7 @@ const DefaultTimeout = 300 * time.Second
 // Compile-time interface check.
 var _ command.Handler = (*ExecuteEpfHandler)(nil)
 
-func init() {
+func RegisterCmd() {
 	command.RegisterWithAlias(&ExecuteEpfHandler{}, constants.ActExecuteEpf)
 }
 

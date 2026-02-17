@@ -132,7 +132,7 @@ func TestVersionHandler_Execute_MetadataGeneratesTraceID(t *testing.T) {
 }
 
 func TestVersionHandler_Registration(t *testing.T) {
-	// init() уже вызван при импорте пакета — проверяем что handler зарегистрирован
+	// RegisterCmd() вызван в TestMain — проверяем что handler зарегистрирован
 	h, ok := command.Get(constants.ActNRVersion)
 	require.True(t, ok, "handler nr-version должен быть зарегистрирован в registry")
 	assert.Equal(t, constants.ActNRVersion, h.Name())

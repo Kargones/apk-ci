@@ -23,7 +23,7 @@ import (
 // Compile-time interface check (AC-8).
 var _ command.Handler = (*ConvertHandler)(nil)
 
-func init() {
+func RegisterCmd() {
 	// AC-6: Deprecated alias через DeprecatedBridge
 	command.RegisterWithAlias(&ConvertHandler{}, constants.ActConvert)
 }

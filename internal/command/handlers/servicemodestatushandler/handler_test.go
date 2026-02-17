@@ -33,7 +33,7 @@ func TestServiceModeStatusHandler_Description(t *testing.T) {
 }
 
 func TestServiceModeStatusHandler_Registration(t *testing.T) {
-	// init() уже вызван при импорте пакета — проверяем что handler зарегистрирован
+	// RegisterCmd() вызван в TestMain — проверяем что handler зарегистрирован
 	h, ok := command.Get("nr-service-mode-status")
 	require.True(t, ok, "handler nr-service-mode-status должен быть зарегистрирован в registry")
 	assert.Equal(t, constants.ActNRServiceModeStatus, h.Name())

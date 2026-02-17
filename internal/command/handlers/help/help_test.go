@@ -143,7 +143,7 @@ func TestHelpHandler_Sorting(t *testing.T) {
 }
 
 func TestHelpHandler_Registration(t *testing.T) {
-	// init() уже вызван при импорте пакета — проверяем что handler зарегистрирован
+	// RegisterCmd() вызван в TestMain — проверяем что handler зарегистрирован
 	h, ok := command.Get(constants.ActHelp)
 	require.True(t, ok, "handler help должен быть зарегистрирован в registry")
 	assert.Equal(t, constants.ActHelp, h.Name())

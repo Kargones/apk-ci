@@ -46,7 +46,7 @@ const (
 	maxExtensions = 50
 )
 
-func init() {
+func RegisterCmd() {
 	command.RegisterWithAlias(&CreateTempDbHandler{}, constants.ActCreateTempDb)
 }
 

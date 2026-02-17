@@ -73,7 +73,7 @@ func TestExecuteEpfHandler_ImplementsHandler(t *testing.T) {
 // === Registration ===
 
 func TestExecuteEpfHandler_Registration(t *testing.T) {
-	// init() уже вызван при импорте пакета — проверяем что handler зарегистрирован
+	// RegisterCmd() вызван в TestMain — проверяем что handler зарегистрирован
 	h, ok := command.Get("nr-execute-epf")
 	require.True(t, ok, "handler nr-execute-epf должен быть зарегистрирован в registry")
 	assert.Equal(t, constants.ActNRExecuteEpf, h.Name())

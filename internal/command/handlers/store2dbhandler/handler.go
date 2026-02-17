@@ -25,7 +25,7 @@ const storeVersionLatest = "latest"
 // Compile-time interface check (M-3 fix).
 var _ command.Handler = (*Store2DbHandler)(nil)
 
-func init() {
+func RegisterCmd() {
 	command.RegisterWithAlias(&Store2DbHandler{}, constants.ActStore2db)
 }
 

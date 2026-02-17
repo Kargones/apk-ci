@@ -48,7 +48,7 @@ const (
 	racOperationTimeout = 60 * time.Second
 )
 
-func init() {
+func RegisterCmd() {
 	command.RegisterWithAlias(&DbUpdateHandler{}, constants.ActDbupdate)
 }
 
