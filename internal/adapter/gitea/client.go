@@ -14,7 +14,7 @@ var _ Client = (*APIClient)(nil)
 // Принимает context.Context в каждом методе (для совместимости с интерфейсом),
 // но entity API контекст не использует — это будет исправлено при рефакторинге entity.
 type APIClient struct {
-	api    *entity_gitea.API
+	api    entity_gitea.APIInterface
 	logger *slog.Logger
 }
 
@@ -28,6 +28,17 @@ func NewAPIClient(api *entity_gitea.API) *APIClient {
 
 // NewAPIClientWithLogger создаёт APIClient с пользовательским логгером.
 func NewAPIClientWithLogger(api *entity_gitea.API, logger *slog.Logger) *APIClient {
+	return &APIClient{
+		api:    api,
+		logger: logger,
+	}
+}
+
+// NewAPIClientWithInterface создаёт APIClient с интерфейсом для тестирования.
+func NewAPIClientWithInterface(api entity_gitea.APIInterface, logger *slog.Logger) *APIClient {
+	if logger == nil {
+		logger = slog.Default()
+	}
 	return &APIClient{
 		api:    api,
 		logger: logger,
@@ -244,9 +255,9 @@ func (c *APIClient) ClosePR(ctx context.Context, prNumber int64) error {
 // -------------------------------------------------------------------
 
 func (c *APIClient) SetRepositoryState(ctx context.Context, operations []BatchOperation, branch, commitMessage string) error {
-	entityOps := make([]entity_gitea.ChangeFileOperation, len(operations))
+	entityOps := make([]entity_gitea.BatchOperation, len(operations))
 	for i, op := range operations {
-		entityOps[i] = entity_gitea.ChangeFileOperation{
+		entityOps[i] = entity_gitea.BatchOperation{
 			Operation: op.Operation,
 			Path:      op.Path,
 			Content:   op.Content,
