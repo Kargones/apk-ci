@@ -64,7 +64,7 @@ func (s *Store) Lock(ctx context.Context, l *slog.Logger, cfg *config.Config, db
 //
 // Возвращает:
 //   - error: ошибку, если операция не удалась
-func (s *Store) LockAdd(_ context.Context, l *slog.Logger, cfg *config.Config, dbConnectString string, storeRoot string, addName string) error {
+func (s *Store) LockAdd(ctx context.Context, l *slog.Logger, cfg *config.Config, dbConnectString string, storeRoot string, addName string) error {
 	var tPath string
 	tPath, s.Path = fullPathStore(storeRoot, s.Path)
 	defer func() {
@@ -76,7 +76,7 @@ func (s *Store) LockAdd(_ context.Context, l *slog.Logger, cfg *config.Config, d
 	r.Params = append(r.Params, addName)
 	r.Params = append(r.Params, "/Out")
 	r.Params = append(r.Params, "/c Захват объектов расширения")
-	_, err := r.RunCommand(context.Background(), l)
+	_, err := r.RunCommand(ctx, l)
 	if err != nil {
 		l.Error("Ошибка захвата объектов расширения",
 			slog.String("Путь", s.Path),
@@ -418,7 +418,7 @@ func (s *Store) BindAdd(ctx context.Context, l *slog.Logger, cfg *config.Config,
 //
 // Возвращает:
 //   - error: ошибку, если операция не удалась
-func (s *Store) UnBind(_ context.Context, l *slog.Logger, cfg *config.Config, dbConnectString string, storeRoot string) error {
+func (s *Store) UnBind(ctx context.Context, l *slog.Logger, cfg *config.Config, dbConnectString string, storeRoot string) error {
 	var tPath string
 	tPath, s.Path = fullPathStore(storeRoot, s.Path)
 	defer func() {
@@ -429,7 +429,7 @@ func (s *Store) UnBind(_ context.Context, l *slog.Logger, cfg *config.Config, db
 	r.Params = append(r.Params, "-force")
 	r.Params = append(r.Params, "/Out")
 	r.Params = append(r.Params, "/c Отключение конфигурации от хранилища")
-	_, err := r.RunCommand(context.Background(), l)
+	_, err := r.RunCommand(ctx, l)
 	if err != nil {
 		l.Error("Ошибка отключения конфигурации от хранилища",
 			slog.String("Путь", s.Path),
@@ -459,7 +459,7 @@ func (s *Store) UnBind(_ context.Context, l *slog.Logger, cfg *config.Config, db
 //
 // Возвращает:
 //   - error: ошибку, если операция не удалась
-func (s *Store) UnBindAdd(_ context.Context, l *slog.Logger, cfg *config.Config, dbConnectString string, storeRoot string, addName string) error {
+func (s *Store) UnBindAdd(ctx context.Context, l *slog.Logger, cfg *config.Config, dbConnectString string, storeRoot string, addName string) error {
 	var tPath string
 	tPath, s.Path = fullPathStore(storeRoot, s.Path)
 	defer func() {
@@ -472,7 +472,7 @@ func (s *Store) UnBindAdd(_ context.Context, l *slog.Logger, cfg *config.Config,
 	r.Params = append(r.Params, "-force")
 	r.Params = append(r.Params, "/Out")
 	r.Params = append(r.Params, "/c Отключение конфигурации от хранилища")
-	_, err := r.RunCommand(context.Background(), l)
+	_, err := r.RunCommand(ctx, l)
 	if err != nil {
 		l.Error("Ошибка отключения расширения от хранилища",
 			slog.String("Путь", s.Path),
@@ -504,7 +504,7 @@ func (s *Store) UnBindAdd(_ context.Context, l *slog.Logger, cfg *config.Config,
 //
 // Возвращает:
 //   - error: ошибку, если операция не удалась
-func (s *Store) Merge(_ context.Context, l *slog.Logger, cfg *config.Config, dbConnectString string, pathCf string, pathMergeSettings string, storeRoot string) error {
+func (s *Store) Merge(ctx context.Context, l *slog.Logger, cfg *config.Config, dbConnectString string, pathCf string, pathMergeSettings string, storeRoot string) error {
 	var tPath string
 	tPath, s.Path = fullPathStore(storeRoot, s.Path)
 	defer func() {
@@ -520,7 +520,7 @@ func (s *Store) Merge(_ context.Context, l *slog.Logger, cfg *config.Config, dbC
 	r.Params = append(r.Params, "/Out")
 	r.Params = append(r.Params, "/UpdateDBCfg")
 	r.Params = append(r.Params, "/c Загрузка изменений в основную конфигурацию")
-	_, err := r.RunCommand(context.Background(), l)
+	_, err := r.RunCommand(ctx, l)
 	if err != nil {
 		l.Error("Ошибка загрузки изменений основной конфигурации",
 			slog.String("Путь", s.Path),
@@ -553,7 +553,7 @@ func (s *Store) Merge(_ context.Context, l *slog.Logger, cfg *config.Config, dbC
 //
 // Возвращает:
 //   - error: ошибку, если операция не удалась
-func (s *Store) MergeAdd(_ context.Context, l *slog.Logger, cfg *config.Config, dbConnectString string, pathCf string, pathMergeSettings string, storeRoot string, addName string) error {
+func (s *Store) MergeAdd(ctx context.Context, l *slog.Logger, cfg *config.Config, dbConnectString string, pathCf string, pathMergeSettings string, storeRoot string, addName string) error {
 	var tPath string
 	tPath, s.Path = fullPathStore(storeRoot, s.Path)
 	defer func() {
@@ -573,7 +573,7 @@ func (s *Store) MergeAdd(_ context.Context, l *slog.Logger, cfg *config.Config, 
 	// r.Params = append(r.Params, addName)
 	r.Params = append(r.Params, "/Out")
 	r.Params = append(r.Params, "/c Загрузка изменений в расширение")
-	_, err := r.RunCommand(context.Background(), l)
+	_, err := r.RunCommand(ctx, l)
 	if err != nil {
 		l.Error("Ошибка загрузки изменений  в расширение",
 			slog.String("Путь", s.Path),
@@ -605,7 +605,7 @@ func (s *Store) MergeAdd(_ context.Context, l *slog.Logger, cfg *config.Config, 
 //
 // Возвращает:
 //   - error: ошибку, если операция не удалась
-func (s *Store) StoreCommit(_ context.Context, l *slog.Logger, cfg *config.Config, dbConnectString string, storeRoot string, comment string, addName ...string) error {
+func (s *Store) StoreCommit(ctx context.Context, l *slog.Logger, cfg *config.Config, dbConnectString string, storeRoot string, comment string, addName ...string) error {
 	var tPath string
 	tPath, s.Path = fullPathStore(storeRoot, s.Path)
 	defer func() {
@@ -624,7 +624,7 @@ func (s *Store) StoreCommit(_ context.Context, l *slog.Logger, cfg *config.Confi
 
 	r.Params = append(r.Params, "/Out")
 	r.Params = append(r.Params, "/c Создание версии хранилища")
-	_, err := r.RunCommand(context.Background(), l)
+	_, err := r.RunCommand(ctx, l)
 	if err != nil {
 		l.Error("Ошибка создания версии хранилища",
 			slog.String("Путь", s.Path),

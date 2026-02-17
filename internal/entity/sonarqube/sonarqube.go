@@ -114,7 +114,8 @@ func (s *Entity) ValidateToken(ctx context.Context) error {
 }
 
 // executeRequest выполняет HTTP-запрос без механизма повторных попыток
-func (s *Entity) executeRequest(_ context.Context, req *http.Request) ([]byte, error) {
+func (s *Entity) executeRequest(ctx context.Context, req *http.Request) ([]byte, error) {
+	req = req.WithContext(ctx)
 	resp, err := s.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to execute request: %w", err)

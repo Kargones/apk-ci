@@ -64,7 +64,7 @@ type Source struct {
 // Возвращает:
 //   - *Config: загруженная конфигурация
 //   - error: ошибка чтения или парсинга файла, nil при успехе
-func LoadFromConfig(_ context.Context, l *slog.Logger, cfg *config.Config) (*Config, error) {
+func LoadFromConfig(ctx context.Context, l *slog.Logger, cfg *config.Config) (*Config, error) {
 	// Формирование StoreRoot из AppConfig
 	storeRoot := constants.StoreRoot + cfg.Owner + "/" + cfg.Repo
 
@@ -193,7 +193,7 @@ func getDbPassword(cfg *struct {
 // Возвращает:
 //   - *Config: загруженная конфигурация
 //   - error: ошибка парсинга JSON, nil при успехе
-func LoadConfigFromData(_ context.Context, l *slog.Logger, _ *config.Config, configData []byte) (*Config, error) {
+func LoadConfigFromData(ctx context.Context, l *slog.Logger, _ *config.Config, configData []byte) (*Config, error) {
 	// Сначала парсим JSON во временную структуру для обработки пустых значений
 	var tempConfig struct {
 		Branch     string `json:"Имя ветки"`
@@ -276,7 +276,7 @@ func setupDbParams(cc *Config) {
 //
 // Возвращает:
 //   - error: ошибка загрузки данных, nil при успехе
-func (cc *Config) Load(_ context.Context, _ *slog.Logger, cfg *config.Config, _ string) error {
+func (cc *Config) Load(ctx context.Context, _ *slog.Logger, cfg *config.Config, _ string) error {
 	// Формирование StoreRoot
 	cc.StoreRoot = constants.StoreRoot + cfg.Owner + "/" + cfg.Repo
 
@@ -672,7 +672,7 @@ func mergeSetting(cfg *config.Config) (string, error) {
 //
 // Возвращает:
 //   - error: ошибка сохранения файла, nil при успехе
-func (cc *Config) Save(_ context.Context, _ *slog.Logger, _ *config.Config, configPath string) error {
+func (cc *Config) Save(ctx context.Context, _ *slog.Logger, _ *config.Config, configPath string) error {
 	ocJSON, err := json.MarshalIndent(cc, "", "\t")
 	if err != nil {
 		return fmt.Errorf("ошибка сериализации конфигурации: %w", err)
