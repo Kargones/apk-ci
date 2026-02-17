@@ -127,65 +127,9 @@ func ProvideAlerter(cfg *config.Config, logger logging.Logger) alerting.Alerter 
 		return alerting.NewNopAlerter()
 	}
 
-	// L-2/Review #9: Три уровня валидации (defense-in-depth) — намеренная архитектура:
-	// 1. config.validateAlertingConfig() — предварительная проверка обязательных полей при загрузке
-	// 2. alerting.Config.Validate() — полная проверка (URL format, CRLF, Header Injection)
-	// 3. Каждый канал (EmailConfig/TelegramConfig/WebhookConfig).Validate() — per-channel валидация
-
-	// Конвертируем config.AlertingConfig в alerting.Config
-	alertCfg := alerting.Config{
-		Enabled:         cfg.AlertingConfig.Enabled,
-		RateLimitWindow: cfg.AlertingConfig.RateLimitWindow,
-		Email: alerting.EmailConfig{
-			Enabled:         cfg.AlertingConfig.Email.Enabled,
-			SMTPHost:        cfg.AlertingConfig.Email.SMTPHost,
-			SMTPPort:        cfg.AlertingConfig.Email.SMTPPort,
-			SMTPUser:        cfg.AlertingConfig.Email.SMTPUser,
-			SMTPPassword:    cfg.AlertingConfig.Email.SMTPPassword,
-			UseTLS:          cfg.AlertingConfig.Email.UseTLS,
-			From:            cfg.AlertingConfig.Email.From,
-			To:              cfg.AlertingConfig.Email.To,
-			SubjectTemplate: cfg.AlertingConfig.Email.SubjectTemplate,
-			Timeout:         cfg.AlertingConfig.Email.Timeout,
-		},
-		Telegram: alerting.TelegramConfig{
-			Enabled:  cfg.AlertingConfig.Telegram.Enabled,
-			BotToken: cfg.AlertingConfig.Telegram.BotToken,
-			ChatIDs:  cfg.AlertingConfig.Telegram.ChatIDs,
-			Timeout:  cfg.AlertingConfig.Telegram.Timeout,
-		},
-		Webhook: alerting.WebhookConfig{
-			Enabled:    cfg.AlertingConfig.Webhook.Enabled,
-			URLs:       cfg.AlertingConfig.Webhook.URLs,
-			Headers:    cfg.AlertingConfig.Webhook.Headers,
-			Timeout:    cfg.AlertingConfig.Webhook.Timeout,
-			MaxRetries: cfg.AlertingConfig.Webhook.MaxRetries,
-		},
-	}
-
-	// Конвертируем config.AlertRulesConfig в alerting.RulesConfig
-	rulesCfg := alerting.RulesConfig{
-		MinSeverity:       cfg.AlertingConfig.Rules.MinSeverity,
-		ExcludeErrorCodes: cfg.AlertingConfig.Rules.ExcludeErrorCodes,
-		IncludeErrorCodes: cfg.AlertingConfig.Rules.IncludeErrorCodes,
-		ExcludeCommands:   cfg.AlertingConfig.Rules.ExcludeCommands,
-		IncludeCommands:   cfg.AlertingConfig.Rules.IncludeCommands,
-	}
-
-	if len(cfg.AlertingConfig.Rules.ChannelOverrides) > 0 {
-		rulesCfg.Channels = make(map[string]alerting.ChannelRulesConfig, len(cfg.AlertingConfig.Rules.ChannelOverrides))
-		for name, ch := range cfg.AlertingConfig.Rules.ChannelOverrides {
-			rulesCfg.Channels[name] = alerting.ChannelRulesConfig{
-				MinSeverity:       ch.MinSeverity,
-				ExcludeErrorCodes: ch.ExcludeErrorCodes,
-				IncludeErrorCodes: ch.IncludeErrorCodes,
-				ExcludeCommands:   ch.ExcludeCommands,
-				IncludeCommands:   ch.IncludeCommands,
-			}
-		}
-	}
-
-	alerter, err := alerting.NewAlerter(alertCfg, rulesCfg, logger)
+	// Issue #81: config.AlertingConfig теперь является alerting.Config напрямую (type alias),
+	// поэтому передаём конфиг без field-by-field копирования.
+	alerter, err := alerting.NewAlerter(*cfg.AlertingConfig, cfg.AlertingConfig.Rules, logger)
 	if err != nil {
 		logger.Error("ошибка создания Alerter, используется NopAlerter",
 			slog.String("error", err.Error()),

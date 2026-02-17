@@ -5,31 +5,33 @@ import "strings"
 // RulesConfig содержит конфигурацию правил фильтрации для factory.
 type RulesConfig struct {
 	// MinSeverity — минимальный уровень severity ("INFO", "WARNING", "CRITICAL").
-	MinSeverity string
+	MinSeverity string `yaml:"minSeverity" env:"BR_ALERTING_RULES_MIN_SEVERITY" env-default:"INFO"`
 
 	// ExcludeErrorCodes — коды ошибок, для которых НЕ отправляются алерты.
-	ExcludeErrorCodes []string
+	ExcludeErrorCodes []string `yaml:"excludeErrorCodes" env:"BR_ALERTING_RULES_EXCLUDE_ERRORS" env-separator:","`
 
 	// IncludeErrorCodes — если задан, алерты отправляются ТОЛЬКО для этих кодов.
-	IncludeErrorCodes []string
+	IncludeErrorCodes []string `yaml:"includeErrorCodes" env:"BR_ALERTING_RULES_INCLUDE_ERRORS" env-separator:","`
 
 	// ExcludeCommands — команды, для которых НЕ отправляются алерты.
-	ExcludeCommands []string
+	ExcludeCommands []string `yaml:"excludeCommands" env:"BR_ALERTING_RULES_EXCLUDE_COMMANDS" env-separator:","`
 
 	// IncludeCommands — если задан, алерты отправляются ТОЛЬКО для этих команд.
-	IncludeCommands []string
+	IncludeCommands []string `yaml:"includeCommands" env:"BR_ALERTING_RULES_INCLUDE_COMMANDS" env-separator:","`
 
 	// Channels — правила для конкретных каналов (переопределяют глобальные).
-	Channels map[string]ChannelRulesConfig
+	// ВНИМАНИЕ: channel override ПОЛНОСТЬЮ ЗАМЕНЯЕТ глобальные правила для канала,
+	// а НЕ мержит с ними.
+	Channels map[string]ChannelRulesConfig `yaml:"channels"`
 }
 
 // ChannelRulesConfig — правила для конкретного канала алертинга.
 type ChannelRulesConfig struct {
-	MinSeverity       string
-	ExcludeErrorCodes []string
-	IncludeErrorCodes []string
-	ExcludeCommands   []string
-	IncludeCommands   []string
+	MinSeverity       string   `yaml:"minSeverity"`
+	ExcludeErrorCodes []string `yaml:"excludeErrorCodes"`
+	IncludeErrorCodes []string `yaml:"includeErrorCodes"`
+	ExcludeCommands   []string `yaml:"excludeCommands"`
+	IncludeCommands   []string `yaml:"includeCommands"`
 }
 
 // ruleConfig определяет внутренний набор правил фильтрации.
@@ -62,12 +64,6 @@ func NewRulesEngine(config RulesConfig) *RulesEngine {
 }
 
 // Evaluate проверяет, должен ли алерт быть отправлен в указанный канал.
-// Возвращает true если алерт разрешён.
-//
-// Если для канала задан channel override — используется ТОЛЬКО override правило,
-// глобальные правила НЕ мержатся. Это означает, что channel override с
-// ExcludeErrorCodes но без MinSeverity будет использовать MinSeverity=INFO (default),
-// а не глобальный MinSeverity.
 func (e *RulesEngine) Evaluate(alert Alert, channel string) bool {
 	rule := e.global
 	if channelRule, ok := e.channels[channel]; ok {
@@ -79,14 +75,10 @@ func (e *RulesEngine) Evaluate(alert Alert, channel string) bool {
 
 // evaluateRule применяет правило к алерту.
 func evaluateRule(rule ruleConfig, alert Alert) bool {
-	// Проверка severity: alert.Severity >= rule.minSeverity
 	if alert.Severity < rule.minSeverity {
 		return false
 	}
 
-	// L-9/Review #15: Проверка error code: include имеет приоритет над exclude.
-	// При одновременном задании обоих include побеждает — алерт для кода из include
-	// будет отправлен даже если он также в exclude. Аналогично для commands.
 	if len(rule.includeErrorCodes) > 0 {
 		if _, ok := rule.includeErrorCodes[alert.ErrorCode]; !ok {
 			return false
@@ -97,7 +89,6 @@ func evaluateRule(rule ruleConfig, alert Alert) bool {
 		}
 	}
 
-	// Проверка command: include имеет приоритет над exclude
 	if len(rule.includeCommands) > 0 {
 		if _, ok := rule.includeCommands[alert.Command]; !ok {
 			return false
