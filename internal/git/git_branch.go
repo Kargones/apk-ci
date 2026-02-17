@@ -50,7 +50,7 @@ func SwitchOrCreateBranch(ctx context.Context, repoPath, branchName string) erro
 	if err != nil {
 		slog.Error("Не удалось получить текущую рабочую директорию",
 			slog.String("error", err.Error()))
-		return fmt.Errorf("failed to get current working directory: %v", err)
+		return fmt.Errorf("failed to get current working directory: %w", err)
 	}
 	slog.Debug("Сохранили текущую рабочую директорию", slog.String("originalDir", originalDir))
 
@@ -62,7 +62,7 @@ func SwitchOrCreateBranch(ctx context.Context, repoPath, branchName string) erro
 		slog.Error("Не удалось перейти в директорию репозитория",
 			slog.String("repoPath", repoPath),
 			slog.String("error", err.Error()))
-		return fmt.Errorf("failed to change to repository directory: %v", err)
+		return fmt.Errorf("failed to change to repository directory: %w", err)
 	}
 
 	// Используем defer для восстановления исходной директории
@@ -104,7 +104,7 @@ func SwitchOrCreateBranch(ctx context.Context, repoPath, branchName string) erro
 			slog.Error("Не удалось переключиться на существующую ветку",
 				slog.String("branch", branchName),
 				slog.String("error", err.Error()))
-			return fmt.Errorf("failed to switch to branch %s: %v", branchName, err)
+			return fmt.Errorf("failed to switch to branch %s: %w", branchName, err)
 		}
 		slog.Info("Успешно переключились на существующую ветку", slog.String("branch", branchName))
 	} else {
@@ -127,7 +127,7 @@ func SwitchOrCreateBranch(ctx context.Context, repoPath, branchName string) erro
 					slog.String("branch", branchName),
 					slog.String("remote", "origin/"+branchName),
 					slog.String("error", err.Error()))
-				return fmt.Errorf("failed to create branch %s from origin/%s: %v", branchName, branchName, err)
+				return fmt.Errorf("failed to create branch %s from origin/%s: %w", branchName, branchName, err)
 			}
 			slog.Info("Успешно создали локальную ветку от удаленной",
 				slog.String("branch", branchName),
@@ -142,7 +142,7 @@ func SwitchOrCreateBranch(ctx context.Context, repoPath, branchName string) erro
 				slog.Error("Не удалось создать новую ветку",
 					slog.String("branch", branchName),
 					slog.String("error", err.Error()))
-				return fmt.Errorf("failed to create and switch to branch %s: %v", branchName, err)
+				return fmt.Errorf("failed to create and switch to branch %s: %w", branchName, err)
 			}
 			slog.Info("Успешно создали новую ветку", slog.String("branch", branchName))
 		}
@@ -154,7 +154,7 @@ func SwitchOrCreateBranch(ctx context.Context, repoPath, branchName string) erro
 		slog.Error("Не удалось дождаться синхронизации Git",
 			slog.String("repoPath", repoPath),
 			slog.String("error", err.Error()))
-		return fmt.Errorf("failed to wait for git sync: %v", err)
+		return fmt.Errorf("failed to wait for git sync: %w", err)
 	}
 	slog.Debug("Git синхронизация завершена успешно")
 
@@ -177,7 +177,7 @@ func SyncRepoBranches(repoPath string) error {
 	// Сохраняем текущую директорию для восстановления в конце
 	originalDir, err := os.Getwd()
 	if err != nil {
-		return fmt.Errorf("ошибка получения текущей директории: %v", err)
+		return fmt.Errorf("ошибка получения текущей директории: %w", err)
 	}
 	defer func() {
 		if chdirErr := os.Chdir(originalDir); chdirErr != nil {
@@ -188,24 +188,24 @@ slog.Warn("failed to restore working directory", slog.String("error", chdirErr.E
 	// Переходим в целевой каталог
 	absPath, err := filepath.Abs(repoPath)
 	if err != nil {
-		return fmt.Errorf("ошибка преобразования пути: %v", err)
+		return fmt.Errorf("ошибка преобразования пути: %w", err)
 	}
 
 	err = os.Chdir(absPath)
 	if err != nil {
-		return fmt.Errorf("не удалось перейти в каталог %s: %v", absPath, err)
+		return fmt.Errorf("не удалось перейти в каталог %s: %w", absPath, err)
 	}
 
 	// Получаем все изменения с удаленного репозитория
 	err = runGitCommand(30*time.Minute, "fetch", "--all", "--prune")
 	if err != nil {
-		return fmt.Errorf("ошибка при выполнении git fetch: %v", err)
+		return fmt.Errorf("ошибка при выполнении git fetch: %w", err)
 	}
 
 	// Получаем список всех удаленных веток
 	remoteBranches, err := getRemoteBranches(10 * time.Minute)
 	if err != nil {
-		return fmt.Errorf("ошибка получения списка веток: %v", err)
+		return fmt.Errorf("ошибка получения списка веток: %w", err)
 	}
 
 	// Создаем локальные ветки для каждой удаленной
@@ -222,7 +222,7 @@ slog.Warn("failed to create tracking branch", slog.String("branch", localBranch)
 
 	// Обновляем все локальные ветки
 	if err := runGitCommand(30*time.Minute, "pull", "--all"); err != nil {
-		return fmt.Errorf("ошибка при выполнении git pull: %v", err)
+		return fmt.Errorf("ошибка при выполнении git pull: %w", err)
 	}
 
 	return nil
@@ -279,7 +279,7 @@ func createTrackingBranch(local, remote string) error {
 
 	// Создаем новую ветку с трекингом
 	if err := runGitCommand(30*time.Minute, "checkout", "-b", local, "--track", remote); err != nil {
-		return fmt.Errorf("не удалось создать ветку %s: %v", local, err)
+		return fmt.Errorf("не удалось создать ветку %s: %w", local, err)
 	}
 
 	// Branch created: local -> remote (logging handled by caller)

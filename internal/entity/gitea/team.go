@@ -27,7 +27,7 @@ func (g *API) IsUserInTeam(l *slog.Logger, username string, orgName string, team
 
 	statusCode, body, err := g.sendReq(searchURL, "", "GET")
 	if err != nil {
-		return false, fmt.Errorf("ошибка при поиске команды: %v", err)
+		return false, fmt.Errorf("ошибка при поиске команды: %w", err)
 	}
 
 	if statusCode != http.StatusOK {
@@ -44,7 +44,7 @@ func (g *API) IsUserInTeam(l *slog.Logger, username string, orgName string, team
 
 	err = json.Unmarshal([]byte(body), &searchResult)
 	if err != nil {
-		return false, fmt.Errorf("ошибка парсинга ответа поиска команды: %v", err)
+		return false, fmt.Errorf("ошибка парсинга ответа поиска команды: %w", err)
 	}
 
 	// Ищем команду с точным совпадением имени
@@ -71,7 +71,7 @@ func (g *API) IsUserInTeam(l *slog.Logger, username string, orgName string, team
 
 	statusCode, _, err = g.sendReq(memberURL, "", "GET")
 	if err != nil {
-		return false, fmt.Errorf("ошибка при проверке членства: %v", err)
+		return false, fmt.Errorf("ошибка при проверке членства: %w", err)
 	}
 
 	l.Debug("Проверка членства пользователя в команде",
@@ -100,7 +100,7 @@ func (g *API) GetTeamMembers(orgName, teamName string) ([]string, error) {
 
 	statusCode, body, err := g.sendReq(searchURL, "", "GET")
 	if err != nil {
-		return nil, fmt.Errorf("ошибка при поиске команды: %v", err)
+		return nil, fmt.Errorf("ошибка при поиске команды: %w", err)
 	}
 
 	if statusCode != http.StatusOK {
@@ -117,7 +117,7 @@ func (g *API) GetTeamMembers(orgName, teamName string) ([]string, error) {
 
 	err = json.Unmarshal([]byte(body), &searchResult)
 	if err != nil {
-		return nil, fmt.Errorf("ошибка парсинга ответа поиска команды: %v", err)
+		return nil, fmt.Errorf("ошибка парсинга ответа поиска команды: %w", err)
 	}
 
 	// Ищем команду с точным совпадением имени
@@ -140,7 +140,7 @@ func (g *API) GetTeamMembers(orgName, teamName string) ([]string, error) {
 
 	statusCode, body, err = g.sendReq(membersURL, "", "GET")
 	if err != nil {
-		return nil, fmt.Errorf("ошибка при получении членов команды: %v", err)
+		return nil, fmt.Errorf("ошибка при получении членов команды: %w", err)
 	}
 
 	if statusCode != http.StatusOK {
@@ -154,7 +154,7 @@ func (g *API) GetTeamMembers(orgName, teamName string) ([]string, error) {
 
 	err = json.Unmarshal([]byte(body), &members)
 	if err != nil {
-		return nil, fmt.Errorf("ошибка парсинга ответа членов команды: %v", err)
+		return nil, fmt.Errorf("ошибка парсинга ответа членов команды: %w", err)
 	}
 
 	// Формируем список имен пользователей

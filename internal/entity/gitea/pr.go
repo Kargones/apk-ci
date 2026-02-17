@@ -164,7 +164,7 @@ func (g *API) CreatePR(head string) (PR, error) {
 
 	statusCode, body, err := g.sendReq(urlString, reqBody, "POST")
 	if statusCode != http.StatusCreated {
-		return pr, fmt.Errorf("ошибка при создании пулл реквеста: статус %d, ответ: %s, ошибка: %v", statusCode, body, err)
+		return pr, fmt.Errorf("ошибка при создании пулл реквеста: статус %d, ответ: %s, ошибка: %w", statusCode, body, err)
 	}
 	r := strings.NewReader(body)
 	var prResp PRData
@@ -191,12 +191,12 @@ func (g *API) CreatePRWithOptions(opts CreatePROptions) (*PRResponse, error) {
 	// Сериализуем опции в JSON
 	requestBody, err := json.Marshal(opts)
 	if err != nil {
-		return nil, fmt.Errorf("ошибка сериализации параметров PR: %v", err)
+		return nil, fmt.Errorf("ошибка сериализации параметров PR: %w", err)
 	}
 
 	statusCode, body, err := g.sendReq(urlString, string(requestBody), "POST")
 	if err != nil {
-		return nil, fmt.Errorf("ошибка при выполнении запроса: %v", err)
+		return nil, fmt.Errorf("ошибка при выполнении запроса: %w", err)
 	}
 
 	// Обработка случая, когда PR уже существует
@@ -220,7 +220,7 @@ func (g *API) CreatePRWithOptions(opts CreatePROptions) (*PRResponse, error) {
 
 	var prResp PRResponse
 	if err := json.Unmarshal([]byte(body), &prResp); err != nil {
-		return nil, fmt.Errorf("ошибка при разборе ответа: %v", err)
+		return nil, fmt.Errorf("ошибка при разборе ответа: %w", err)
 	}
 
 	return &prResp, nil
@@ -232,7 +232,7 @@ func (g *API) findExistingPR(head, base string) (*PRResponse, error) {
 
 	statusCode, body, err := g.sendReq(urlString, "", "GET")
 	if err != nil {
-		return nil, fmt.Errorf("ошибка при получении списка PR: %v", err)
+		return nil, fmt.Errorf("ошибка при получении списка PR: %w", err)
 	}
 
 	if statusCode != http.StatusOK {
@@ -255,7 +255,7 @@ func (g *API) findExistingPR(head, base string) (*PRResponse, error) {
 	}
 
 	if err := json.Unmarshal([]byte(body), &prs); err != nil {
-		return nil, fmt.Errorf("ошибка при разборе списка PR: %v", err)
+		return nil, fmt.Errorf("ошибка при разборе списка PR: %w", err)
 	}
 
 	for _, pr := range prs {
@@ -317,7 +317,7 @@ func (g *API) ClosePR(prNumber int64) error {
 
 	statusCode, _, err := g.sendReq(urlString, reqBody, "PATCH")
 	if err != nil {
-		return fmt.Errorf("ошибка при выполнении запроса: %v", err)
+		return fmt.Errorf("ошибка при выполнении запроса: %w", err)
 	}
 	if statusCode != http.StatusCreated {
 		return fmt.Errorf("ошибка при закрытии PR: %d %d", prNumber, statusCode)
