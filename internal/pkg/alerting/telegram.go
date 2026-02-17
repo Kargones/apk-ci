@@ -17,7 +17,6 @@ import (
 const TelegramAPIBaseURL = "https://api.telegram.org/bot"
 
 // TelegramParseMode — режим парсинга сообщений (Markdown или MarkdownV2).
-// TODO(#59): мигрировать на "MarkdownV2" для расширенного форматирования.
 // Markdown v1 deprecated в Telegram API, но v2 требует другого escaping.
 const TelegramParseMode = "Markdown"
 
@@ -185,7 +184,6 @@ var markdownReplacer = strings.NewReplacer(
 // _ * ` [ ] ( )
 // Скобки "()" экранируются для защиты от инъекции inline ссылок [text](url).
 //
-// TODO(#59): при миграции на MarkdownV2 необходимо экранировать дополнительные символы:
 // ! # - . = > { } | ~
 // См. https://core.telegram.org/bots/api#markdownv2-style
 func escapeMarkdown(s string) string {

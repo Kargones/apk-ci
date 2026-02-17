@@ -16,6 +16,7 @@ import (
 	errhandler "github.com/Kargones/apk-ci/internal/command/handlers/shared"
 	"github.com/Kargones/apk-ci/internal/config"
 	"github.com/Kargones/apk-ci/internal/constants"
+	"github.com/Kargones/apk-ci/internal/pkg/alerting"
 	"github.com/Kargones/apk-ci/internal/pkg/dryrun"
 	"github.com/Kargones/apk-ci/internal/pkg/output"
 	"github.com/Kargones/apk-ci/internal/pkg/tracing"
@@ -159,14 +160,14 @@ func (h *DbUpdateHandler) Execute(ctx context.Context, cfg *config.Config) error
 	// 1. Проверка отмены контекста перед началом работы
 	if err := ctx.Err(); err != nil {
 		log.Warn("Context отменён до начала выполнения", slog.String("error", err.Error()))
-		return h.writeError(format, traceID, start, ErrDbUpdateFailed,
+		return h.writeError(ctx, cfg, format, traceID, start, ErrDbUpdateFailed,
 			"операция отменена: "+err.Error())
 	}
 
 	// 2. Валидация
 	if cfg == nil || cfg.InfobaseName == "" {
 		log.Error("Не указано имя информационной базы")
-		return h.writeError(format, traceID, start, ErrDbUpdateValidation,
+		return h.writeError(ctx, cfg, format, traceID, start, ErrDbUpdateValidation,
 			"BR_INFOBASE_NAME обязателен")
 	}
 
@@ -177,14 +178,14 @@ func (h *DbUpdateHandler) Execute(ctx context.Context, cfg *config.Config) error
 	dbInfo := cfg.GetDatabaseInfo(cfg.InfobaseName)
 	if dbInfo == nil {
 		log.Error("Информационная база не найдена в конфигурации", slog.String("infobase", cfg.InfobaseName))
-		return h.writeError(format, traceID, start, ErrDbUpdateConfig,
+		return h.writeError(ctx, cfg, format, traceID, start, ErrDbUpdateConfig,
 			fmt.Sprintf("информационная база '%s' не найдена в конфигурации", cfg.InfobaseName))
 	}
 
 	// 4. Проверка пути к 1cv8 до начала операций
 	if cfg.AppConfig == nil || cfg.AppConfig.Paths.Bin1cv8 == "" {
 		log.Error("Путь к 1cv8 не указан в конфигурации")
-		return h.writeError(format, traceID, start, ErrDbUpdateConfig,
+		return h.writeError(ctx, cfg, format, traceID, start, ErrDbUpdateConfig,
 			"путь к 1cv8 не указан в конфигурации (app.yaml:paths.bin1cv8)")
 	}
 
@@ -293,7 +294,7 @@ func (h *DbUpdateHandler) Execute(ctx context.Context, cfg *config.Config) error
 	result, err := client.UpdateDBCfg(ctx, opts)
 	if err != nil {
 		log.Error("Ошибка обновления структуры БД", slog.String("error", err.Error()))
-		return h.writeError(format, traceID, start, ErrDbUpdateFailed, err.Error())
+		return h.writeError(ctx, cfg, format, traceID, start, ErrDbUpdateFailed, err.Error())
 	}
 
 	// M-4 fix: применяем лимит сообщений после первого прохода тоже
@@ -317,7 +318,7 @@ func (h *DbUpdateHandler) Execute(ctx context.Context, cfg *config.Config) error
 		// Проверяем отмену контекста перед вторым проходом
 		if ctx.Err() != nil {
 			log.Error("Контекст отменён перед вторым проходом", slog.String("error", ctx.Err().Error()))
-			return h.writeError(format, traceID, start, ErrDbUpdateFailed,
+			return h.writeError(ctx, cfg, format, traceID, start, ErrDbUpdateFailed,
 				fmt.Sprintf("операция отменена перед вторым проходом: %s", ctx.Err().Error()))
 		}
 
@@ -326,7 +327,7 @@ func (h *DbUpdateHandler) Execute(ctx context.Context, cfg *config.Config) error
 		result2, err := client.UpdateDBCfg(ctx, opts)
 		if err != nil {
 			log.Error("Ошибка второго прохода обновления", slog.String("error", err.Error()))
-			return h.writeError(format, traceID, start, ErrDbUpdateSecondPassFailed,
+			return h.writeError(ctx, cfg, format, traceID, start, ErrDbUpdateSecondPassFailed,
 				fmt.Sprintf("ошибка второго прохода обновления расширения: %s", err.Error()))
 		}
 		// Объединяем результаты с лимитом на количество сообщений
@@ -381,7 +382,19 @@ func (h *DbUpdateHandler) Execute(ctx context.Context, cfg *config.Config) error
 }
 
 // writeError выводит структурированную ошибку и возвращает error.
-func (h *DbUpdateHandler) writeError(format, traceID string, start time.Time, code, message string) error {
+func (h *DbUpdateHandler) writeError(ctx context.Context, cfg *config.Config, format, traceID string, start time.Time, code, message string) error {
+	// Отправка алерта с детальным кодом ошибки (#59)
+	if cfg != nil && cfg.Alerter != nil {
+		_ = cfg.Alerter.Send(ctx, alerting.Alert{
+			ErrorCode: code,
+			Message:   message,
+			Command:   constants.ActNRDbupdate,
+			Infobase:  cfg.InfobaseName,
+			TraceID:   traceID,
+			Timestamp: time.Now(),
+			Severity:  alerting.SeverityCritical,
+		})
+	}
 	// Текстовый формат — человекочитаемый вывод ошибки
 	if format != output.FormatJSON {
 		return errhandler.HandleError(message, code)

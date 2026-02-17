@@ -51,6 +51,7 @@ func run() int {
 		return 5
 	}
 	l := cfg.Logger
+	slog.SetDefault(l)
 	l.Debug("Информация о сборке",
 		slog.String("version", constants.Version),
 		slog.String("commit_hash", constants.PreCommitHash),
@@ -71,6 +72,7 @@ func run() int {
 
 	// Инициализация alerter для отправки алертов при ошибках
 	alerter := di.ProvideAlerter(cfg, logAdapter)
+	cfg.Alerter = alerter
 
 	// Инициализация OpenTelemetry трейсинга
 	tracerShutdown := di.ProvideTracerProvider(cfg, logAdapter)
