@@ -68,37 +68,12 @@ func validateRequiredParams(inputParams *InputParams, l *slog.Logger) error {
 // Возвращает:
 //   - *Config: указатель на загруженную конфигурацию приложения
 //   - error: ошибка загрузки конфигурации или nil при успехе
-func MustLoad() (*Config, error) {
-	var cfg Config
-	var err error
-
-	// Читаем переменные окружения в структуру Config
-	if err = cleanenv.ReadEnv(&cfg); err != nil {
-		return nil, fmt.Errorf("не удалось прочитать переменные окружения в Config: %w", err)
-	}
-
-	// Читаем переданные параметры
-	inputParams := GetInputParams()
-	if inputParams == nil {
-		return nil, errors.New("не удалось получить входные параметры")
-	}
-
-	// Получаем пользователя который запустил процесс
-	cfg.Actor = inputParams.GHAActor
-
-	// Инициализируем логгер
-	l := getSlog(cfg.Actor, inputParams.GHALogLevel)
-	cfg.Logger = l
-	l.Debug("inputParams", "inputParams", inputParams)
-	// Проверяем обязательные параметры перед загрузкой конфигурации
-	if err = validateRequiredParams(inputParams, l); err != nil {
-		return nil, err
-	}
-
+// applyInputParams переносит входные параметры в конфигурацию.
+func applyInputParams(cfg *Config, inputParams *InputParams) {
 	cfg.GiteaURL = inputParams.GHAGiteaURL
 	cfg.Command = inputParams.GHACommand
-	issueNumStr := inputParams.GHAIssueNumber
-	if issueNumStr != "" {
+
+	if issueNumStr := inputParams.GHAIssueNumber; issueNumStr != "" {
 		if num, numErr := strconv.Atoi(issueNumStr); numErr == nil {
 			cfg.IssueNumber = num
 		}
@@ -120,88 +95,108 @@ func MustLoad() (*Config, error) {
 
 	repositoryInput := inputParams.GHARepository
 	cfg.Owner = getOwner(repositoryInput)
-
 	cfg.Repo = getRepo(repositoryInput)
 	cfg.BaseBranch = constants.BaseBranch
-
 	cfg.NewBranch = constants.TestBranch
-
 	cfg.BranchForScan = inputParams.GHABranchForScan
 	cfg.CommitHash = inputParams.GHACommitHash
+}
+
+// loadAllSubConfigs загружает все подконфигурации (app, project, secrets, db, menus и т.д.).
+func loadAllSubConfigs(l *slog.Logger, cfg *Config) {
+	var err error
 
 	// Загрузка конфигурации приложения
-	if cfg.AppConfig, err = loadAppConfig(l, &cfg); err != nil {
+	if cfg.AppConfig, err = loadAppConfig(l, cfg); err != nil {
 		l.Warn("ошибка загрузки конфигурации приложения", slog.String("error", err.Error()))
-		// Используем значения по умолчанию
 		cfg.AppConfig = getDefaultAppConfig()
 	}
 
 	// Загрузка конфигурации проекта
-	if cfg.ProjectConfig, err = loadProjectConfig(l, &cfg); err != nil {
+	if cfg.ProjectConfig, err = loadProjectConfig(l, cfg); err != nil {
 		l.Warn("ошибка загрузки конфигурации проекта", slog.String("error", err.Error()))
 	}
 
 	// Загрузка секретов
-	if cfg.SecretConfig, err = loadSecretConfig(l, &cfg); err != nil {
+	if cfg.SecretConfig, err = loadSecretConfig(l, cfg); err != nil {
 		l.Warn("ошибка загрузки секретов", slog.String("error", err.Error()))
 	}
 
 	// Загрузка конфигурации баз данных
-	if cfg.DbConfig, err = loadDbConfig(l, &cfg); err != nil {
+	if cfg.DbConfig, err = loadDbConfig(l, cfg); err != nil {
 		l.Warn("ошибка загрузки конфигурации БД", slog.String("error", err.Error()))
 	}
 
 	// Загрузка конфигурации главного меню
-	if cfg.MenuMain, err = loadMenuMainConfig(l, &cfg); err != nil {
+	if cfg.MenuMain, err = loadMenuMainConfig(l, cfg); err != nil {
 		l.Warn("ошибка загрузки конфигурации главного меню", slog.String("error", err.Error()))
 	}
 
 	// Загрузка конфигурации меню отладки
-	if cfg.MenuDebug, err = loadMenuDebugConfig(l, &cfg); err != nil {
+	if cfg.MenuDebug, err = loadMenuDebugConfig(l, cfg); err != nil {
 		l.Warn("ошибка загрузки конфигурации меню отладки", slog.String("error", err.Error()))
 	}
 
 	// Загрузка конфигурации SonarQube из переменных окружения
-	// TODO(#44): SonarQubeConfig.Validate() и ScannerConfig.Validate()
-	// существуют, но не вызываются в MustLoad(). Добавить fail-fast валидацию
-	// по аналогии с AlertingConfig/MetricsConfig/TracingConfig.
-	if cfg.SonarQubeConfig, err = GetSonarQubeConfig(l, &cfg); err != nil {
+	if cfg.SonarQubeConfig, err = GetSonarQubeConfig(l, cfg); err != nil {
 		l.Warn("ошибка загрузки конфигурации SonarQube", slog.String("error", err.Error()))
-		// Используем значения по умолчанию
 		cfg.SonarQubeConfig = GetDefaultSonarQubeConfig()
 	}
 
 	// Загрузка конфигурации сканера из переменных окружения
-	if cfg.ScannerConfig, err = GetScannerConfig(l, &cfg); err != nil {
+	if cfg.ScannerConfig, err = GetScannerConfig(l, cfg); err != nil {
 		l.Warn("ошибка загрузки конфигурации сканера", slog.String("error", err.Error()))
-		// Используем значения по умолчанию
 		cfg.ScannerConfig = GetDefaultScannerConfig()
 	}
 
 	// Загрузка конфигурации Git
-	if cfg.GitConfig, err = loadGitConfig(l, &cfg); err != nil {
+	if cfg.GitConfig, err = loadGitConfig(l, cfg); err != nil {
 		l.Warn("ошибка загрузки конфигурации Git", slog.String("error", err.Error()))
-		// Используем значения по умолчанию
 		cfg.GitConfig = getDefaultGitConfig()
 	}
 
 	// Загрузка конфигурации логирования
-	if cfg.LoggingConfig, err = loadLoggingConfig(l, &cfg); err != nil {
+	if cfg.LoggingConfig, err = loadLoggingConfig(l, cfg); err != nil {
 		l.Warn("ошибка загрузки конфигурации логирования", slog.String("error", err.Error()))
-		// Используем значения по умолчанию
 		cfg.LoggingConfig = getDefaultLoggingConfig()
 	}
 
 	// Загрузка конфигурации реализаций
-	if cfg.ImplementationsConfig, err = loadImplementationsConfig(l, &cfg); err != nil {
+	if cfg.ImplementationsConfig, err = loadImplementationsConfig(l, cfg); err != nil {
 		l.Warn("ошибка загрузки конфигурации реализаций", slog.String("error", err.Error()))
-		// Используем значения по умолчанию
 		cfg.ImplementationsConfig = getDefaultImplementationsConfig()
 	}
 
+	// Загрузка конфигурации RAC
+	if cfg.RacConfig, err = loadRacConfig(l, cfg); err != nil {
+		l.Warn("ошибка загрузки конфигурации RAC", slog.String("error", err.Error()))
+		cfg.RacConfig = getDefaultRacConfig()
+	}
+
+	// Загрузка конфигурации алертинга
+	if cfg.AlertingConfig, err = loadAlertingConfig(l, cfg); err != nil {
+		l.Warn("ошибка загрузки конфигурации алертинга", slog.String("error", err.Error()))
+		cfg.AlertingConfig = getDefaultAlertingConfig()
+	}
+
+	// Загрузка конфигурации метрик
+	if cfg.MetricsConfig, err = loadMetricsConfig(l, cfg); err != nil {
+		l.Warn("ошибка загрузки конфигурации метрик", slog.String("error", err.Error()))
+		cfg.MetricsConfig = getDefaultMetricsConfig()
+	}
+
+	// Загрузка конфигурации трейсинга
+	if cfg.TracingConfig, err = loadTracingConfig(l, cfg); err != nil {
+		l.Warn("ошибка загрузки конфигурации трейсинга", slog.String("error", err.Error()))
+		cfg.TracingConfig = getDefaultTracingConfig()
+	}
+}
+
+// validateLoadedConfigs выполняет fail-fast валидацию загруженных подконфигураций.
+func validateLoadedConfigs(l *slog.Logger, cfg *Config) {
 	// Валидация конфигурации реализаций (AC6: невалидные значения обнаруживаются early)
 	if cfg.ImplementationsConfig != nil {
-		if err = cfg.ImplementationsConfig.Validate(); err != nil {
+		if err := cfg.ImplementationsConfig.Validate(); err != nil {
 			l.Warn("невалидная конфигурация реализаций, используются значения по умолчанию",
 				slog.String("error", err.Error()),
 			)
@@ -209,24 +204,7 @@ func MustLoad() (*Config, error) {
 		}
 	}
 
-	// Загрузка конфигурации RAC
-	if cfg.RacConfig, err = loadRacConfig(l, &cfg); err != nil {
-		l.Warn("ошибка загрузки конфигурации RAC", slog.String("error", err.Error()))
-		// Используем значения по умолчанию
-		cfg.RacConfig = getDefaultRacConfig()
-	}
-
-	// Загрузка конфигурации алертинга
-	if cfg.AlertingConfig, err = loadAlertingConfig(l, &cfg); err != nil {
-		l.Warn("ошибка загрузки конфигурации алертинга", slog.String("error", err.Error()))
-		// Используем значения по умолчанию
-		cfg.AlertingConfig = getDefaultAlertingConfig()
-	}
-	// Fail-fast валидация: обнаруживаем невалидную конфигурацию при загрузке,
-	// а не при первом использовании Alerter в runtime.
-	// TODO(#44): При ошибке валидации код выставляет Enabled=false,
-	// но невалидные поля (пустой SMTPHost и т.д.) остаются в структуре.
-	// Рекомендуется заменять невалидную конфигурацию на getDefault*Config().
+	// Fail-fast валидация алертинга
 	if cfg.AlertingConfig != nil && cfg.AlertingConfig.Enabled {
 		if valErr := validateAlertingConfig(cfg.AlertingConfig); valErr != nil {
 			l.Warn("невалидная конфигурация алертинга, алертинг отключён",
@@ -237,13 +215,7 @@ func MustLoad() (*Config, error) {
 		}
 	}
 
-	// Загрузка конфигурации метрик
-	if cfg.MetricsConfig, err = loadMetricsConfig(l, &cfg); err != nil {
-		l.Warn("ошибка загрузки конфигурации метрик", slog.String("error", err.Error()))
-		// Используем значения по умолчанию
-		cfg.MetricsConfig = getDefaultMetricsConfig()
-	}
-	// Fail-fast валидация: обнаруживаем невалидную конфигурацию при загрузке.
+	// Fail-fast валидация метрик
 	if cfg.MetricsConfig != nil && cfg.MetricsConfig.Enabled {
 		if valErr := validateMetricsConfig(cfg.MetricsConfig); valErr != nil {
 			l.Warn("невалидная конфигурация метрик, метрики отключены",
@@ -254,13 +226,7 @@ func MustLoad() (*Config, error) {
 		}
 	}
 
-	// Загрузка конфигурации трейсинга
-	if cfg.TracingConfig, err = loadTracingConfig(l, &cfg); err != nil {
-		l.Warn("ошибка загрузки конфигурации трейсинга", slog.String("error", err.Error()))
-		// Используем значения по умолчанию
-		cfg.TracingConfig = getDefaultTracingConfig()
-	}
-	// Fail-fast валидация: обнаруживаем невалидную конфигурацию при загрузке.
+	// Fail-fast валидация трейсинга
 	if cfg.TracingConfig != nil && cfg.TracingConfig.Enabled {
 		if valErr := validateTracingConfig(cfg.TracingConfig); valErr != nil {
 			l.Warn("невалидная конфигурация трейсинга, трейсинг отключён",
@@ -270,32 +236,82 @@ func MustLoad() (*Config, error) {
 			cfg.TracingConfig.Enabled = false
 		}
 	}
+}
 
-	// l.Debug("Config", "Параметры конфигурации", cfg)
-	err = runner.DisplayConfig(l)
-	if err != nil {
+// finalizeConfig настраивает дисплей, создаёт рабочие директории и анализирует проект.
+func finalizeConfig(l *slog.Logger, cfg *Config) error {
+	if err := runner.DisplayConfig(l); err != nil {
 		l.Error("Ошибка настройки виртуального дисплея",
 			slog.String("Описание ошибки", err.Error()),
 		)
 	}
+
 	cfg.WorkDir = constants.WorkDir
 	cfg.TmpDir = constants.TempDir
 
-	err = createWorkDirectories(&cfg)
-	if err != nil {
+	if err := createWorkDirectories(cfg); err != nil {
 		l.Error("Ошибка создания рабочих директорий",
 			slog.String("Описание ошибки", err.Error()),
 		)
 	}
 
-	// Заполнение данных проекта
-	err = cfg.AnalyzeProject(l, constants.BaseBranch)
-	if err != nil {
+	if err := cfg.AnalyzeProject(l, constants.BaseBranch); err != nil {
 		l.Error("Ошибка анализа проекта",
 			slog.String("Описание ошибки", err.Error()),
 		)
+		return err
+	}
+
+	return nil
+}
+
+// MustLoad загружает конфигурацию приложения из файла или завершает выполнение при ошибке.
+// Читает конфигурационный файл, парсит его содержимое и возвращает структуру Config.
+// В случае ошибки загрузки приложение завершается с фатальной ошибкой.
+// Возвращает:
+//   - *Config: указатель на загруженную конфигурацию приложения
+//   - error: ошибка загрузки конфигурации или nil при успехе
+func MustLoad() (*Config, error) {
+	var cfg Config
+
+	// Читаем переменные окружения в структуру Config
+	if err := cleanenv.ReadEnv(&cfg); err != nil {
+		return nil, fmt.Errorf("не удалось прочитать переменные окружения в Config: %w", err)
+	}
+
+	// Читаем переданные параметры
+	inputParams := GetInputParams()
+	if inputParams == nil {
+		return nil, errors.New("не удалось получить входные параметры")
+	}
+
+	// Получаем пользователя который запустил процесс
+	cfg.Actor = inputParams.GHAActor
+
+	// Инициализируем логгер
+	l := getSlog(cfg.Actor, inputParams.GHALogLevel)
+	cfg.Logger = l
+	l.Debug("inputParams", "inputParams", inputParams)
+
+	// Проверяем обязательные параметры перед загрузкой конфигурации
+	if err := validateRequiredParams(inputParams, l); err != nil {
 		return nil, err
 	}
+
+	// Переносим входные параметры в конфигурацию
+	applyInputParams(&cfg, inputParams)
+
+	// Загружаем все подконфигурации
+	loadAllSubConfigs(l, &cfg)
+
+	// Валидируем загруженные конфигурации
+	validateLoadedConfigs(l, &cfg)
+
+	// Финализация: дисплей, директории, анализ проекта
+	if err := finalizeConfig(l, &cfg); err != nil {
+		return nil, err
+	}
+
 	return &cfg, nil
 }
 func getSlog(actor string, logLevel string) *slog.Logger {
