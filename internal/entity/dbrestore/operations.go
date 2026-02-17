@@ -6,9 +6,6 @@ import (
 	"fmt"
 	"log/slog"
 	"time"
-
-	// blank import for sql server driver
-	_ "github.com/denisenkom/go-mssqldb"
 )
 
 // Connect устанавливает соединение с MS SQL Server.
