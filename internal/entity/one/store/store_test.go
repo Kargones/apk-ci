@@ -324,8 +324,6 @@ func TestParseReport(t *testing.T) {
 	t.Logf("Max version: %d", maxVersion)
 }
 
-
-
 func TestRecord(t *testing.T) {
 	// Тест создания записи
 	record := Record{
@@ -619,7 +617,7 @@ func TestStore_Merge(t *testing.T) {
 	pathMergeSettings := filepath.Join(tmpDir, "merge.xml")
 	storeRoot := tmpDir
 	dbConnectString := "File=" + tmpDir + ";Usr=user;Pwd=pass;"
-	
+
 	err = s.Merge(ctx, logger, cfg, dbConnectString, pathCf, pathMergeSettings, storeRoot)
 	if err != nil {
 		t.Logf("Merge returned error (may be expected): %v", err)
@@ -665,7 +663,7 @@ func TestStore_MergeAdd(t *testing.T) {
 	pathMergeSettings := filepath.Join(tmpDir, "merge.xml")
 	storeRoot := tmpDir
 	dbConnectString := "File=" + tmpDir + ";Usr=user;Pwd=pass;"
-	
+
 	err = s.MergeAdd(ctx, logger, cfg, dbConnectString, pathCf, pathMergeSettings, storeRoot, "TestAdd")
 	if err != nil {
 		t.Logf("MergeAdd returned error (may be expected): %v", err)
@@ -753,7 +751,7 @@ func TestStore_StoreCommit(t *testing.T) {
 	storeRoot := tmpDir
 	dbConnectString := "File=" + tmpDir + ";Usr=user;Pwd=pass;"
 	comment := "Test commit"
-	
+
 	err = s.StoreCommit(ctx, logger, cfg, dbConnectString, storeRoot, comment)
 	if err != nil {
 		t.Logf("StoreCommit returned error (may be expected): %v", err)
@@ -798,7 +796,7 @@ func TestStore_StoreCommitAdd(t *testing.T) {
 	storeRoot := tmpDir
 	dbConnectString := "File=" + tmpDir + ";Usr=user;Pwd=pass;"
 	comment := "Test commit"
-	
+
 	err = s.StoreCommitAdd(ctx, logger, cfg, dbConnectString, storeRoot, comment, "TestAdd")
 	if err != nil {
 		t.Logf("StoreCommitAdd returned error (may be expected): %v", err)
@@ -840,10 +838,10 @@ func TestCommentAdd(t *testing.T) {
 
 	dbConnectString := "File=" + tmpDir + ";Usr=user;Pwd=pass;"
 	runner := s.GetStoreParam(dbConnectString, cfg)
-	
+
 	comment := "Test comment"
 	CommentAdd(&runner, comment)
-	
+
 	// Проверяем, что комментарий добавлен в параметры
 	paramsStr := strings.Join(runner.Params, " ")
 	if !strings.Contains(paramsStr, comment) {
@@ -909,7 +907,7 @@ func TestCreateStores(t *testing.T) {
 	storeRoot := tmpDir
 	dbConnectString := "File=" + tmpDir + ";Usr=user;Pwd=pass;"
 	arrayAdd := []string{"TestAdd1", "TestAdd2"}
-	
+
 	err = CreateStores(logger, cfg, storeRoot, dbConnectString, arrayAdd)
 	if err != nil {
 		t.Logf("CreateStores returned error (may be expected): %v", err)
