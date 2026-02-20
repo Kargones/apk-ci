@@ -1143,21 +1143,21 @@ func TestSonarQubeEntity_GetProject_Integration(t *testing.T) {
 	t.Skip("Integration test - requires real SonarQube server")
 
 	// ========== MANUAL CONFIGURATION BLOCK ==========
-	// Fill in these parameters to connect to your SonarQube server
-	sonarQubeURL := "http://sq.apkholding.ru:9000"                   // Example: "http://localhost:9000" or "https://sonarqube.example.com"
-	sonarQubeToken := "sqa_195ccbda0a3cb555fd380cd2a7366b7c63fcb225" // Your SonarQube authentication token
-	projectKey := "test_SURV_main1"                                  // Project key to search for (e.g., "my-project-key")
+	// Set env vars: SONARQUBE_URL, SONARQUBE_TOKEN, SONARQUBE_PROJECT
+	sonarQubeURL := os.Getenv("SONARQUBE_URL")
+	sonarQubeToken := os.Getenv("SONARQUBE_TOKEN")
+	projectKey := os.Getenv("SONARQUBE_PROJECT")
 	// ================================================
 
 	// Validate that required parameters are filled
 	if sonarQubeURL == "" {
-		t.Fatal("sonarQubeURL must be filled in the manual configuration block")
+		t.Fatal("SONARQUBE_URL env var must be set")
 	}
 	if sonarQubeToken == "" {
-		t.Fatal("sonarQubeToken must be filled in the manual configuration block")
+		t.Fatal("SONARQUBE_TOKEN env var must be set")
 	}
 	if projectKey == "" {
-		t.Fatal("projectKey must be filled in the manual configuration block")
+		t.Fatal("SONARQUBE_PROJECT env var must be set")
 	}
 
 	// Create configuration
