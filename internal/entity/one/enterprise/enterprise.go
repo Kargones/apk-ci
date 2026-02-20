@@ -55,7 +55,7 @@ func (e *EpfExecutor) Execute(ctx context.Context, cfg *config.Config) error {
 	}
 
 	// Скачивание .epf файла
-	tempEpfPath, cleanup, err := e.downloadEpfFile(cfg)
+	tempEpfPath, cleanup, err := e.downloadEpfFile(ctx, cfg)
 	if err != nil {
 		return err
 	}
@@ -103,7 +103,7 @@ func (e *EpfExecutor) ensureTempDirectory(cfg *config.Config) error {
 }
 
 // downloadEpfFile скачивает .epf файл и возвращает путь к нему и функцию очистки
-func (e *EpfExecutor) downloadEpfFile(cfg *config.Config) (string, func(), error) {
+func (e *EpfExecutor) downloadEpfFile(ctx context.Context, cfg *config.Config) (string, func(), error) {
 	e.logger.Debug("Скачивание .epf файла", slog.String("url", cfg.StartEpf))
 
 	// Создаем временный файл для .epf
@@ -135,7 +135,7 @@ func (e *EpfExecutor) downloadEpfFile(cfg *config.Config) (string, func(), error
 		Command:     cfg.Command,
 	}
 	giteaAPI := gitea.NewGiteaAPI(giteaConfig)
-	data, err := giteaAPI.GetConfigData(e.logger, cfg.StartEpf)
+	data, err := giteaAPI.GetConfigData(ctx, e.logger, cfg.StartEpf)
 	if err != nil {
 		e.logger.Error("Ошибка получения данных .epf файла",
 			slog.String("url", cfg.StartEpf),

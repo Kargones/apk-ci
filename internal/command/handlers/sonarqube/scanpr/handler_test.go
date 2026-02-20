@@ -968,6 +968,7 @@ func TestWaitForAnalysisCompletion_FailedStatus(t *testing.T) {
 
 // TestWaitForAnalysisCompletion_ContextCanceled проверяет обработку отмены context.
 func TestWaitForAnalysisCompletion_ContextCanceled(t *testing.T) {
+	ctx := context.Background()
 	firstCallDone := make(chan struct{})
 	sqClient := &sonarqubetest.MockClient{
 		GetAnalysisStatusFunc: func(_ context.Context, _ string) (*sonarqube.AnalysisStatus, error) {
@@ -1021,6 +1022,7 @@ func TestWaitForAnalysisCompletion_UnknownStatus(t *testing.T) {
 
 // TestWaitForAnalysisCompletion_Timeout проверяет таймаут ожидания.
 func TestWaitForAnalysisCompletion_Timeout(t *testing.T) {
+	ctx := context.Background()
 	sqClient := &sonarqubetest.MockClient{
 		GetAnalysisStatusFunc: func(_ context.Context, _ string) (*sonarqube.AnalysisStatus, error) {
 			return &sonarqube.AnalysisStatus{

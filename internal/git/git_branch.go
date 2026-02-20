@@ -77,7 +77,7 @@ func SwitchOrCreateBranch(ctx context.Context, repoPath, branchName string) erro
 	// Используем переданный контекст или создаем новый с увеличенным таймаутом для больших репозиториев
 	var cancel context.CancelFunc
 	if ctx == nil {
-		ctx = context.Background()
+		
 	}
 
 	// Если контекст не имеет дедлайна, устанавливаем таймаут 60 минут для больших репозиториев (до 80 ГБ)
@@ -150,7 +150,7 @@ func SwitchOrCreateBranch(ctx context.Context, repoPath, branchName string) erro
 
 	// Ожидаем синхронизации состояния каталога с git
 	slog.Debug("Ожидаем синхронизации Git репозитория", slog.String("repoPath", repoPath))
-	if err := waitForGitSync(repoPath); err != nil {
+	if err := waitForGitSync(ctx, repoPath); err != nil {
 		slog.Error("Не удалось дождаться синхронизации Git",
 			slog.String("repoPath", repoPath),
 			slog.String("error", err.Error()))
@@ -173,7 +173,7 @@ func SwitchOrCreateBranch(ctx context.Context, repoPath, branchName string) erro
 //
 // Возвращает:
 //   - error: ошибка синхронизации или nil при успехе
-func SyncRepoBranches(repoPath string) error {
+func SyncRepoBranches(ctx context.Context, repoPath string) error {
 	// Сохраняем текущую директорию для восстановления в конце
 	originalDir, err := os.Getwd()
 	if err != nil {
@@ -197,13 +197,13 @@ slog.Warn("failed to restore working directory", slog.String("error", chdirErr.E
 	}
 
 	// Получаем все изменения с удаленного репозитория
-	err = runGitCommand(30*time.Minute, "fetch", "--all", "--prune")
+	err = runGitCommand(ctx, 30*time.Minute, "fetch", "--all", "--prune")
 	if err != nil {
 		return fmt.Errorf("ошибка при выполнении git fetch: %w", err)
 	}
 
 	// Получаем список всех удаленных веток
-	remoteBranches, err := getRemoteBranches(10 * time.Minute)
+	remoteBranches, err := getRemoteBranches(ctx, 10 * time.Minute)
 	if err != nil {
 		return fmt.Errorf("ошибка получения списка веток: %w", err)
 	}
@@ -215,13 +215,13 @@ slog.Warn("failed to restore working directory", slog.String("error", chdirErr.E
 		}
 
 		localBranch := strings.TrimPrefix(branch, "origin/")
-		if err := createTrackingBranch(localBranch, branch); err != nil {
+		if err := createTrackingBranch(ctx, localBranch, branch); err != nil {
 slog.Warn("failed to create tracking branch", slog.String("branch", localBranch), slog.String("error", err.Error()))
 		}
 	}
 
 	// Обновляем все локальные ветки
-	if err := runGitCommand(30*time.Minute, "pull", "--all"); err != nil {
+	if err := runGitCommand(ctx, 30*time.Minute, "pull", "--all"); err != nil {
 		return fmt.Errorf("ошибка при выполнении git pull: %w", err)
 	}
 
@@ -234,12 +234,12 @@ slog.Warn("failed to create tracking branch", slog.String("branch", localBranch)
 // Возвращает:
 //   - []string: список имен удаленных веток
 //   - error: ошибка получения веток или nil при успехе
-func getRemoteBranches(timeout time.Duration) ([]string, error) {
+func getRemoteBranches(ctx context.Context, timeout time.Duration) ([]string, error) {
 	// Создаем контекст с переданным таймаутом для команды git
 	if timeout == 0 {
 		timeout = 10 * time.Minute // Значение по умолчанию
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
 	// #nosec G204 - GitCommand is a constant, all arguments are hardcoded
@@ -271,14 +271,14 @@ func getRemoteBranches(timeout time.Duration) ([]string, error) {
 //
 // Возвращает:
 //   - error: ошибка создания ветки или nil при успехе
-func createTrackingBranch(local, remote string) error {
+func createTrackingBranch(ctx context.Context, local, remote string) error {
 	// Проверяем существование локальной ветки
-	if err := runGitCommand(10*time.Minute, "show-ref", "--verify", "--quiet", "refs/heads/"+local); err == nil {
+	if err := runGitCommand(ctx, 10*time.Minute, "show-ref", "--verify", "--quiet", "refs/heads/"+local); err == nil {
 		return fmt.Errorf("ветка %s уже существует", local)
 	}
 
 	// Создаем новую ветку с трекингом
-	if err := runGitCommand(30*time.Minute, "checkout", "-b", local, "--track", remote); err != nil {
+	if err := runGitCommand(ctx, 30*time.Minute, "checkout", "-b", local, "--track", remote); err != nil {
 		return fmt.Errorf("не удалось создать ветку %s: %w", local, err)
 	}
 

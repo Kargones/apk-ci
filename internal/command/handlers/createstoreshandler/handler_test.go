@@ -26,7 +26,7 @@ type mockStoreCreator struct {
 	createDirs bool
 }
 
-func (m *mockStoreCreator) CreateStores(l *slog.Logger, cfg *config.Config, storeRoot string, dbConnectString string, arrayAdd []string) error {
+func (m *mockStoreCreator) CreateStores(ctx context.Context, l *slog.Logger, cfg *config.Config, storeRoot string, dbConnectString string, arrayAdd []string) error {
 	if m.createStoresFunc != nil {
 		return m.createStoresFunc(l, cfg, storeRoot, dbConnectString, arrayAdd)
 	}

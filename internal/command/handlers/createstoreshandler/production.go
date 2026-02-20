@@ -33,6 +33,6 @@ func createTempDbProduction(ctx context.Context, l *slog.Logger, cfg *config.Con
 }
 
 // createStoresProduction — production реализация создания хранилищ.
-func createStoresProduction(l *slog.Logger, cfg *config.Config, storeRoot string, dbConnectString string, arrayAdd []string) error {
-	return store.CreateStores(l, cfg, storeRoot, dbConnectString, arrayAdd)
+func createStoresProduction(ctx context.Context, l *slog.Logger, cfg *config.Config, storeRoot string, dbConnectString string, arrayAdd []string) error {
+	return store.CreateStores(ctx, l, cfg, storeRoot, dbConnectString, arrayAdd)
 }

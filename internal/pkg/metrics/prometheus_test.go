@@ -342,6 +342,7 @@ func TestPrometheusCollector_ErrorStatus(t *testing.T) {
 
 // TestPrometheusCollector_ContextCancellation проверяет отмену контекста.
 func TestPrometheusCollector_ContextCancellation(t *testing.T) {
+	ctx := context.Background()
 	config := Config{
 		Enabled:        true,
 		PushgatewayURL: "http://localhost:9091",

@@ -14,7 +14,7 @@ import (
 // или разработки новых функций без влияния на основную ветку.
 // Возвращает:
 //   - error: ошибка создания ветки или nil при успехе
-func (g *API) CreateTestBranch() error {
+func (g *API) CreateTestBranch(ctx context.Context) error {
 	urlString := fmt.Sprintf("%s/api/%s/repos/%s/%s/branches", g.GiteaURL, constants.APIVersion, g.Owner, g.Repo)
 	reqBody := fmt.Sprintf(`{
 "new_branch_name": "%s",
@@ -22,7 +22,7 @@ func (g *API) CreateTestBranch() error {
 "old_ref_name": "refs/heads/%s"
 }`, g.NewBranch, g.BaseBranch, g.BaseBranch)
 
-	statusCode, _, err := g.sendReq(context.Background(), urlString, reqBody, "POST")
+	statusCode, _, err := g.sendReq(ctx, urlString, reqBody, "POST")
 
 	if statusCode != http.StatusCreated {
 		return fmt.Errorf("ошибка при создании ветки: %v %w", statusCode, err)
@@ -35,10 +35,10 @@ func (g *API) CreateTestBranch() error {
 // для поддержания чистоты репозитория.
 // Возвращает:
 //   - error: ошибка удаления ветки или nil при успехе
-func (g *API) DeleteTestBranch() error {
+func (g *API) DeleteTestBranch(ctx context.Context) error {
 	urlString := fmt.Sprintf("%s/api/%s/repos/%s/%s/branches/%s", g.GiteaURL, constants.APIVersion, g.Owner, g.Repo, g.NewBranch)
 
-	statusCode, _, err := g.sendReq(context.Background(), urlString, "", "DELETE")
+	statusCode, _, err := g.sendReq(ctx, urlString, "", "DELETE")
 	if statusCode != http.StatusNoContent {
 		return fmt.Errorf("ошибка при создании ветки: %v %w", statusCode, err)
 	}
@@ -53,10 +53,10 @@ func (g *API) DeleteTestBranch() error {
 // Возвращает:
 //   - []Branch: список веток в репозитории
 //   - error: ошибка получения списка или nil при успехе
-func (g *API) GetBranches(repo string) ([]Branch, error) {
+func (g *API) GetBranches(ctx context.Context, repo string) ([]Branch, error) {
 	urlString := fmt.Sprintf("%s/api/%s/repos/%s/%s/branches", g.GiteaURL, constants.APIVersion, g.Owner, repo)
 
-	statusCode, body, err := g.sendReq(context.Background(), urlString, "", "GET")
+	statusCode, body, err := g.sendReq(ctx, urlString, "", "GET")
 	if err != nil {
 		return nil, fmt.Errorf("ошибка при выполнении запроса: %w", err)
 	}
@@ -85,11 +85,11 @@ func (g *API) GetBranches(repo string) ([]Branch, error) {
 // Возвращает:
 //   - bool: true если ветка существует, false если нет
 //   - error: ошибка при выполнении запроса или nil при успехе
-func (g *API) HasBranch(owner, repo, branchName string) (bool, error) {
+func (g *API) HasBranch(ctx context.Context, owner, repo, branchName string) (bool, error) {
 	urlString := fmt.Sprintf("%s/api/%s/repos/%s/%s/branches/%s",
 		g.GiteaURL, constants.APIVersion, owner, repo, branchName)
 
-	statusCode, _, err := g.sendReq(context.Background(), urlString, "", "GET")
+	statusCode, _, err := g.sendReq(ctx, urlString, "", "GET")
 	if err != nil {
 		return false, fmt.Errorf("ошибка при проверке ветки %s в %s/%s: %w", branchName, owner, repo, err)
 	}

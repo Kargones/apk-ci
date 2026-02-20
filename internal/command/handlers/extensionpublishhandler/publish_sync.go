@@ -1,6 +1,7 @@
 package extensionpublishhandler
 
 import (
+	"context"
 	"encoding/base64"
 	"fmt"
 	"log/slog"
@@ -56,8 +57,8 @@ type SyncResult struct {
 // Возвращает:
 //   - []gitea.ChangeFileOperation: список операций create с относительными путями
 //   - error: ошибка при получении содержимого или nil при успехе
-func GetSourceFiles(api *gitea.API, sourceDir, branch string) ([]gitea.ChangeFileOperation, error) {
-	operations, err := getSourceFilesRecursive(api, sourceDir, "", branch)
+func GetSourceFiles(ctx context.Context, api *gitea.API, sourceDir, branch string) ([]gitea.ChangeFileOperation, error) {
+	operations, err := getSourceFilesRecursive(ctx, api, sourceDir, "", branch)
 	if err != nil {
 		return nil, err
 	}
@@ -86,14 +87,14 @@ func GetSourceFiles(api *gitea.API, sourceDir, branch string) ([]gitea.ChangeFil
 // Возвращает:
 //   - []gitea.ChangeFileOperation: список операций delete с полными путями и SHA
 //   - error: ошибка при получении содержимого или nil при успехе
-func GetTargetFilesToDelete(api *gitea.API, targetDir, branch string) ([]gitea.ChangeFileOperation, error) {
-	return getTargetFilesRecursive(api, targetDir, branch)
+func GetTargetFilesToDelete(ctx context.Context, api *gitea.API, targetDir, branch string) ([]gitea.ChangeFileOperation, error) {
+	return getTargetFilesRecursive(ctx, api, targetDir, branch)
 }
 
 // getTargetFilesRecursive рекурсивно обходит целевой каталог и собирает операции удаления.
-func getTargetFilesRecursive(api *gitea.API, currentDir, branch string) ([]gitea.ChangeFileOperation, error) {
+func getTargetFilesRecursive(ctx context.Context, api *gitea.API, currentDir, branch string) ([]gitea.ChangeFileOperation, error) {
 	// Получаем содержимое текущего каталога
-	contents, err := api.GetRepositoryContents(currentDir, branch)
+	contents, err := api.GetRepositoryContents(ctx, currentDir, branch)
 	if err != nil {
 		// Несуществующий каталог не является ошибкой - просто нечего удалять
 		if strings.Contains(err.Error(), "404") || strings.Contains(err.Error(), "статус 404") {
@@ -110,7 +111,7 @@ func getTargetFilesRecursive(api *gitea.API, currentDir, branch string) ([]gitea
 			// Рекурсивный вызов для подкаталога
 			// Используем path.Join вместо filepath.Join для кросс-платформенной совместимости
 			// (Gitea API всегда ожидает Unix-пути с прямыми слешами)
-			subOps, err := getTargetFilesRecursive(
+			subOps, err := getTargetFilesRecursive(ctx, 
 				api,
 				path.Join(currentDir, item.Name),
 				branch,
@@ -145,14 +146,14 @@ func getTargetFilesRecursive(api *gitea.API, currentDir, branch string) ([]gitea
 // Возвращает:
 //   - map[string]string: карта путей к SHA файлов
 //   - error: ошибка при получении содержимого или nil при успехе
-func GetTargetFilesMap(api *gitea.API, targetDir, branch string) (map[string]string, error) {
-	return getTargetFilesMapRecursive(api, targetDir, targetDir, branch)
+func GetTargetFilesMap(ctx context.Context, api *gitea.API, targetDir, branch string) (map[string]string, error) {
+	return getTargetFilesMapRecursive(ctx, api, targetDir, targetDir, branch)
 }
 
 // getTargetFilesMapRecursive рекурсивно обходит каталог и собирает карту файлов.
 // baseDir - базовый каталог для вычисления относительных путей.
-func getTargetFilesMapRecursive(api *gitea.API, currentDir, baseDir, branch string) (map[string]string, error) {
-	contents, err := api.GetRepositoryContents(currentDir, branch)
+func getTargetFilesMapRecursive(ctx context.Context, api *gitea.API, currentDir, baseDir, branch string) (map[string]string, error) {
+	contents, err := api.GetRepositoryContents(ctx, currentDir, branch)
 	if err != nil {
 		// Несуществующий каталог не является ошибкой - просто пустая карта
 		if strings.Contains(err.Error(), "404") || strings.Contains(err.Error(), "статус 404") {
@@ -167,7 +168,7 @@ func getTargetFilesMapRecursive(api *gitea.API, currentDir, baseDir, branch stri
 		switch item.Type {
 		case "dir":
 			// Рекурсивный вызов для подкаталога
-			subMap, err := getTargetFilesMapRecursive(
+			subMap, err := getTargetFilesMapRecursive(ctx, 
 				api,
 				path.Join(currentDir, item.Name),
 				baseDir,
@@ -216,7 +217,7 @@ func getTargetFilesMapRecursive(api *gitea.API, currentDir, baseDir, branch stri
 // Возвращает:
 //   - *SyncResult: результат синхронизации
 //   - error: критическая ошибка или nil при успехе
-func SyncExtensionToRepo(l *slog.Logger, sourceAPI, targetAPI *gitea.API, subscriber SubscribedRepo, sourceDir, sourceBranch, targetDir, extName, version string) (*SyncResult, error) {
+func SyncExtensionToRepo(ctx context.Context, l *slog.Logger, sourceAPI, targetAPI *gitea.API, subscriber SubscribedRepo, sourceDir, sourceBranch, targetDir, extName, version string) (*SyncResult, error) {
 	logger := l
 
 	result := &SyncResult{
@@ -233,7 +234,7 @@ func SyncExtensionToRepo(l *slog.Logger, sourceAPI, targetAPI *gitea.API, subscr
 	)
 
 	// 1. Получаем файлы из исходного каталога
-	sourceOps, err := GetSourceFiles(sourceAPI, sourceDir, sourceBranch)
+	sourceOps, err := GetSourceFiles(ctx, sourceAPI, sourceDir, sourceBranch)
 	if err != nil {
 		return nil, fmt.Errorf("ошибка получения исходных файлов: %w", err)
 	}
@@ -244,7 +245,7 @@ func SyncExtensionToRepo(l *slog.Logger, sourceAPI, targetAPI *gitea.API, subscr
 	)
 
 	// 2. Получаем карту существующих файлов в целевом каталоге (путь -> SHA)
-	targetFilesMap, err := GetTargetFilesMap(targetAPI, targetDir, subscriber.TargetBranch)
+	targetFilesMap, err := GetTargetFilesMap(ctx, targetAPI, targetDir, subscriber.TargetBranch)
 	if err != nil {
 		return nil, fmt.Errorf("ошибка получения файлов целевого каталога: %w", err)
 	}
@@ -355,7 +356,7 @@ func SyncExtensionToRepo(l *slog.Logger, sourceAPI, targetAPI *gitea.API, subscr
 	}
 
 	// 6. Выполняем batch commit с созданием новой ветки
-	commitSHA, err := targetAPI.SetRepositoryStateWithNewBranch(
+	commitSHA, err := targetAPI.SetRepositoryStateWithNewBranch(ctx, 
 		logger,
 		allOperations,
 		subscriber.TargetBranch,
@@ -374,9 +375,9 @@ func SyncExtensionToRepo(l *slog.Logger, sourceAPI, targetAPI *gitea.API, subscr
 
 // getSourceFilesRecursive рекурсивно обходит каталог и собирает файлы.
 // basePath используется для формирования относительных путей файлов.
-func getSourceFilesRecursive(api *gitea.API, currentDir, basePath, branch string) ([]gitea.ChangeFileOperation, error) {
+func getSourceFilesRecursive(ctx context.Context, api *gitea.API, currentDir, basePath, branch string) ([]gitea.ChangeFileOperation, error) {
 	// Получаем содержимое текущего каталога
-	contents, err := api.GetRepositoryContents(currentDir, branch)
+	contents, err := api.GetRepositoryContents(ctx, currentDir, branch)
 	if err != nil {
 		return nil, fmt.Errorf("ошибка получения содержимого каталога %s: %w", currentDir, err)
 	}
@@ -394,7 +395,7 @@ func getSourceFilesRecursive(api *gitea.API, currentDir, basePath, branch string
 		switch item.Type {
 		case "dir":
 			// Рекурсивный вызов для подкаталога
-			subOps, err := getSourceFilesRecursive(
+			subOps, err := getSourceFilesRecursive(ctx, 
 				api,
 				path.Join(currentDir, item.Name),
 				relativePath,
@@ -407,7 +408,7 @@ func getSourceFilesRecursive(api *gitea.API, currentDir, basePath, branch string
 
 		case "file":
 			// Получаем содержимое файла (GetFileContent возвращает уже декодированные байты)
-			content, err := api.GetFileContent(item.Path)
+			content, err := api.GetFileContent(ctx, item.Path)
 			if err != nil {
 				return nil, fmt.Errorf("ошибка получения файла %s: %w", item.Path, err)
 			}

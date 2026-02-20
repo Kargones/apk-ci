@@ -232,6 +232,7 @@ func TestScanLegacySwitchCases(t *testing.T) {
 	content := `package main
 
 func run() int {
+	ctx := context.Background()
 	switch cfg.Command {
 	case constants.ActStore2db:
 		err = app.Store2DbWithConfig(ctx, l, cfg)

@@ -12,6 +12,7 @@ import (
 
 // TestSendReqEdgeCases тестирует edge cases функции sendReq
 func TestSendReqEdgeCases(t *testing.T) {
+	ctx := context.Background()
 	tests := []struct {
 		name         string
 		reqBody      string
@@ -64,7 +65,7 @@ func TestSendReqEdgeCases(t *testing.T) {
 				AccessToken: "testtoken",
 			}
 
-			statusCode, body, err := api.sendReq(context.Background(), server.URL+"/test", tt.reqBody, tt.method)
+			statusCode, body, err := api.sendReq(ctx, server.URL+"/test", tt.reqBody, tt.method)
 
 			if tt.expectError {
 				if err == nil {
@@ -87,6 +88,7 @@ func TestSendReqEdgeCases(t *testing.T) {
 
 // TestGetFileContentEdgeCases тестирует edge cases для GetFileContent
 func TestGetFileContentEdgeCases(t *testing.T) {
+	ctx := context.Background()
 	tests := []struct {
 		name            string
 		fileName        string
@@ -150,7 +152,7 @@ func TestGetFileContentEdgeCases(t *testing.T) {
 				Repo:     "testrepo",
 			}
 
-			content, err := api.GetFileContent(fileName)
+			content, err := api.GetFileContent(ctx, fileName)
 
 			if tt.expectError {
 				if err == nil {
@@ -170,6 +172,7 @@ func TestGetFileContentEdgeCases(t *testing.T) {
 
 // TestGetConfigDataEdgeCases тестирует edge cases для GetConfigData
 func TestGetConfigDataEdgeCases(t *testing.T) {
+	ctx := context.Background()
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
 	tests := []struct {
@@ -228,7 +231,7 @@ func TestGetConfigDataEdgeCases(t *testing.T) {
 				BaseBranch: "main",
 			}
 
-			content, err := api.GetConfigData(logger, tt.filename)
+			content, err := api.GetConfigData(ctx, logger, tt.filename)
 
 			if tt.expectError {
 				if err == nil {
@@ -248,6 +251,7 @@ func TestGetConfigDataEdgeCases(t *testing.T) {
 
 // TestAnalyzeProjectStructureEdgeCases тестирует edge cases для AnalyzeProjectStructure
 func TestAnalyzeProjectStructureEdgeCases(t *testing.T) {
+	ctx := context.Background()
 	tests := []struct {
 		name         string
 		branch       string
@@ -297,7 +301,7 @@ func TestAnalyzeProjectStructureEdgeCases(t *testing.T) {
 				Repo:     "testrepo",
 			}
 
-			result, err := api.AnalyzeProjectStructure(tt.branch)
+			result, err := api.AnalyzeProjectStructure(ctx, tt.branch)
 
 			if tt.expectError {
 				if err == nil {
@@ -322,6 +326,7 @@ func TestAnalyzeProjectStructureEdgeCases(t *testing.T) {
 
 // TestIsUserInTeamEdgeCases тестирует edge cases для IsUserInTeam
 func TestIsUserInTeamEdgeCases(t *testing.T) {
+	ctx := context.Background()
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
 	tests := []struct {
@@ -397,7 +402,7 @@ func TestIsUserInTeamEdgeCases(t *testing.T) {
 				AccessToken: "testtoken",
 			}
 
-			result, err := api.IsUserInTeam(logger, tt.username, tt.orgName, tt.teamName)
+			result, err := api.IsUserInTeam(ctx, logger, tt.username, tt.orgName, tt.teamName)
 
 			if tt.expectError {
 				if err == nil {
@@ -417,6 +422,7 @@ func TestIsUserInTeamEdgeCases(t *testing.T) {
 
 // TestConflictPREdgeCases тестирует edge cases для ConflictPR
 func TestConflictPREdgeCases(t *testing.T) {
+	ctx := context.Background()
 	tests := []struct {
 		name             string
 		prNumber         int64
@@ -466,7 +472,7 @@ func TestConflictPREdgeCases(t *testing.T) {
 				Repo:     "testrepo",
 			}
 
-			hasConflict, err := api.ConflictPR(tt.prNumber)
+			hasConflict, err := api.ConflictPR(ctx, tt.prNumber)
 
 			if tt.expectError {
 				if err == nil {

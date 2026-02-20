@@ -78,6 +78,7 @@ func TestNewNopTracerProvider(t *testing.T) {
 }
 
 func TestNewNopTracerProvider_CancelledContext(t *testing.T) {
+	ctx := context.Background()
 	shutdown := NewNopTracerProvider()
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -128,6 +129,7 @@ func TestSpanCreation_WithInMemoryExporter(t *testing.T) {
 
 // TestSpanCreation_ChildSpans проверяет создание child span-ов (AC3).
 func TestSpanCreation_ChildSpans(t *testing.T) {
+	ctx := context.Background()
 	exporter := tracetest.NewInMemoryExporter()
 	tp := sdktrace.NewTracerProvider(
 		sdktrace.WithSyncer(exporter),

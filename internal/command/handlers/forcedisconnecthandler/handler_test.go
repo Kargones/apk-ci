@@ -514,6 +514,7 @@ func TestForceDisconnectHandler_Execute_TextAllTerminateFailed(t *testing.T) {
 }
 
 func TestForceDisconnectHandler_Execute_ContextCancellation(t *testing.T) {
+	ctx := context.Background()
 	t.Setenv("BR_OUTPUT_FORMAT", "json")
 	t.Setenv("BR_DISCONNECT_DELAY_SEC", "10")
 

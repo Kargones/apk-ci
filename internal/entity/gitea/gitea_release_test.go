@@ -1,6 +1,7 @@
 package gitea
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -11,6 +12,7 @@ import (
 
 // TestGetLatestRelease тестирует получение последнего релиза
 func TestGetLatestRelease(t *testing.T) {
+	ctx := context.Background()
 	tests := []struct {
 		name            string
 		responseCode    int
@@ -75,7 +77,7 @@ func TestGetLatestRelease(t *testing.T) {
 				AccessToken: "testtoken",
 			}
 
-			release, err := api.GetLatestRelease()
+			release, err := api.GetLatestRelease(ctx)
 
 			if tt.expectError {
 				if err == nil {
@@ -107,6 +109,7 @@ func TestGetLatestRelease(t *testing.T) {
 
 // TestGetReleaseByTag тестирует получение релиза по тегу
 func TestGetReleaseByTag(t *testing.T) {
+	ctx := context.Background()
 	tests := []struct {
 		name            string
 		tag             string
@@ -200,7 +203,7 @@ func TestGetReleaseByTag(t *testing.T) {
 				AccessToken: "testtoken",
 			}
 
-			release, err := api.GetReleaseByTag(tt.tag)
+			release, err := api.GetReleaseByTag(ctx, tt.tag)
 
 			if tt.expectError {
 				if err == nil {
@@ -232,6 +235,7 @@ func TestGetReleaseByTag(t *testing.T) {
 
 // TestReleaseWithAssets тестирует корректную десериализацию релиза с ассетами
 func TestReleaseWithAssets(t *testing.T) {
+	ctx := context.Background()
 	responseBody := `{
 		"id": 100,
 		"tag_name": "v3.0.0",
@@ -261,7 +265,7 @@ func TestReleaseWithAssets(t *testing.T) {
 		AccessToken: "testtoken",
 	}
 
-	release, err := api.GetLatestRelease()
+	release, err := api.GetLatestRelease(ctx)
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -376,6 +380,7 @@ func TestReleaseStructJSON(t *testing.T) {
 
 // TestGetLatestReleaseInvalidJSON тестирует обработку некорректного JSON
 func TestGetLatestReleaseInvalidJSON(t *testing.T) {
+	ctx := context.Background()
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(200)
 		if _, err := w.Write([]byte("invalid json")); err != nil {
@@ -391,7 +396,7 @@ func TestGetLatestReleaseInvalidJSON(t *testing.T) {
 		AccessToken: "testtoken",
 	}
 
-	_, err := api.GetLatestRelease()
+	_, err := api.GetLatestRelease(ctx)
 	if err == nil {
 		t.Error("Expected error for invalid JSON but got none")
 	}
@@ -399,6 +404,7 @@ func TestGetLatestReleaseInvalidJSON(t *testing.T) {
 
 // TestGetReleaseByTagEmptyTag тестирует обработку пустого тега
 func TestGetReleaseByTagEmptyTag(t *testing.T) {
+	ctx := context.Background()
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		expectedPath := "/api/v1/repos/testowner/testrepo/releases/tags/"
 		if r.URL.Path != expectedPath {
@@ -418,7 +424,7 @@ func TestGetReleaseByTagEmptyTag(t *testing.T) {
 		AccessToken: "testtoken",
 	}
 
-	_, err := api.GetReleaseByTag("")
+	_, err := api.GetReleaseByTag(ctx, "")
 	if err == nil {
 		t.Error("Expected error for empty tag but got none")
 	}
@@ -426,6 +432,7 @@ func TestGetReleaseByTagEmptyTag(t *testing.T) {
 
 // TestGetLatestReleaseEmptyAssets тестирует релиз без ассетов
 func TestGetLatestReleaseEmptyAssets(t *testing.T) {
+	ctx := context.Background()
 	responseBody := `{
 		"id": 200,
 		"tag_name": "v0.1.0",
@@ -451,7 +458,7 @@ func TestGetLatestReleaseEmptyAssets(t *testing.T) {
 		AccessToken: "testtoken",
 	}
 
-	release, err := api.GetLatestRelease()
+	release, err := api.GetLatestRelease(ctx)
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -463,6 +470,7 @@ func TestGetLatestReleaseEmptyAssets(t *testing.T) {
 
 // TestGetLatestReleaseNetworkError тестирует обработку сетевой ошибки
 func TestGetLatestReleaseNetworkError(t *testing.T) {
+	ctx := context.Background()
 	// Создаём и сразу закрываем сервер для симуляции недоступного хоста
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
 	serverURL := server.URL
@@ -475,7 +483,7 @@ func TestGetLatestReleaseNetworkError(t *testing.T) {
 		AccessToken: "testtoken",
 	}
 
-	_, err := api.GetLatestRelease()
+	_, err := api.GetLatestRelease(ctx)
 	if err == nil {
 		t.Error("Expected network error but got none")
 	}
@@ -488,6 +496,7 @@ func TestGetLatestReleaseNetworkError(t *testing.T) {
 
 // TestGetReleaseByTagNetworkError тестирует обработку сетевой ошибки для GetReleaseByTag
 func TestGetReleaseByTagNetworkError(t *testing.T) {
+	ctx := context.Background()
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
 	serverURL := server.URL
 	server.Close()
@@ -499,7 +508,7 @@ func TestGetReleaseByTagNetworkError(t *testing.T) {
 		AccessToken: "testtoken",
 	}
 
-	_, err := api.GetReleaseByTag("v1.0.0")
+	_, err := api.GetReleaseByTag(ctx, "v1.0.0")
 	if err == nil {
 		t.Error("Expected network error but got none")
 	}
@@ -507,6 +516,7 @@ func TestGetReleaseByTagNetworkError(t *testing.T) {
 
 // TestReleaseAuthorizationHeader тестирует отправку заголовка авторизации
 func TestReleaseAuthorizationHeader(t *testing.T) {
+	ctx := context.Background()
 	expectedToken := "my-secret-token"
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -530,7 +540,7 @@ func TestReleaseAuthorizationHeader(t *testing.T) {
 		AccessToken: expectedToken,
 	}
 
-	_, err := api.GetLatestRelease()
+	_, err := api.GetLatestRelease(ctx)
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
 	}

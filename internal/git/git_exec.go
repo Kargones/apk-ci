@@ -80,12 +80,12 @@ type Config struct {
 //
 // Возвращает:
 //   - error: ошибка выполнения или nil при успехе
-func runGitCommand(timeout time.Duration, args ...string) error {
+func runGitCommand(ctx context.Context, timeout time.Duration, args ...string) error {
 	// Создаем контекст с переданным таймаутом для команды git
 	if timeout == 0 {
 		timeout = 30 * time.Minute // Значение по умолчанию
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
 	// #nosec G204 - GitCommand является константой, args формируется из проверенных значений

@@ -25,6 +25,7 @@ func TestDownload_InvalidURL(t *testing.T) {
 }
 
 func TestDownload_CancelledContext(t *testing.T) {
+	ctx := context.Background()
 	cfg := &config.ScannerConfig{TempDir: os.TempDir()}
 	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelError}))
 	e := NewSonarScannerEntity(cfg, logger)
@@ -37,6 +38,7 @@ func TestDownload_CancelledContext(t *testing.T) {
 }
 
 func TestDownload_EmptyTempDir(t *testing.T) {
+	ctx := context.Background()
 	cfg := &config.ScannerConfig{}
 	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelError}))
 	e := NewSonarScannerEntity(cfg, logger)

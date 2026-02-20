@@ -119,6 +119,7 @@ func TestParseSubscriptionID_Invalid(t *testing.T) {
 
 // TestFindSubscribedRepos_Success проверяет успешный поиск подписчиков через project.yaml
 func TestFindSubscribedRepos_Success(t *testing.T) {
+	ctx := context.Background()
 	// project.yaml содержимое для TargetOrg/TargetRepo (подписка на cfe)
 	targetRepoProjectYAML := `subscriptions:
   - SourceOrg_source-repo_cfe
@@ -203,7 +204,7 @@ func TestFindSubscribedRepos_Success(t *testing.T) {
 	}
 
 	extensions := []string{"cfe", "cfe/common"}
-	subscribers, err := FindSubscribedRepos(testLogger(), api, "source-repo", extensions)
+	subscribers, err := FindSubscribedRepos(ctx, testLogger(), api, "source-repo", extensions)
 	if err != nil {
 		t.Fatalf("FindSubscribedRepos вернул ошибку: %v", err)
 	}
@@ -248,6 +249,7 @@ func base64EncodeString(s string) string {
 
 // TestFindSubscribedRepos_NoSubscribers проверяет случай без подписчиков (project.yaml без нужных подписок)
 func TestFindSubscribedRepos_NoSubscribers(t *testing.T) {
+	ctx := context.Background()
 	// project.yaml с подпиской на другой репозиторий
 	projectYAML := `subscriptions:
   - OtherOrg_other-repo_cfe
@@ -297,7 +299,7 @@ func TestFindSubscribedRepos_NoSubscribers(t *testing.T) {
 	}
 
 	extensions := []string{"cfe"}
-	subscribers, err := FindSubscribedRepos(testLogger(), api, "source-repo", extensions)
+	subscribers, err := FindSubscribedRepos(ctx, testLogger(), api, "source-repo", extensions)
 	if err != nil {
 		t.Fatalf("FindSubscribedRepos вернул ошибку: %v", err)
 	}
@@ -309,6 +311,7 @@ func TestFindSubscribedRepos_NoSubscribers(t *testing.T) {
 
 // TestFindSubscribedRepos_EmptyExtensions проверяет случай с пустым списком расширений
 func TestFindSubscribedRepos_EmptyExtensions(t *testing.T) {
+	ctx := context.Background()
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Сервер не должен получать никаких запросов
 		t.Error("Не ожидались запросы к серверу при пустом списке расширений")
@@ -323,7 +326,7 @@ func TestFindSubscribedRepos_EmptyExtensions(t *testing.T) {
 	}
 
 	extensions := []string{}
-	subscribers, err := FindSubscribedRepos(testLogger(), api, "source-repo", extensions)
+	subscribers, err := FindSubscribedRepos(ctx, testLogger(), api, "source-repo", extensions)
 	if err != nil {
 		t.Fatalf("FindSubscribedRepos вернул ошибку: %v", err)
 	}
@@ -335,6 +338,7 @@ func TestFindSubscribedRepos_EmptyExtensions(t *testing.T) {
 
 // TestFindSubscribedRepos_NoProjectYAML проверяет случай когда project.yaml не существует
 func TestFindSubscribedRepos_NoProjectYAML(t *testing.T) {
+	ctx := context.Background()
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
 		case r.URL.Path == "/api/v1/user/orgs":
@@ -373,7 +377,7 @@ func TestFindSubscribedRepos_NoProjectYAML(t *testing.T) {
 	}
 
 	extensions := []string{"cfe"}
-	subscribers, err := FindSubscribedRepos(testLogger(), api, "source-repo", extensions)
+	subscribers, err := FindSubscribedRepos(ctx, testLogger(), api, "source-repo", extensions)
 	if err != nil {
 		t.Fatalf("FindSubscribedRepos вернул ошибку: %v", err)
 	}
@@ -385,6 +389,7 @@ func TestFindSubscribedRepos_NoProjectYAML(t *testing.T) {
 
 // TestFindSubscribedRepos_OrgsAPIError проверяет обработку ошибки при получении организаций
 func TestFindSubscribedRepos_OrgsAPIError(t *testing.T) {
+	ctx := context.Background()
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/api/v1/user/orgs" {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -400,7 +405,7 @@ func TestFindSubscribedRepos_OrgsAPIError(t *testing.T) {
 	}
 
 	extensions := []string{"cfe"}
-	_, err := FindSubscribedRepos(testLogger(), api, "source-repo", extensions)
+	_, err := FindSubscribedRepos(ctx, testLogger(), api, "source-repo", extensions)
 	if err == nil {
 		t.Fatal("Ожидалась ошибка при проблеме с API организаций")
 	}
@@ -408,6 +413,7 @@ func TestFindSubscribedRepos_OrgsAPIError(t *testing.T) {
 
 // TestFindSubscribedRepos_OrgReposAPIError проверяет продолжение работы при ошибке получения репозиториев организации
 func TestFindSubscribedRepos_OrgReposAPIError(t *testing.T) {
+	ctx := context.Background()
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
 		case r.URL.Path == "/api/v1/user/orgs":
@@ -440,7 +446,7 @@ func TestFindSubscribedRepos_OrgReposAPIError(t *testing.T) {
 
 	extensions := []string{"cfe"}
 	// Функция должна продолжить работу, но не найти подписчиков
-	subscribers, err := FindSubscribedRepos(testLogger(), api, "source-repo", extensions)
+	subscribers, err := FindSubscribedRepos(ctx, testLogger(), api, "source-repo", extensions)
 	if err != nil {
 		t.Fatalf("FindSubscribedRepos не должен возвращать ошибку при проблеме с одной организацией: %v", err)
 	}
@@ -516,6 +522,7 @@ func TestSyncResult_WithError(t *testing.T) {
 
 // TestGetSourceFiles_Success проверяет успешное получение файлов из исходного каталога (AC2)
 func TestGetSourceFiles_Success(t *testing.T) {
+	ctx := context.Background()
 	// Создаём тестовый сервер
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
@@ -563,7 +570,7 @@ func TestGetSourceFiles_Success(t *testing.T) {
 		AccessToken: "test-token",
 	}
 
-	operations, err := GetSourceFiles(api, "extensions/CommonExt", "main")
+	operations, err := GetSourceFiles(ctx, api, "extensions/CommonExt", "main")
 	if err != nil {
 		t.Fatalf("GetSourceFiles вернул ошибку: %v", err)
 	}
@@ -606,6 +613,7 @@ func TestGetSourceFiles_Success(t *testing.T) {
 
 // TestGetSourceFiles_EmptyDirectory проверяет обработку пустого каталога (AC2, AC5)
 func TestGetSourceFiles_EmptyDirectory(t *testing.T) {
+	ctx := context.Background()
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/api/v1/repos/SourceOrg/source-repo/contents/empty-dir" {
 			w.Header().Set("Content-Type", "application/json")
@@ -624,7 +632,7 @@ func TestGetSourceFiles_EmptyDirectory(t *testing.T) {
 		AccessToken: "test-token",
 	}
 
-	_, err := GetSourceFiles(api, "empty-dir", "main")
+	_, err := GetSourceFiles(ctx, api, "empty-dir", "main")
 	if err == nil {
 		t.Fatal("Ожидалась ошибка при пустом каталоге")
 	}
@@ -632,6 +640,7 @@ func TestGetSourceFiles_EmptyDirectory(t *testing.T) {
 
 // TestGetSourceFiles_DirectoryNotFound проверяет обработку несуществующего каталога (AC2)
 func TestGetSourceFiles_DirectoryNotFound(t *testing.T) {
+	ctx := context.Background()
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		_, _ = w.Write([]byte(`{"message": "not found"}`))
@@ -645,7 +654,7 @@ func TestGetSourceFiles_DirectoryNotFound(t *testing.T) {
 		AccessToken: "test-token",
 	}
 
-	_, err := GetSourceFiles(api, "non-existent", "main")
+	_, err := GetSourceFiles(ctx, api, "non-existent", "main")
 	if err == nil {
 		t.Fatal("Ожидалась ошибка при несуществующем каталоге")
 	}
@@ -653,6 +662,7 @@ func TestGetSourceFiles_DirectoryNotFound(t *testing.T) {
 
 // TestGetTargetFilesToDelete_Success проверяет успешное получение операций удаления (AC3)
 func TestGetTargetFilesToDelete_Success(t *testing.T) {
+	ctx := context.Background()
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		// Получение содержимого целевого каталога
@@ -685,7 +695,7 @@ func TestGetTargetFilesToDelete_Success(t *testing.T) {
 		AccessToken: "test-token",
 	}
 
-	operations, err := GetTargetFilesToDelete(api, "cfe/CommonExt", "main")
+	operations, err := GetTargetFilesToDelete(ctx, api, "cfe/CommonExt", "main")
 	if err != nil {
 		t.Fatalf("GetTargetFilesToDelete вернул ошибку: %v", err)
 	}
@@ -733,6 +743,7 @@ func TestGetTargetFilesToDelete_Success(t *testing.T) {
 
 // TestGetTargetFilesToDelete_EmptyDirectory проверяет пустой целевой каталог (AC3)
 func TestGetTargetFilesToDelete_EmptyDirectory(t *testing.T) {
+	ctx := context.Background()
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/api/v1/repos/TargetOrg/target-repo/contents/cfe/NewExt" {
 			w.Header().Set("Content-Type", "application/json")
@@ -751,7 +762,7 @@ func TestGetTargetFilesToDelete_EmptyDirectory(t *testing.T) {
 		AccessToken: "test-token",
 	}
 
-	operations, err := GetTargetFilesToDelete(api, "cfe/NewExt", "main")
+	operations, err := GetTargetFilesToDelete(ctx, api, "cfe/NewExt", "main")
 	if err != nil {
 		t.Fatalf("GetTargetFilesToDelete вернул ошибку: %v", err)
 	}
@@ -764,6 +775,7 @@ func TestGetTargetFilesToDelete_EmptyDirectory(t *testing.T) {
 
 // TestGetTargetFilesToDelete_DirectoryNotExists проверяет несуществующий целевой каталог (AC3)
 func TestGetTargetFilesToDelete_DirectoryNotExists(t *testing.T) {
+	ctx := context.Background()
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		_, _ = w.Write([]byte(`{"message": "not found"}`))
@@ -777,7 +789,7 @@ func TestGetTargetFilesToDelete_DirectoryNotExists(t *testing.T) {
 		AccessToken: "test-token",
 	}
 
-	operations, err := GetTargetFilesToDelete(api, "non-existent", "main")
+	operations, err := GetTargetFilesToDelete(ctx, api, "non-existent", "main")
 	if err != nil {
 		t.Fatalf("GetTargetFilesToDelete вернул ошибку: %v", err)
 	}
@@ -790,6 +802,7 @@ func TestGetTargetFilesToDelete_DirectoryNotExists(t *testing.T) {
 
 // TestGetTargetFilesToDelete_RecursiveError проверяет ошибку при рекурсивном обходе подкаталога
 func TestGetTargetFilesToDelete_RecursiveError(t *testing.T) {
+	ctx := context.Background()
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		// Корневой каталог возвращает подкаталог
@@ -818,7 +831,7 @@ func TestGetTargetFilesToDelete_RecursiveError(t *testing.T) {
 		AccessToken: "test-token",
 	}
 
-	_, err := GetTargetFilesToDelete(api, "cfe/CommonExt", "main")
+	_, err := GetTargetFilesToDelete(ctx, api, "cfe/CommonExt", "main")
 	if err == nil {
 		t.Fatal("Ожидалась ошибка при ошибке рекурсивного обхода")
 	}
@@ -829,6 +842,7 @@ func TestGetTargetFilesToDelete_RecursiveError(t *testing.T) {
 
 // TestGetTargetFilesToDelete_APIError проверяет обработку HTTP ошибки (не 404)
 func TestGetTargetFilesToDelete_APIError(t *testing.T) {
+	ctx := context.Background()
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusForbidden)
 		_, _ = w.Write([]byte(`{"message": "access denied"}`))
@@ -842,7 +856,7 @@ func TestGetTargetFilesToDelete_APIError(t *testing.T) {
 		AccessToken: "test-token",
 	}
 
-	_, err := GetTargetFilesToDelete(api, "cfe/CommonExt", "main")
+	_, err := GetTargetFilesToDelete(ctx, api, "cfe/CommonExt", "main")
 	if err == nil {
 		t.Fatal("Ожидалась ошибка при HTTP 403")
 	}
@@ -923,6 +937,7 @@ func TestGenerateCommitMessage(t *testing.T) {
 
 // TestSyncExtensionToRepo_Success проверяет успешную синхронизацию (AC4)
 func TestSyncExtensionToRepo_Success(t *testing.T) {
+	ctx := context.Background()
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
 		// Source: Получение содержимого исходного каталога
@@ -983,7 +998,7 @@ func TestSyncExtensionToRepo_Success(t *testing.T) {
 		SubscriptionID:  "TargetOrg_target-repo_cfe_CommonExt",
 	}
 
-	result, err := SyncExtensionToRepo(testLogger(), sourceAPI, targetAPI, subscriber, "extensions/CommonExt", "main", "CommonExt", "CommonExt", "v1.2.3")
+	result, err := SyncExtensionToRepo(ctx, testLogger(), sourceAPI, targetAPI, subscriber, "extensions/CommonExt", "main", "CommonExt", "CommonExt", "v1.2.3")
 	if err != nil {
 		t.Fatalf("SyncExtensionToRepo вернул ошибку: %v", err)
 	}
@@ -1005,6 +1020,7 @@ func TestSyncExtensionToRepo_Success(t *testing.T) {
 
 // TestSyncExtensionToRepo_EmptySource проверяет ошибку при пустом источнике (AC5)
 func TestSyncExtensionToRepo_EmptySource(t *testing.T) {
+	ctx := context.Background()
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Source: Пустой каталог
 		if r.URL.Path == "/api/v1/repos/SourceOrg/source-repo/contents/empty" {
@@ -1038,7 +1054,7 @@ func TestSyncExtensionToRepo_EmptySource(t *testing.T) {
 		TargetDirectory: "cfe/MyExt",
 	}
 
-	_, err := SyncExtensionToRepo(testLogger(), sourceAPI, targetAPI, subscriber, "empty", "main", "MyExt", "MyExt", "v1.0.0")
+	_, err := SyncExtensionToRepo(ctx, testLogger(), sourceAPI, targetAPI, subscriber, "empty", "main", "MyExt", "MyExt", "v1.0.0")
 	if err == nil {
 		t.Fatal("Ожидалась ошибка при пустом исходном каталоге")
 	}
@@ -1164,6 +1180,7 @@ func TestBuildExtensionPRTitle(t *testing.T) {
 
 // TestCreateExtensionPR_Success проверяет успешное создание PR (AC4)
 func TestCreateExtensionPR_Success(t *testing.T) {
+	ctx := context.Background()
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/api/v1/repos/TargetOrg/target-repo/pulls" && r.Method == "POST" {
 			w.Header().Set("Content-Type", "application/json")
@@ -1205,7 +1222,7 @@ func TestCreateExtensionPR_Success(t *testing.T) {
 		Body:    "Release notes here",
 	}
 
-	pr, err := CreateExtensionPR(testLogger(), api, syncResult, release, "CommonExt", "SourceOrg/extensions", "https://gitea.example.com/release")
+	pr, err := CreateExtensionPR(ctx, testLogger(), api, syncResult, release, "CommonExt", "SourceOrg/extensions", "https://gitea.example.com/release")
 	if err != nil {
 		t.Fatalf("CreateExtensionPR вернул ошибку: %v", err)
 	}
@@ -1220,6 +1237,7 @@ func TestCreateExtensionPR_Success(t *testing.T) {
 
 // TestCreateExtensionPR_ExistingPR проверяет обработку существующего PR (AC5)
 func TestCreateExtensionPR_ExistingPR(t *testing.T) {
+	ctx := context.Background()
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
 		// Попытка создать PR возвращает конфликт
@@ -1269,7 +1287,7 @@ func TestCreateExtensionPR_ExistingPR(t *testing.T) {
 		TagName: "v1.2.3",
 	}
 
-	pr, err := CreateExtensionPR(testLogger(), api, syncResult, release, "CommonExt", "SourceOrg/extensions", "")
+	pr, err := CreateExtensionPR(ctx, testLogger(), api, syncResult, release, "CommonExt", "SourceOrg/extensions", "")
 	if err != nil {
 		t.Fatalf("CreateExtensionPR вернул ошибку: %v", err)
 	}
@@ -1282,6 +1300,7 @@ func TestCreateExtensionPR_ExistingPR(t *testing.T) {
 
 // TestCreateExtensionPR_BranchNotExists проверяет ошибку при несуществующей ветке (AC5)
 func TestCreateExtensionPR_BranchNotExists(t *testing.T) {
+	ctx := context.Background()
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		_, _ = w.Write([]byte(`{"message": "branch not found"}`))
@@ -1302,7 +1321,7 @@ func TestCreateExtensionPR_BranchNotExists(t *testing.T) {
 		NewBranch: "non-existent-branch",
 	}
 
-	_, err := CreateExtensionPR(testLogger(), api, syncResult, nil, "TestExt", "SourceOrg/ext", "")
+	_, err := CreateExtensionPR(ctx, testLogger(), api, syncResult, nil, "TestExt", "SourceOrg/ext", "")
 	if err == nil {
 		t.Fatal("Ожидалась ошибка при несуществующей ветке")
 	}
@@ -1313,6 +1332,7 @@ func TestCreateExtensionPR_BranchNotExists(t *testing.T) {
 
 // TestCreateExtensionPR_NilRelease проверяет создание PR без релиза (AC4)
 func TestCreateExtensionPR_NilRelease(t *testing.T) {
+	ctx := context.Background()
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/api/v1/repos/TargetOrg/target-repo/pulls" && r.Method == "POST" {
 			w.Header().Set("Content-Type", "application/json")
@@ -1343,7 +1363,7 @@ func TestCreateExtensionPR_NilRelease(t *testing.T) {
 		NewBranch: "update-myext-1.0.0",
 	}
 
-	pr, err := CreateExtensionPR(testLogger(), api, syncResult, nil, "MyExt", "SourceOrg/ext", "")
+	pr, err := CreateExtensionPR(ctx, testLogger(), api, syncResult, nil, "MyExt", "SourceOrg/ext", "")
 	if err != nil {
 		t.Fatalf("CreateExtensionPR вернул ошибку: %v", err)
 	}

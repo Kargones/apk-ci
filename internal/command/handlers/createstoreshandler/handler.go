@@ -110,7 +110,7 @@ func (d *CreateStoresData) writeText(w io.Writer) error {
 // StoreCreator — интерфейс для создания хранилищ (AC-7: тестируемость).
 type StoreCreator interface {
 	// CreateStores создаёт хранилища для основной конфигурации и расширений
-	CreateStores(l *slog.Logger, cfg *config.Config, storeRoot string, dbConnectString string, arrayAdd []string) error
+	CreateStores(ctx context.Context, l *slog.Logger, cfg *config.Config, storeRoot string, dbConnectString string, arrayAdd []string) error
 }
 
 // TempDbCreator — интерфейс для создания временной БД (AC-7: тестируемость).
@@ -231,7 +231,7 @@ func (h *CreateStoresHandler) Execute(ctx context.Context, cfg *config.Config) e
 	}
 
 	// Создание хранилищ через интерфейс
-	err = h.createStores(log, cfg, storeRoot, dbConnectString, extensions)
+	err = h.createStores(ctx, log, cfg, storeRoot, dbConnectString, extensions)
 	if err != nil {
 		log.Error("Ошибка создания хранилищ", slog.String("error", err.Error()))
 		return h.writeError(format, traceID, start, "ERR_STORE_CREATE", err.Error())
@@ -313,12 +313,12 @@ func (h *CreateStoresHandler) createTempDb(ctx context.Context, l *slog.Logger, 
 }
 
 // createStores создаёт хранилища через интерфейс или production реализацию.
-func (h *CreateStoresHandler) createStores(l *slog.Logger, cfg *config.Config, storeRoot string, dbConnectString string, arrayAdd []string) error {
+func (h *CreateStoresHandler) createStores(ctx context.Context, l *slog.Logger, cfg *config.Config, storeRoot string, dbConnectString string, arrayAdd []string) error {
 	if h.storeCreator != nil {
-		return h.storeCreator.CreateStores(l, cfg, storeRoot, dbConnectString, arrayAdd)
+		return h.storeCreator.CreateStores(ctx, l, cfg, storeRoot, dbConnectString, arrayAdd)
 	}
 	// Production: используем store.CreateStores
-	return createStoresProduction(l, cfg, storeRoot, dbConnectString, arrayAdd)
+	return createStoresProduction(ctx, l, cfg, storeRoot, dbConnectString, arrayAdd)
 }
 
 // writeSuccess выводит успешный результат (AC-3, AC-4).

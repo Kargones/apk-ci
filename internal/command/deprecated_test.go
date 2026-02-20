@@ -259,6 +259,7 @@ func TestRegisterWithAlias_LegacyNameFormat(t *testing.T) {
 
 // TestDeprecatedBridge_Execute_ContextCancelled проверяет поведение при отменённом context.
 func TestDeprecatedBridge_Execute_ContextCancelled(t *testing.T) {
+	ctx := context.Background()
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel() // Отменяем context сразу
 
@@ -277,6 +278,7 @@ func TestDeprecatedBridge_Execute_ContextCancelled(t *testing.T) {
 
 // TestDeprecatedBridge_Execute_ContextDeadlineExceeded проверяет поведение при истёкшем deadline.
 func TestDeprecatedBridge_Execute_ContextDeadlineExceeded(t *testing.T) {
+	ctx := context.Background()
 	ctx, cancel := context.WithTimeout(context.Background(), 0) // Истекает мгновенно
 	defer cancel()
 

@@ -606,6 +606,7 @@ func TestTelegramAlerter_DefaultTimeout(t *testing.T) {
 
 // M1 fix: Тест проверяет что отменённый контекст прерывает отправку.
 func TestTelegramAlerter_ContextCanceled(t *testing.T) {
+	ctx := context.Background()
 	config := TelegramConfig{
 		Enabled:  true,
 		BotToken: "123456:ABC-DEF-TEST-TOKEN",

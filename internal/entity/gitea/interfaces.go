@@ -1,6 +1,7 @@
 package gitea
 
 import (
+	"context"
 	"log/slog"
 )
 
@@ -17,46 +18,46 @@ type Config struct {
 
 // APIInterface определяет интерфейс для работы с Gitea API
 type APIInterface interface {
-	GetIssue(issueNumber int64) (*Issue, error)
-	GetFileContent(fileName string) ([]byte, error)
-	GetConfigData(l *slog.Logger, filename string) ([]byte, error)
-	AddIssueComment(issueNumber int64, commentText string) error
-	CloseIssue(issueNumber int64) error
-	ConflictPR(prNumber int64) (bool, error)
-	ConflictFilesPR(prNumber int64) ([]string, error)
-	GetRepositoryContents(filepath, branch string) ([]FileInfo, error)
-	AnalyzeProjectStructure(branch string) ([]string, error)
-	AnalyzeProject(branch string) ([]string, error)
-	GetLatestCommit(branch string) (*Commit, error)
-	GetCommitFiles(commitSHA string) ([]CommitFile, error)
+	GetIssue(ctx context.Context, issueNumber int64) (*Issue, error)
+	GetFileContent(ctx context.Context, fileName string) ([]byte, error)
+	GetConfigData(ctx context.Context, l *slog.Logger, filename string) ([]byte, error)
+	AddIssueComment(ctx context.Context, issueNumber int64, commentText string) error
+	CloseIssue(ctx context.Context, issueNumber int64) error
+	ConflictPR(ctx context.Context, prNumber int64) (bool, error)
+	ConflictFilesPR(ctx context.Context, prNumber int64) ([]string, error)
+	GetRepositoryContents(ctx context.Context, filepath, branch string) ([]FileInfo, error)
+	AnalyzeProjectStructure(ctx context.Context, branch string) ([]string, error)
+	AnalyzeProject(ctx context.Context, branch string) ([]string, error)
+	GetLatestCommit(ctx context.Context, branch string) (*Commit, error)
+	GetCommitFiles(ctx context.Context, commitSHA string) ([]CommitFile, error)
 	// Методы для работы с релизами
-	GetLatestRelease() (*Release, error)
-	GetReleaseByTag(tag string) (*Release, error)
-	IsUserInTeam(l *slog.Logger, username string, orgName string, teamName string) (bool, error)
+	GetLatestRelease(ctx context.Context) (*Release, error)
+	GetReleaseByTag(ctx context.Context, tag string) (*Release, error)
+	IsUserInTeam(ctx context.Context, l *slog.Logger, username string, orgName string, teamName string) (bool, error)
 	// Методы для работы с коммитами и историей
-	GetCommits(branch string, limit int) ([]Commit, error)
-	GetFirstCommitOfBranch(branch string, baseBranch string) (*Commit, error)
-	GetCommitsBetween(baseCommitSHA, headCommitSHA string) ([]Commit, error)
-	GetBranchCommitRange(branch string) (*BranchCommitRange, error)
+	GetCommits(ctx context.Context, branch string, limit int) ([]Commit, error)
+	GetFirstCommitOfBranch(ctx context.Context, branch string, baseBranch string) (*Commit, error)
+	GetCommitsBetween(ctx context.Context, baseCommitSHA, headCommitSHA string) ([]Commit, error)
+	GetBranchCommitRange(ctx context.Context, branch string) (*BranchCommitRange, error)
 	// Методы для работы с PR и ветками
-	ActivePR() ([]PR, error)
-	DeleteTestBranch() error
-	CreateTestBranch() error
-	CreatePR(head string) (PR, error)
-	CreatePRWithOptions(opts CreatePROptions) (*PRResponse, error)
-	MergePR(prNumber int64, l *slog.Logger) error
-	ClosePR(prNumber int64) error
+	ActivePR(ctx context.Context) ([]PR, error)
+	DeleteTestBranch(ctx context.Context) error
+	CreateTestBranch(ctx context.Context) error
+	CreatePR(ctx context.Context, head string) (PR, error)
+	CreatePRWithOptions(ctx context.Context, opts CreatePROptions) (*PRResponse, error)
+	MergePR(ctx context.Context, prNumber int64, l *slog.Logger) error
+	ClosePR(ctx context.Context, prNumber int64) error
 	// Batch операции с файлами
-	SetRepositoryState(l *slog.Logger, operations []BatchOperation, branch, commitMessage string) error
+	SetRepositoryState(ctx context.Context, l *slog.Logger, operations []ChangeFileOperation, branch, commitMessage string) error
 	// Методы для работы с командами
-	GetTeamMembers(orgName, teamName string) ([]string, error)
+	GetTeamMembers(ctx context.Context, orgName, teamName string) ([]string, error)
 	// Методы для работы с ветками
-	GetBranches(repo string) ([]Branch, error)
+	GetBranches(ctx context.Context, repo string) ([]Branch, error)
 	// Методы для работы с организациями
-	SearchOrgRepos(orgName string) ([]Repository, error)
+	SearchOrgRepos(ctx context.Context, orgName string) ([]Repository, error)
 }
 
 // ProjectAnalyzer определяет интерфейс для анализа проектов
 type ProjectAnalyzer interface {
-	AnalyzeProject(l *slog.Logger, branch string) error
+	AnalyzeProject(ctx context.Context, l *slog.Logger, branch string) error
 }

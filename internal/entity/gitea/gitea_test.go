@@ -1,6 +1,7 @@
 package gitea
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -61,6 +62,7 @@ func TestNewGiteaAPI(t *testing.T) {
 
 // TestGetIssue тестирует получение issue
 func TestGetIssue(t *testing.T) {
+	ctx := context.Background()
 	tests := []struct {
 		name         string
 		issueNumber  int64
@@ -105,7 +107,7 @@ func TestGetIssue(t *testing.T) {
 				AccessToken: "testtoken",
 			}
 
-			issue, err := api.GetIssue(tt.issueNumber)
+			issue, err := api.GetIssue(ctx, tt.issueNumber)
 
 			if tt.expectError {
 				if err == nil {
@@ -133,6 +135,7 @@ func TestGetIssue(t *testing.T) {
 
 // TestGetRepositoryContents тестирует получение содержимого репозитория
 func TestGetRepositoryContents(t *testing.T) {
+	ctx := context.Background()
 	tests := []struct {
 		name          string
 		filepath      string
@@ -185,7 +188,7 @@ func TestGetRepositoryContents(t *testing.T) {
 				AccessToken: "testtoken",
 			}
 
-			contents, err := api.GetRepositoryContents(tt.filepath, tt.branch)
+			contents, err := api.GetRepositoryContents(ctx, tt.filepath, tt.branch)
 
 			if tt.expectError {
 				if err == nil {
@@ -208,6 +211,7 @@ func TestGetRepositoryContents(t *testing.T) {
 
 // TestAnalyzeProject тестирует анализ проекта
 func TestAnalyzeProject(t *testing.T) {
+	ctx := context.Background()
 	tests := []struct {
 		name          string
 		branch        string
@@ -254,7 +258,7 @@ func TestAnalyzeProject(t *testing.T) {
 				AccessToken: "testtoken",
 			}
 
-			result, err := api.AnalyzeProject(tt.branch)
+			result, err := api.AnalyzeProject(ctx, tt.branch)
 
 			if tt.expectError {
 				if err == nil {
@@ -277,6 +281,7 @@ func TestAnalyzeProject(t *testing.T) {
 
 // TestConflictPR тестирует проверку конфликтов в PR
 func TestConflictPR(t *testing.T) {
+	ctx := context.Background()
 	tests := []struct {
 		name             string
 		prNumber         int64
@@ -331,7 +336,7 @@ func TestConflictPR(t *testing.T) {
 				AccessToken: "testtoken",
 			}
 
-			hasConflict, err := api.ConflictPR(tt.prNumber)
+			hasConflict, err := api.ConflictPR(ctx, tt.prNumber)
 
 			if tt.expectError {
 				if err == nil {
@@ -354,6 +359,7 @@ func TestConflictPR(t *testing.T) {
 
 // TestConflictPRWithAsyncCheck тестирует поведение ConflictPR при асинхронной проверке конфликтов (статус "checking")
 func TestConflictPRWithAsyncCheck(t *testing.T) {
+	ctx := context.Background()
 	tests := []struct {
 		name                string
 		prNumber            int64
@@ -427,7 +433,7 @@ func TestConflictPRWithAsyncCheck(t *testing.T) {
 				AccessToken: "testtoken",
 			}
 
-			hasConflict, err := api.ConflictPR(tt.prNumber)
+			hasConflict, err := api.ConflictPR(ctx, tt.prNumber)
 
 			if tt.expectError {
 				if err == nil {
@@ -588,6 +594,7 @@ func TestUpdateConfig(t *testing.T) {
 
 // TestGetFileContent тестирует получение содержимого файла
 func TestGetFileContent(t *testing.T) {
+	ctx := context.Background()
 	tests := []struct {
 		name            string
 		fileName        string
@@ -635,7 +642,7 @@ func TestGetFileContent(t *testing.T) {
 				BaseBranch:  "main",
 			}
 
-			content, err := api.GetFileContent(tt.fileName)
+			content, err := api.GetFileContent(ctx, tt.fileName)
 
 			if tt.expectError {
 				if err == nil {
@@ -658,6 +665,7 @@ func TestGetFileContent(t *testing.T) {
 
 // TestAddIssueComment тестирует добавление комментария к issue
 func TestAddIssueComment(t *testing.T) {
+	ctx := context.Background()
 	tests := []struct {
 		name         string
 		issueNumber  int64
@@ -717,7 +725,7 @@ func TestAddIssueComment(t *testing.T) {
 				AccessToken: "testtoken",
 			}
 
-			err := api.AddIssueComment(tt.issueNumber, tt.commentText)
+			err := api.AddIssueComment(ctx, tt.issueNumber, tt.commentText)
 
 			if tt.expectError {
 				if err == nil {
@@ -734,6 +742,7 @@ func TestAddIssueComment(t *testing.T) {
 
 // TestCloseIssue тестирует закрытие issue
 func TestCloseIssue(t *testing.T) {
+	ctx := context.Background()
 	tests := []struct {
 		name         string
 		issueNumber  int64
@@ -790,7 +799,7 @@ func TestCloseIssue(t *testing.T) {
 				AccessToken: "testtoken",
 			}
 
-			err := api.CloseIssue(tt.issueNumber)
+			err := api.CloseIssue(ctx, tt.issueNumber)
 
 			if tt.expectError {
 				if err == nil {
@@ -807,6 +816,7 @@ func TestCloseIssue(t *testing.T) {
 
 // TestCreatePRWithOptions_Success тестирует успешное создание PR
 func TestCreatePRWithOptions_Success(t *testing.T) {
+	ctx := context.Background()
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/api/v1/repos/testowner/testrepo/pulls" && r.Method == "POST" {
 			w.Header().Set("Content-Type", "application/json")
@@ -840,7 +850,7 @@ func TestCreatePRWithOptions_Success(t *testing.T) {
 		Base:  "main",
 	}
 
-	pr, err := api.CreatePRWithOptions(opts)
+	pr, err := api.CreatePRWithOptions(ctx, opts)
 	if err != nil {
 		t.Fatalf("CreatePRWithOptions вернул ошибку: %v", err)
 	}
@@ -858,6 +868,7 @@ func TestCreatePRWithOptions_Success(t *testing.T) {
 
 // TestCreatePRWithOptions_Conflict тестирует обработку существующего PR
 func TestCreatePRWithOptions_Conflict(t *testing.T) {
+	ctx := context.Background()
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
 		case r.URL.Path == "/api/v1/repos/testowner/testrepo/pulls" && r.Method == "POST":
@@ -898,7 +909,7 @@ func TestCreatePRWithOptions_Conflict(t *testing.T) {
 		Base:  "main",
 	}
 
-	pr, err := api.CreatePRWithOptions(opts)
+	pr, err := api.CreatePRWithOptions(ctx, opts)
 	if err != nil {
 		t.Fatalf("CreatePRWithOptions вернул ошибку: %v", err)
 	}
@@ -911,6 +922,7 @@ func TestCreatePRWithOptions_Conflict(t *testing.T) {
 
 // TestCreatePRWithOptions_BranchNotFound тестирует ошибку при несуществующей ветке
 func TestCreatePRWithOptions_BranchNotFound(t *testing.T) {
+	ctx := context.Background()
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		_, _ = w.Write([]byte(`{"message": "branch not found"}`))
@@ -931,7 +943,7 @@ func TestCreatePRWithOptions_BranchNotFound(t *testing.T) {
 		Base:  "main",
 	}
 
-	_, err := api.CreatePRWithOptions(opts)
+	_, err := api.CreatePRWithOptions(ctx, opts)
 	if err == nil {
 		t.Fatal("Ожидалась ошибка при несуществующей ветке")
 	}
@@ -942,6 +954,7 @@ func TestCreatePRWithOptions_BranchNotFound(t *testing.T) {
 
 // TestCreatePRWithOptions_ServerError тестирует обработку ошибки сервера
 func TestCreatePRWithOptions_ServerError(t *testing.T) {
+	ctx := context.Background()
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		_, _ = w.Write([]byte(`{"message": "internal server error"}`))
@@ -962,7 +975,7 @@ func TestCreatePRWithOptions_ServerError(t *testing.T) {
 		Base:  "main",
 	}
 
-	_, err := api.CreatePRWithOptions(opts)
+	_, err := api.CreatePRWithOptions(ctx, opts)
 	if err == nil {
 		t.Fatal("Ожидалась ошибка при ошибке сервера")
 	}
@@ -973,6 +986,7 @@ func TestCreatePRWithOptions_ServerError(t *testing.T) {
 
 // TestCreatePRWithOptions_InvalidJSON тестирует обработку некорректного JSON ответа
 func TestCreatePRWithOptions_InvalidJSON(t *testing.T) {
+	ctx := context.Background()
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
@@ -994,7 +1008,7 @@ func TestCreatePRWithOptions_InvalidJSON(t *testing.T) {
 		Base:  "main",
 	}
 
-	_, err := api.CreatePRWithOptions(opts)
+	_, err := api.CreatePRWithOptions(ctx, opts)
 	if err == nil {
 		t.Fatal("Ожидалась ошибка при некорректном JSON")
 	}
@@ -1005,6 +1019,7 @@ func TestCreatePRWithOptions_InvalidJSON(t *testing.T) {
 
 // TestCreatePRWithOptions_ConflictFindError тестирует ошибку поиска существующего PR
 func TestCreatePRWithOptions_ConflictFindError(t *testing.T) {
+	ctx := context.Background()
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
 		case r.URL.Path == "/api/v1/repos/testowner/testrepo/pulls" && r.Method == "POST":
@@ -1036,7 +1051,7 @@ func TestCreatePRWithOptions_ConflictFindError(t *testing.T) {
 		Base:  "main",
 	}
 
-	_, err := api.CreatePRWithOptions(opts)
+	_, err := api.CreatePRWithOptions(ctx, opts)
 	if err == nil {
 		t.Fatal("Ожидалась ошибка при невозможности найти существующий PR")
 	}
@@ -1047,6 +1062,7 @@ func TestCreatePRWithOptions_ConflictFindError(t *testing.T) {
 
 // TestGetConfigData тестирует получение конфигурационных данных
 func TestGetConfigData(t *testing.T) {
+	ctx := context.Background()
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
 	tests := []struct {
@@ -1096,7 +1112,7 @@ func TestGetConfigData(t *testing.T) {
 				BaseBranch:  "main",
 			}
 
-			content, err := api.GetConfigData(logger, tt.filename)
+			content, err := api.GetConfigData(ctx, logger, tt.filename)
 
 			if tt.expectError {
 				if err == nil {

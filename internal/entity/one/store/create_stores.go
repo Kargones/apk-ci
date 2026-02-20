@@ -24,7 +24,7 @@ import (
 //
 // Возвращает:
 //   - error: ошибку, если операция не удалась
-func CreateStores(l *slog.Logger, cfg *config.Config, storeRoot string, dbConnectString string, arrayAdd []string) error {
+func CreateStores(ctx context.Context, l *slog.Logger, cfg *config.Config, storeRoot string, dbConnectString string, arrayAdd []string) error {
 	l.Debug("Начало создания хранилищ",
 		slog.String("storeRoot", storeRoot),
 		slog.String("dbConnectString", dbConnectString),
@@ -70,7 +70,7 @@ func CreateStores(l *slog.Logger, cfg *config.Config, storeRoot string, dbConnec
 	r.Params = append(r.Params, "/Out")
 	r.Params = append(r.Params, "/c Создание хранилища конфигурации")
 
-	cmdCtx, cmdCancel := context.WithTimeout(context.Background(), 5*time.Minute)
+	cmdCtx, cmdCancel := context.WithTimeout(ctx, 5*time.Minute)
 	defer cmdCancel()
 	_, err := r.RunCommand(cmdCtx, l)
 	if err != nil {
@@ -142,7 +142,7 @@ func CreateStores(l *slog.Logger, cfg *config.Config, storeRoot string, dbConnec
 		rAdd.Params = append(rAdd.Params, "/Out")
 		rAdd.Params = append(rAdd.Params, "/c Создание хранилища конфигурации")
 
-		cmdCtx, cmdCancel := context.WithTimeout(context.Background(), 5*time.Minute)
+		cmdCtx, cmdCancel := context.WithTimeout(ctx, 5*time.Minute)
 		defer cmdCancel()
 		_, err := rAdd.RunCommand(cmdCtx, l)
 		if err != nil {

@@ -48,7 +48,7 @@ func run() int {
 
 	var err error
 	ctx := context.Background()
-	cfg, err := config.MustLoad()
+	cfg, err := config.MustLoad(ctx)
 	if err != nil || cfg == nil {
 		fmt.Fprintf(os.Stderr, "Не удалось загрузить конфигурацию приложения: %v\n", err) //nolint:errcheck // writing to stderr
 		return 5

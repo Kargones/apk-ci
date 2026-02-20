@@ -22,14 +22,14 @@ import (
 //   - Автоматически обрабатывает пагинацию (лимит 50 на страницу)
 //   - Защита от бесконечного цикла (максимум 100 страниц = 5000 репозиториев)
 //   - Возвращает пустой slice если организация не найдена (HTTP 404)
-func (g *API) SearchOrgRepos(orgName string) ([]Repository, error) {
+func (g *API) SearchOrgRepos(ctx context.Context, orgName string) ([]Repository, error) {
 	var allRepos []Repository
 
 	for page := 1; page <= SearchOrgReposMaxPages; page++ {
 		urlString := fmt.Sprintf("%s/api/%s/orgs/%s/repos?page=%d&limit=%d",
 			g.GiteaURL, constants.APIVersion, orgName, page, SearchOrgReposPageLimit)
 
-		statusCode, body, err := g.sendReq(context.Background(), urlString, "", "GET")
+		statusCode, body, err := g.sendReq(ctx, urlString, "", "GET")
 		if err != nil {
 			return nil, fmt.Errorf("ошибка при запросе репозиториев организации %s: %w", orgName, err)
 		}
@@ -69,14 +69,14 @@ func (g *API) SearchOrgRepos(orgName string) ([]Repository, error) {
 // Особенности:
 //   - Автоматически обрабатывает пагинацию (лимит 50 на страницу)
 //   - Защита от бесконечного цикла (максимум 100 страниц)
-func (g *API) GetUserOrganizations() ([]Organization, error) {
+func (g *API) GetUserOrganizations(ctx context.Context) ([]Organization, error) {
 	var allOrgs []Organization
 
 	for page := 1; page <= GetUserOrgsMaxPages; page++ {
 		urlString := fmt.Sprintf("%s/api/%s/user/orgs?page=%d&limit=%d",
 			g.GiteaURL, constants.APIVersion, page, GetUserOrgsPageLimit)
 
-		statusCode, body, err := g.sendReq(context.Background(), urlString, "", "GET")
+		statusCode, body, err := g.sendReq(ctx, urlString, "", "GET")
 		if err != nil {
 			return nil, fmt.Errorf("ошибка при запросе организаций пользователя: %w", err)
 		}

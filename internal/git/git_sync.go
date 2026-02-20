@@ -136,8 +136,8 @@ func executeGitCommandWithRetry(repoPath string, args []string) error {
 
 // waitForGitSync ожидает синхронизации состояния каталога с git
 // getGitStatus возвращает статус Git репозитория для диагностики
-func getGitStatus(repoPath string) (string, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+func getGitStatus(ctx context.Context, repoPath string) (string, error) {
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Minute)
 	defer cancel()
 
 	// #nosec G204 - GitCommand is a constant, all arguments are hardcoded
@@ -152,14 +152,14 @@ func getGitStatus(repoPath string) (string, error) {
 	return string(output), nil
 }
 
-func waitForGitSync(repoPath string) error {
+func waitForGitSync(ctx context.Context, repoPath string) error {
 	maxAttempts := 10
 	slog.Debug("Начинаем ожидание Git синхронизации",
 		slog.String("repoPath", repoPath),
 		slog.Int("maxAttempts", maxAttempts))
 
 	// Получаем начальный статус репозитория для диагностики
-	if status, err := getGitStatus(repoPath); err == nil {
+	if status, err := getGitStatus(ctx, repoPath); err == nil {
 		slog.Debug("Начальный статус Git репозитория",
 			slog.String("status", status))
 	} else {
@@ -174,7 +174,7 @@ func waitForGitSync(repoPath string) error {
 
 		// Проверяем, что Git репозиторий готов к работе
 		// Используем простую команду git status для проверки готовности
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+		ctx, cancel := context.WithTimeout(ctx, 2*time.Minute)
 		// #nosec G204 - GitCommand is a constant, all arguments are hardcoded
 		cmd := exec.CommandContext(ctx, GitCommand, "status", "--porcelain")
 		cmd.Dir = repoPath

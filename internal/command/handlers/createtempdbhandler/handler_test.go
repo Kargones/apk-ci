@@ -762,6 +762,7 @@ func TestCreateTempDbHandler_Execute_ValidationError_IbcmdNotExists(t *testing.T
 
 // H3 fix: тест для проверки отмены context
 func TestCreateTempDbHandler_Execute_ContextCancelled(t *testing.T) {
+	ctx := context.Background()
 	h := &CreateTempDbHandler{}
 
 	t.Setenv("BR_OUTPUT_FORMAT", "")

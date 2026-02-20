@@ -22,7 +22,7 @@ import (
 //
 // Возвращает:
 //   - error: ошибка слияния или nil при успехе
-func (g *API) MergePR(prNumber int64, l *slog.Logger) error {
+func (g *API) MergePR(ctx context.Context, prNumber int64, l *slog.Logger) error {
 	urlString := fmt.Sprintf("%s/api/%s/repos/%s/%s/pulls/%d/merge", g.GiteaURL, constants.APIVersion, g.Owner, g.Repo, prNumber)
 	reqBody := `{
 		"Do": "merge",
@@ -31,7 +31,7 @@ func (g *API) MergePR(prNumber int64, l *slog.Logger) error {
 		"merge_when_checks_succeed": false
 		}`
 
-	statusCode, bodyString, err := g.sendReq(context.Background(), urlString, reqBody, "POST")
+	statusCode, bodyString, err := g.sendReq(ctx, urlString, reqBody, "POST")
 	l.Debug("Ответ сервера при слиянии PR",
 		slog.String("BR_ACTION", "merge-pr"),
 		slog.Int64("BR_PR_NUMBER", prNumber),
@@ -54,7 +54,7 @@ func (g *API) MergePR(prNumber int64, l *slog.Logger) error {
 // Возвращает:
 //   - bool: true если есть конфликты, false если их нет
 //   - error: ошибка проверки или nil при успехе
-func (g *API) ConflictPR(prNumber int64) (bool, error) {
+func (g *API) ConflictPR(ctx context.Context, prNumber int64) (bool, error) {
 	const (
 		maxRetries      = 60             // Максимальное количество попыток (60 * 5 секунд = 5 минут)
 		retryInterval   = 5 * time.Second // Интервал между попытками
@@ -63,7 +63,7 @@ func (g *API) ConflictPR(prNumber int64) (bool, error) {
 	urlString := fmt.Sprintf("%s/api/%s/repos/%s/%s/pulls/%d", g.GiteaURL, constants.APIVersion, g.Owner, g.Repo, prNumber)
 
 	for attempt := 0; attempt < maxRetries; attempt++ {
-		statusCode, body, err := g.sendReq(context.Background(), urlString, "", "GET")
+		statusCode, body, err := g.sendReq(ctx, urlString, "", "GET")
 		if err != nil {
 			return true, fmt.Errorf("ошибка при выполнении запроса ConflictPR: %w", err)
 		}
@@ -120,10 +120,10 @@ func (g *API) ConflictPR(prNumber int64) (bool, error) {
 // Возвращает:
 //   - []string: список путей к файлам с конфликтами
 //   - error: ошибка получения информации или nil при успехе
-func (g *API) ConflictFilesPR(prNumber int64) ([]string, error) {
+func (g *API) ConflictFilesPR(ctx context.Context, prNumber int64) ([]string, error) {
 	var err error
 	urlString := fmt.Sprintf("%s/api/%s/repos/%s/%s/pulls/%d/files", g.GiteaURL, constants.APIVersion, g.Owner, g.Repo, prNumber)
-	statusCode, body, err := g.sendReq(context.Background(), urlString, "", "GET")
+	statusCode, body, err := g.sendReq(ctx, urlString, "", "GET")
 	if err != nil {
 		return []string{}, fmt.Errorf("ошибка при выполнении запроса ConflictFilesPR: %w", err)
 	}
@@ -152,7 +152,7 @@ func (g *API) ConflictFilesPR(prNumber int64) ([]string, error) {
 // Возвращает:
 //   - PR: созданный запрос на изменение
 //   - error: ошибка создания или nil при успехе
-func (g *API) CreatePR(head string) (PR, error) {
+func (g *API) CreatePR(ctx context.Context, head string) (PR, error) {
 	pr := PR{}
 
 	urlString := fmt.Sprintf("%s/api/%s/repos/%s/%s/pulls", g.GiteaURL, constants.APIVersion, g.Owner, g.Repo)
@@ -163,7 +163,7 @@ func (g *API) CreatePR(head string) (PR, error) {
 		"title": "Test merge %s to %s"
 	}`, g.NewBranch, head, head, g.NewBranch)
 
-	statusCode, body, err := g.sendReq(context.Background(), urlString, reqBody, "POST")
+	statusCode, body, err := g.sendReq(ctx, urlString, reqBody, "POST")
 	if statusCode != http.StatusCreated {
 		return pr, fmt.Errorf("ошибка при создании пулл реквеста: статус %d, ответ: %s, ошибка: %w", statusCode, body, err)
 	}
@@ -186,7 +186,7 @@ func (g *API) CreatePR(head string) (PR, error) {
 // Возвращает:
 //   - *PRResponse: информация о созданном PR
 //   - error: ошибка создания или nil при успехе
-func (g *API) CreatePRWithOptions(opts CreatePROptions) (*PRResponse, error) {
+func (g *API) CreatePRWithOptions(ctx context.Context, opts CreatePROptions) (*PRResponse, error) {
 	urlString := fmt.Sprintf("%s/api/%s/repos/%s/%s/pulls", g.GiteaURL, constants.APIVersion, g.Owner, g.Repo)
 
 	// Сериализуем опции в JSON
@@ -195,7 +195,7 @@ func (g *API) CreatePRWithOptions(opts CreatePROptions) (*PRResponse, error) {
 		return nil, fmt.Errorf("ошибка сериализации параметров PR: %w", err)
 	}
 
-	statusCode, body, err := g.sendReq(context.Background(), urlString, string(requestBody), "POST")
+	statusCode, body, err := g.sendReq(ctx, urlString, string(requestBody), "POST")
 	if err != nil {
 		return nil, fmt.Errorf("ошибка при выполнении запроса: %w", err)
 	}
@@ -203,7 +203,7 @@ func (g *API) CreatePRWithOptions(opts CreatePROptions) (*PRResponse, error) {
 	// Обработка случая, когда PR уже существует
 	if statusCode == http.StatusConflict {
 		// Пробуем найти существующий PR с теми же head и base
-		existingPR, findErr := g.findExistingPR(opts.Head, opts.Base)
+		existingPR, findErr := g.findExistingPR(ctx, opts.Head, opts.Base)
 		if findErr != nil {
 			return nil, fmt.Errorf("PR уже существует, но не удалось его найти: %v", findErr)
 		}
@@ -228,10 +228,10 @@ func (g *API) CreatePRWithOptions(opts CreatePROptions) (*PRResponse, error) {
 }
 
 // findExistingPR ищет существующий открытый PR с заданными head и base ветками.
-func (g *API) findExistingPR(head, base string) (*PRResponse, error) {
+func (g *API) findExistingPR(ctx context.Context, head, base string) (*PRResponse, error) {
 	urlString := fmt.Sprintf("%s/api/%s/repos/%s/%s/pulls?state=open", g.GiteaURL, constants.APIVersion, g.Owner, g.Repo)
 
-	statusCode, body, err := g.sendReq(context.Background(), urlString, "", "GET")
+	statusCode, body, err := g.sendReq(ctx, urlString, "", "GET")
 	if err != nil {
 		return nil, fmt.Errorf("ошибка при получении списка PR: %w", err)
 	}
@@ -281,9 +281,9 @@ func (g *API) findExistingPR(head, base string) (*PRResponse, error) {
 // Возвращает:
 //   - []PR: список активных запросов на изменение
 //   - error: ошибка получения списка или nil при успехе
-func (g *API) ActivePR() ([]PR, error) {
+func (g *API) ActivePR(ctx context.Context) ([]PR, error) {
 	urlString := fmt.Sprintf("%s/api/%s/repos/%s/%s/pulls?state=open&sort=oldest", g.GiteaURL, constants.APIVersion, g.Owner, g.Repo)
-	statusCode, body, err := g.sendReq(context.Background(), urlString, "", "GET")
+	statusCode, body, err := g.sendReq(ctx, urlString, "", "GET")
 	if err != nil {
 		return nil, fmt.Errorf("ошибка при выполнении запроса ActivePR: %w", err)
 	}
@@ -312,11 +312,11 @@ func (g *API) ActivePR() ([]PR, error) {
 //
 // Возвращает:
 //   - error: ошибка закрытия или nil при успехе
-func (g *API) ClosePR(prNumber int64) error {
+func (g *API) ClosePR(ctx context.Context, prNumber int64) error {
 	urlString := fmt.Sprintf("%s/api/%s/repos/%s/%s/pulls/%d", g.GiteaURL, constants.APIVersion, g.Owner, g.Repo, prNumber)
 	reqBody := `{"state":"closed"}`
 
-	statusCode, _, err := g.sendReq(context.Background(), urlString, reqBody, "PATCH")
+	statusCode, _, err := g.sendReq(ctx, urlString, reqBody, "PATCH")
 	if err != nil {
 		return fmt.Errorf("ошибка при выполнении запроса: %w", err)
 	}

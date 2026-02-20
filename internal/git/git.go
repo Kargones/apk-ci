@@ -123,7 +123,7 @@ func (g *Git) Clone(ctx context.Context, l *slog.Logger) error {
 	if timeout == 0 {
 		timeout = 60 * time.Minute // Значение по умолчанию, если таймаут не задан
 	}
-	ctxTimeout, cancel := context.WithTimeout(context.Background(), timeout)
+	ctxTimeout, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
 	// Формируем параметры команды
@@ -601,7 +601,7 @@ func CheckoutCommit(ctx context.Context, l *slog.Logger, repoPath, commitHash st
 	}
 
 	// Проверяем существование коммита в репозитории
-	if err := validateCommitExists(repoPath, commitHash); err != nil {
+	if err := validateCommitExists(ctx, repoPath, commitHash); err != nil {
 		l.Error("Коммит не найден в репозитории",
 			slog.String("repoPath", repoPath),
 			slog.String("commitHash", commitHash),
@@ -666,9 +666,9 @@ func CheckoutCommit(ctx context.Context, l *slog.Logger, repoPath, commitHash st
 }
 
 // validateCommitExists проверяет существование коммита в репозитории
-func validateCommitExists(repoPath, commitHash string) error {
+func validateCommitExists(ctx context.Context, repoPath, commitHash string) error {
 	// Создаем контекст с таймаутом для команды git
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Minute)
 	defer cancel()
 
 	// #nosec G204 - GitCommand является константой, args формируется из проверенных значений

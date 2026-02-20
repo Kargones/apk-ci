@@ -18,10 +18,10 @@ import (
 // Возвращает:
 //   - *Commit: указатель на структуру с информацией о коммите
 //   - error: ошибка получения коммита или nil при успехе
-func (g *API) GetLatestCommit(branch string) (*Commit, error) {
+func (g *API) GetLatestCommit(ctx context.Context, branch string) (*Commit, error) {
 	urlString := fmt.Sprintf("%s/api/%s/repos/%s/%s/commits?sha=%s&limit=1", g.GiteaURL, constants.APIVersion, g.Owner, g.Repo, branch)
 
-	statusCode, body, err := g.sendReq(context.Background(), urlString, "", "GET")
+	statusCode, body, err := g.sendReq(ctx, urlString, "", "GET")
 	if err != nil {
 		return nil, fmt.Errorf("ошибка при выполнении запроса: %w", err)
 	}
@@ -52,13 +52,13 @@ func (g *API) GetLatestCommit(branch string) (*Commit, error) {
 // Возвращает:
 //   - []Commit: массив коммитов
 //   - error: ошибка получения коммитов или nil при успехе
-func (g *API) GetCommits(branch string, limit int) ([]Commit, error) {
+func (g *API) GetCommits(ctx context.Context, branch string, limit int) ([]Commit, error) {
 	urlString := fmt.Sprintf("%s/api/%s/repos/%s/%s/commits?sha=%s", g.GiteaURL, constants.APIVersion, g.Owner, g.Repo, branch)
 	if limit > 0 {
 		urlString = fmt.Sprintf("%s&limit=%d", urlString, limit)
 	}
 
-	statusCode, body, err := g.sendReq(context.Background(), urlString, "", "GET")
+	statusCode, body, err := g.sendReq(ctx, urlString, "", "GET")
 	if err != nil {
 		return nil, fmt.Errorf("ошибка при выполнении запроса: %w", err)
 	}
@@ -85,12 +85,12 @@ func (g *API) GetCommits(branch string, limit int) ([]Commit, error) {
 // Возвращает:
 //   - *Commit: указатель на первый коммит ветки
 //   - error: ошибка получения коммита или nil при успехе
-func (g *API) GetFirstCommitOfBranch(branch string, _ string) (*Commit, error) {
+func (g *API) GetFirstCommitOfBranch(ctx context.Context, branch string, _ string) (*Commit, error) {
 	// Получаем все коммиты в ветке в обратном порядке (от старых к новым)
 	// Это может быть неэффективно для больших историй, но для наших целей подойдет
 	urlString := fmt.Sprintf("%s/api/%s/repos/%s/%s/commits?sha=%s&stat=false&verification=false&files=false", g.GiteaURL, constants.APIVersion, g.Owner, g.Repo, branch)
 
-	statusCode, body, err := g.sendReq(context.Background(), urlString, "", "GET")
+	statusCode, body, err := g.sendReq(ctx, urlString, "", "GET")
 	if err != nil {
 		return nil, fmt.Errorf("ошибка при выполнении запроса: %w", err)
 	}
@@ -124,7 +124,7 @@ func (g *API) GetFirstCommitOfBranch(branch string, _ string) (*Commit, error) {
 // Возвращает:
 //   - []Commit: массив коммитов между указанными коммитами
 //   - error: ошибка получения коммитов или nil при успехе
-func (g *API) GetCommitsBetween(baseCommitSHA, headCommitSHA string) ([]Commit, error) {
+func (g *API) GetCommitsBetween(ctx context.Context, baseCommitSHA, headCommitSHA string) ([]Commit, error) {
 	// Gitea API не предоставляет прямого метода для получения коммитов между двумя SHA.
 	// Мы можем попробовать использовать логику вида `git log base..head`, но через API это сложно.
 	// Вместо этого мы получим коммиты от head и будем идти вниз по истории до base.
@@ -132,7 +132,7 @@ func (g *API) GetCommitsBetween(baseCommitSHA, headCommitSHA string) ([]Commit, 
 
 	urlString := fmt.Sprintf("%s/api/%s/repos/%s/%s/commits?sha=%s", g.GiteaURL, constants.APIVersion, g.Owner, g.Repo, headCommitSHA)
 
-	statusCode, body, err := g.sendReq(context.Background(), urlString, "", "GET")
+	statusCode, body, err := g.sendReq(ctx, urlString, "", "GET")
 	if err != nil {
 		return nil, fmt.Errorf("ошибка при выполнении запроса: %w", err)
 	}
@@ -178,10 +178,10 @@ func (g *API) GetCommitsBetween(baseCommitSHA, headCommitSHA string) ([]Commit, 
 // Возвращает:
 //   - []CommitFile: список файлов с информацией об изменениях
 //   - error: ошибка получения файлов или nil при успехе
-func (g *API) GetCommitFiles(commitSHA string) ([]CommitFile, error) {
+func (g *API) GetCommitFiles(ctx context.Context, commitSHA string) ([]CommitFile, error) {
 	urlString := fmt.Sprintf("%s/api/%s/repos/%s/%s/git/commits/%s", g.GiteaURL, constants.APIVersion, g.Owner, g.Repo, commitSHA)
 
-	statusCode, body, err := g.sendReq(context.Background(), urlString, "", "GET")
+	statusCode, body, err := g.sendReq(ctx, urlString, "", "GET")
 	if err != nil {
 		return nil, fmt.Errorf("ошибка при выполнении запроса: %w", err)
 	}
@@ -215,28 +215,28 @@ func (g *API) GetCommitFiles(commitSHA string) ([]CommitFile, error) {
 // Возвращает:
 //   - *BranchCommitRange: структура с первым и последним коммитом
 //   - error: ошибка получения коммитов или nil при успехе
-func (g *API) GetBranchCommitRange(branch string) (*BranchCommitRange, error) {
+func (g *API) GetBranchCommitRange(ctx context.Context, branch string) (*BranchCommitRange, error) {
 	if branch == "main" || branch == "master" {
-		return g.getMainBranchCommitRange(branch)
+		return g.getMainBranchCommitRange(ctx, branch)
 	}
-	return g.getFeatureBranchCommitRange(branch)
+	return g.getFeatureBranchCommitRange(ctx, branch)
 }
 
 // getMainBranchCommitRange получает диапазон коммитов для главной ветки.
 // Для первого коммита ищет коммит с тегом "sq-start", если не найден - берет первый коммит.
 // Для последнего коммита берет последний коммит в ветке.
-func (g *API) getMainBranchCommitRange(branch string) (*BranchCommitRange, error) {
+func (g *API) getMainBranchCommitRange(ctx context.Context, branch string) (*BranchCommitRange, error) {
 	// Получаем последний коммит
-	lastCommit, err := g.GetLatestCommit(branch)
+	lastCommit, err := g.GetLatestCommit(ctx, branch)
 	if err != nil {
 		return nil, fmt.Errorf("ошибка получения последнего коммита: %w", err)
 	}
 
 	// Ищем коммит с тегом "sq-start"
-	firstCommit, err := g.findCommitWithTag(branch, "sq-start")
+	firstCommit, err := g.findCommitWithTag(ctx, branch, "sq-start")
 	if err != nil {
 		// Если коммит с тегом не найден, берем первый коммит в истории
-		firstCommit, err = g.getFirstCommitInHistory(branch)
+		firstCommit, err = g.getFirstCommitInHistory(ctx, branch)
 		if err != nil {
 			return nil, fmt.Errorf("ошибка получения первого коммита: %w", err)
 		}
@@ -250,9 +250,9 @@ func (g *API) getMainBranchCommitRange(branch string) (*BranchCommitRange, error
 
 // getFeatureBranchCommitRange получает диапазон коммитов для feature ветки.
 // Использует compare API для определения первого коммита (merge base) и последнего коммита.
-func (g *API) getFeatureBranchCommitRange(branch string) (*BranchCommitRange, error) {
+func (g *API) getFeatureBranchCommitRange(ctx context.Context, branch string) (*BranchCommitRange, error) {
 	// Получаем последний коммит ветки
-	lastCommit, err := g.GetLatestCommit(branch)
+	lastCommit, err := g.GetLatestCommit(ctx, branch)
 	if err != nil {
 		return nil, fmt.Errorf("ошибка получения последнего коммита: %w", err)
 	}
@@ -263,7 +263,7 @@ func (g *API) getFeatureBranchCommitRange(branch string) (*BranchCommitRange, er
 		baseBranch = "main"
 	}
 
-	compareResult, err := g.compareBranches(baseBranch, branch)
+	compareResult, err := g.compareBranches(ctx, baseBranch, branch)
 	if err != nil {
 		return nil, fmt.Errorf("ошибка сравнения веток: %w", err)
 	}
@@ -272,7 +272,7 @@ func (g *API) getFeatureBranchCommitRange(branch string) (*BranchCommitRange, er
 	var firstCommit *Commit
 	if compareResult.MergeBaseCommit == nil {
 		// Fallback: используем первый коммит базовой ветки
-		firstCommit, err = g.getFirstCommitInHistory(baseBranch)
+		firstCommit, err = g.getFirstCommitInHistory(ctx, baseBranch)
 		if err != nil {
 			return nil, fmt.Errorf("не удалось получить первый коммит базовой ветки %s: %w", baseBranch, err)
 		}
@@ -288,11 +288,11 @@ func (g *API) getFeatureBranchCommitRange(branch string) (*BranchCommitRange, er
 
 // findCommitWithTag ищет коммит с указанным тегом в ветке.
 // Возвращает коммит, если тег найден, иначе возвращает ошибку.
-func (g *API) findCommitWithTag(_, tag string) (*Commit, error) {
+func (g *API) findCommitWithTag(ctx context.Context, _, tag string) (*Commit, error) {
 	// Получаем список тегов
 	urlString := fmt.Sprintf("%s/api/%s/repos/%s/%s/tags", g.GiteaURL, constants.APIVersion, g.Owner, g.Repo)
 
-	statusCode, body, err := g.sendReq(context.Background(), urlString, "", "GET")
+	statusCode, body, err := g.sendReq(ctx, urlString, "", "GET")
 	if err != nil {
 		return nil, fmt.Errorf("ошибка при выполнении запроса тегов: %w", err)
 	}
@@ -317,7 +317,7 @@ func (g *API) findCommitWithTag(_, tag string) (*Commit, error) {
 	for _, t := range tags {
 		if t.Name == tag {
 			// Получаем полную информацию о коммите
-			return g.getCommitBySHA(t.Commit.SHA)
+			return g.getCommitBySHA(ctx, t.Commit.SHA)
 		}
 	}
 
@@ -325,11 +325,11 @@ func (g *API) findCommitWithTag(_, tag string) (*Commit, error) {
 }
 
 // getFirstCommitInHistory получает самый первый коммит в истории ветки.
-func (g *API) getFirstCommitInHistory(branch string) (*Commit, error) {
+func (g *API) getFirstCommitInHistory(ctx context.Context, branch string) (*Commit, error) {
 	// Получаем все коммиты в ветке
 	urlString := fmt.Sprintf("%s/api/%s/repos/%s/%s/commits?sha=%s&stat=false&verification=false&files=false", g.GiteaURL, constants.APIVersion, g.Owner, g.Repo, branch)
 
-	statusCode, body, err := g.sendReq(context.Background(), urlString, "", "GET")
+	statusCode, body, err := g.sendReq(ctx, urlString, "", "GET")
 	if err != nil {
 		return nil, fmt.Errorf("ошибка при выполнении запроса: %w", err)
 	}
@@ -355,10 +355,10 @@ func (g *API) getFirstCommitInHistory(branch string) (*Commit, error) {
 // compareBranches сравнивает две ветки и возвращает результат сравнения.
 // Использует Gitea API для получения общего предка и списка коммитов.
 // Гарантирует, что MergeBaseCommit будет найден и возвращен.
-func (g *API) compareBranches(base, head string) (*CompareResult, error) {
+func (g *API) compareBranches(ctx context.Context, base, head string) (*CompareResult, error) {
 	urlString := fmt.Sprintf("%s/api/%s/repos/%s/%s/compare/%s...%s", g.GiteaURL, constants.APIVersion, g.Owner, g.Repo, base, head)
 
-	statusCode, body, err := g.sendReq(context.Background(), urlString, "", "GET")
+	statusCode, body, err := g.sendReq(ctx, urlString, "", "GET")
 	if err != nil {
 		return nil, fmt.Errorf("ошибка при выполнении запроса сравнения: %w", err)
 	}
@@ -375,7 +375,7 @@ func (g *API) compareBranches(base, head string) (*CompareResult, error) {
 
 	// Если общий предок не найден через API сравнения, попробуем найти его вручную
 	if result.MergeBaseCommit == nil {
-		mergeBase, err := g.findMergeBase(base, head)
+		mergeBase, err := g.findMergeBase(ctx, base, head)
 		if err != nil {
 			return nil, fmt.Errorf("не удалось найти общего предка веток %s и %s: %w", base, head, err)
 		}
@@ -388,9 +388,9 @@ func (g *API) compareBranches(base, head string) (*CompareResult, error) {
 // findMergeBase находит коммит в базовой ветке, предшествующий первому коммиту ветки head.
 // Определяет состояние базовой ветки до внесения первого изменения в head ветку.
 // Возвращает коммит из base ветки, который был актуален до создания head ветки.
-func (g *API) findMergeBase(base, head string) (*Commit, error) {
+func (g *API) findMergeBase(ctx context.Context, base, head string) (*Commit, error) {
 	// Получаем историю коммитов целевой ветки (head)
-	headCommits, err := g.getAllCommits(head)
+	headCommits, err := g.getAllCommits(ctx, head)
 	if err != nil {
 		return nil, fmt.Errorf("не удалось получить коммиты ветки head %s: %w", head, err)
 	}
@@ -404,7 +404,7 @@ func (g *API) findMergeBase(base, head string) (*Commit, error) {
 	firstHeadCommit := &headCommits[len(headCommits)-1]
 
 	// Получаем историю коммитов базовой ветки
-	baseCommits, err := g.getAllCommits(base)
+	baseCommits, err := g.getAllCommits(ctx, base)
 	if err != nil {
 		return nil, fmt.Errorf("не удалось получить коммиты базовой ветки %s: %w", base, err)
 	}
@@ -439,10 +439,10 @@ func (g *API) findMergeBase(base, head string) (*Commit, error) {
 }
 
 // getAllCommits получает все коммиты ветки.
-func (g *API) getAllCommits(branch string) ([]Commit, error) {
+func (g *API) getAllCommits(ctx context.Context, branch string) ([]Commit, error) {
 	urlString := fmt.Sprintf("%s/api/%s/repos/%s/%s/commits?sha=%s", g.GiteaURL, constants.APIVersion, g.Owner, g.Repo, branch)
 
-	statusCode, body, err := g.sendReq(context.Background(), urlString, "", "GET")
+	statusCode, body, err := g.sendReq(ctx, urlString, "", "GET")
 	if err != nil {
 		return nil, fmt.Errorf("ошибка при выполнении запроса коммитов: %w", err)
 	}
@@ -461,10 +461,10 @@ func (g *API) getAllCommits(branch string) ([]Commit, error) {
 }
 
 // getCommitBySHA получает информацию о коммите по его SHA.
-func (g *API) getCommitBySHA(sha string) (*Commit, error) {
+func (g *API) getCommitBySHA(ctx context.Context, sha string) (*Commit, error) {
 	urlString := fmt.Sprintf("%s/api/%s/repos/%s/%s/commits?sha=%s", g.GiteaURL, constants.APIVersion, g.Owner, g.Repo, sha)
 
-	statusCode, body, err := g.sendReq(context.Background(), urlString, "", "GET")
+	statusCode, body, err := g.sendReq(ctx, urlString, "", "GET")
 	if err != nil {
 		return nil, fmt.Errorf("ошибка при выполнении запроса коммита: %w", err)
 	}

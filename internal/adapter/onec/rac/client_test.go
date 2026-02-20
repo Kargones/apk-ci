@@ -267,6 +267,7 @@ func TestExecuteRAC_Timeout(t *testing.T) {
 }
 
 func TestExecuteRAC_CancelledContext(t *testing.T) {
+	ctx := context.Background()
 	c, err := NewClient(ClientOptions{
 		RACPath: "/bin/sh",
 		Server:  "localhost",

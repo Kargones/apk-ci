@@ -71,6 +71,7 @@ func TestTempDbCreator_CreateInfobase_EmptyBinIbcmd(t *testing.T) {
 }
 
 func TestTempDbCreator_CreateInfobase_TimeoutContext(t *testing.T) {
+	ctx := context.Background()
 	creator := NewTempDbCreator()
 	logger := slog.Default()
 
@@ -101,6 +102,7 @@ func TestTempDbCreator_AddExtension_EmptyBinIbcmd(t *testing.T) {
 }
 
 func TestTempDbCreator_AddExtension_TimeoutContext(t *testing.T) {
+	ctx := context.Background()
 	creator := NewTempDbCreator()
 	logger := slog.Default()
 

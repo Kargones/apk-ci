@@ -452,6 +452,7 @@ func TestGitResetToCommit(t *testing.T) {
 
 // TestGitClone тестирует метод Clone
 func TestGitClone(t *testing.T) {
+	ctx := context.Background()
 	// Создаем контекст с коротким таймаутом для предотвращения зависания тестов
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -614,8 +615,9 @@ func TestSwitchOrCreateBranch(t *testing.T) {
 
 // TestSyncRepoBranches тестирует функцию SyncRepoBranches
 func TestSyncRepoBranches(t *testing.T) {
+	ctx := context.Background()
 	t.Run("несуществующий путь", func(t *testing.T) {
-		err := SyncRepoBranches("/nonexistent/path")
+		err := SyncRepoBranches(ctx, "/nonexistent/path")
 		if err == nil {
 			t.Error("Ожидалась ошибка для несуществующего пути")
 		}
@@ -632,7 +634,7 @@ func TestSyncRepoBranches(t *testing.T) {
 			}
 		}()
 
-		err = SyncRepoBranches(tempDir)
+		err = SyncRepoBranches(ctx, tempDir)
 		if err == nil {
 			t.Error("Ожидалась ошибка для не-git директории")
 		}
@@ -641,6 +643,7 @@ func TestSyncRepoBranches(t *testing.T) {
 
 // TestCloneToTempDir тестирует функцию CloneToTempDir
 func TestCloneToTempDir(t *testing.T) {
+	ctx := context.Background()
 	// Создаем контекст с коротким таймаутом для предотвращения зависания тестов
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -722,8 +725,9 @@ func TestGitSwitch(t *testing.T) {
 
 // TestValidateCommitExists тестирует функцию validateCommitExists
 func TestValidateCommitExists(t *testing.T) {
+	ctx := context.Background()
 	t.Run("несуществующий репозиторий", func(t *testing.T) {
-		err := validateCommitExists("/nonexistent/path", "abc123")
+		err := validateCommitExists(ctx, "/nonexistent/path", "abc123")
 		if err == nil {
 			t.Error("Ожидалась ошибка для несуществующего репозитория")
 		}
@@ -740,7 +744,7 @@ func TestValidateCommitExists(t *testing.T) {
 			}
 		}()
 
-		err = validateCommitExists(tempDir, "")
+		err = validateCommitExists(ctx, tempDir, "")
 		if err == nil {
 			t.Error("Ожидалась ошибка для пустого хеша коммита")
 		}
@@ -757,7 +761,7 @@ func TestValidateCommitExists(t *testing.T) {
 			}
 		}()
 
-		err = validateCommitExists(tempDir, "nonexistent-commit-hash")
+		err = validateCommitExists(ctx, tempDir, "nonexistent-commit-hash")
 		if err == nil {
 			t.Error("Ожидалась ошибка для несуществующего коммита")
 		}
@@ -766,8 +770,9 @@ func TestValidateCommitExists(t *testing.T) {
 
 // TestRunGitCommand тестирует функцию runGitCommand
 func TestRunGitCommand(t *testing.T) {
+	ctx := context.Background()
 	t.Run("неверная команда git", func(t *testing.T) {
-		err := runGitCommand(30*time.Second, "invalid-command")
+		err := runGitCommand(ctx, 30*time.Second, "invalid-command")
 		if err == nil {
 			t.Error("Ожидалась ошибка для неверной команды git")
 		}
@@ -775,7 +780,7 @@ func TestRunGitCommand(t *testing.T) {
 
 	t.Run("git version", func(t *testing.T) {
 		// Эта команда должна работать, если git установлен
-		err := runGitCommand(30*time.Second, "version")
+		err := runGitCommand(ctx, 30*time.Second, "version")
 		// Не проверяем ошибку, так как git может быть не установлен в тестовой среде
 		t.Logf("git version result: %v", err)
 	})
@@ -783,6 +788,7 @@ func TestRunGitCommand(t *testing.T) {
 
 // TestGetRemoteBranches тестирует функцию getRemoteBranches
 func TestGetRemoteBranches(t *testing.T) {
+	ctx := context.Background()
 	// Сохраняем текущую директорию
 	originalDir, err := os.Getwd()
 	if err != nil {
@@ -813,7 +819,7 @@ func TestGetRemoteBranches(t *testing.T) {
 	}
 
 	// Тестируем в не-git директории
-	_, err = getRemoteBranches(30*time.Second)
+	_, err = getRemoteBranches(ctx, 30*time.Second)
 	if err == nil {
 		t.Error("Ожидалась ошибка для не-git директории")
 	}
@@ -826,6 +832,7 @@ func TestGetRemoteBranches(t *testing.T) {
 
 // TestCreateTrackingBranch тестирует функцию createTrackingBranch
 func TestCreateTrackingBranch(t *testing.T) {
+	ctx := context.Background()
 	// Создаем временную директорию
 	tempDir, err := os.MkdirTemp("", "git-tracking-branch-test-*")
 	if err != nil {
@@ -854,7 +861,7 @@ func TestCreateTrackingBranch(t *testing.T) {
 	}
 
 	// Тестируем в не-git директории
-	err = createTrackingBranch("test-branch", "origin/test-branch")
+	err = createTrackingBranch(ctx, "test-branch", "origin/test-branch")
 	if err == nil {
 		t.Error("Ожидалась ошибка для не-git директории")
 	}
@@ -862,6 +869,7 @@ func TestCreateTrackingBranch(t *testing.T) {
 
 // TestWaitForGitSync тестирует функцию waitForGitSync
 func TestWaitForGitSync(t *testing.T) {
+	ctx := context.Background()
 	// Создаем временную директорию
 	tempDir, err := os.MkdirTemp("", "git-sync-test-*")
 	if err != nil {
@@ -874,7 +882,7 @@ func TestWaitForGitSync(t *testing.T) {
 	}()
 
 	// Тестируем в не-git директории
-	err = waitForGitSync(tempDir)
+	err = waitForGitSync(ctx, tempDir)
 	if err == nil {
 		t.Error("Ожидалась ошибка для не-git директории")
 	}
@@ -1035,6 +1043,7 @@ func TestGitSwitchOrCreateBranch(t *testing.T) {
 
 // TestGitHelperFunctions тестирует вспомогательные функции Git
 func TestGitHelperFunctions(t *testing.T) {
+	ctx := context.Background()
 
 	// Создаем временную директорию
 	tempDir, err := os.MkdirTemp("", "git-helpers-test-*")
@@ -1054,13 +1063,13 @@ func TestGitHelperFunctions(t *testing.T) {
 	}
 
 	// Тестируем getGitStatus
-	_, err = getGitStatus(tempDir)
+	_, err = getGitStatus(ctx, tempDir)
 	if err == nil {
 		t.Log("getGitStatus completed without error (unexpected in non-git directory)")
 	}
 
 	// Тестируем waitForGitSync
-	err = waitForGitSync(tempDir)
+	err = waitForGitSync(ctx, tempDir)
 	if err == nil {
 		t.Log("waitForGitSync completed without error")
 	}

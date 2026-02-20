@@ -54,6 +54,7 @@ func TestMaskPasswordInParam(t *testing.T) {
 
 // TestRunner_RunCommandWithContextCancellation проверяет отмену команды по контексту
 func TestRunner_RunCommandWithContextCancellation(t *testing.T) {
+	ctx := context.Background()
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	tmpDir := t.TempDir()
 

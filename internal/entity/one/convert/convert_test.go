@@ -183,7 +183,7 @@ func TestLoadFromConfig_DatabaseNotFound(t *testing.T) {
 		odb := designer.OneDb{}
 		cp := Pair{}
 		cc := &Config{"", "", []Pair{cp, cp}, odb}
-		cfg := config.MustLoad()
+		cfg := config.MustLoad(ctx)
 		cfg.TmpDir = "c:\\tmp\\4del"
 		arg := args{ctx, l, cfg}
 		tests := []struct {
@@ -224,7 +224,7 @@ func TestLoadFromConfig_DatabaseNotFound(t *testing.T) {
 // 	odb := designer.OneDb{}
 // 	cp := Pair{}
 // 	cc := &Config{"", "", []Pair{cp, cp}, odb}
-// 	cfg := config.MustLoad()
+// 	cfg := config.MustLoad(ctx)
 // 	cfg.TmpDir = "c:\\tmp\\4del"
 // 	arg := args{ctx, l, cfg, "c:\\tmp\\cc.json"}
 // 	tests := []struct {
