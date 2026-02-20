@@ -405,7 +405,7 @@ func TestGit2StoreHandler_Execute_JSONOutput(t *testing.T) {
 
 	// Устанавливаем JSON формат
 	_ = os.Setenv("BR_OUTPUT_FORMAT", "json")
-	defer _ = os.Unsetenv("BR_OUTPUT_FORMAT")
+	defer os.Unsetenv("BR_OUTPUT_FORMAT") //nolint:errcheck
 
 	// Перенаправляем stdout
 	oldStdout := os.Stdout
@@ -468,7 +468,7 @@ func TestGit2StoreHandler_Execute_DryRun(t *testing.T) {
 	h := &Git2StoreHandler{}
 
 	_ = os.Setenv("BR_DRY_RUN", "true")
-	defer _ = os.Unsetenv("BR_DRY_RUN")
+	defer os.Unsetenv("BR_DRY_RUN") //nolint:errcheck
 
 	// Перенаправляем stdout
 	oldStdout := os.Stdout
@@ -1049,7 +1049,7 @@ func TestGit2StoreHandler_JSONErrorOutput(t *testing.T) {
 	}
 
 	_ = os.Setenv("BR_OUTPUT_FORMAT", "json")
-	defer _ = os.Unsetenv("BR_OUTPUT_FORMAT")
+	defer os.Unsetenv("BR_OUTPUT_FORMAT") //nolint:errcheck
 
 	// Перенаправляем stdout
 	oldStdout := os.Stdout
@@ -1136,7 +1136,7 @@ func TestGit2StoreHandler_Execute_DurationMs(t *testing.T) {
 	}
 
 	_ = os.Setenv("BR_OUTPUT_FORMAT", "json")
-	defer _ = os.Unsetenv("BR_OUTPUT_FORMAT")
+	defer os.Unsetenv("BR_OUTPUT_FORMAT") //nolint:errcheck
 
 	// Перенаправляем stdout
 	oldStdout := os.Stdout
@@ -1224,7 +1224,7 @@ func TestGit2StoreHandler_Execute_JSONOutput_ErrorsField(t *testing.T) {
 	}
 
 	_ = os.Setenv("BR_OUTPUT_FORMAT", "json")
-	defer _ = os.Unsetenv("BR_OUTPUT_FORMAT")
+	defer os.Unsetenv("BR_OUTPUT_FORMAT") //nolint:errcheck
 
 	// Перенаправляем stdout
 	oldStdout := os.Stdout
@@ -1274,7 +1274,7 @@ func TestGit2StoreHandler_Execute_InvalidTimeout(t *testing.T) {
 
 	// Устанавливаем невалидный timeout
 	_ = os.Setenv("BR_GIT2STORE_TIMEOUT", "invalid_duration")
-	defer _ = os.Unsetenv("BR_GIT2STORE_TIMEOUT")
+	defer os.Unsetenv("BR_GIT2STORE_TIMEOUT") //nolint:errcheck
 
 	// Перенаправляем stdout
 	oldStdout := os.Stdout

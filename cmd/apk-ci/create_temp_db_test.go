@@ -48,7 +48,7 @@ func TestCreateTempDbEnvironmentSetup(t *testing.T) {
 		t.Fatalf("Не удалось установить BR_COMMAND: %v", err)
 	}
 
-	err = _ = os.Setenv("BR_LOGLEVEL", "Debug")
+	_ = os.Setenv("BR_LOGLEVEL", "Debug")
 	if err != nil {
 		t.Fatalf("Не удалось установить BR_LOGLEVEL: %v", err)
 	}

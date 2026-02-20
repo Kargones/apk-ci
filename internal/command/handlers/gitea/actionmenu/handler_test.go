@@ -153,7 +153,7 @@ func TestExecute_NoChanges(t *testing.T) {
 
 	// Установим BR_OUTPUT_FORMAT=json для проверки JSON вывода
 	_ = os.Setenv("BR_OUTPUT_FORMAT", "json")
-	defer _ = os.Unsetenv("BR_OUTPUT_FORMAT")
+	defer os.Unsetenv("BR_OUTPUT_FORMAT") //nolint:errcheck
 
 	captured := captureStdout(t, func() {
 		err := h.Execute(context.Background(), cfg)
@@ -214,7 +214,7 @@ func TestExecute_ForceUpdate(t *testing.T) {
 	}
 
 	_ = os.Setenv("BR_OUTPUT_FORMAT", "json")
-	defer _ = os.Unsetenv("BR_OUTPUT_FORMAT")
+	defer os.Unsetenv("BR_OUTPUT_FORMAT") //nolint:errcheck
 
 	captured := captureStdout(t, func() {
 		err := h.Execute(context.Background(), cfg)
@@ -268,7 +268,7 @@ func TestExecute_AddFiles(t *testing.T) {
 	}
 
 	_ = os.Setenv("BR_OUTPUT_FORMAT", "json")
-	defer _ = os.Unsetenv("BR_OUTPUT_FORMAT")
+	defer os.Unsetenv("BR_OUTPUT_FORMAT") //nolint:errcheck
 
 	captured := captureStdout(t, func() {
 		_ = h.Execute(context.Background(), cfg)
@@ -337,7 +337,7 @@ func TestExecute_UpdateFiles(t *testing.T) {
 	}
 
 	_ = os.Setenv("BR_OUTPUT_FORMAT", "json")
-	defer _ = os.Unsetenv("BR_OUTPUT_FORMAT")
+	defer os.Unsetenv("BR_OUTPUT_FORMAT") //nolint:errcheck
 
 	captured := captureStdout(t, func() {
 		_ = h.Execute(context.Background(), cfg)
@@ -410,7 +410,7 @@ func TestExecute_DeleteFiles(t *testing.T) {
 	}
 
 	_ = os.Setenv("BR_OUTPUT_FORMAT", "json")
-	defer _ = os.Unsetenv("BR_OUTPUT_FORMAT")
+	defer os.Unsetenv("BR_OUTPUT_FORMAT") //nolint:errcheck
 
 	captured := captureStdout(t, func() {
 		_ = h.Execute(context.Background(), cfg)
@@ -477,7 +477,7 @@ func TestExecute_MixedOperations(t *testing.T) {
 	}
 
 	_ = os.Setenv("BR_OUTPUT_FORMAT", "json")
-	defer _ = os.Unsetenv("BR_OUTPUT_FORMAT")
+	defer os.Unsetenv("BR_OUTPUT_FORMAT") //nolint:errcheck
 
 	captured := captureStdout(t, func() {
 		_ = h.Execute(context.Background(), cfg)
@@ -532,7 +532,7 @@ func TestExecute_NoDatabases(t *testing.T) {
 	}
 
 	_ = os.Setenv("BR_OUTPUT_FORMAT", "json")
-	defer _ = os.Unsetenv("BR_OUTPUT_FORMAT")
+	defer os.Unsetenv("BR_OUTPUT_FORMAT") //nolint:errcheck
 
 	captured := captureStdout(t, func() {
 		err := h.Execute(context.Background(), cfg)
@@ -585,7 +585,7 @@ func TestExecute_JSONOutput(t *testing.T) {
 	}
 
 	_ = os.Setenv("BR_OUTPUT_FORMAT", "json")
-	defer _ = os.Unsetenv("BR_OUTPUT_FORMAT")
+	defer os.Unsetenv("BR_OUTPUT_FORMAT") //nolint:errcheck
 
 	captured := captureStdout(t, func() {
 		_ = h.Execute(context.Background(), cfg)
@@ -673,7 +673,7 @@ func TestExecute_StateChangedFalse(t *testing.T) {
 	}
 
 	_ = os.Setenv("BR_OUTPUT_FORMAT", "json")
-	defer _ = os.Unsetenv("BR_OUTPUT_FORMAT")
+	defer os.Unsetenv("BR_OUTPUT_FORMAT") //nolint:errcheck
 
 	captured := captureStdout(t, func() {
 		_ = h.Execute(context.Background(), cfg)
@@ -859,7 +859,7 @@ func TestExecute_GetLatestCommitError(t *testing.T) {
 	}
 
 	_ = os.Setenv("BR_OUTPUT_FORMAT", "json")
-	defer _ = os.Unsetenv("BR_OUTPUT_FORMAT")
+	defer os.Unsetenv("BR_OUTPUT_FORMAT") //nolint:errcheck
 
 	captured := captureStdout(t, func() {
 		err := h.Execute(context.Background(), cfg)
@@ -903,7 +903,7 @@ func TestExecute_SyncFilesError(t *testing.T) {
 	}
 
 	_ = os.Setenv("BR_OUTPUT_FORMAT", "json")
-	defer _ = os.Unsetenv("BR_OUTPUT_FORMAT")
+	defer os.Unsetenv("BR_OUTPUT_FORMAT") //nolint:errcheck
 
 	captured := captureStdout(t, func() {
 		err := h.Execute(context.Background(), cfg)
@@ -958,7 +958,7 @@ func TestExecute_EmptyMenuMain(t *testing.T) {
 	}
 
 	_ = os.Setenv("BR_OUTPUT_FORMAT", "json")
-	defer _ = os.Unsetenv("BR_OUTPUT_FORMAT")
+	defer os.Unsetenv("BR_OUTPUT_FORMAT") //nolint:errcheck
 
 	captured := captureStdout(t, func() {
 		err := h.Execute(context.Background(), cfg)
@@ -987,7 +987,7 @@ func TestWriteError_JSONFormat(t *testing.T) {
 	h := &ActionMenuHandler{}
 
 	_ = os.Setenv("BR_OUTPUT_FORMAT", "json")
-	defer _ = os.Unsetenv("BR_OUTPUT_FORMAT")
+	defer os.Unsetenv("BR_OUTPUT_FORMAT") //nolint:errcheck
 
 	captured := captureStdout(t, func() {
 		err := h.writeError("json", "test-trace-id", time.Now(), "TEST.ERROR", "Test error message")
