@@ -963,14 +963,14 @@ func TestSetupDBRestoreDefaults_EnvPassword(t *testing.T) {
 	original := os.Getenv("MSSQL_PASSWORD")
 	defer func() {
 		if original == "" {
-			os.Unsetenv("MSSQL_PASSWORD")
+			_ = os.Unsetenv("MSSQL_PASSWORD")
 		} else {
-			os.Setenv("MSSQL_PASSWORD", original)
+			_ = os.Setenv("MSSQL_PASSWORD", original)
 		}
 	}()
 
 	// Устанавливаем переменную окружения
-	os.Setenv("MSSQL_PASSWORD", "env_password")
+	_ = os.Setenv("MSSQL_PASSWORD", "env_password")
 
 	dbR := &DBRestore{}
 	setupDBRestoreDefaults(dbR)

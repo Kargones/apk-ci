@@ -27,7 +27,7 @@ func captureStdout(fn func()) string {
 
 	fn()
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	var buf bytes.Buffer
@@ -263,7 +263,7 @@ func TestDbUpdateHandler_Execute_JSONOutput(t *testing.T) {
 
 	err := h.Execute(context.Background(), cfg)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	var buf bytes.Buffer
@@ -1141,7 +1141,7 @@ func TestDbUpdateHandler_DryRun_JSONOutput(t *testing.T) {
 
 	err := h.Execute(context.Background(), cfg)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	var buf bytes.Buffer
@@ -1193,7 +1193,7 @@ func TestDbUpdateHandler_DryRun_NoMockCalls(t *testing.T) {
 
 	err := h.Execute(context.Background(), cfg)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	if err != nil {
@@ -1219,7 +1219,7 @@ func TestDbUpdateHandler_DryRun_WithExtension(t *testing.T) {
 
 	err := h.Execute(context.Background(), cfg)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	var buf bytes.Buffer
@@ -1327,7 +1327,7 @@ func TestDbUpdateHandler_DryRun_ValidationError(t *testing.T) {
 
 			err := h.Execute(context.Background(), tt.cfg)
 
-			w.Close()
+			_ = w.Close()
 			os.Stdout = oldStdout
 
 			// AC-6: Должна быть ошибка валидации
@@ -1507,7 +1507,7 @@ func TestDbUpdateHandler_PlanOnly_JSONOutput(t *testing.T) {
 
 	err := h.Execute(context.Background(), cfg)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	var buf bytes.Buffer
@@ -1562,7 +1562,7 @@ func TestDbUpdateHandler_PlanOnly_NoExecution(t *testing.T) {
 
 	err := h.Execute(context.Background(), cfg)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	// Если mock-и не упали через t.Fatal — значит ни один не был вызван
@@ -1620,7 +1620,7 @@ func TestDbUpdateHandler_Verbose_JSONOutput(t *testing.T) {
 
 	err := h.Execute(context.Background(), cfg)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	var buf bytes.Buffer

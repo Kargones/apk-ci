@@ -320,11 +320,11 @@ func TestSonarQubeConfig(t *testing.T) {
 		}
 
 		// Устанавливаем переменные окружения для тестирования
-		os.Setenv("SONARQUBE_URL", "http://test-sonar:9000")
-		os.Setenv("SONARQUBE_TOKEN", "test-env-token")
+		_ = os.Setenv("SONARQUBE_URL", "http://test-sonar:9000")
+		_ = os.Setenv("SONARQUBE_TOKEN", "test-env-token")
 		defer func() {
-			os.Unsetenv("SONARQUBE_URL")
-			os.Unsetenv("SONARQUBE_TOKEN")
+			_ = os.Unsetenv("SONARQUBE_URL")
+			_ = os.Unsetenv("SONARQUBE_TOKEN")
 		}()
 
 		config, err := GetSonarQubeConfig(logger, cfg)
@@ -376,7 +376,7 @@ func TestSonarQubeConfig(t *testing.T) {
 		}
 
 		// Очищаем переменную окружения для токена
-		os.Unsetenv("SONARQUBE_TOKEN")
+		_ = os.Unsetenv("SONARQUBE_TOKEN")
 		config, err = GetSonarQubeConfig(logger, cfg)
 		if err != nil {
 			t.Errorf("Unexpected error: %v", err)
@@ -463,11 +463,11 @@ func TestScannerConfig(t *testing.T) {
 		}
 
 		// Устанавливаем переменные окружения для тестирования
-		os.Setenv("SONARQUBE_SCANNER_URL", "https://test.com/scanner.zip")
-		os.Setenv("SONARQUBE_SCANNER_VERSION", "5.0.0")
+		_ = os.Setenv("SONARQUBE_SCANNER_URL", "https://test.com/scanner.zip")
+		_ = os.Setenv("SONARQUBE_SCANNER_VERSION", "5.0.0")
 		defer func() {
-			os.Unsetenv("SONARQUBE_SCANNER_URL")
-			os.Unsetenv("SONARQUBE_SCANNER_VERSION")
+			_ = os.Unsetenv("SONARQUBE_SCANNER_URL")
+			_ = os.Unsetenv("SONARQUBE_SCANNER_VERSION")
 		}()
 
 		config, err := GetScannerConfig(logger, cfg)

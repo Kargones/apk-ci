@@ -288,13 +288,13 @@ func TestGetSonarQubeConfig(t *testing.T) {
 
 	// Очищаем переменные окружения после теста
 	defer func() {
-		os.Setenv("SONARQUBE_URL", originalURL)
-		os.Setenv("SONARQUBE_TOKEN", originalToken)
+		_ = os.Setenv("SONARQUBE_URL", originalURL)
+		_ = os.Setenv("SONARQUBE_TOKEN", originalToken)
 	}()
 
 	// Устанавливаем тестовые переменные окружения
-	os.Setenv("SONARQUBE_URL", "http://test.sonarqube.com")
-	os.Setenv("SONARQUBE_TOKEN", "test-token-123")
+	_ = os.Setenv("SONARQUBE_URL", "http://test.sonarqube.com")
+	_ = os.Setenv("SONARQUBE_TOKEN", "test-token-123")
 
 	cfg := &Config{}
 	config, err := GetSonarQubeConfig(nil, cfg)
@@ -320,13 +320,13 @@ func TestGetScannerConfig(t *testing.T) {
 
 	// Очищаем переменные окружения после теста
 	defer func() {
-		os.Setenv("SONARQUBE_SCANNER_URL", originalURL)
-		os.Setenv("SONARQUBE_SCANNER_VERSION", originalVersion)
+		_ = os.Setenv("SONARQUBE_SCANNER_URL", originalURL)
+		_ = os.Setenv("SONARQUBE_SCANNER_VERSION", originalVersion)
 	}()
 
 	// Устанавливаем тестовые переменные окружения
-	os.Setenv("SONARQUBE_SCANNER_URL", "http://test.scanner.com/scanner.zip")
-	os.Setenv("SONARQUBE_SCANNER_VERSION", "5.0.0")
+	_ = os.Setenv("SONARQUBE_SCANNER_URL", "http://test.scanner.com/scanner.zip")
+	_ = os.Setenv("SONARQUBE_SCANNER_VERSION", "5.0.0")
 
 	cfg := &Config{}
 	config, err := GetScannerConfig(nil, cfg)

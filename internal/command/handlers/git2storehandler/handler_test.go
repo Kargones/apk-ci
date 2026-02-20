@@ -373,7 +373,7 @@ func TestGit2StoreHandler_Execute_SuccessCase(t *testing.T) {
 	ctx := context.Background()
 	err := h.Execute(ctx, cfg)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	var buf bytes.Buffer
@@ -404,8 +404,8 @@ func TestGit2StoreHandler_Execute_JSONOutput(t *testing.T) {
 	}
 
 	// Устанавливаем JSON формат
-	os.Setenv("BR_OUTPUT_FORMAT", "json")
-	defer os.Unsetenv("BR_OUTPUT_FORMAT")
+	_ = os.Setenv("BR_OUTPUT_FORMAT", "json")
+	defer _ = os.Unsetenv("BR_OUTPUT_FORMAT")
 
 	// Перенаправляем stdout
 	oldStdout := os.Stdout
@@ -415,7 +415,7 @@ func TestGit2StoreHandler_Execute_JSONOutput(t *testing.T) {
 	ctx := context.Background()
 	err := h.Execute(ctx, cfg)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	var buf bytes.Buffer
@@ -467,8 +467,8 @@ func TestGit2StoreHandler_Execute_DryRun(t *testing.T) {
 
 	h := &Git2StoreHandler{}
 
-	os.Setenv("BR_DRY_RUN", "true")
-	defer os.Unsetenv("BR_DRY_RUN")
+	_ = os.Setenv("BR_DRY_RUN", "true")
+	defer _ = os.Unsetenv("BR_DRY_RUN")
 
 	// Перенаправляем stdout
 	oldStdout := os.Stdout
@@ -478,7 +478,7 @@ func TestGit2StoreHandler_Execute_DryRun(t *testing.T) {
 	ctx := context.Background()
 	err := h.Execute(ctx, cfg)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	var buf bytes.Buffer
@@ -813,7 +813,7 @@ func TestGit2StoreHandler_Execute_ProgressLogs(t *testing.T) {
 	ctx := context.Background()
 	_ = h.Execute(ctx, cfg)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 	io.Copy(io.Discard, r)
 
@@ -855,7 +855,7 @@ func TestGit2StoreHandler_Execute_WithExtensions(t *testing.T) {
 	ctx := context.Background()
 	err := h.Execute(ctx, cfg)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 	io.Copy(io.Discard, r)
 
@@ -987,7 +987,7 @@ func TestGit2StoreHandler_Execute_TempDbForLocalBase(t *testing.T) {
 	ctx := context.Background()
 	err := h.Execute(ctx, cfg)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 	io.Copy(io.Discard, r)
 
@@ -1048,8 +1048,8 @@ func TestGit2StoreHandler_JSONErrorOutput(t *testing.T) {
 		},
 	}
 
-	os.Setenv("BR_OUTPUT_FORMAT", "json")
-	defer os.Unsetenv("BR_OUTPUT_FORMAT")
+	_ = os.Setenv("BR_OUTPUT_FORMAT", "json")
+	defer _ = os.Unsetenv("BR_OUTPUT_FORMAT")
 
 	// Перенаправляем stdout
 	oldStdout := os.Stdout
@@ -1059,7 +1059,7 @@ func TestGit2StoreHandler_JSONErrorOutput(t *testing.T) {
 	ctx := context.Background()
 	_ = h.Execute(ctx, cfg)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	var buf bytes.Buffer
@@ -1135,8 +1135,8 @@ func TestGit2StoreHandler_Execute_DurationMs(t *testing.T) {
 		backupCreator:        &mockBackupCreator{},
 	}
 
-	os.Setenv("BR_OUTPUT_FORMAT", "json")
-	defer os.Unsetenv("BR_OUTPUT_FORMAT")
+	_ = os.Setenv("BR_OUTPUT_FORMAT", "json")
+	defer _ = os.Unsetenv("BR_OUTPUT_FORMAT")
 
 	// Перенаправляем stdout
 	oldStdout := os.Stdout
@@ -1148,7 +1148,7 @@ func TestGit2StoreHandler_Execute_DurationMs(t *testing.T) {
 	_ = h.Execute(ctx, cfg)
 	elapsed := time.Since(startTime).Milliseconds()
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	var buf bytes.Buffer
@@ -1223,8 +1223,8 @@ func TestGit2StoreHandler_Execute_JSONOutput_ErrorsField(t *testing.T) {
 		backupCreator:        &mockBackupCreator{},
 	}
 
-	os.Setenv("BR_OUTPUT_FORMAT", "json")
-	defer os.Unsetenv("BR_OUTPUT_FORMAT")
+	_ = os.Setenv("BR_OUTPUT_FORMAT", "json")
+	defer _ = os.Unsetenv("BR_OUTPUT_FORMAT")
 
 	// Перенаправляем stdout
 	oldStdout := os.Stdout
@@ -1234,7 +1234,7 @@ func TestGit2StoreHandler_Execute_JSONOutput_ErrorsField(t *testing.T) {
 	ctx := context.Background()
 	err := h.Execute(ctx, cfg)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	var buf bytes.Buffer
@@ -1273,8 +1273,8 @@ func TestGit2StoreHandler_Execute_InvalidTimeout(t *testing.T) {
 	}
 
 	// Устанавливаем невалидный timeout
-	os.Setenv("BR_GIT2STORE_TIMEOUT", "invalid_duration")
-	defer os.Unsetenv("BR_GIT2STORE_TIMEOUT")
+	_ = os.Setenv("BR_GIT2STORE_TIMEOUT", "invalid_duration")
+	defer _ = os.Unsetenv("BR_GIT2STORE_TIMEOUT")
 
 	// Перенаправляем stdout
 	oldStdout := os.Stdout
@@ -1284,7 +1284,7 @@ func TestGit2StoreHandler_Execute_InvalidTimeout(t *testing.T) {
 	ctx := context.Background()
 	_ = h.Execute(ctx, cfg)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 	io.Copy(io.Discard, r)
 
@@ -1312,7 +1312,7 @@ func TestGit2StoreHandler_Execute_DryRun_JSONOutput(t *testing.T) {
 	ctx := context.Background()
 	err := h.Execute(ctx, cfg)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	var buf bytes.Buffer
@@ -1402,7 +1402,7 @@ func TestGit2StoreHandler_Execute_NilProjectConfig(t *testing.T) {
 	// Не должно быть panic при nil ProjectConfig
 	err := h.Execute(ctx, cfg)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 	io.Copy(io.Discard, r)
 
@@ -1433,7 +1433,7 @@ func TestGit2StoreHandler_PlanOnly_TextOutput(t *testing.T) {
 	ctx := context.Background()
 	err := h.Execute(ctx, cfg)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	var buf bytes.Buffer
@@ -1490,7 +1490,7 @@ func TestGit2StoreHandler_PlanOnly_JSONOutput(t *testing.T) {
 	ctx := context.Background()
 	err := h.Execute(ctx, cfg)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	var buf bytes.Buffer
@@ -1551,7 +1551,7 @@ func TestGit2StoreHandler_Priority_DryRunOverPlanOnly(t *testing.T) {
 	ctx := context.Background()
 	err := h.Execute(ctx, cfg)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	var buf bytes.Buffer
@@ -1612,7 +1612,7 @@ func TestGit2StoreHandler_Execute_NilGitConfig(t *testing.T) {
 	// Не должно быть panic при nil GitConfig (тест использует mock, но проверяем что код готов)
 	err := h.Execute(ctx, cfg)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 	io.Copy(io.Discard, r)
 
@@ -1648,7 +1648,7 @@ func TestGit2StoreHandler_Verbose_TextOutput(t *testing.T) {
 	ctx := context.Background()
 	err := h.Execute(ctx, cfg)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	var buf bytes.Buffer
@@ -1695,7 +1695,7 @@ func TestGit2StoreHandler_Verbose_JSONOutput(t *testing.T) {
 	ctx := context.Background()
 	err := h.Execute(ctx, cfg)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	var buf bytes.Buffer
@@ -1753,7 +1753,7 @@ func TestGit2StoreHandler_Priority_DryRunOverVerbose(t *testing.T) {
 	ctx := context.Background()
 	err := h.Execute(ctx, cfg)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	var buf bytes.Buffer
@@ -1793,7 +1793,7 @@ func TestGit2StoreHandler_Priority_PlanOnlyOverVerbose(t *testing.T) {
 	ctx := context.Background()
 	err := h.Execute(ctx, cfg)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	var buf bytes.Buffer

@@ -238,7 +238,7 @@ func (h *CreateTempDbHandler) handleTempDbPreviewModes(ec *tempDbExecContext, cf
 			if err := plan.WritePlanText(os.Stdout); err != nil {
 				ec.log.Warn("Не удалось вывести план операций", slog.String("error", err.Error()))
 			}
-			fmt.Fprintln(os.Stdout)
+			fmt.Fprintln(os.Stdout) //nolint:errcheck // writing to stdout
 		}
 		h.verbosePlan = plan
 	}

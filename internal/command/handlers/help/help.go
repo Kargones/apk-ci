@@ -184,12 +184,12 @@ func (d *Data) writeText(w io.Writer) error {
 		if cmd.Deprecated {
 			desc = fmt.Sprintf("[deprecated → %s] %s", cmd.NewName, desc)
 		}
-		fmt.Fprintf(&sb, "  %-*s  %s\n", maxLen, cmd.Name, desc)
+		fmt.Fprintf(&sb, "  %-*s  %s\n", maxLen, cmd.Name, desc) //nolint:errcheck // strings.Builder.Write never fails
 	}
 
 	sb.WriteString("\nLegacy-команды:\n")
 	for _, cmd := range d.LegacyCommands {
-		fmt.Fprintf(&sb, "  %-*s  %s\n", maxLen, cmd.Name, cmd.Description)
+		fmt.Fprintf(&sb, "  %-*s  %s\n", maxLen, cmd.Name, cmd.Description) //nolint:errcheck // strings.Builder.Write never fails
 	}
 
 	sb.WriteString("\nОпции:\n")

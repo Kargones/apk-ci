@@ -541,7 +541,7 @@ func TestCreateTempDbHandler_Execute_JSONOutput(t *testing.T) {
 	ctx := context.Background()
 	err := h.Execute(ctx, cfg)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	if err != nil {
@@ -645,7 +645,7 @@ func TestCreateTempDbHandler_Execute_TextOutput(t *testing.T) {
 	ctx := context.Background()
 	err := h.Execute(ctx, cfg)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	if err != nil {
@@ -1267,7 +1267,7 @@ func TestCreateTempDbHandler_DryRun_Success(t *testing.T) {
 
 	err := h.Execute(context.Background(), cfg)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	var buf bytes.Buffer
@@ -1336,7 +1336,7 @@ func TestCreateTempDbHandler_DryRun_JSONOutput(t *testing.T) {
 
 	err := h.Execute(context.Background(), cfg)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	var buf bytes.Buffer
@@ -1405,7 +1405,7 @@ func TestCreateTempDbHandler_DryRun_NoMockCalls(t *testing.T) {
 
 	err := h.Execute(context.Background(), cfg)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	// Если mock был вызван — тест упал бы в FailOnCallMockCreator
@@ -1452,7 +1452,7 @@ func TestCreateTempDbHandler_DryRun_WithExtensions(t *testing.T) {
 
 	err := h.Execute(context.Background(), cfg)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	var buf bytes.Buffer
@@ -1511,7 +1511,7 @@ func TestCreateTempDbHandler_DryRun_WithTTL(t *testing.T) {
 
 	err := h.Execute(context.Background(), cfg)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	var buf bytes.Buffer
@@ -1578,7 +1578,7 @@ func TestCreateTempDbHandler_DryRun_ValidationError(t *testing.T) {
 
 			err := h.Execute(context.Background(), tt.cfg)
 
-			w.Close()
+			_ = w.Close()
 			os.Stdout = oldStdout
 
 			// AC-6: Должна быть ошибка валидации
@@ -1635,7 +1635,7 @@ func TestCreateTempDbHandler_PlanOnly_TextOutput(t *testing.T) {
 
 	err := h.Execute(context.Background(), cfg)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	var buf bytes.Buffer
@@ -1705,7 +1705,7 @@ func TestCreateTempDbHandler_PlanOnly_JSONOutput(t *testing.T) {
 
 	err := h.Execute(context.Background(), cfg)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	var buf bytes.Buffer
@@ -1780,7 +1780,7 @@ func TestCreateTempDbHandler_Priority_DryRunOverPlanOnly(t *testing.T) {
 
 	err := h.Execute(context.Background(), cfg)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	var buf bytes.Buffer
@@ -1844,7 +1844,7 @@ func TestCreateTempDbHandler_Verbose_TextOutput(t *testing.T) {
 
 	err := h.Execute(context.Background(), cfg)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	var buf bytes.Buffer
@@ -1905,7 +1905,7 @@ func TestCreateTempDbHandler_Verbose_JSONOutput(t *testing.T) {
 
 	err := h.Execute(context.Background(), cfg)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	var buf bytes.Buffer
@@ -1983,7 +1983,7 @@ func TestCreateTempDbHandler_Priority_DryRunOverVerbose(t *testing.T) {
 
 	err := h.Execute(context.Background(), cfg)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	var buf bytes.Buffer
@@ -2043,7 +2043,7 @@ func TestCreateTempDbHandler_Priority_PlanOnlyOverVerbose(t *testing.T) {
 
 	err := h.Execute(context.Background(), cfg)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	var buf bytes.Buffer
