@@ -1,6 +1,7 @@
 package gitea
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -63,6 +64,7 @@ func TestRepositoryStructure(t *testing.T) {
 
 // TestSearchOrgRepos_Success проверяет успешный поиск репозиториев организации.
 func TestSearchOrgRepos_Success(t *testing.T) {
+	ctx := context.Background()
 	// Создаём тестовый сервер
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Проверяем путь запроса
@@ -125,7 +127,7 @@ func TestSearchOrgRepos_Success(t *testing.T) {
 	}
 
 	// Вызываем тестируемый метод
-	repos, err := api.SearchOrgRepos("testorg")
+	repos, err := api.SearchOrgRepos(ctx, "testorg")
 	if err != nil {
 		t.Fatalf("Ошибка при вызове SearchOrgRepos: %v", err)
 	}
@@ -145,6 +147,7 @@ func TestSearchOrgRepos_Success(t *testing.T) {
 
 // TestSearchOrgRepos_NotFound проверяет обработку несуществующей организации.
 func TestSearchOrgRepos_NotFound(t *testing.T) {
+	ctx := context.Background()
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		_, _ = w.Write([]byte(`{"message": "Organization not found"}`))
@@ -156,7 +159,7 @@ func TestSearchOrgRepos_NotFound(t *testing.T) {
 		AccessToken: "test-token",
 	}
 
-	repos, err := api.SearchOrgRepos("nonexistent")
+	repos, err := api.SearchOrgRepos(ctx, "nonexistent")
 	if err != nil {
 		t.Fatalf("Ошибка не ожидалась для 404, получена: %v", err)
 	}
@@ -168,6 +171,7 @@ func TestSearchOrgRepos_NotFound(t *testing.T) {
 
 // TestSearchOrgRepos_Pagination проверяет обработку пагинации.
 func TestSearchOrgRepos_Pagination(t *testing.T) {
+	ctx := context.Background()
 	pageCount := 0
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		pageCount++
@@ -190,7 +194,7 @@ func TestSearchOrgRepos_Pagination(t *testing.T) {
 		AccessToken: "test-token",
 	}
 
-	repos, err := api.SearchOrgRepos("org")
+	repos, err := api.SearchOrgRepos(ctx, "org")
 	if err != nil {
 		t.Fatalf("Ошибка при вызове SearchOrgRepos: %v", err)
 	}
@@ -207,6 +211,7 @@ func TestSearchOrgRepos_Pagination(t *testing.T) {
 
 // TestSearchOrgRepos_MaxPages проверяет защиту от бесконечного цикла.
 func TestSearchOrgRepos_MaxPages(t *testing.T) {
+	ctx := context.Background()
 	pageCount := 0
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		pageCount++
@@ -222,7 +227,7 @@ func TestSearchOrgRepos_MaxPages(t *testing.T) {
 		AccessToken: "test-token",
 	}
 
-	repos, err := api.SearchOrgRepos("org")
+	repos, err := api.SearchOrgRepos(ctx, "org")
 	if err != nil {
 		t.Fatalf("Ошибка при вызове SearchOrgRepos: %v", err)
 	}
@@ -240,12 +245,13 @@ func TestSearchOrgRepos_MaxPages(t *testing.T) {
 
 // TestSearchOrgRepos_NetworkError проверяет обработку сетевых ошибок.
 func TestSearchOrgRepos_NetworkError(t *testing.T) {
+	ctx := context.Background()
 	api := &API{
 		GiteaURL:    "http://invalid-host-that-does-not-exist:12345",
 		AccessToken: "test-token",
 	}
 
-	_, err := api.SearchOrgRepos("org")
+	_, err := api.SearchOrgRepos(ctx, "org")
 	if err == nil {
 		t.Fatal("Ожидалась ошибка при сетевой проблеме")
 	}
@@ -253,6 +259,7 @@ func TestSearchOrgRepos_NetworkError(t *testing.T) {
 
 // TestSearchOrgRepos_InvalidJSON проверяет обработку невалидного JSON в ответе.
 func TestSearchOrgRepos_InvalidJSON(t *testing.T) {
+	ctx := context.Background()
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
@@ -265,7 +272,7 @@ func TestSearchOrgRepos_InvalidJSON(t *testing.T) {
 		AccessToken: "test-token",
 	}
 
-	_, err := api.SearchOrgRepos("testorg")
+	_, err := api.SearchOrgRepos(ctx, "testorg")
 	if err == nil {
 		t.Fatal("Ожидалась ошибка при невалидном JSON")
 	}
@@ -278,6 +285,7 @@ func TestSearchOrgRepos_InvalidJSON(t *testing.T) {
 
 // TestSearchOrgRepos_ServerError проверяет обработку HTTP ошибок сервера (500, 403 и т.д.).
 func TestSearchOrgRepos_ServerError(t *testing.T) {
+	ctx := context.Background()
 	tests := []struct {
 		name       string
 		statusCode int
@@ -301,7 +309,7 @@ func TestSearchOrgRepos_ServerError(t *testing.T) {
 				AccessToken: "test-token",
 			}
 
-			_, err := api.SearchOrgRepos("testorg")
+			_, err := api.SearchOrgRepos(ctx, "testorg")
 			if err == nil {
 				t.Fatalf("Ожидалась ошибка для статуса %d", tt.statusCode)
 			}

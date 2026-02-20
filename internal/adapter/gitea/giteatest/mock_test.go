@@ -56,10 +56,10 @@ func TestNewMockClientWithCommits(t *testing.T) {
 
 	got, err := mock.GetCommits(ctx, "main", 10)
 	if err != nil {
-		t.Fatalf("GetCommits() error = %v", err)
+		t.Fatalf("GetCommits(ctx) error = %v", err)
 	}
 	if len(got) != len(commits) {
-		t.Errorf("GetCommits() вернул %d коммитов, ожидалось %d", len(got), len(commits))
+		t.Errorf("GetCommits(ctx) вернул %d коммитов, ожидалось %d", len(got), len(commits))
 	}
 }
 
@@ -77,10 +77,10 @@ func TestNewMockClientWithIssue(t *testing.T) {
 
 	got, err := mock.GetIssue(ctx, 100)
 	if err != nil {
-		t.Fatalf("GetIssue() error = %v", err)
+		t.Fatalf("GetIssue(ctx) error = %v", err)
 	}
 	if got.Title != issue.Title {
-		t.Errorf("GetIssue().Title = %q, want %q", got.Title, issue.Title)
+		t.Errorf("GetIssue(ctx).Title = %q, want %q", got.Title, issue.Title)
 	}
 }
 
@@ -98,18 +98,18 @@ func TestNewMockClientWithRelease(t *testing.T) {
 
 	got, err := mock.GetLatestRelease(ctx)
 	if err != nil {
-		t.Fatalf("GetLatestRelease() error = %v", err)
+		t.Fatalf("GetLatestRelease(ctx) error = %v", err)
 	}
 	if got.TagName != release.TagName {
-		t.Errorf("GetLatestRelease().TagName = %q, want %q", got.TagName, release.TagName)
+		t.Errorf("GetLatestRelease(ctx).TagName = %q, want %q", got.TagName, release.TagName)
 	}
 
 	gotByTag, err := mock.GetReleaseByTag(ctx, "v2.0.0")
 	if err != nil {
-		t.Fatalf("GetReleaseByTag() error = %v", err)
+		t.Fatalf("GetReleaseByTag(ctx) error = %v", err)
 	}
 	if gotByTag.Name != release.Name {
-		t.Errorf("GetReleaseByTag().Name = %q, want %q", gotByTag.Name, release.Name)
+		t.Errorf("GetReleaseByTag(ctx).Name = %q, want %q", gotByTag.Name, release.Name)
 	}
 }
 
@@ -148,7 +148,7 @@ func TestMockClient_CustomFunctions(t *testing.T) {
 
 		_, err := mock.GetLatestCommit(ctx, "main")
 		if err != expectedErr {
-			t.Errorf("GetLatestCommit() error = %v, want %v", err, expectedErr)
+			t.Errorf("GetLatestCommit(ctx) error = %v, want %v", err, expectedErr)
 		}
 	})
 }
@@ -201,10 +201,10 @@ func TestMockClient_DefaultBehavior(t *testing.T) {
 		t.Parallel()
 		conflict, err := mock.ConflictPR(ctx, 1)
 		if err != nil {
-			t.Fatalf("ConflictPR() error = %v", err)
+			t.Fatalf("ConflictPR(ctx) error = %v", err)
 		}
 		if conflict {
-			t.Error("ConflictPR() = true, want false")
+			t.Error("ConflictPR(ctx) = true, want false")
 		}
 	})
 }
@@ -220,12 +220,14 @@ func usePRReader(reader gitea.PRReader, prNumber int64) (*gitea.PRResponse, erro
 
 // useCommitReader демонстрирует использование только CommitReader интерфейса.
 func useCommitReader(reader gitea.CommitReader, branch string) (*gitea.Commit, error) {
-	return reader.GetLatestCommit(context.Background(), branch)
+	ctx := context.Background()
+	return reader.GetLatestCommit(ctx, branch)
 }
 
 // useFileReader демонстрирует использование только FileReader интерфейса.
 func useFileReader(reader gitea.FileReader, filename string) ([]byte, error) {
-	return reader.GetFileContent(context.Background(), filename)
+	ctx := context.Background()
+	return reader.GetFileContent(ctx, filename)
 }
 
 func TestISPUsage_PRReader(t *testing.T) {
@@ -279,6 +281,7 @@ func TestISPUsage_FileReader(t *testing.T) {
 }
 
 func TestISPUsage_MultipleInterfaces(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
 	// Один mock может использоваться для разных интерфейсов
@@ -290,12 +293,12 @@ func TestISPUsage_MultipleInterfaces(t *testing.T) {
 
 	// Как CommitReader
 	var commitReader gitea.CommitReader = mock
-	_, _ = commitReader.GetLatestCommit(context.Background(), "main")
+	_, _ = commitReader.GetLatestCommit(ctx, "main")
 
 	// Как полный Client
 	var client gitea.Client = mock
 	_, _ = client.GetPR(context.Background(), 1)
-	_, _ = client.GetLatestCommit(context.Background(), "main")
+	_, _ = client.GetLatestCommit(ctx, "main")
 }
 
 // -------------------------------------------------------------------
@@ -443,6 +446,7 @@ func ExampleMockClient_customFunction() {
 
 // Example_iSPUsage демонстрирует использование ISP интерфейсов.
 func Example_iSPUsage() {
+	ctx := context.Background()
 	mock := giteatest.NewMockClient()
 
 	// Использование как PRReader — только методы для чтения PR
@@ -452,7 +456,7 @@ func Example_iSPUsage() {
 
 	// Использование как ReleaseReader — только методы для чтения релизов
 	var releaseReader gitea.ReleaseReader = mock
-	release, _ := releaseReader.GetLatestRelease(context.Background())
+	release, _ := releaseReader.GetLatestRelease(ctx)
 	fmt.Printf("Последний релиз: %s\n", release.TagName)
 	// Output: Открытых PR: 0
 	// Последний релиз: v1.0.0

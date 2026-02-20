@@ -1,6 +1,7 @@
 package gitea
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -9,6 +10,7 @@ import (
 
 // TestGetBranchCommitRange тестирует получение диапазона коммитов ветки
 func TestGetBranchCommitRange(t *testing.T) {
+	ctx := context.Background()
 	tests := []struct {
 		name         string
 		branch       string
@@ -99,7 +101,7 @@ func TestGetBranchCommitRange(t *testing.T) {
 				BaseBranch: "main",
 			}
 
-			result, err := api.GetBranchCommitRange(tt.branch)
+			result, err := api.GetBranchCommitRange(ctx, tt.branch)
 
 			if tt.expectError {
 				if err == nil {
@@ -127,6 +129,7 @@ func TestGetBranchCommitRange(t *testing.T) {
 
 // TestGetMainBranchCommitRange тестирует получение диапазона коммитов главной ветки
 func TestGetMainBranchCommitRange(t *testing.T) {
+	ctx := context.Background()
 	tests := []struct {
 		name               string
 		branch             string
@@ -216,7 +219,7 @@ func TestGetMainBranchCommitRange(t *testing.T) {
 				Repo:     "testrepo",
 			}
 
-			result, err := api.getMainBranchCommitRange(tt.branch)
+			result, err := api.getMainBranchCommitRange(ctx, tt.branch)
 
 			if tt.expectError {
 				if err == nil {
@@ -236,6 +239,7 @@ func TestGetMainBranchCommitRange(t *testing.T) {
 
 // TestGetFeatureBranchCommitRange тестирует получение диапазона коммитов feature ветки
 func TestGetFeatureBranchCommitRange(t *testing.T) {
+	ctx := context.Background()
 	tests := []struct {
 		name              string
 		branch            string
@@ -334,7 +338,7 @@ func TestGetFeatureBranchCommitRange(t *testing.T) {
 				BaseBranch: "main",
 			}
 
-			result, err := api.getFeatureBranchCommitRange(tt.branch)
+			result, err := api.getFeatureBranchCommitRange(ctx, tt.branch)
 
 			if tt.expectError {
 				if err == nil {
@@ -354,6 +358,7 @@ func TestGetFeatureBranchCommitRange(t *testing.T) {
 
 // TestFindCommitWithTag тестирует поиск коммита с тегом
 func TestFindCommitWithTag(t *testing.T) {
+	ctx := context.Background()
 	tests := []struct {
 		name         string
 		branch       string
@@ -422,7 +427,7 @@ func TestFindCommitWithTag(t *testing.T) {
 				Repo:     "testrepo",
 			}
 
-			commit, err := api.findCommitWithTag(tt.branch, tt.tag)
+			commit, err := api.findCommitWithTag(ctx, tt.branch, tt.tag)
 
 			if tt.expectError {
 				if err == nil {
@@ -442,6 +447,7 @@ func TestFindCommitWithTag(t *testing.T) {
 
 // TestGetFirstCommitInHistory тестирует получение первого коммита в истории
 func TestGetFirstCommitInHistory(t *testing.T) {
+	ctx := context.Background()
 	tests := []struct {
 		name         string
 		branch       string
@@ -492,7 +498,7 @@ func TestGetFirstCommitInHistory(t *testing.T) {
 				Repo:     "testrepo",
 			}
 
-			commit, err := api.getFirstCommitInHistory(tt.branch)
+			commit, err := api.getFirstCommitInHistory(ctx, tt.branch)
 
 			if tt.expectError {
 				if err == nil {
@@ -516,6 +522,7 @@ func TestGetFirstCommitInHistory(t *testing.T) {
 
 // TestCompareBranches тестирует сравнение веток
 func TestCompareBranches(t *testing.T) {
+	ctx := context.Background()
 	tests := []struct {
 		name              string
 		base              string
@@ -600,7 +607,7 @@ func TestCompareBranches(t *testing.T) {
 				Repo:     "testrepo",
 			}
 
-			result, err := api.compareBranches(tt.base, tt.head)
+			result, err := api.compareBranches(ctx, tt.base, tt.head)
 
 			if tt.expectError {
 				if err == nil {
@@ -623,6 +630,7 @@ func TestCompareBranches(t *testing.T) {
 
 // TestFindMergeBase тестирует поиск общего предка веток
 func TestFindMergeBase(t *testing.T) {
+	ctx := context.Background()
 	tests := []struct {
 		name        string
 		base        string
@@ -693,7 +701,7 @@ func TestFindMergeBase(t *testing.T) {
 				Repo:     "testrepo",
 			}
 
-			commit, err := api.findMergeBase(tt.base, tt.head)
+			commit, err := api.findMergeBase(ctx, tt.base, tt.head)
 
 			if tt.expectError {
 				if err == nil {
@@ -713,6 +721,7 @@ func TestFindMergeBase(t *testing.T) {
 
 // TestGetAllCommits тестирует получение всех коммитов ветки
 func TestGetAllCommits(t *testing.T) {
+	ctx := context.Background()
 	tests := []struct {
 		name         string
 		branch       string
@@ -766,7 +775,7 @@ func TestGetAllCommits(t *testing.T) {
 				Repo:     "testrepo",
 			}
 
-			commits, err := api.getAllCommits(tt.branch)
+			commits, err := api.getAllCommits(ctx, tt.branch)
 
 			if tt.expectError {
 				if err == nil {
@@ -786,6 +795,7 @@ func TestGetAllCommits(t *testing.T) {
 
 // TestGetCommitBySHA тестирует получение коммита по SHA
 func TestGetCommitBySHA(t *testing.T) {
+	ctx := context.Background()
 	tests := []struct {
 		name         string
 		sha          string
@@ -843,7 +853,7 @@ func TestGetCommitBySHA(t *testing.T) {
 				Repo:     "testrepo",
 			}
 
-			commit, err := api.getCommitBySHA(tt.sha)
+			commit, err := api.getCommitBySHA(ctx, tt.sha)
 
 			if tt.expectError {
 				if err == nil {

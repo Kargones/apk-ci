@@ -1,6 +1,7 @@
 package config
 
 import (
+	"context"
 	"log/slog"
 	"os"
 	"testing"
@@ -422,7 +423,7 @@ func TestLoadAllSubConfigs(t *testing.T) {
 	cfg := &Config{Logger: l}
 
 	// This will fail to load from gitea (no API configured) and fall back to defaults
-	loadAllSubConfigs(l, cfg)
+	loadAllSubConfigs(context.Background(), l, cfg)
 
 	if cfg.AppConfig == nil {
 		t.Error("AppConfig should have default value")
@@ -470,7 +471,7 @@ func TestValidateLoadedConfigs(t *testing.T) {
 			MetricsConfig:         getDefaultMetricsConfig(),
 			TracingConfig:         getDefaultTracingConfig(),
 		}
-		validateLoadedConfigs(l, cfg)
+		validateLoadedConfigs(context.Background(), l, cfg)
 		if cfg.ImplementationsConfig.ConfigExport != "1cv8" {
 			t.Errorf("ConfigExport should be reset to default, got %q", cfg.ImplementationsConfig.ConfigExport)
 		}
@@ -483,7 +484,7 @@ func TestValidateLoadedConfigs(t *testing.T) {
 			MetricsConfig:         getDefaultMetricsConfig(),
 			TracingConfig:         getDefaultTracingConfig(),
 		}
-		validateLoadedConfigs(l, cfg)
+		validateLoadedConfigs(context.Background(), l, cfg)
 		if cfg.AlertingConfig.Enabled {
 			t.Error("alerting should be disabled after validation failure")
 		}
@@ -496,7 +497,7 @@ func TestValidateLoadedConfigs(t *testing.T) {
 			MetricsConfig:         &MetricsConfig{Enabled: true},
 			TracingConfig:         getDefaultTracingConfig(),
 		}
-		validateLoadedConfigs(l, cfg)
+		validateLoadedConfigs(context.Background(), l, cfg)
 		if cfg.MetricsConfig.Enabled {
 			t.Error("metrics should be disabled after validation failure")
 		}
@@ -509,7 +510,7 @@ func TestValidateLoadedConfigs(t *testing.T) {
 			MetricsConfig:         getDefaultMetricsConfig(),
 			TracingConfig:         &TracingConfig{Enabled: true, SamplingRate: 1.0, Timeout: 5 * time.Second},
 		}
-		validateLoadedConfigs(l, cfg)
+		validateLoadedConfigs(context.Background(), l, cfg)
 		if cfg.TracingConfig.Enabled {
 			t.Error("tracing should be disabled after validation failure (no endpoint)")
 		}
@@ -525,7 +526,7 @@ func TestValidateLoadedConfigs(t *testing.T) {
 			MetricsConfig: &MetricsConfig{Enabled: true, PushgatewayURL: "http://pg:9091", Timeout: 10 * time.Second},
 			TracingConfig: &TracingConfig{Enabled: true, Endpoint: "http://j:4318", ServiceName: "s", Timeout: 5 * time.Second, SamplingRate: 1.0},
 		}
-		validateLoadedConfigs(l, cfg)
+		validateLoadedConfigs(context.Background(), l, cfg)
 		if !cfg.AlertingConfig.Enabled {
 			t.Error("valid alerting should remain enabled")
 		}
@@ -545,7 +546,7 @@ func TestValidateLoadedConfigs(t *testing.T) {
 func TestLoadMenuMainConfig_Empty(t *testing.T) {
 	l := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelError}))
 	cfg := &Config{ConfigMenuMain: ""}
-	result, err := loadMenuMainConfig(l, cfg)
+	result, err := loadMenuMainConfig(context.Background(), l, cfg)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -557,7 +558,7 @@ func TestLoadMenuMainConfig_Empty(t *testing.T) {
 func TestLoadMenuDebugConfig_Empty(t *testing.T) {
 	l := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelError}))
 	cfg := &Config{ConfigMenuDebug: ""}
-	result, err := loadMenuDebugConfig(l, cfg)
+	result, err := loadMenuDebugConfig(context.Background(), l, cfg)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -735,7 +736,7 @@ func TestLoadImplementationsConfig(t *testing.T) {
 func TestLoadMenuMainConfig_NonEmpty(t *testing.T) {
 	l := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelError}))
 	cfg := &Config{ConfigMenuMain: "menu-main.txt"}
-	_, err := loadMenuMainConfig(l, cfg)
+	_, err := loadMenuMainConfig(context.Background(), l, cfg)
 	if err == nil {
 		t.Error("expected error when gitea API not configured")
 	}
@@ -744,7 +745,7 @@ func TestLoadMenuMainConfig_NonEmpty(t *testing.T) {
 func TestLoadMenuDebugConfig_NonEmpty(t *testing.T) {
 	l := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelError}))
 	cfg := &Config{ConfigMenuDebug: "menu-debug.txt"}
-	_, err := loadMenuDebugConfig(l, cfg)
+	_, err := loadMenuDebugConfig(context.Background(), l, cfg)
 	if err == nil {
 		t.Error("expected error when gitea API not configured")
 	}
@@ -757,7 +758,7 @@ func TestLoadMenuDebugConfig_NonEmpty(t *testing.T) {
 func TestLoadAppConfig_Error(t *testing.T) {
 	l := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelError}))
 	cfg := &Config{ConfigSystem: "nonexistent.yaml"}
-	_, err := loadAppConfig(l, cfg)
+	_, err := loadAppConfig(context.Background(), l, cfg)
 	if err == nil {
 		t.Error("expected error")
 	}
@@ -766,7 +767,7 @@ func TestLoadAppConfig_Error(t *testing.T) {
 func TestLoadProjectConfig_Error(t *testing.T) {
 	l := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelError}))
 	cfg := &Config{ConfigProject: "nonexistent.yaml"}
-	_, err := loadProjectConfig(l, cfg)
+	_, err := loadProjectConfig(context.Background(), l, cfg)
 	if err == nil {
 		t.Error("expected error")
 	}
@@ -775,7 +776,7 @@ func TestLoadProjectConfig_Error(t *testing.T) {
 func TestLoadSecretConfig_Error(t *testing.T) {
 	l := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelError}))
 	cfg := &Config{ConfigSecret: "nonexistent.yaml"}
-	_, err := loadSecretConfig(l, cfg)
+	_, err := loadSecretConfig(context.Background(), l, cfg)
 	if err == nil {
 		t.Error("expected error")
 	}
@@ -784,7 +785,7 @@ func TestLoadSecretConfig_Error(t *testing.T) {
 func TestLoadDbConfig_Error(t *testing.T) {
 	l := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelError}))
 	cfg := &Config{ConfigDbData: "nonexistent.yaml"}
-	_, err := loadDbConfig(l, cfg)
+	_, err := loadDbConfig(context.Background(), l, cfg)
 	if err == nil {
 		t.Error("expected error")
 	}
@@ -797,7 +798,7 @@ func TestLoadDbConfig_Error(t *testing.T) {
 func TestAnalyzeProject_Error(t *testing.T) {
 	l := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelError}))
 	cfg := &Config{}
-	err := cfg.AnalyzeProject(l, "main")
+	err := cfg.AnalyzeProject(context.Background(), l, "main")
 	if err == nil {
 		t.Error("expected error when gitea API not configured")
 	}
@@ -810,7 +811,7 @@ func TestAnalyzeProject_Error(t *testing.T) {
 func TestReloadConfig_Error(t *testing.T) {
 	l := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelError}))
 	cfg := &Config{Logger: l}
-	err := cfg.ReloadConfig()
+	err := cfg.ReloadConfig(context.Background())
 	if err == nil {
 		t.Error("expected error when gitea API not configured")
 	}

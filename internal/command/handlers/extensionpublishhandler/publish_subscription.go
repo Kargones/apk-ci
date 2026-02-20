@@ -1,6 +1,7 @@
 package extensionpublishhandler
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"strings"
@@ -27,9 +28,9 @@ type ProjectYAML struct {
 // Возвращает:
 //   - []string: список подписок в формате {Org}_{Repo}_{ExtDir}
 //   - error: ошибка при чтении/парсинге или nil при успехе
-func GetProjectSubscriptions(api *gitea.API, branch string) ([]string, error) {
+func GetProjectSubscriptions(ctx context.Context, api *gitea.API, branch string) ([]string, error) {
 	// Читаем содержимое project.yaml
-	content, err := api.GetFileContent("project.yaml")
+	content, err := api.GetFileContent(ctx, "project.yaml")
 	if err != nil {
 		// Если файл не существует — это не ошибка, просто нет подписок
 		if strings.Contains(err.Error(), "404") || strings.Contains(err.Error(), "статус 404") {
@@ -132,7 +133,7 @@ func ParseSubscriptionID(subscriptionID string) (org, repo, extDir string, err e
 // Возвращает:
 //   - []SubscribedRepo: список валидных подписчиков
 //   - error: ошибка при выполнении операций с API или nil при успехе
-func FindSubscribedRepos(l *slog.Logger, api *gitea.API, sourceRepo string, extensions []string) ([]SubscribedRepo, error) {
+func FindSubscribedRepos(ctx context.Context, l *slog.Logger, api *gitea.API, sourceRepo string, extensions []string) ([]SubscribedRepo, error) {
 	logger := l
 
 	// Если расширения не указаны, возвращаем пустой список
@@ -156,7 +157,7 @@ func FindSubscribedRepos(l *slog.Logger, api *gitea.API, sourceRepo string, exte
 	)
 
 	// Получаем список всех доступных организаций
-	orgs, err := api.GetUserOrganizations()
+	orgs, err := api.GetUserOrganizations(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("ошибка получения списка организаций: %w", err)
 	}
@@ -170,7 +171,7 @@ func FindSubscribedRepos(l *slog.Logger, api *gitea.API, sourceRepo string, exte
 	// Для каждой организации получаем список репозиториев
 	for _, org := range orgs {
 		// Получаем репозитории организации
-		repos, err := api.SearchOrgRepos(org.Username)
+		repos, err := api.SearchOrgRepos(ctx, org.Username)
 		if err != nil {
 			// Логируем ошибку, но продолжаем обработку других организаций
 			logger.Warn("ошибка получения репозиториев организации",
@@ -192,7 +193,7 @@ func FindSubscribedRepos(l *slog.Logger, api *gitea.API, sourceRepo string, exte
 			})
 
 			// Читаем подписки из project.yaml
-			subscriptions, err := GetProjectSubscriptions(targetAPI, repo.DefaultBranch)
+			subscriptions, err := GetProjectSubscriptions(ctx, targetAPI, repo.DefaultBranch)
 			if err != nil {
 				logger.Warn("ошибка чтения подписок репозитория",
 					slog.String("organization", org.Username),

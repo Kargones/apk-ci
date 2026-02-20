@@ -55,7 +55,7 @@ func (c *APIClient) GetPR(ctx context.Context, prNumber int64) (*PRResponse, err
 }
 
 func (c *APIClient) ListOpenPRs(ctx context.Context) ([]PR, error) {
-	entityPRs, err := c.api.ActivePR()
+	entityPRs, err := c.api.ActivePR(ctx)
 	if err != nil {
 		return nil, NewGiteaError(ErrGiteaAPI, "ListOpenPRs failed", err)
 	}
@@ -67,11 +67,11 @@ func (c *APIClient) ListOpenPRs(ctx context.Context) ([]PR, error) {
 }
 
 func (c *APIClient) ConflictPR(ctx context.Context, prNumber int64) (bool, error) {
-	return c.api.ConflictPR(prNumber)
+	return c.api.ConflictPR(ctx, prNumber)
 }
 
 func (c *APIClient) ConflictFilesPR(ctx context.Context, prNumber int64) ([]string, error) {
-	return c.api.ConflictFilesPR(prNumber)
+	return c.api.ConflictFilesPR(ctx, prNumber)
 }
 
 // -------------------------------------------------------------------
@@ -79,7 +79,7 @@ func (c *APIClient) ConflictFilesPR(ctx context.Context, prNumber int64) ([]stri
 // -------------------------------------------------------------------
 
 func (c *APIClient) GetCommits(ctx context.Context, branch string, limit int) ([]Commit, error) {
-	entityCommits, err := c.api.GetCommits(branch, limit)
+	entityCommits, err := c.api.GetCommits(ctx, branch, limit)
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +87,7 @@ func (c *APIClient) GetCommits(ctx context.Context, branch string, limit int) ([
 }
 
 func (c *APIClient) GetLatestCommit(ctx context.Context, branch string) (*Commit, error) {
-	ec, err := c.api.GetLatestCommit(branch)
+	ec, err := c.api.GetLatestCommit(ctx, branch)
 	if err != nil {
 		return nil, err
 	}
@@ -96,7 +96,7 @@ func (c *APIClient) GetLatestCommit(ctx context.Context, branch string) (*Commit
 }
 
 func (c *APIClient) GetCommitFiles(ctx context.Context, commitSHA string) ([]CommitFile, error) {
-	entityFiles, err := c.api.GetCommitFiles(commitSHA)
+	entityFiles, err := c.api.GetCommitFiles(ctx, commitSHA)
 	if err != nil {
 		return nil, err
 	}
@@ -104,7 +104,7 @@ func (c *APIClient) GetCommitFiles(ctx context.Context, commitSHA string) ([]Com
 }
 
 func (c *APIClient) GetCommitsBetween(ctx context.Context, baseSHA, headSHA string) ([]Commit, error) {
-	entityCommits, err := c.api.GetCommitsBetween(baseSHA, headSHA)
+	entityCommits, err := c.api.GetCommitsBetween(ctx, baseSHA, headSHA)
 	if err != nil {
 		return nil, err
 	}
@@ -112,7 +112,7 @@ func (c *APIClient) GetCommitsBetween(ctx context.Context, baseSHA, headSHA stri
 }
 
 func (c *APIClient) GetFirstCommitOfBranch(ctx context.Context, branch, baseBranch string) (*Commit, error) {
-	ec, err := c.api.GetFirstCommitOfBranch(branch, baseBranch)
+	ec, err := c.api.GetFirstCommitOfBranch(ctx, branch, baseBranch)
 	if err != nil {
 		return nil, err
 	}
@@ -121,7 +121,7 @@ func (c *APIClient) GetFirstCommitOfBranch(ctx context.Context, branch, baseBran
 }
 
 func (c *APIClient) GetBranchCommitRange(ctx context.Context, branch string) (*BranchCommitRange, error) {
-	ecr, err := c.api.GetBranchCommitRange(branch)
+	ecr, err := c.api.GetBranchCommitRange(ctx, branch)
 	if err != nil {
 		return nil, err
 	}
@@ -133,11 +133,11 @@ func (c *APIClient) GetBranchCommitRange(ctx context.Context, branch string) (*B
 // -------------------------------------------------------------------
 
 func (c *APIClient) GetFileContent(ctx context.Context, fileName string) ([]byte, error) {
-	return c.api.GetFileContent(fileName)
+	return c.api.GetFileContent(ctx, fileName)
 }
 
 func (c *APIClient) GetRepositoryContents(ctx context.Context, filepath, branch string) ([]FileInfo, error) {
-	entityFiles, err := c.api.GetRepositoryContents(filepath, branch)
+	entityFiles, err := c.api.GetRepositoryContents(ctx, filepath, branch)
 	if err != nil {
 		return nil, err
 	}
@@ -145,7 +145,7 @@ func (c *APIClient) GetRepositoryContents(ctx context.Context, filepath, branch 
 }
 
 func (c *APIClient) AnalyzeProjectStructure(ctx context.Context, branch string) ([]string, error) {
-	return c.api.AnalyzeProjectStructure(branch)
+	return c.api.AnalyzeProjectStructure(ctx, branch)
 }
 
 // -------------------------------------------------------------------
@@ -153,7 +153,7 @@ func (c *APIClient) AnalyzeProjectStructure(ctx context.Context, branch string) 
 // -------------------------------------------------------------------
 
 func (c *APIClient) GetBranches(ctx context.Context, repo string) ([]Branch, error) {
-	entityBranches, err := c.api.GetBranches(repo)
+	entityBranches, err := c.api.GetBranches(ctx, repo)
 	if err != nil {
 		return nil, err
 	}
@@ -162,12 +162,12 @@ func (c *APIClient) GetBranches(ctx context.Context, repo string) ([]Branch, err
 
 func (c *APIClient) CreateBranch(ctx context.Context, _, _ string) error {
 	// entity API CreateTestBranch uses pre-configured branch names
-	return c.api.CreateTestBranch()
+	return c.api.CreateTestBranch(ctx)
 }
 
 func (c *APIClient) DeleteBranch(ctx context.Context, _ string) error {
 	// entity API DeleteTestBranch uses pre-configured branch name
-	return c.api.DeleteTestBranch()
+	return c.api.DeleteTestBranch(ctx)
 }
 
 // -------------------------------------------------------------------
@@ -175,7 +175,7 @@ func (c *APIClient) DeleteBranch(ctx context.Context, _ string) error {
 // -------------------------------------------------------------------
 
 func (c *APIClient) GetLatestRelease(ctx context.Context) (*Release, error) {
-	er, err := c.api.GetLatestRelease()
+	er, err := c.api.GetLatestRelease(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -184,7 +184,7 @@ func (c *APIClient) GetLatestRelease(ctx context.Context) (*Release, error) {
 }
 
 func (c *APIClient) GetReleaseByTag(ctx context.Context, tag string) (*Release, error) {
-	er, err := c.api.GetReleaseByTag(tag)
+	er, err := c.api.GetReleaseByTag(ctx, tag)
 	if err != nil {
 		return nil, err
 	}
@@ -197,7 +197,7 @@ func (c *APIClient) GetReleaseByTag(ctx context.Context, tag string) (*Release, 
 // -------------------------------------------------------------------
 
 func (c *APIClient) GetIssue(ctx context.Context, issueNumber int64) (*Issue, error) {
-	ei, err := c.api.GetIssue(issueNumber)
+	ei, err := c.api.GetIssue(ctx, issueNumber)
 	if err != nil {
 		return nil, err
 	}
@@ -206,11 +206,11 @@ func (c *APIClient) GetIssue(ctx context.Context, issueNumber int64) (*Issue, er
 }
 
 func (c *APIClient) AddIssueComment(ctx context.Context, issueNumber int64, commentText string) error {
-	return c.api.AddIssueComment(issueNumber, commentText)
+	return c.api.AddIssueComment(ctx, issueNumber, commentText)
 }
 
 func (c *APIClient) CloseIssue(ctx context.Context, issueNumber int64) error {
-	return c.api.CloseIssue(issueNumber)
+	return c.api.CloseIssue(ctx, issueNumber)
 }
 
 // -------------------------------------------------------------------
@@ -218,7 +218,7 @@ func (c *APIClient) CloseIssue(ctx context.Context, issueNumber int64) error {
 // -------------------------------------------------------------------
 
 func (c *APIClient) CreatePR(ctx context.Context, head string) (PR, error) {
-	ep, err := c.api.CreatePR(head)
+	ep, err := c.api.CreatePR(ctx, head)
 	if err != nil {
 		return PR{}, err
 	}
@@ -234,7 +234,7 @@ func (c *APIClient) CreatePRWithOptions(ctx context.Context, opts CreatePROption
 		Assignees: opts.Assignees,
 		Labels:    opts.Labels,
 	}
-	er, err := c.api.CreatePRWithOptions(entityOpts)
+	er, err := c.api.CreatePRWithOptions(ctx, entityOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -243,11 +243,11 @@ func (c *APIClient) CreatePRWithOptions(ctx context.Context, opts CreatePROption
 }
 
 func (c *APIClient) MergePR(ctx context.Context, prNumber int64) error {
-	return c.api.MergePR(prNumber, c.logger)
+	return c.api.MergePR(ctx, prNumber, c.logger)
 }
 
 func (c *APIClient) ClosePR(ctx context.Context, prNumber int64) error {
-	return c.api.ClosePR(prNumber)
+	return c.api.ClosePR(ctx, prNumber)
 }
 
 // -------------------------------------------------------------------
@@ -265,7 +265,7 @@ func (c *APIClient) SetRepositoryState(ctx context.Context, operations []BatchOp
 			FromPath:  op.FromPath,
 		}
 	}
-	return c.api.SetRepositoryState(c.logger, entityOps, branch, commitMessage)
+	return c.api.SetRepositoryState(ctx, c.logger, entityOps, branch, commitMessage)
 }
 
 // -------------------------------------------------------------------
@@ -273,11 +273,11 @@ func (c *APIClient) SetRepositoryState(ctx context.Context, operations []BatchOp
 // -------------------------------------------------------------------
 
 func (c *APIClient) IsUserInTeam(ctx context.Context, username, orgName, teamName string) (bool, error) {
-	return c.api.IsUserInTeam(c.logger, username, orgName, teamName)
+	return c.api.IsUserInTeam(ctx, c.logger, username, orgName, teamName)
 }
 
 func (c *APIClient) GetTeamMembers(ctx context.Context, orgName, teamName string) ([]string, error) {
-	return c.api.GetTeamMembers(orgName, teamName)
+	return c.api.GetTeamMembers(ctx, orgName, teamName)
 }
 
 // -------------------------------------------------------------------
@@ -285,7 +285,7 @@ func (c *APIClient) GetTeamMembers(ctx context.Context, orgName, teamName string
 // -------------------------------------------------------------------
 
 func (c *APIClient) SearchOrgRepos(ctx context.Context, orgName string) ([]Repository, error) {
-	entityRepos, err := c.api.SearchOrgRepos(orgName)
+	entityRepos, err := c.api.SearchOrgRepos(ctx, orgName)
 	if err != nil {
 		return nil, err
 	}

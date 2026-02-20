@@ -63,7 +63,7 @@ func NewEntity(cfg *config.SonarQubeConfig, logger *slog.Logger) *Entity {
 //
 // Returns:
 //   - error: error if authentication fails
-func (s *Entity) Authenticate(token string) error {
+func (s *Entity) Authenticate(ctx context.Context, token string) error {
 	// Temporarily set the token for validation
 	originalToken := s.config.Token
 	s.config.Token = token
@@ -72,7 +72,7 @@ func (s *Entity) Authenticate(token string) error {
 	}()
 
 	// Validate the token
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
 	return s.ValidateToken(ctx)
 }

@@ -64,6 +64,7 @@ func TestUpdater_UpdateDBCfg_WithTimeout(t *testing.T) {
 }
 
 func TestUpdater_UpdateDBCfg_CancelledContext(t *testing.T) {
+	ctx := context.Background()
 	u := NewUpdater("/usr/bin/1cv8", "/work", "/tmp")
 
 	ctx, cancel := context.WithCancel(context.Background())

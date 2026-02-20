@@ -79,7 +79,6 @@ func restoreEnvironment(saved map[string]string) {
 // TestMain_ContextCreation tests that context is properly created
 func TestMain_ContextCreation(t *testing.T) {
 	// This test verifies that the context creation logic works
-	ctx := context.Background()
 	if ctx == nil {
 		t.Error("Expected context to be created, got nil")
 	}
@@ -174,6 +173,7 @@ func TestConfigLoadingWithGiteaActionParams(t *testing.T) {
 
 // TestConfig_MustLoad tests the config.MustLoad function behavior
 func TestConfig_MustLoad(t *testing.T) {
+	ctx := context.Background()
 	tests := []struct {
 		name        string
 		setupEnv    func()
@@ -225,7 +225,7 @@ func TestConfig_MustLoad(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.setupEnv()
 
-			cfg, err := config.MustLoad()
+			cfg, err := config.MustLoad(ctx)
 
 			if tt.expectError {
 				if err == nil {
@@ -248,6 +248,7 @@ func TestConfig_MustLoad(t *testing.T) {
 
 // TestMain_WithYamlConfig тестирует функцию main с загрузкой параметров из YAML файла
 func TestMain_WithYamlConfig(t *testing.T) {
+	ctx := context.Background()
 	// Импорты для работы с YAML
 	yamlContent := `
 # Конфигурация для тестирования функции main
@@ -354,7 +355,7 @@ env-vars:
 				}
 
 				// Проверяем, что конфигурация может быть загружена
-				cfg, err := config.MustLoad()
+				cfg, err := config.MustLoad(ctx)
 				if err != nil {
 					t.Logf("Config loading failed (expected in test environment): %v", err)
 					// В тестовой среде это ожидаемо, так как файлы конфигурации могут отсутствовать
@@ -741,6 +742,7 @@ func TestMain_WithGiteaActionParams(t *testing.T) {
 
 // TestMain_Integration tests integration scenarios without calling main()
 func TestMain_Integration(t *testing.T) {
+	ctx := context.Background()
 	if testing.Short() {
 		t.Skip("Skipping integration test in short mode")
 	}
@@ -760,7 +762,7 @@ func TestMain_Integration(t *testing.T) {
 	_ = os.Setenv("INPUT_LOGLEVEL", "Error") // Use Error level to reduce log noise
 
 	// Test that the configuration can be loaded and basic operations work
-	cfg, err := config.MustLoad()
+	cfg, err := config.MustLoad(ctx)
 	if err != nil {
 		t.Logf("Config loading failed in integration test (expected due to missing external services): %v", err)
 		// This is expected in test environment without external dependencies
@@ -827,6 +829,7 @@ func TestMain_AllCommandConstants(t *testing.T) {
 
 // TestMain_ErrorHandling tests error handling scenarios
 func TestMain_ErrorHandling(t *testing.T) {
+	ctx := context.Background()
 	envVars := []string{
 		"INPUT_ACTOR", "INPUT_COMMAND", "INPUT_LOGLEVEL", "INPUT_GITEAURL",
 		"INPUT_REPOSITORY", "INPUT_ACCESSTOKEN", "INPUT_DBNAME",
@@ -870,7 +873,7 @@ func TestMain_ErrorHandling(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.setupEnv()
 
-			cfg, err := config.MustLoad()
+			cfg, err := config.MustLoad(ctx)
 
 			if tt.expectError {
 				if err == nil {

@@ -1,6 +1,7 @@
 package gitea
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -12,6 +13,7 @@ import (
 
 // TestConflictFilesPR тестирует получение файлов с конфликтами в PR
 func TestConflictFilesPR(t *testing.T) {
+	ctx := context.Background()
 	tests := []struct {
 		name         string
 		prNumber     int64
@@ -57,7 +59,7 @@ func TestConflictFilesPR(t *testing.T) {
 				Repo:     "testrepo",
 			}
 
-			files, err := api.ConflictFilesPR(tt.prNumber)
+			files, err := api.ConflictFilesPR(ctx, tt.prNumber)
 
 			if tt.expectError {
 				if err == nil {
@@ -77,6 +79,7 @@ func TestConflictFilesPR(t *testing.T) {
 
 // TestGetTeamMembers тестирует получение членов команды
 func TestGetTeamMembers(t *testing.T) {
+	ctx := context.Background()
 	tests := []struct {
 		name              string
 		orgName           string
@@ -150,7 +153,7 @@ func TestGetTeamMembers(t *testing.T) {
 				AccessToken: "testtoken",
 			}
 
-			members, err := api.GetTeamMembers(tt.orgName, tt.teamName)
+			members, err := api.GetTeamMembers(ctx, tt.orgName, tt.teamName)
 
 			if tt.expectError {
 				if err == nil {
@@ -170,6 +173,7 @@ func TestGetTeamMembers(t *testing.T) {
 
 // TestGetLatestCommit тестирует получение последнего коммита
 func TestGetLatestCommit(t *testing.T) {
+	ctx := context.Background()
 	tests := []struct {
 		name         string
 		branch       string
@@ -226,7 +230,7 @@ func TestGetLatestCommit(t *testing.T) {
 				Repo:     "testrepo",
 			}
 
-			commit, err := api.GetLatestCommit(tt.branch)
+			commit, err := api.GetLatestCommit(ctx, tt.branch)
 
 			if tt.expectError {
 				if err == nil {
@@ -246,6 +250,7 @@ func TestGetLatestCommit(t *testing.T) {
 
 // TestGetCommits тестирует получение списка коммитов
 func TestGetCommits(t *testing.T) {
+	ctx := context.Background()
 	tests := []struct {
 		name         string
 		branch       string
@@ -312,7 +317,7 @@ func TestGetCommits(t *testing.T) {
 				Repo:     "testrepo",
 			}
 
-			commits, err := api.GetCommits(tt.branch, tt.limit)
+			commits, err := api.GetCommits(ctx, tt.branch, tt.limit)
 
 			if tt.expectError {
 				if err == nil {
@@ -332,6 +337,7 @@ func TestGetCommits(t *testing.T) {
 
 // TestGetFirstCommitOfBranch тестирует получение первого коммита ветки
 func TestGetFirstCommitOfBranch(t *testing.T) {
+	ctx := context.Background()
 	tests := []struct {
 		name         string
 		branch       string
@@ -382,7 +388,7 @@ func TestGetFirstCommitOfBranch(t *testing.T) {
 				Repo:     "testrepo",
 			}
 
-			commit, err := api.GetFirstCommitOfBranch(tt.branch, tt.baseBranch)
+			commit, err := api.GetFirstCommitOfBranch(ctx, tt.branch, tt.baseBranch)
 
 			if tt.expectError {
 				if err == nil {
@@ -406,6 +412,7 @@ func TestGetFirstCommitOfBranch(t *testing.T) {
 
 // TestGetCommitsBetween тестирует получение коммитов между двумя SHA
 func TestGetCommitsBetween(t *testing.T) {
+	ctx := context.Background()
 	tests := []struct {
 		name            string
 		baseCommitSHA   string
@@ -459,7 +466,7 @@ func TestGetCommitsBetween(t *testing.T) {
 				Repo:     "testrepo",
 			}
 
-			commits, err := api.GetCommitsBetween(tt.baseCommitSHA, tt.headCommitSHA)
+			commits, err := api.GetCommitsBetween(ctx, tt.baseCommitSHA, tt.headCommitSHA)
 
 			if tt.expectError {
 				if err == nil {
@@ -479,6 +486,7 @@ func TestGetCommitsBetween(t *testing.T) {
 
 // TestGetCommitFiles тестирует получение файлов коммита
 func TestGetCommitFiles(t *testing.T) {
+	ctx := context.Background()
 	tests := []struct {
 		name         string
 		commitSHA    string
@@ -524,7 +532,7 @@ func TestGetCommitFiles(t *testing.T) {
 				Repo:     "testrepo",
 			}
 
-			files, err := api.GetCommitFiles(tt.commitSHA)
+			files, err := api.GetCommitFiles(ctx, tt.commitSHA)
 
 			if tt.expectError {
 				if err == nil {
@@ -544,6 +552,7 @@ func TestGetCommitFiles(t *testing.T) {
 
 // TestSetRepositoryState тестирует установку состояния репозитория
 func TestSetRepositoryState(t *testing.T) {
+	ctx := context.Background()
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
 	tests := []struct {
@@ -610,7 +619,7 @@ func TestSetRepositoryState(t *testing.T) {
 				Repo:     "testrepo",
 			}
 
-			err := api.SetRepositoryState(logger, tt.operations, tt.branch, tt.commitMessage)
+			err := api.SetRepositoryState(ctx, logger, tt.operations, tt.branch, tt.commitMessage)
 
 			if tt.expectError {
 				if err == nil {
@@ -627,6 +636,7 @@ func TestSetRepositoryState(t *testing.T) {
 
 // TestGetConfigDataBad тестирует получение конфигурационных данных (устаревший метод)
 func TestGetConfigDataBad(t *testing.T) {
+	ctx := context.Background()
 	tests := []struct {
 		name            string
 		filenamePrefix  string
@@ -720,7 +730,7 @@ func TestGetConfigDataBad(t *testing.T) {
 				filenamePrefix = server.URL + "/config.yaml"
 			}
 
-			content, err := api.GetConfigDataBad(filenamePrefix)
+			content, err := api.GetConfigDataBad(ctx, filenamePrefix)
 
 			if tt.expectError {
 				if err == nil {
@@ -740,6 +750,7 @@ func TestGetConfigDataBad(t *testing.T) {
 
 // TestAnalyzeProjectStructureMethod тестирует публичный метод AnalyzeProjectStructure
 func TestAnalyzeProjectStructureMethod(t *testing.T) {
+	ctx := context.Background()
 	tests := []struct {
 		name         string
 		branch       string
@@ -787,7 +798,7 @@ func TestAnalyzeProjectStructureMethod(t *testing.T) {
 				Repo:     "testrepo",
 			}
 
-			result, err := api.AnalyzeProjectStructure(tt.branch)
+			result, err := api.AnalyzeProjectStructure(ctx, tt.branch)
 
 			if tt.expectError {
 				if err == nil {

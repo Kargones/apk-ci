@@ -1,6 +1,7 @@
 package extensionpublishhandler
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"strings"
@@ -114,7 +115,7 @@ func BuildExtensionPRTitle(extName, version string) string {
 // Возвращает:
 //   - *gitea.PRResponse: информация о созданном PR
 //   - error: ошибка создания или nil при успехе
-func CreateExtensionPR(l *slog.Logger, api *gitea.API, syncResult *SyncResult, release *gitea.Release, extName, sourceRepo, releaseURL string) (*gitea.PRResponse, error) {
+func CreateExtensionPR(ctx context.Context, l *slog.Logger, api *gitea.API, syncResult *SyncResult, release *gitea.Release, extName, sourceRepo, releaseURL string) (*gitea.PRResponse, error) {
 	logger := l
 
 	// Определяем версию для заголовка
@@ -152,7 +153,7 @@ func CreateExtensionPR(l *slog.Logger, api *gitea.API, syncResult *SyncResult, r
 	)
 
 	// Создаём PR через API
-	pr, err := api.CreatePRWithOptions(opts)
+	pr, err := api.CreatePRWithOptions(ctx, opts)
 	if err != nil {
 		return nil, fmt.Errorf("ошибка создания PR: %w", err)
 	}

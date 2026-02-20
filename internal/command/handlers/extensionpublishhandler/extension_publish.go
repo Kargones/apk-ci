@@ -80,7 +80,7 @@ func ExtensionPublish(ctx context.Context, l *slog.Logger, cfg *config.Config) e
 	})
 
 	// 4. Получение информации о релизе
-	release, err := sourceAPI.GetReleaseByTag(releaseTag)
+	release, err := sourceAPI.GetReleaseByTag(ctx, releaseTag)
 	if err != nil {
 		return fmt.Errorf("ошибка получения релиза %s: %w", releaseTag, err)
 	}
@@ -92,7 +92,7 @@ func ExtensionPublish(ctx context.Context, l *slog.Logger, cfg *config.Config) e
 
 	// 5. Поиск подписчиков
 	// Расширения уже загружены из конфигурации в cfg.AddArray
-	subscribers, err := FindSubscribedRepos(l, sourceAPI, repo, extensions)
+	subscribers, err := FindSubscribedRepos(ctx, l, sourceAPI, repo, extensions)
 	if err != nil {
 		return fmt.Errorf("ошибка поиска подписчиков: %w", err)
 	}
@@ -149,7 +149,7 @@ func ExtensionPublish(ctx context.Context, l *slog.Logger, cfg *config.Config) e
 			BaseBranch:  sub.TargetBranch,
 		})
 		// Анализируем проект
-		analysis, err := targetAPI.AnalyzeProject("main")
+		analysis, err := targetAPI.AnalyzeProject(ctx, "main")
 		if err != nil {
 			l.Error("Ошибка анализа проекта",
 				slog.String("error", err.Error()),
@@ -182,7 +182,7 @@ func ExtensionPublish(ctx context.Context, l *slog.Logger, cfg *config.Config) e
 		// Синхронизируем файлы
 		// extName используется для формирования имени ветки и commit message
 		extName := sub.TargetDirectory
-		syncResult, err := SyncExtensionToRepo(
+		syncResult, err := SyncExtensionToRepo(ctx, 
 			l,
 			sourceAPI,
 			targetAPI,
@@ -235,7 +235,7 @@ func ExtensionPublish(ctx context.Context, l *slog.Logger, cfg *config.Config) e
 		releaseURL := fmt.Sprintf("%s/%s/releases/tag/%s", cfg.GiteaURL, sourceRepo, releaseTag)
 
 		// Создаём Pull Request
-		pr, err := CreateExtensionPR(l, targetAPI, syncResult, release, extName, sourceRepo, releaseURL)
+		pr, err := CreateExtensionPR(ctx, l, targetAPI, syncResult, release, extName, sourceRepo, releaseURL)
 		if err != nil {
 			l.Error("Ошибка создания PR",
 				slog.String("target", fmt.Sprintf("%s/%s", sub.Organization, sub.Repository)),

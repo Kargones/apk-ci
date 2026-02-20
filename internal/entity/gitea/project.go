@@ -1,6 +1,7 @@
 package gitea
 
 import (
+	"context"
 	"fmt"
 	"strings"
 )
@@ -80,8 +81,8 @@ func analyzeProjectStructure(directories []string) ([]string, error) {
 // Возвращает:
 //   - []string: массив строк где первый элемент - название проекта, остальные - имена расширений
 //   - error: ошибка анализа или nil при успехе
-func (g *API) AnalyzeProjectStructure(branch string) ([]string, error) {
-	files, err := g.GetRepositoryContents(".", branch)
+func (g *API) AnalyzeProjectStructure(ctx context.Context, branch string) ([]string, error) {
+	files, err := g.GetRepositoryContents(ctx, ".", branch)
 	if err != nil {
 		return []string{}, err
 	}
@@ -128,8 +129,8 @@ func (g *API) AnalyzeProjectStructure(branch string) ([]string, error) {
 // Возвращает:
 //   - []string: массив где первый элемент - название проекта, остальные - расширения
 //   - error: ошибка анализа или nil при успехе
-func (g *API) AnalyzeProject(branch string) ([]string, error) {
-	files, err := g.GetRepositoryContents("", branch)
+func (g *API) AnalyzeProject(ctx context.Context, branch string) ([]string, error) {
+	files, err := g.GetRepositoryContents(ctx, "", branch)
 	if err != nil {
 		return []string{}, err
 	}

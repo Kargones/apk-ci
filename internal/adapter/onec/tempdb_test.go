@@ -40,6 +40,7 @@ func TestTempDbCreator_CreateTempDB_EmptyDbPath(t *testing.T) {
 
 // TestTempDbCreator_CreateTempDB_ContextCancellation проверяет отмену через контекст.
 func TestTempDbCreator_CreateTempDB_ContextCancellation(t *testing.T) {
+	ctx := context.Background()
 	creator := NewTempDbCreator()
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -196,6 +197,7 @@ func TestTempDbCreator_ImplConstants(t *testing.T) {
 
 // TestTempDbCreator_CreateTempDB_ContextAlreadyCancelled проверяет случай когда контекст уже отменён.
 func TestTempDbCreator_CreateTempDB_ContextAlreadyCancelled(t *testing.T) {
+	ctx := context.Background()
 	creator := NewTempDbCreator()
 
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Nanosecond)

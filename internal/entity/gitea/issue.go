@@ -19,10 +19,10 @@ import (
 // Возвращает:
 //   - *Issue: указатель на структуру с информацией о задаче
 //   - error: ошибка получения задачи или nil при успехе
-func (g *API) GetIssue(issueNumber int64) (*Issue, error) {
+func (g *API) GetIssue(ctx context.Context, issueNumber int64) (*Issue, error) {
 	urlString := fmt.Sprintf("%s/api/%s/repos/%s/%s/issues/%d", g.GiteaURL, constants.APIVersion, g.Owner, g.Repo, issueNumber)
 
-	statusCode, body, err := g.sendReq(context.Background(), urlString, "", "GET")
+	statusCode, body, err := g.sendReq(ctx, urlString, "", "GET")
 	if err != nil {
 		return nil, fmt.Errorf("ошибка при выполнении запроса: %w", err)
 	}
@@ -49,11 +49,11 @@ func (g *API) GetIssue(issueNumber int64) (*Issue, error) {
 //
 // Возвращает:
 //   - error: ошибка добавления комментария или nil при успехе
-func (g *API) AddIssueComment(issueNumber int64, commentText string) error {
+func (g *API) AddIssueComment(ctx context.Context, issueNumber int64, commentText string) error {
 	urlString := fmt.Sprintf("%s/api/%s/repos/%s/%s/issues/%d/comments", g.GiteaURL, constants.APIVersion, g.Owner, g.Repo, issueNumber)
 	reqBody := fmt.Sprintf(`{"body":"%s"}`, strings.ReplaceAll(commentText, "\"", "\\\""))
 
-	statusCode, _, err := g.sendReq(context.Background(), urlString, reqBody, "POST")
+	statusCode, _, err := g.sendReq(ctx, urlString, reqBody, "POST")
 	if err != nil {
 		return fmt.Errorf("ошибка при выполнении запроса: %w", err)
 	}
@@ -73,11 +73,11 @@ func (g *API) AddIssueComment(issueNumber int64, commentText string) error {
 //
 // Возвращает:
 //   - error: ошибка закрытия задачи или nil при успехе
-func (g *API) CloseIssue(issueNumber int64) error {
+func (g *API) CloseIssue(ctx context.Context, issueNumber int64) error {
 	urlString := fmt.Sprintf("%s/api/%s/repos/%s/%s/issues/%d", g.GiteaURL, constants.APIVersion, g.Owner, g.Repo, issueNumber)
 	reqBody := `{"state":"closed"}`
 
-	statusCode, _, err := g.sendReq(context.Background(), urlString, reqBody, "PATCH")
+	statusCode, _, err := g.sendReq(ctx, urlString, reqBody, "PATCH")
 	if err != nil {
 		return fmt.Errorf("ошибка при выполнении запроса: %w", err)
 	}

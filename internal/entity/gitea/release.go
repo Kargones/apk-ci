@@ -15,10 +15,10 @@ import (
 // Возвращает:
 //   - *Release: указатель на структуру с информацией о релизе
 //   - error: ошибка получения релиза или nil при успехе
-func (g *API) GetLatestRelease() (*Release, error) {
+func (g *API) GetLatestRelease(ctx context.Context) (*Release, error) {
 	urlString := fmt.Sprintf("%s/api/%s/repos/%s/%s/releases/latest", g.GiteaURL, constants.APIVersion, g.Owner, g.Repo)
 
-	statusCode, body, err := g.sendReq(context.Background(), urlString, "", "GET")
+	statusCode, body, err := g.sendReq(ctx, urlString, "", "GET")
 	if err != nil {
 		return nil, fmt.Errorf("ошибка при выполнении запроса: %w", err)
 	}
@@ -48,13 +48,13 @@ func (g *API) GetLatestRelease() (*Release, error) {
 // Возвращает:
 //   - *Release: указатель на структуру с информацией о релизе
 //   - error: ошибка получения релиза или nil при успехе
-func (g *API) GetReleaseByTag(tag string) (*Release, error) {
+func (g *API) GetReleaseByTag(ctx context.Context, tag string) (*Release, error) {
 	// URL-кодируем тег для безопасной передачи в URL
 	// Используем QueryEscape, так как PathEscape не кодирует символ /
 	escapedTag := url.QueryEscape(tag)
 	urlString := fmt.Sprintf("%s/api/%s/repos/%s/%s/releases/tags/%s", g.GiteaURL, constants.APIVersion, g.Owner, g.Repo, escapedTag)
 
-	statusCode, body, err := g.sendReq(context.Background(), urlString, "", "GET")
+	statusCode, body, err := g.sendReq(ctx, urlString, "", "GET")
 	if err != nil {
 		return nil, fmt.Errorf("ошибка при выполнении запроса: %w", err)
 	}

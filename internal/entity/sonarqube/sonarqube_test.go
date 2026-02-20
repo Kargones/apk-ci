@@ -70,6 +70,7 @@ func TestSonarQubeEntity_authenticate(t *testing.T) {
 
 // TestSonarQubeEntity_Authenticate tests the Authenticate method.
 func TestSonarQubeEntity_Authenticate(t *testing.T) {
+	ctx := context.Background()
 	// Create a test server
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Check the request path
@@ -105,7 +106,7 @@ func TestSonarQubeEntity_Authenticate(t *testing.T) {
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	entity := NewEntity(cfg, logger)
 
-	err := entity.Authenticate("test-token")
+	err := entity.Authenticate(ctx, "test-token")
 	assert.NoError(t, err)
 
 	// Verify that the original token is restored

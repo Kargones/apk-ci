@@ -246,6 +246,7 @@ func TestWebhookAlerter_HTTPError(t *testing.T) {
 }
 
 func TestWebhookAlerter_RetryOnError(t *testing.T) {
+	ctx := context.Background()
 	config := WebhookConfig{
 		Enabled:    true,
 		URLs:       []string{"https://hooks.example.com/webhook"},
@@ -581,6 +582,7 @@ func TestWebhookAlerter_PayloadFormat(t *testing.T) {
 }
 
 func TestWebhookAlerter_ContextCanceled(t *testing.T) {
+	ctx := context.Background()
 	config := WebhookConfig{
 		Enabled:    true,
 		URLs:       []string{"https://url1.com", "https://url2.com", "https://url3.com"},
@@ -852,6 +854,7 @@ func TestWebhookConfig_Validate_InvalidURL(t *testing.T) {
 // Тест: retry ПРОИСХОДИТ на 5xx HTTP ошибках (503, 502, 504).
 // 5xx — серверные ошибки, часто временные (Slack, PagerDuty могут вернуть 503).
 func TestWebhookAlerter_RetryOn5xx(t *testing.T) {
+	ctx := context.Background()
 	config := WebhookConfig{
 		Enabled:    true,
 		URLs:       []string{"https://hooks.example.com/webhook"},

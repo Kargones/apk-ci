@@ -297,6 +297,7 @@ func TestExecute_ValidURLButMissingDatabaseInfo(t *testing.T) {
 }
 
 func TestDownloadEpfFile_Error(t *testing.T) {
+	ctx := context.Background()
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	executor := NewEpfExecutor(logger, "/tmp")
 
@@ -306,7 +307,7 @@ func TestDownloadEpfFile_Error(t *testing.T) {
 		// Missing required Gitea config fields will cause error
 	}
 
-	_, cleanup, err := executor.downloadEpfFile(cfg)
+	_, cleanup, err := executor.downloadEpfFile(ctx, cfg)
 	if err == nil {
 		t.Error("Expected error for invalid Gitea config")
 	}
@@ -316,6 +317,7 @@ func TestDownloadEpfFile_Error(t *testing.T) {
 }
 
 func TestDownloadEpfFile_CreateTempError(t *testing.T) {
+	ctx := context.Background()
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	executor := NewEpfExecutor(logger, "/tmp")
 
@@ -324,7 +326,7 @@ func TestDownloadEpfFile_CreateTempError(t *testing.T) {
 		WorkDir:  "/nonexistent/directory", // This should cause error
 	}
 
-	_, cleanup, err := executor.downloadEpfFile(cfg)
+	_, cleanup, err := executor.downloadEpfFile(ctx, cfg)
 	if err == nil {
 		t.Error("Expected error for invalid work directory")
 	}
@@ -491,6 +493,7 @@ func TestPrepareConnectionString_ErrorCases(t *testing.T) {
 }
 
 func TestDownloadEpfFile_WriteError(t *testing.T) {
+	ctx := context.Background()
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	executor := NewEpfExecutor(logger, "/tmp")
 
@@ -502,7 +505,7 @@ func TestDownloadEpfFile_WriteError(t *testing.T) {
 		// but we're testing the file creation part
 	}
 
-	_, cleanup, err := executor.downloadEpfFile(cfg)
+	_, cleanup, err := executor.downloadEpfFile(ctx, cfg)
 	if err == nil {
 		t.Error("Expected error for missing Gitea config")
 	}
@@ -588,6 +591,7 @@ func TestEnsureTempDirectoryAdditional(t *testing.T) {
 
 // TestDownloadEpfFile_DetailedScenarios tests downloadEpfFile with more detailed scenarios
 func TestDownloadEpfFile_DetailedScenarios(t *testing.T) {
+	ctx := context.Background()
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	executor := NewEpfExecutor(logger, "/tmp")
 
@@ -597,7 +601,7 @@ func TestDownloadEpfFile_DetailedScenarios(t *testing.T) {
 			WorkDir:  "/tmp",
 		}
 
-		_, cleanup, err := executor.downloadEpfFile(cfg)
+		_, cleanup, err := executor.downloadEpfFile(ctx, cfg)
 		if err == nil {
 			t.Error("Expected error for missing epf filename")
 		}
@@ -612,7 +616,7 @@ func TestDownloadEpfFile_DetailedScenarios(t *testing.T) {
 			WorkDir:  "/nonexistent/directory",
 		}
 
-		_, cleanup, err := executor.downloadEpfFile(cfg)
+		_, cleanup, err := executor.downloadEpfFile(ctx, cfg)
 		if err == nil {
 			t.Error("Expected error for invalid work directory")
 		}
@@ -628,7 +632,7 @@ func TestDownloadEpfFile_DetailedScenarios(t *testing.T) {
 		}
 
 		// This will fail due to missing Gitea config but tests the filename handling
-		_, cleanup, err := executor.downloadEpfFile(cfg)
+		_, cleanup, err := executor.downloadEpfFile(ctx, cfg)
 		if err == nil {
 			t.Log("Unexpected success in test environment")
 		}

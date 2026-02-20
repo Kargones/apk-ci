@@ -1,6 +1,7 @@
 package config
 
 import (
+	"context"
 	"errors"
 	"log/slog"
 	"os"
@@ -22,7 +23,7 @@ type MockGiteaAPI struct {
 	shouldFail bool
 }
 
-func (m *MockGiteaAPI) GetConfigData(l *slog.Logger, configPath string) ([]byte, error) {
+func (m *MockGiteaAPI) GetConfigData(ctx context.Context, l *slog.Logger, configPath string) ([]byte, error) {
 	if m.shouldFail {
 		return nil, errors.New("mock error")
 	}
@@ -33,103 +34,103 @@ func (m *MockGiteaAPI) GetConfigData(l *slog.Logger, configPath string) ([]byte,
 }
 
 // Реализация всех методов интерфейса gitea.APIInterface
-func (m *MockGiteaAPI) GetIssue(issueNumber int64) (*gitea.Issue, error) {
+func (m *MockGiteaAPI) GetIssue(ctx context.Context, issueNumber int64) (*gitea.Issue, error) {
 	return nil, nil
 }
 
-func (m *MockGiteaAPI) GetFileContent(fileName string) ([]byte, error) {
+func (m *MockGiteaAPI) GetFileContent(ctx context.Context, fileName string) ([]byte, error) {
 	return nil, nil
 }
 
-func (m *MockGiteaAPI) AddIssueComment(issueNumber int64, commentText string) error {
+func (m *MockGiteaAPI) AddIssueComment(ctx context.Context, issueNumber int64, commentText string) error {
 	return nil
 }
 
-func (m *MockGiteaAPI) CloseIssue(issueNumber int64) error {
+func (m *MockGiteaAPI) CloseIssue(ctx context.Context, issueNumber int64) error {
 	return nil
 }
 
-func (m *MockGiteaAPI) ConflictPR(prNumber int64) (bool, error) {
+func (m *MockGiteaAPI) ConflictPR(ctx context.Context, prNumber int64) (bool, error) {
 	return false, nil
 }
 
-func (m *MockGiteaAPI) ConflictFilesPR(prNumber int64) ([]string, error) {
+func (m *MockGiteaAPI) ConflictFilesPR(ctx context.Context, prNumber int64) ([]string, error) {
 	return nil, nil
 }
 
-func (m *MockGiteaAPI) GetRepositoryContents(filepath, branch string) ([]gitea.FileInfo, error) {
+func (m *MockGiteaAPI) GetRepositoryContents(ctx context.Context, filepath, branch string) ([]gitea.FileInfo, error) {
 	return nil, nil
 }
 
-func (m *MockGiteaAPI) AnalyzeProjectStructure(branch string) ([]string, error) {
+func (m *MockGiteaAPI) AnalyzeProjectStructure(ctx context.Context, branch string) ([]string, error) {
 	return nil, nil
 }
 
-func (m *MockGiteaAPI) AnalyzeProject(branch string) ([]string, error) {
+func (m *MockGiteaAPI) AnalyzeProject(ctx context.Context, branch string) ([]string, error) {
 	return nil, nil
 }
 
-func (m *MockGiteaAPI) GetLatestCommit(branch string) (*gitea.Commit, error) {
+func (m *MockGiteaAPI) GetLatestCommit(ctx context.Context, branch string) (*gitea.Commit, error) {
 	return nil, nil
 }
 
-func (m *MockGiteaAPI) GetCommitFiles(commitSHA string) ([]gitea.CommitFile, error) {
+func (m *MockGiteaAPI) GetCommitFiles(ctx context.Context, commitSHA string) ([]gitea.CommitFile, error) {
 	return nil, nil
 }
 
-func (m *MockGiteaAPI) IsUserInTeam(l *slog.Logger, username string, orgName string, teamName string) (bool, error) {
+func (m *MockGiteaAPI) IsUserInTeam(ctx context.Context, l *slog.Logger, username string, orgName string, teamName string) (bool, error) {
 	return false, nil
 }
 
-func (m *MockGiteaAPI) GetCommits(branch string, limit int) ([]gitea.Commit, error) {
+func (m *MockGiteaAPI) GetCommits(ctx context.Context, branch string, limit int) ([]gitea.Commit, error) {
 	return nil, nil
 }
 
-func (m *MockGiteaAPI) GetFirstCommitOfBranch(branch string, baseBranch string) (*gitea.Commit, error) {
+func (m *MockGiteaAPI) GetFirstCommitOfBranch(ctx context.Context, branch string, baseBranch string) (*gitea.Commit, error) {
 	return nil, nil
 }
 
-func (m *MockGiteaAPI) GetCommitsBetween(baseCommitSHA, headCommitSHA string) ([]gitea.Commit, error) {
+func (m *MockGiteaAPI) GetCommitsBetween(ctx context.Context, baseCommitSHA, headCommitSHA string) ([]gitea.Commit, error) {
 	return nil, nil
 }
 
-func (m *MockGiteaAPI) GetBranchCommitRange(branch string) (*gitea.BranchCommitRange, error) {
+func (m *MockGiteaAPI) GetBranchCommitRange(ctx context.Context, branch string) (*gitea.BranchCommitRange, error) {
 	return nil, nil
 }
 
-func (m *MockGiteaAPI) ActivePR() ([]gitea.PR, error) {
+func (m *MockGiteaAPI) ActivePR(ctx context.Context) ([]gitea.PR, error) {
 	return nil, nil
 }
 
-func (m *MockGiteaAPI) DeleteTestBranch() error {
+func (m *MockGiteaAPI) DeleteTestBranch(ctx context.Context) error {
 	return nil
 }
 
-func (m *MockGiteaAPI) CreateTestBranch() error {
+func (m *MockGiteaAPI) CreateTestBranch(ctx context.Context) error {
 	return nil
 }
 
-func (m *MockGiteaAPI) CreatePR(head string) (gitea.PR, error) {
+func (m *MockGiteaAPI) CreatePR(ctx context.Context, head string) (gitea.PR, error) {
 	return gitea.PR{}, nil
 }
 
-func (m *MockGiteaAPI) MergePR(prNumber int64, l *slog.Logger) error {
+func (m *MockGiteaAPI) MergePR(ctx context.Context, prNumber int64, l *slog.Logger) error {
 	return nil
 }
 
-func (m *MockGiteaAPI) ClosePR(prNumber int64) error {
+func (m *MockGiteaAPI) ClosePR(ctx context.Context, prNumber int64) error {
 	return nil
 }
 
-func (m *MockGiteaAPI) SetRepositoryState(l *slog.Logger, operations []gitea.BatchOperation, branch, commitMessage string) error {
+func (m *MockGiteaAPI) SetRepositoryState(ctx context.Context, l *slog.Logger, operations []gitea.BatchOperation, branch, commitMessage string) error {
 	return nil
 }
 
-func (m *MockGiteaAPI) GetTeamMembers(orgName, teamName string) ([]string, error) {
+func (m *MockGiteaAPI) GetTeamMembers(ctx context.Context, orgName, teamName string) ([]string, error) {
 	return nil, nil
 }
 
-func (m *MockGiteaAPI) GetBranches(repo string) ([]gitea.Branch, error) {
+func (m *MockGiteaAPI) GetBranches(ctx context.Context, repo string) ([]gitea.Branch, error) {
 	return nil, nil
 }
 
@@ -1389,7 +1390,7 @@ func TestLoadConfigMethods(t *testing.T) {
 
 	t.Run("loadAppConfig", func(t *testing.T) {
 		// Эта функция требует реальной API интеграции, тестируем вызов
-		_, err := loadAppConfig(slog.Default(), cfg)
+		_, err := loadAppConfig(context.Background(), slog.Default(), cfg)
 		if err != nil {
 			// Ожидаем ошибку из-за отсутствия реального API
 		}
@@ -1397,7 +1398,7 @@ func TestLoadConfigMethods(t *testing.T) {
 
 	t.Run("loadSecretConfig", func(t *testing.T) {
 		// Эта функция требует реальной API интеграции, тестируем вызов
-		_, err := loadSecretConfig(slog.Default(), cfg)
+		_, err := loadSecretConfig(context.Background(), slog.Default(), cfg)
 		if err != nil {
 			// Ожидаем ошибку из-за отсутствия реального API
 		}
@@ -1405,7 +1406,7 @@ func TestLoadConfigMethods(t *testing.T) {
 
 	t.Run("loadProjectConfig", func(t *testing.T) {
 		// Эта функция требует реальной API интеграции, тестируем вызов
-		_, err := loadProjectConfig(slog.Default(), cfg)
+		_, err := loadProjectConfig(context.Background(), slog.Default(), cfg)
 		if err != nil {
 			// Ожидаем ошибку из-за отсутствия реального API
 		}
@@ -1413,7 +1414,7 @@ func TestLoadConfigMethods(t *testing.T) {
 
 	t.Run("loadDbConfig", func(t *testing.T) {
 		// Эта функция требует реальной API интеграции, тестируем вызов
-		_, err := loadDbConfig(slog.Default(), cfg)
+		_, err := loadDbConfig(context.Background(), slog.Default(), cfg)
 		if err != nil {
 			// Ожидаем ошибку из-за отсутствия реального API
 		}

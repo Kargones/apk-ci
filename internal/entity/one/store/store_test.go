@@ -852,6 +852,7 @@ func TestCommentAdd(t *testing.T) {
 }
 
 func TestCreateStores(t *testing.T) {
+	ctx := context.Background()
 	tmpDir, err := os.MkdirTemp("", "store_test")
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
@@ -910,7 +911,7 @@ func TestCreateStores(t *testing.T) {
 	dbConnectString := "File=" + tmpDir + ";Usr=user;Pwd=pass;"
 	arrayAdd := []string{"TestAdd1", "TestAdd2"}
 	
-	err = CreateStores(logger, cfg, storeRoot, dbConnectString, arrayAdd)
+	err = CreateStores(ctx, logger, cfg, storeRoot, dbConnectString, arrayAdd)
 	if err != nil {
 		t.Logf("CreateStores returned error (may be expected): %v", err)
 	} else {

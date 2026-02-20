@@ -1,6 +1,7 @@
 package gitea
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -9,6 +10,7 @@ import (
 
 // TestGetIssueAdditionalCases tests additional edge cases for GetIssue function
 func TestGetIssueAdditionalCases(t *testing.T) {
+	ctx := context.Background()
 	// Test with empty response
 	t.Run("empty_response", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -24,7 +26,7 @@ func TestGetIssueAdditionalCases(t *testing.T) {
 			AccessToken: "testtoken",
 		}
 
-		issue, err := api.GetIssue(1)
+		issue, err := api.GetIssue(ctx, 1)
 		if err == nil {
 			t.Error("Expected error for empty response, got none")
 		}
@@ -48,7 +50,7 @@ func TestGetIssueAdditionalCases(t *testing.T) {
 			AccessToken: "testtoken",
 		}
 
-		issue, err := api.GetIssue(1)
+		issue, err := api.GetIssue(ctx, 1)
 		if err == nil {
 			t.Error("Expected error for malformed JSON, got none")
 		}
@@ -79,7 +81,7 @@ func TestGetIssueAdditionalCases(t *testing.T) {
 			AccessToken: "testtoken",
 		}
 
-		issue, err := api.GetIssue(123)
+		issue, err := api.GetIssue(ctx, 123)
 		if err != nil {
 			t.Errorf("Expected no error, got: %v", err)
 		}
@@ -105,7 +107,7 @@ func TestGetIssueAdditionalCases(t *testing.T) {
 			AccessToken: "testtoken",
 		}
 
-		issue, err := api.GetIssue(1)
+		issue, err := api.GetIssue(ctx, 1)
 		if err == nil {
 			t.Error("Expected error for server error, got none")
 		}

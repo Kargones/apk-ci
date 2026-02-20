@@ -367,6 +367,7 @@ func TestEmailAlerter_Send_ImplicitSSL_Port465(t *testing.T) {
 
 // M4 fix: Тест для context cancellation
 func TestEmailAlerter_Send_ContextCanceled(t *testing.T) {
+	ctx := context.Background()
 	config := EmailConfig{
 		Enabled:  true,
 		SMTPHost: "smtp.example.com",

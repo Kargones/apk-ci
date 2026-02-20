@@ -1,6 +1,7 @@
 package gitea
 
 import (
+	"context"
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
@@ -11,6 +12,7 @@ import (
 
 // TestCreateTestBranch тестирует создание тестовой ветки
 func TestCreateTestBranch(t *testing.T) {
+	ctx := context.Background()
 	tests := []struct {
 		name         string
 		responseCode int
@@ -46,7 +48,7 @@ func TestCreateTestBranch(t *testing.T) {
 				NewBranch:  "test-branch",
 			}
 
-			err := api.CreateTestBranch()
+			err := api.CreateTestBranch(ctx)
 
 			if tt.expectError {
 				if err == nil {
@@ -63,6 +65,7 @@ func TestCreateTestBranch(t *testing.T) {
 
 // TestDeleteTestBranch тестирует удаление тестовой ветки
 func TestDeleteTestBranch(t *testing.T) {
+	ctx := context.Background()
 	tests := []struct {
 		name         string
 		responseCode int
@@ -97,7 +100,7 @@ func TestDeleteTestBranch(t *testing.T) {
 				NewBranch: "test-branch",
 			}
 
-			err := api.DeleteTestBranch()
+			err := api.DeleteTestBranch(ctx)
 
 			if tt.expectError {
 				if err == nil {
@@ -114,6 +117,7 @@ func TestDeleteTestBranch(t *testing.T) {
 
 // TestMergePR тестирует слияние Pull Request
 func TestMergePR(t *testing.T) {
+	ctx := context.Background()
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
 	tests := []struct {
@@ -152,7 +156,7 @@ func TestMergePR(t *testing.T) {
 				Repo:     "testrepo",
 			}
 
-			err := api.MergePR(tt.prNumber, logger)
+			err := api.MergePR(ctx, tt.prNumber, logger)
 
 			if tt.expectError {
 				if err == nil {
@@ -169,6 +173,7 @@ func TestMergePR(t *testing.T) {
 
 // TestActivePR тестирует получение активных Pull Request
 func TestActivePR(t *testing.T) {
+	ctx := context.Background()
 	tests := []struct {
 		name         string
 		responseCode int
@@ -217,7 +222,7 @@ func TestActivePR(t *testing.T) {
 				BaseBranch: "main",
 			}
 
-			prs, err := api.ActivePR()
+			prs, err := api.ActivePR(ctx)
 
 			if tt.expectError {
 				if err == nil {
@@ -237,6 +242,7 @@ func TestActivePR(t *testing.T) {
 
 // TestCreatePR тестирует создание Pull Request
 func TestCreatePR(t *testing.T) {
+	ctx := context.Background()
 	tests := []struct {
 		name         string
 		head         string
@@ -280,7 +286,7 @@ func TestCreatePR(t *testing.T) {
 				NewBranch:  "test-branch",
 			}
 
-			pr, err := api.CreatePR(tt.head)
+			pr, err := api.CreatePR(ctx, tt.head)
 
 			if tt.expectError {
 				if err == nil {
@@ -300,6 +306,7 @@ func TestCreatePR(t *testing.T) {
 
 // TestClosePR тестирует закрытие Pull Request
 func TestClosePR(t *testing.T) {
+	ctx := context.Background()
 	tests := []struct {
 		name         string
 		prNumber     int64
@@ -336,7 +343,7 @@ func TestClosePR(t *testing.T) {
 				Repo:     "testrepo",
 			}
 
-			err := api.ClosePR(tt.prNumber)
+			err := api.ClosePR(ctx, tt.prNumber)
 
 			if tt.expectError {
 				if err == nil {
@@ -353,6 +360,7 @@ func TestClosePR(t *testing.T) {
 
 // TestIsUserInTeam тестирует проверку участия пользователя в команде
 func TestIsUserInTeam(t *testing.T) {
+	ctx := context.Background()
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
 	tests := []struct {
@@ -440,7 +448,7 @@ func TestIsUserInTeam(t *testing.T) {
 				AccessToken: "testtoken",
 			}
 
-			result, err := api.IsUserInTeam(logger, tt.username, tt.orgName, tt.teamName)
+			result, err := api.IsUserInTeam(ctx, logger, tt.username, tt.orgName, tt.teamName)
 
 			if tt.expectError {
 				if err == nil {
@@ -461,6 +469,7 @@ func TestIsUserInTeam(t *testing.T) {
 
 // TestGetBranches тестирует получение списка веток
 func TestGetBranches(t *testing.T) {
+	ctx := context.Background()
 	tests := []struct {
 		name         string
 		repo         string
@@ -502,7 +511,7 @@ func TestGetBranches(t *testing.T) {
 				AccessToken: "testtoken",
 			}
 
-			branches, err := api.GetBranches(tt.repo)
+			branches, err := api.GetBranches(ctx, tt.repo)
 
 			if tt.expectError {
 				if err == nil {

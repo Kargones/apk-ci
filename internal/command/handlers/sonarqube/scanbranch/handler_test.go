@@ -797,6 +797,7 @@ func TestWaitForAnalysisCompletion_FailedStatus(t *testing.T) {
 // TestWaitForAnalysisCompletion_ContextCanceled проверяет обработку отмены context (M-4).
 // M-2 fix: устранён race condition через sync канал вместо busy-loop.
 func TestWaitForAnalysisCompletion_ContextCanceled(t *testing.T) {
+	ctx := context.Background()
 	firstCallDone := make(chan struct{})
 	sqClient := &sonarqubetest.MockClient{
 		GetAnalysisStatusFunc: func(_ context.Context, _ string) (*sonarqube.AnalysisStatus, error) {
@@ -882,6 +883,7 @@ func TestWaitForAnalysisCompletion_CanceledStatus(t *testing.T) {
 
 // TestWaitForAnalysisCompletion_Timeout проверяет таймаут ожидания (M-1 fix).
 func TestWaitForAnalysisCompletion_Timeout(t *testing.T) {
+	ctx := context.Background()
 	callCount := 0
 	sqClient := &sonarqubetest.MockClient{
 		GetAnalysisStatusFunc: func(_ context.Context, _ string) (*sonarqube.AnalysisStatus, error) {

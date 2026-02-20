@@ -67,6 +67,7 @@ func TestIntegration_ExtensionPublish_RealGitea(t *testing.T) {
 
 // TestIntegration_FindSubscribedRepos_RealGitea тестирует поиск подписчиков на реальном Gitea
 func TestIntegration_FindSubscribedRepos_RealGitea(t *testing.T) {
+	ctx := context.Background()
 	giteaURL := os.Getenv("GITEA_URL")
 	giteaToken := os.Getenv("GITEA_TOKEN")
 	repo := os.Getenv("GITHUB_REPOSITORY")
@@ -94,7 +95,7 @@ func TestIntegration_FindSubscribedRepos_RealGitea(t *testing.T) {
 	// Тестовые расширения для поиска подписчиков
 	extensions := []string{"cfe", "cfe/common"}
 
-	subscribers, err := FindSubscribedRepos(l, api, repoName, extensions)
+	subscribers, err := FindSubscribedRepos(ctx, l, api, repoName, extensions)
 	if err != nil {
 		t.Fatalf("Ошибка поиска подписчиков: %v", err)
 	}
@@ -107,6 +108,7 @@ func TestIntegration_FindSubscribedRepos_RealGitea(t *testing.T) {
 
 // TestIntegration_GetSourceFiles_RealGitea тестирует получение файлов из реального репозитория
 func TestIntegration_GetSourceFiles_RealGitea(t *testing.T) {
+	ctx := context.Background()
 	giteaURL := os.Getenv("GITEA_URL")
 	giteaToken := os.Getenv("GITEA_TOKEN")
 	repo := os.Getenv("GITHUB_REPOSITORY")
@@ -135,7 +137,7 @@ func TestIntegration_GetSourceFiles_RealGitea(t *testing.T) {
 		extDir = ""
 	}
 
-	files, err := GetSourceFiles(api, extDir, ref)
+	files, err := GetSourceFiles(ctx, api, extDir, ref)
 	if err != nil {
 		t.Fatalf("Ошибка получения файлов: %v", err)
 	}

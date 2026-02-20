@@ -46,127 +46,127 @@ type mockAPI struct {
 	searchOrgReposFunc       func(orgName string) ([]entity_gitea.Repository, error)
 }
 
-func (m *mockAPI) GetIssue(issueNumber int64) (*entity_gitea.Issue, error) {
+func (m *mockAPI) GetIssue(ctx context.Context, issueNumber int64) (*entity_gitea.Issue, error) {
 	if m.getIssueFunc != nil {
 		return m.getIssueFunc(issueNumber)
 	}
 	return &entity_gitea.Issue{ID: issueNumber, Number: issueNumber, Title: "Test Issue"}, nil
 }
 
-func (m *mockAPI) GetFileContent(fileName string) ([]byte, error) {
+func (m *mockAPI) GetFileContent(ctx context.Context, fileName string) ([]byte, error) {
 	if m.getFileContentFunc != nil {
 		return m.getFileContentFunc(fileName)
 	}
 	return []byte("test content"), nil
 }
 
-func (m *mockAPI) GetConfigData(l *slog.Logger, filename string) ([]byte, error) {
+func (m *mockAPI) GetConfigData(ctx context.Context, l *slog.Logger, filename string) ([]byte, error) {
 	return []byte("config data"), nil
 }
 
-func (m *mockAPI) AddIssueComment(issueNumber int64, commentText string) error {
+func (m *mockAPI) AddIssueComment(ctx context.Context, issueNumber int64, commentText string) error {
 	if m.addIssueCommentFunc != nil {
 		return m.addIssueCommentFunc(issueNumber, commentText)
 	}
 	return nil
 }
 
-func (m *mockAPI) CloseIssue(issueNumber int64) error {
+func (m *mockAPI) CloseIssue(ctx context.Context, issueNumber int64) error {
 	if m.closeIssueFunc != nil {
 		return m.closeIssueFunc(issueNumber)
 	}
 	return nil
 }
 
-func (m *mockAPI) ConflictPR(prNumber int64) (bool, error) {
+func (m *mockAPI) ConflictPR(ctx context.Context, prNumber int64) (bool, error) {
 	if m.conflictPRFunc != nil {
 		return m.conflictPRFunc(prNumber)
 	}
 	return false, nil
 }
 
-func (m *mockAPI) ConflictFilesPR(prNumber int64) ([]string, error) {
+func (m *mockAPI) ConflictFilesPR(ctx context.Context, prNumber int64) ([]string, error) {
 	if m.conflictFilesPRFunc != nil {
 		return m.conflictFilesPRFunc(prNumber)
 	}
 	return []string{}, nil
 }
 
-func (m *mockAPI) GetRepositoryContents(filepath, branch string) ([]entity_gitea.FileInfo, error) {
+func (m *mockAPI) GetRepositoryContents(ctx context.Context, filepath, branch string) ([]entity_gitea.FileInfo, error) {
 	if m.getRepositoryContentsFunc != nil {
 		return m.getRepositoryContentsFunc(filepath, branch)
 	}
 	return []entity_gitea.FileInfo{}, nil
 }
 
-func (m *mockAPI) AnalyzeProjectStructure(branch string) ([]string, error) {
+func (m *mockAPI) AnalyzeProjectStructure(ctx context.Context, branch string) ([]string, error) {
 	if m.analyzeProjectStructureFunc != nil {
 		return m.analyzeProjectStructureFunc(branch)
 	}
 	return []string{"file1.xml", "file2.xml"}, nil
 }
 
-func (m *mockAPI) AnalyzeProject(branch string) ([]string, error) {
+func (m *mockAPI) AnalyzeProject(ctx context.Context, branch string) ([]string, error) {
 	return []string{"project.xml"}, nil
 }
 
-func (m *mockAPI) GetLatestCommit(branch string) (*entity_gitea.Commit, error) {
+func (m *mockAPI) GetLatestCommit(ctx context.Context, branch string) (*entity_gitea.Commit, error) {
 	if m.getLatestCommitFunc != nil {
 		return m.getLatestCommitFunc(branch)
 	}
 	return &entity_gitea.Commit{SHA: "abc123"}, nil
 }
 
-func (m *mockAPI) GetCommitFiles(commitSHA string) ([]entity_gitea.CommitFile, error) {
+func (m *mockAPI) GetCommitFiles(ctx context.Context, commitSHA string) ([]entity_gitea.CommitFile, error) {
 	if m.getCommitFilesFunc != nil {
 		return m.getCommitFilesFunc(commitSHA)
 	}
 	return []entity_gitea.CommitFile{}, nil
 }
 
-func (m *mockAPI) GetLatestRelease() (*entity_gitea.Release, error) {
+func (m *mockAPI) GetLatestRelease(ctx context.Context) (*entity_gitea.Release, error) {
 	if m.getLatestReleaseFunc != nil {
 		return m.getLatestReleaseFunc()
 	}
 	return &entity_gitea.Release{ID: 1, TagName: "v1.0.0"}, nil
 }
 
-func (m *mockAPI) GetReleaseByTag(tag string) (*entity_gitea.Release, error) {
+func (m *mockAPI) GetReleaseByTag(ctx context.Context, tag string) (*entity_gitea.Release, error) {
 	if m.getReleaseByTagFunc != nil {
 		return m.getReleaseByTagFunc(tag)
 	}
 	return &entity_gitea.Release{ID: 1, TagName: tag}, nil
 }
 
-func (m *mockAPI) IsUserInTeam(l *slog.Logger, username, orgName, teamName string) (bool, error) {
+func (m *mockAPI) IsUserInTeam(ctx context.Context, l *slog.Logger, username, orgName, teamName string) (bool, error) {
 	if m.isUserInTeamFunc != nil {
 		return m.isUserInTeamFunc(l, username, orgName, teamName)
 	}
 	return true, nil
 }
 
-func (m *mockAPI) GetCommits(branch string, limit int) ([]entity_gitea.Commit, error) {
+func (m *mockAPI) GetCommits(ctx context.Context, branch string, limit int) ([]entity_gitea.Commit, error) {
 	if m.getCommitsFunc != nil {
 		return m.getCommitsFunc(branch, limit)
 	}
 	return []entity_gitea.Commit{{SHA: "commit1"}, {SHA: "commit2"}}, nil
 }
 
-func (m *mockAPI) GetFirstCommitOfBranch(branch, baseBranch string) (*entity_gitea.Commit, error) {
+func (m *mockAPI) GetFirstCommitOfBranch(ctx context.Context, branch, baseBranch string) (*entity_gitea.Commit, error) {
 	if m.getFirstCommitOfBranchFunc != nil {
 		return m.getFirstCommitOfBranchFunc(branch, baseBranch)
 	}
 	return &entity_gitea.Commit{SHA: "firstcommit"}, nil
 }
 
-func (m *mockAPI) GetCommitsBetween(baseSHA, headSHA string) ([]entity_gitea.Commit, error) {
+func (m *mockAPI) GetCommitsBetween(ctx context.Context, baseSHA, headSHA string) ([]entity_gitea.Commit, error) {
 	if m.getCommitsBetweenFunc != nil {
 		return m.getCommitsBetweenFunc(baseSHA, headSHA)
 	}
 	return []entity_gitea.Commit{{SHA: "commit1"}}, nil
 }
 
-func (m *mockAPI) GetBranchCommitRange(branch string) (*entity_gitea.BranchCommitRange, error) {
+func (m *mockAPI) GetBranchCommitRange(ctx context.Context, branch string) (*entity_gitea.BranchCommitRange, error) {
 	if m.getBranchCommitRangeFunc != nil {
 		return m.getBranchCommitRangeFunc(branch)
 	}
@@ -176,77 +176,77 @@ func (m *mockAPI) GetBranchCommitRange(branch string) (*entity_gitea.BranchCommi
 	}, nil
 }
 
-func (m *mockAPI) ActivePR() ([]entity_gitea.PR, error) {
+func (m *mockAPI) ActivePR(ctx context.Context) ([]entity_gitea.PR, error) {
 	if m.activePRFunc != nil {
 		return m.activePRFunc()
 	}
 	return []entity_gitea.PR{{ID: 1, Number: 1, Base: "main", Head: "feature"}}, nil
 }
 
-func (m *mockAPI) DeleteTestBranch() error {
+func (m *mockAPI) DeleteTestBranch(ctx context.Context) error {
 	if m.deleteTestBranchFunc != nil {
 		return m.deleteTestBranchFunc()
 	}
 	return nil
 }
 
-func (m *mockAPI) CreateTestBranch() error {
+func (m *mockAPI) CreateTestBranch(ctx context.Context) error {
 	if m.createTestBranchFunc != nil {
 		return m.createTestBranchFunc()
 	}
 	return nil
 }
 
-func (m *mockAPI) CreatePR(head string) (entity_gitea.PR, error) {
+func (m *mockAPI) CreatePR(ctx context.Context, head string) (entity_gitea.PR, error) {
 	if m.createPRFunc != nil {
 		return m.createPRFunc(head)
 	}
 	return entity_gitea.PR{ID: 1, Number: 1, Head: head}, nil
 }
 
-func (m *mockAPI) CreatePRWithOptions(opts entity_gitea.CreatePROptions) (*entity_gitea.PRResponse, error) {
+func (m *mockAPI) CreatePRWithOptions(ctx context.Context, opts entity_gitea.CreatePROptions) (*entity_gitea.PRResponse, error) {
 	if m.createPRWithOptionsFunc != nil {
 		return m.createPRWithOptionsFunc(opts)
 	}
 	return &entity_gitea.PRResponse{ID: 1, Number: 1, Title: opts.Title}, nil
 }
 
-func (m *mockAPI) MergePR(prNumber int64, l *slog.Logger) error {
+func (m *mockAPI) MergePR(ctx context.Context, prNumber int64, l *slog.Logger) error {
 	if m.mergePRFunc != nil {
 		return m.mergePRFunc(prNumber, l)
 	}
 	return nil
 }
 
-func (m *mockAPI) ClosePR(prNumber int64) error {
+func (m *mockAPI) ClosePR(ctx context.Context, prNumber int64) error {
 	if m.closePRFunc != nil {
 		return m.closePRFunc(prNumber)
 	}
 	return nil
 }
 
-func (m *mockAPI) SetRepositoryState(l *slog.Logger, operations []entity_gitea.BatchOperation, branch, commitMessage string) error {
+func (m *mockAPI) SetRepositoryState(ctx context.Context, l *slog.Logger, operations []entity_gitea.BatchOperation, branch, commitMessage string) error {
 	if m.setRepositoryStateFunc != nil {
 		return m.setRepositoryStateFunc(l, operations, branch, commitMessage)
 	}
 	return nil
 }
 
-func (m *mockAPI) GetTeamMembers(orgName, teamName string) ([]string, error) {
+func (m *mockAPI) GetTeamMembers(ctx context.Context, orgName, teamName string) ([]string, error) {
 	if m.getTeamMembersFunc != nil {
 		return m.getTeamMembersFunc(orgName, teamName)
 	}
 	return []string{"user1", "user2"}, nil
 }
 
-func (m *mockAPI) GetBranches(repo string) ([]entity_gitea.Branch, error) {
+func (m *mockAPI) GetBranches(ctx context.Context, repo string) ([]entity_gitea.Branch, error) {
 	if m.getBranchesFunc != nil {
 		return m.getBranchesFunc(repo)
 	}
 	return []entity_gitea.Branch{{Name: "main", Label: "origin:main"}}, nil
 }
 
-func (m *mockAPI) SearchOrgRepos(orgName string) ([]entity_gitea.Repository, error) {
+func (m *mockAPI) SearchOrgRepos(ctx context.Context, orgName string) ([]entity_gitea.Repository, error) {
 	if m.searchOrgReposFunc != nil {
 		return m.searchOrgReposFunc(orgName)
 	}
@@ -325,6 +325,7 @@ func TestAPIClient_ListOpenPRs_Error(t *testing.T) {
 }
 
 func TestAPIClient_ConflictPR(t *testing.T) {
+	ctx := context.Background()
 	mock := &mockAPI{
 		conflictPRFunc: func(prNumber int64) (bool, error) {
 			return true, nil
@@ -332,13 +333,14 @@ func TestAPIClient_ConflictPR(t *testing.T) {
 	}
 	client := gitea.NewAPIClientWithInterface(mock, nil)
 
-	hasConflict, err := client.ConflictPR(context.Background(), 1)
+	hasConflict, err := client.ConflictPR(ctx, 1)
 
 	require.NoError(t, err)
 	assert.True(t, hasConflict)
 }
 
 func TestAPIClient_ConflictFilesPR(t *testing.T) {
+	ctx := context.Background()
 	mock := &mockAPI{
 		conflictFilesPRFunc: func(prNumber int64) ([]string, error) {
 			return []string{"file1.go", "file2.go"}, nil
@@ -346,7 +348,7 @@ func TestAPIClient_ConflictFilesPR(t *testing.T) {
 	}
 	client := gitea.NewAPIClientWithInterface(mock, nil)
 
-	files, err := client.ConflictFilesPR(context.Background(), 1)
+	files, err := client.ConflictFilesPR(ctx, 1)
 
 	require.NoError(t, err)
 	assert.Len(t, files, 2)
@@ -356,6 +358,7 @@ func TestAPIClient_ConflictFilesPR(t *testing.T) {
 // CommitReader tests
 
 func TestAPIClient_GetCommits(t *testing.T) {
+	ctx := context.Background()
 	mock := &mockAPI{
 		getCommitsFunc: func(branch string, limit int) ([]entity_gitea.Commit, error) {
 			return []entity_gitea.Commit{
@@ -366,7 +369,7 @@ func TestAPIClient_GetCommits(t *testing.T) {
 	}
 	client := gitea.NewAPIClientWithInterface(mock, nil)
 
-	commits, err := client.GetCommits(context.Background(), "main", 10)
+	commits, err := client.GetCommits(ctx, "main", 10)
 
 	require.NoError(t, err)
 	assert.Len(t, commits, 2)
@@ -374,6 +377,7 @@ func TestAPIClient_GetCommits(t *testing.T) {
 }
 
 func TestAPIClient_GetCommits_Error(t *testing.T) {
+	ctx := context.Background()
 	mock := &mockAPI{
 		getCommitsFunc: func(branch string, limit int) ([]entity_gitea.Commit, error) {
 			return nil, errors.New("api error")
@@ -381,13 +385,14 @@ func TestAPIClient_GetCommits_Error(t *testing.T) {
 	}
 	client := gitea.NewAPIClientWithInterface(mock, nil)
 
-	commits, err := client.GetCommits(context.Background(), "main", 10)
+	commits, err := client.GetCommits(ctx, "main", 10)
 
 	assert.Nil(t, commits)
 	assert.Error(t, err)
 }
 
 func TestAPIClient_GetLatestCommit(t *testing.T) {
+	ctx := context.Background()
 	mock := &mockAPI{
 		getLatestCommitFunc: func(branch string) (*entity_gitea.Commit, error) {
 			return &entity_gitea.Commit{SHA: "latest123"}, nil
@@ -395,13 +400,14 @@ func TestAPIClient_GetLatestCommit(t *testing.T) {
 	}
 	client := gitea.NewAPIClientWithInterface(mock, nil)
 
-	commit, err := client.GetLatestCommit(context.Background(), "main")
+	commit, err := client.GetLatestCommit(ctx, "main")
 
 	require.NoError(t, err)
 	assert.Equal(t, "latest123", commit.SHA)
 }
 
 func TestAPIClient_GetCommitFiles(t *testing.T) {
+	ctx := context.Background()
 	mock := &mockAPI{
 		getCommitFilesFunc: func(commitSHA string) ([]entity_gitea.CommitFile, error) {
 			return []entity_gitea.CommitFile{
@@ -412,7 +418,7 @@ func TestAPIClient_GetCommitFiles(t *testing.T) {
 	}
 	client := gitea.NewAPIClientWithInterface(mock, nil)
 
-	files, err := client.GetCommitFiles(context.Background(), "abc123")
+	files, err := client.GetCommitFiles(ctx, "abc123")
 
 	require.NoError(t, err)
 	assert.Len(t, files, 2)
@@ -421,6 +427,7 @@ func TestAPIClient_GetCommitFiles(t *testing.T) {
 }
 
 func TestAPIClient_GetCommitsBetween(t *testing.T) {
+	ctx := context.Background()
 	mock := &mockAPI{
 		getCommitsBetweenFunc: func(baseSHA, headSHA string) ([]entity_gitea.Commit, error) {
 			return []entity_gitea.Commit{{SHA: "middle1"}}, nil
@@ -428,13 +435,14 @@ func TestAPIClient_GetCommitsBetween(t *testing.T) {
 	}
 	client := gitea.NewAPIClientWithInterface(mock, nil)
 
-	commits, err := client.GetCommitsBetween(context.Background(), "base123", "head456")
+	commits, err := client.GetCommitsBetween(ctx, "base123", "head456")
 
 	require.NoError(t, err)
 	assert.Len(t, commits, 1)
 }
 
 func TestAPIClient_GetFirstCommitOfBranch(t *testing.T) {
+	ctx := context.Background()
 	mock := &mockAPI{
 		getFirstCommitOfBranchFunc: func(branch, baseBranch string) (*entity_gitea.Commit, error) {
 			return &entity_gitea.Commit{SHA: "firstcommit"}, nil
@@ -442,13 +450,14 @@ func TestAPIClient_GetFirstCommitOfBranch(t *testing.T) {
 	}
 	client := gitea.NewAPIClientWithInterface(mock, nil)
 
-	commit, err := client.GetFirstCommitOfBranch(context.Background(), "feature", "main")
+	commit, err := client.GetFirstCommitOfBranch(ctx, "feature", "main")
 
 	require.NoError(t, err)
 	assert.Equal(t, "firstcommit", commit.SHA)
 }
 
 func TestAPIClient_GetBranchCommitRange(t *testing.T) {
+	ctx := context.Background()
 	mock := &mockAPI{
 		getBranchCommitRangeFunc: func(branch string) (*entity_gitea.BranchCommitRange, error) {
 			return &entity_gitea.BranchCommitRange{
@@ -459,7 +468,7 @@ func TestAPIClient_GetBranchCommitRange(t *testing.T) {
 	}
 	client := gitea.NewAPIClientWithInterface(mock, nil)
 
-	range_, err := client.GetBranchCommitRange(context.Background(), "feature")
+	range_, err := client.GetBranchCommitRange(ctx, "feature")
 
 	require.NoError(t, err)
 	assert.Equal(t, "first", range_.FirstCommit.SHA)
@@ -469,6 +478,7 @@ func TestAPIClient_GetBranchCommitRange(t *testing.T) {
 // FileReader tests
 
 func TestAPIClient_GetFileContent(t *testing.T) {
+	ctx := context.Background()
 	mock := &mockAPI{
 		getFileContentFunc: func(fileName string) ([]byte, error) {
 			return []byte("file content here"), nil
@@ -476,13 +486,14 @@ func TestAPIClient_GetFileContent(t *testing.T) {
 	}
 	client := gitea.NewAPIClientWithInterface(mock, nil)
 
-	content, err := client.GetFileContent(context.Background(), "test.xml")
+	content, err := client.GetFileContent(ctx, "test.xml")
 
 	require.NoError(t, err)
 	assert.Equal(t, []byte("file content here"), content)
 }
 
 func TestAPIClient_GetRepositoryContents(t *testing.T) {
+	ctx := context.Background()
 	mock := &mockAPI{
 		getRepositoryContentsFunc: func(filepath, branch string) ([]entity_gitea.FileInfo, error) {
 			return []entity_gitea.FileInfo{
@@ -493,7 +504,7 @@ func TestAPIClient_GetRepositoryContents(t *testing.T) {
 	}
 	client := gitea.NewAPIClientWithInterface(mock, nil)
 
-	files, err := client.GetRepositoryContents(context.Background(), "path", "main")
+	files, err := client.GetRepositoryContents(ctx, "path", "main")
 
 	require.NoError(t, err)
 	assert.Len(t, files, 2)
@@ -502,6 +513,7 @@ func TestAPIClient_GetRepositoryContents(t *testing.T) {
 }
 
 func TestAPIClient_AnalyzeProjectStructure(t *testing.T) {
+	ctx := context.Background()
 	mock := &mockAPI{
 		analyzeProjectStructureFunc: func(branch string) ([]string, error) {
 			return []string{"src/file1.bsl", "src/file2.bsl"}, nil
@@ -509,7 +521,7 @@ func TestAPIClient_AnalyzeProjectStructure(t *testing.T) {
 	}
 	client := gitea.NewAPIClientWithInterface(mock, nil)
 
-	files, err := client.AnalyzeProjectStructure(context.Background(), "main")
+	files, err := client.AnalyzeProjectStructure(ctx, "main")
 
 	require.NoError(t, err)
 	assert.Len(t, files, 2)
@@ -518,6 +530,7 @@ func TestAPIClient_AnalyzeProjectStructure(t *testing.T) {
 // BranchManager tests
 
 func TestAPIClient_GetBranches(t *testing.T) {
+	ctx := context.Background()
 	mock := &mockAPI{
 		getBranchesFunc: func(repo string) ([]entity_gitea.Branch, error) {
 			return []entity_gitea.Branch{
@@ -528,7 +541,7 @@ func TestAPIClient_GetBranches(t *testing.T) {
 	}
 	client := gitea.NewAPIClientWithInterface(mock, nil)
 
-	branches, err := client.GetBranches(context.Background(), "test-repo")
+	branches, err := client.GetBranches(ctx, "test-repo")
 
 	require.NoError(t, err)
 	assert.Len(t, branches, 2)
@@ -570,6 +583,7 @@ func TestAPIClient_DeleteBranch(t *testing.T) {
 // ReleaseReader tests
 
 func TestAPIClient_GetLatestRelease(t *testing.T) {
+	ctx := context.Background()
 	mock := &mockAPI{
 		getLatestReleaseFunc: func() (*entity_gitea.Release, error) {
 			return &entity_gitea.Release{
@@ -584,7 +598,7 @@ func TestAPIClient_GetLatestRelease(t *testing.T) {
 	}
 	client := gitea.NewAPIClientWithInterface(mock, nil)
 
-	release, err := client.GetLatestRelease(context.Background())
+	release, err := client.GetLatestRelease(ctx)
 
 	require.NoError(t, err)
 	assert.Equal(t, "v1.0.0", release.TagName)
@@ -593,6 +607,7 @@ func TestAPIClient_GetLatestRelease(t *testing.T) {
 }
 
 func TestAPIClient_GetReleaseByTag(t *testing.T) {
+	ctx := context.Background()
 	mock := &mockAPI{
 		getReleaseByTagFunc: func(tag string) (*entity_gitea.Release, error) {
 			return &entity_gitea.Release{ID: 2, TagName: tag, Name: "Release " + tag}, nil
@@ -600,7 +615,7 @@ func TestAPIClient_GetReleaseByTag(t *testing.T) {
 	}
 	client := gitea.NewAPIClientWithInterface(mock, nil)
 
-	release, err := client.GetReleaseByTag(context.Background(), "v2.0.0")
+	release, err := client.GetReleaseByTag(ctx, "v2.0.0")
 
 	require.NoError(t, err)
 	assert.Equal(t, "v2.0.0", release.TagName)
@@ -609,6 +624,7 @@ func TestAPIClient_GetReleaseByTag(t *testing.T) {
 // IssueManager tests
 
 func TestAPIClient_GetIssue(t *testing.T) {
+	ctx := context.Background()
 	mock := &mockAPI{
 		getIssueFunc: func(issueNumber int64) (*entity_gitea.Issue, error) {
 			return &entity_gitea.Issue{
@@ -622,7 +638,7 @@ func TestAPIClient_GetIssue(t *testing.T) {
 	}
 	client := gitea.NewAPIClientWithInterface(mock, nil)
 
-	issue, err := client.GetIssue(context.Background(), 42)
+	issue, err := client.GetIssue(ctx, 42)
 
 	require.NoError(t, err)
 	assert.Equal(t, int64(42), issue.Number)
@@ -631,6 +647,7 @@ func TestAPIClient_GetIssue(t *testing.T) {
 }
 
 func TestAPIClient_AddIssueComment(t *testing.T) {
+	ctx := context.Background()
 	called := false
 	mock := &mockAPI{
 		addIssueCommentFunc: func(issueNumber int64, commentText string) error {
@@ -642,13 +659,14 @@ func TestAPIClient_AddIssueComment(t *testing.T) {
 	}
 	client := gitea.NewAPIClientWithInterface(mock, nil)
 
-	err := client.AddIssueComment(context.Background(), 1, "test comment")
+	err := client.AddIssueComment(ctx, 1, "test comment")
 
 	require.NoError(t, err)
 	assert.True(t, called)
 }
 
 func TestAPIClient_CloseIssue(t *testing.T) {
+	ctx := context.Background()
 	called := false
 	mock := &mockAPI{
 		closeIssueFunc: func(issueNumber int64) error {
@@ -658,7 +676,7 @@ func TestAPIClient_CloseIssue(t *testing.T) {
 	}
 	client := gitea.NewAPIClientWithInterface(mock, nil)
 
-	err := client.CloseIssue(context.Background(), 1)
+	err := client.CloseIssue(ctx, 1)
 
 	require.NoError(t, err)
 	assert.True(t, called)
@@ -667,6 +685,7 @@ func TestAPIClient_CloseIssue(t *testing.T) {
 // PRManager tests
 
 func TestAPIClient_CreatePR(t *testing.T) {
+	ctx := context.Background()
 	mock := &mockAPI{
 		createPRFunc: func(head string) (entity_gitea.PR, error) {
 			return entity_gitea.PR{ID: 1, Number: 10, Head: head, Base: "main"}, nil
@@ -674,7 +693,7 @@ func TestAPIClient_CreatePR(t *testing.T) {
 	}
 	client := gitea.NewAPIClientWithInterface(mock, nil)
 
-	pr, err := client.CreatePR(context.Background(), "feature-branch")
+	pr, err := client.CreatePR(ctx, "feature-branch")
 
 	require.NoError(t, err)
 	assert.Equal(t, int64(10), pr.Number)
@@ -682,6 +701,7 @@ func TestAPIClient_CreatePR(t *testing.T) {
 }
 
 func TestAPIClient_CreatePRWithOptions(t *testing.T) {
+	ctx := context.Background()
 	mock := &mockAPI{
 		createPRWithOptionsFunc: func(opts entity_gitea.CreatePROptions) (*entity_gitea.PRResponse, error) {
 			return &entity_gitea.PRResponse{
@@ -704,7 +724,7 @@ func TestAPIClient_CreatePRWithOptions(t *testing.T) {
 		Assignees: []string{"user1"},
 		Labels:    []int64{1, 2},
 	}
-	pr, err := client.CreatePRWithOptions(context.Background(), opts)
+	pr, err := client.CreatePRWithOptions(ctx, opts)
 
 	require.NoError(t, err)
 	assert.Equal(t, int64(15), pr.Number)
@@ -712,6 +732,7 @@ func TestAPIClient_CreatePRWithOptions(t *testing.T) {
 }
 
 func TestAPIClient_MergePR(t *testing.T) {
+	ctx := context.Background()
 	called := false
 	mock := &mockAPI{
 		mergePRFunc: func(prNumber int64, l *slog.Logger) error {
@@ -721,13 +742,14 @@ func TestAPIClient_MergePR(t *testing.T) {
 	}
 	client := gitea.NewAPIClientWithInterface(mock, nil)
 
-	err := client.MergePR(context.Background(), 1)
+	err := client.MergePR(ctx, 1)
 
 	require.NoError(t, err)
 	assert.True(t, called)
 }
 
 func TestAPIClient_ClosePR(t *testing.T) {
+	ctx := context.Background()
 	called := false
 	mock := &mockAPI{
 		closePRFunc: func(prNumber int64) error {
@@ -737,7 +759,7 @@ func TestAPIClient_ClosePR(t *testing.T) {
 	}
 	client := gitea.NewAPIClientWithInterface(mock, nil)
 
-	err := client.ClosePR(context.Background(), 1)
+	err := client.ClosePR(ctx, 1)
 
 	require.NoError(t, err)
 	assert.True(t, called)
@@ -746,6 +768,7 @@ func TestAPIClient_ClosePR(t *testing.T) {
 // RepositoryWriter tests
 
 func TestAPIClient_SetRepositoryState(t *testing.T) {
+	ctx := context.Background()
 	mock := &mockAPI{
 		setRepositoryStateFunc: func(l *slog.Logger, operations []entity_gitea.BatchOperation, branch, commitMessage string) error {
 			assert.Len(t, operations, 2)
@@ -760,7 +783,7 @@ func TestAPIClient_SetRepositoryState(t *testing.T) {
 		{Operation: "create", Path: "file1.txt", Content: "content1"},
 		{Operation: "update", Path: "file2.txt", Content: "content2"},
 	}
-	err := client.SetRepositoryState(context.Background(), ops, "test-branch", "test commit")
+	err := client.SetRepositoryState(ctx, ops, "test-branch", "test commit")
 
 	require.NoError(t, err)
 }
@@ -768,6 +791,7 @@ func TestAPIClient_SetRepositoryState(t *testing.T) {
 // TeamReader tests
 
 func TestAPIClient_IsUserInTeam(t *testing.T) {
+	ctx := context.Background()
 	mock := &mockAPI{
 		isUserInTeamFunc: func(l *slog.Logger, username, orgName, teamName string) (bool, error) {
 			return username == "testuser", nil
@@ -775,13 +799,14 @@ func TestAPIClient_IsUserInTeam(t *testing.T) {
 	}
 	client := gitea.NewAPIClientWithInterface(mock, nil)
 
-	inTeam, err := client.IsUserInTeam(context.Background(), "testuser", "org1", "team1")
+	inTeam, err := client.IsUserInTeam(ctx, "testuser", "org1", "team1")
 
 	require.NoError(t, err)
 	assert.True(t, inTeam)
 }
 
 func TestAPIClient_GetTeamMembers(t *testing.T) {
+	ctx := context.Background()
 	mock := &mockAPI{
 		getTeamMembersFunc: func(orgName, teamName string) ([]string, error) {
 			return []string{"user1", "user2", "user3"}, nil
@@ -789,7 +814,7 @@ func TestAPIClient_GetTeamMembers(t *testing.T) {
 	}
 	client := gitea.NewAPIClientWithInterface(mock, nil)
 
-	members, err := client.GetTeamMembers(context.Background(), "org1", "team1")
+	members, err := client.GetTeamMembers(ctx, "org1", "team1")
 
 	require.NoError(t, err)
 	assert.Len(t, members, 3)
@@ -798,6 +823,7 @@ func TestAPIClient_GetTeamMembers(t *testing.T) {
 // OrgReader tests
 
 func TestAPIClient_SearchOrgRepos(t *testing.T) {
+	ctx := context.Background()
 	mock := &mockAPI{
 		searchOrgReposFunc: func(orgName string) ([]entity_gitea.Repository, error) {
 			return []entity_gitea.Repository{
@@ -808,7 +834,7 @@ func TestAPIClient_SearchOrgRepos(t *testing.T) {
 	}
 	client := gitea.NewAPIClientWithInterface(mock, nil)
 
-	repos, err := client.SearchOrgRepos(context.Background(), "org1")
+	repos, err := client.SearchOrgRepos(ctx, "org1")
 
 	require.NoError(t, err)
 	assert.Len(t, repos, 2)
@@ -820,6 +846,7 @@ func TestAPIClient_SearchOrgRepos(t *testing.T) {
 // Conversion tests - edge cases
 
 func TestAPIClient_ConvertCommits_Empty(t *testing.T) {
+	ctx := context.Background()
 	mock := &mockAPI{
 		getCommitsFunc: func(branch string, limit int) ([]entity_gitea.Commit, error) {
 			return []entity_gitea.Commit{}, nil
@@ -827,13 +854,14 @@ func TestAPIClient_ConvertCommits_Empty(t *testing.T) {
 	}
 	client := gitea.NewAPIClientWithInterface(mock, nil)
 
-	commits, err := client.GetCommits(context.Background(), "main", 10)
+	commits, err := client.GetCommits(ctx, "main", 10)
 
 	require.NoError(t, err)
 	assert.Empty(t, commits)
 }
 
 func TestAPIClient_ConvertBranchCommitRange_NilCommits(t *testing.T) {
+	ctx := context.Background()
 	mock := &mockAPI{
 		getBranchCommitRangeFunc: func(branch string) (*entity_gitea.BranchCommitRange, error) {
 			return &entity_gitea.BranchCommitRange{
@@ -844,7 +872,7 @@ func TestAPIClient_ConvertBranchCommitRange_NilCommits(t *testing.T) {
 	}
 	client := gitea.NewAPIClientWithInterface(mock, nil)
 
-	range_, err := client.GetBranchCommitRange(context.Background(), "feature")
+	range_, err := client.GetBranchCommitRange(ctx, "feature")
 
 	require.NoError(t, err)
 	assert.Nil(t, range_.FirstCommit)
@@ -866,6 +894,7 @@ func TestAPIClient_ListOpenPRs_Empty(t *testing.T) {
 }
 
 func TestAPIClient_GetIssue_WithUser(t *testing.T) {
+	ctx := context.Background()
 	mock := &mockAPI{
 		getIssueFunc: func(issueNumber int64) (*entity_gitea.Issue, error) {
 			return &entity_gitea.Issue{
@@ -884,7 +913,7 @@ func TestAPIClient_GetIssue_WithUser(t *testing.T) {
 	}
 	client := gitea.NewAPIClientWithInterface(mock, nil)
 
-	issue, err := client.GetIssue(context.Background(), 1)
+	issue, err := client.GetIssue(ctx, 1)
 
 	require.NoError(t, err)
 	assert.Equal(t, "testuser", issue.User.Login)
@@ -892,6 +921,7 @@ func TestAPIClient_GetIssue_WithUser(t *testing.T) {
 }
 
 func TestAPIClient_GetLatestRelease_WithAssets(t *testing.T) {
+	ctx := context.Background()
 	mock := &mockAPI{
 		getLatestReleaseFunc: func() (*entity_gitea.Release, error) {
 			return &entity_gitea.Release{
@@ -910,7 +940,7 @@ func TestAPIClient_GetLatestRelease_WithAssets(t *testing.T) {
 	}
 	client := gitea.NewAPIClientWithInterface(mock, nil)
 
-	release, err := client.GetLatestRelease(context.Background())
+	release, err := client.GetLatestRelease(ctx)
 
 	require.NoError(t, err)
 	assert.Len(t, release.Assets, 2)
@@ -919,6 +949,7 @@ func TestAPIClient_GetLatestRelease_WithAssets(t *testing.T) {
 }
 
 func TestAPIClient_GetBranches_WithCommit(t *testing.T) {
+	ctx := context.Background()
 	mock := &mockAPI{
 		getBranchesFunc: func(repo string) ([]entity_gitea.Branch, error) {
 			return []entity_gitea.Branch{
@@ -934,7 +965,7 @@ func TestAPIClient_GetBranches_WithCommit(t *testing.T) {
 	}
 	client := gitea.NewAPIClientWithInterface(mock, nil)
 
-	branches, err := client.GetBranches(context.Background(), "repo")
+	branches, err := client.GetBranches(ctx, "repo")
 
 	require.NoError(t, err)
 	assert.Len(t, branches, 1)
@@ -942,6 +973,7 @@ func TestAPIClient_GetBranches_WithCommit(t *testing.T) {
 }
 
 func TestAPIClient_SearchOrgRepos_WithOwner(t *testing.T) {
+	ctx := context.Background()
 	mock := &mockAPI{
 		searchOrgReposFunc: func(orgName string) ([]entity_gitea.Repository, error) {
 			return []entity_gitea.Repository{
@@ -963,7 +995,7 @@ func TestAPIClient_SearchOrgRepos_WithOwner(t *testing.T) {
 	}
 	client := gitea.NewAPIClientWithInterface(mock, nil)
 
-	repos, err := client.SearchOrgRepos(context.Background(), "org")
+	repos, err := client.SearchOrgRepos(ctx, "org")
 
 	require.NoError(t, err)
 	assert.Len(t, repos, 1)

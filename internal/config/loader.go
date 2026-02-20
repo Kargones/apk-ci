@@ -104,7 +104,7 @@ func applyInputParams(cfg *Config, inputParams *InputParams) {
 }
 
 // loadAllSubConfigs загружает все подконфигурации (app, project, secrets, db, menus и т.д.).
-func loadAllSubConfigs(l *slog.Logger, cfg *Config) {
+func loadAllSubConfigs(ctx context.Context, l *slog.Logger, cfg *Config) {
 	var err error
 
 	// Загрузка конфигурации приложения
@@ -194,7 +194,7 @@ func loadAllSubConfigs(l *slog.Logger, cfg *Config) {
 }
 
 // validateLoadedConfigs выполняет fail-fast валидацию загруженных подконфигураций.
-func validateLoadedConfigs(l *slog.Logger, cfg *Config) {
+func validateLoadedConfigs(ctx context.Context, l *slog.Logger, cfg *Config) {
 	// Валидация конфигурации реализаций (AC6: невалидные значения обнаруживаются early)
 	if cfg.ImplementationsConfig != nil {
 		if err := cfg.ImplementationsConfig.Validate(); err != nil {
@@ -240,7 +240,7 @@ func validateLoadedConfigs(l *slog.Logger, cfg *Config) {
 }
 
 // finalizeConfig настраивает дисплей, создаёт рабочие директории и анализирует проект.
-func finalizeConfig(l *slog.Logger, cfg *Config) error {
+func finalizeConfig(ctx context.Context, l *slog.Logger, cfg *Config) error {
 	if err := runner.DisplayConfig(l); err != nil {
 		l.Error("Ошибка настройки виртуального дисплея",
 			slog.String("Описание ошибки", err.Error()),
@@ -272,7 +272,7 @@ func finalizeConfig(l *slog.Logger, cfg *Config) error {
 // Возвращает:
 //   - *Config: указатель на загруженную конфигурацию приложения
 //   - error: ошибка загрузки конфигурации или nil при успехе
-func MustLoad() (*Config, error) {
+func MustLoad(ctx context.Context) (*Config, error) {
 	var cfg Config
 
 	// Читаем переменные окружения в структуру Config
@@ -303,13 +303,13 @@ func MustLoad() (*Config, error) {
 	applyInputParams(&cfg, inputParams)
 
 	// Загружаем все подконфигурации
-	loadAllSubConfigs(l, &cfg)
+	loadAllSubConfigs(ctx, l, &cfg)
 
 	// Валидируем загруженные конфигурации
-	validateLoadedConfigs(l, &cfg)
+	validateLoadedConfigs(ctx, l, &cfg)
 
 	// Финализация: дисплей, директории, анализ проекта
-	if err := finalizeConfig(l, &cfg); err != nil {
+	if err := finalizeConfig(ctx, l, &cfg); err != nil {
 		return nil, err
 	}
 
@@ -539,16 +539,16 @@ func createWorkDirectories(cfg *Config) error {
 // Этот метод позволяет обновить конфигурацию во время выполнения приложения.
 // Возвращает:
 //   - error: ошибка перезагрузки конфигурации или nil при успехе
-func (cfg *Config) ReloadConfig() error {
+func (cfg *Config) ReloadConfig(ctx context.Context) error {
 	// Перезагрузка конфигурации приложения
-	appConfig, err := loadAppConfig(cfg.Logger, cfg)
+	appConfig, err := loadAppConfig(ctx, cfg.Logger, cfg)
 	if err != nil {
 		return fmt.Errorf("failed to reload app config: %w", err)
 	}
 	cfg.AppConfig = appConfig
 
 	// Перезагрузка конфигурации проекта
-	projectConfig, err := loadProjectConfig(cfg.Logger, cfg)
+	projectConfig, err := loadProjectConfig(ctx, cfg.Logger, cfg)
 	if err != nil {
 		cfg.Logger.Warn("ошибка перезагрузки конфигурации проекта", slog.String("error", err.Error()))
 	} else {
@@ -556,7 +556,7 @@ func (cfg *Config) ReloadConfig() error {
 	}
 
 	// Перезагрузка секретов
-	secretConfig, err := loadSecretConfig(cfg.Logger, cfg)
+	secretConfig, err := loadSecretConfig(ctx, cfg.Logger, cfg)
 	if err != nil {
 		cfg.Logger.Warn("ошибка перезагрузки секретов", slog.String("error", err.Error()))
 	} else {
@@ -564,7 +564,7 @@ func (cfg *Config) ReloadConfig() error {
 	}
 
 	// Перезагрузка конфигурации баз данных
-	dbConfig, err := loadDbConfig(cfg.Logger, cfg)
+	dbConfig, err := loadDbConfig(ctx, cfg.Logger, cfg)
 	if err != nil {
 		cfg.Logger.Warn("ошибка перезагрузки конфигурации БД", slog.String("error", err.Error()))
 	} else {
@@ -572,7 +572,7 @@ func (cfg *Config) ReloadConfig() error {
 	}
 
 	// Перезагрузка конфигурации главного меню
-	menuMain, err := loadMenuMainConfig(cfg.Logger, cfg)
+	menuMain, err := loadMenuMainConfig(ctx, cfg.Logger, cfg)
 	if err != nil {
 		cfg.Logger.Warn("ошибка перезагрузки конфигурации главного меню", slog.String("error", err.Error()))
 	} else {
@@ -580,7 +580,7 @@ func (cfg *Config) ReloadConfig() error {
 	}
 
 	// Перезагрузка конфигурации меню отладки
-	menuDebug, err := loadMenuDebugConfig(cfg.Logger, cfg)
+	menuDebug, err := loadMenuDebugConfig(ctx, cfg.Logger, cfg)
 	if err != nil {
 		cfg.Logger.Warn("ошибка перезагрузки конфигурации меню отладки", slog.String("error", err.Error()))
 	} else {
