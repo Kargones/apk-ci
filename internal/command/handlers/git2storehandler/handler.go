@@ -224,7 +224,7 @@ func (h *Git2StoreHandler) handlePreviewModes(cfg *config.Config, format, traceI
 			if err := plan.WritePlanText(os.Stdout); err != nil {
 				log.Warn("Не удалось вывести план операций", slog.String("error", err.Error()))
 			}
-			fmt.Fprintln(os.Stdout)
+			fmt.Fprintln(os.Stdout) //nolint:errcheck // writing to stdout
 		}
 		h.verbosePlan = plan
 	}

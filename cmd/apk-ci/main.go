@@ -42,7 +42,7 @@ func main() {
 func run() int {
 	// Explicit handler registration (replaces init()-based blank imports).
 	if err := handlers.RegisterAll(); err != nil {
-		fmt.Fprintf(os.Stderr, "Ошибка регистрации команд: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Ошибка регистрации команд: %v\n", err) //nolint:errcheck // writing to stderr
 		return 1
 	}
 
@@ -50,7 +50,7 @@ func run() int {
 	ctx := context.Background()
 	cfg, err := config.MustLoad()
 	if err != nil || cfg == nil {
-		fmt.Fprintf(os.Stderr, "Не удалось загрузить конфигурацию приложения: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Не удалось загрузить конфигурацию приложения: %v\n", err) //nolint:errcheck // writing to stderr
 		return 5
 	}
 	l := cfg.Logger

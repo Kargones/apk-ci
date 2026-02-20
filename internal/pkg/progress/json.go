@@ -39,7 +39,7 @@ func (p *JSONProgress) Start(message string) {
 			Message: message,
 		}
 		if encErr := p.encoder.Encode(event); encErr != nil {
-			fmt.Fprintf(os.Stderr, "progress: failed to encode event: %v\n", encErr)
+			fmt.Fprintf(os.Stderr, "progress: failed to encode event: %v\n", encErr) //nolint:errcheck // writing to stderr
 		}
 	}
 }
@@ -83,7 +83,7 @@ func (p *JSONProgress) Update(current int64, message string) {
 		Message:    message,
 	}
 	if err := p.encoder.Encode(event); err != nil {
-		fmt.Fprintf(os.Stderr, "progress: encode error: %v\n", err)
+		fmt.Fprintf(os.Stderr, "progress: encode error: %v\n", err) //nolint:errcheck // writing to stderr
 	}
 }
 
@@ -105,7 +105,7 @@ func (p *JSONProgress) Finish() {
 		DurationMs: duration.Milliseconds(),
 	}
 	if err := p.encoder.Encode(event); err != nil {
-		fmt.Fprintf(os.Stderr, "progress: encode error: %v\n", err)
+		fmt.Fprintf(os.Stderr, "progress: encode error: %v\n", err) //nolint:errcheck // writing to stderr
 	}
 }
 

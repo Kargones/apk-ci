@@ -359,12 +359,12 @@ func TestExecute_JSONOutput(t *testing.T) {
 	oldFormat := os.Getenv("BR_OUTPUT_FORMAT")
 	t.Cleanup(func() {
 		if oldFormat == "" {
-			os.Unsetenv("BR_OUTPUT_FORMAT")
+			_ = os.Unsetenv("BR_OUTPUT_FORMAT")
 		} else {
-			os.Setenv("BR_OUTPUT_FORMAT", oldFormat)
+			_ = os.Setenv("BR_OUTPUT_FORMAT", oldFormat)
 		}
 	})
-	os.Setenv("BR_OUTPUT_FORMAT", "json")
+	_ = os.Setenv("BR_OUTPUT_FORMAT", "json")
 
 	giteaClient := &giteatest.MockClient{
 		ListOpenPRsFunc: func(_ context.Context) ([]gitea.PR, error) {
@@ -794,13 +794,13 @@ func TestExecute_JSONOutput_Structure(t *testing.T) {
 	oldStdout := os.Stdout
 	t.Cleanup(func() {
 		if oldFormat == "" {
-			os.Unsetenv("BR_OUTPUT_FORMAT")
+			_ = os.Unsetenv("BR_OUTPUT_FORMAT")
 		} else {
-			os.Setenv("BR_OUTPUT_FORMAT", oldFormat)
+			_ = os.Setenv("BR_OUTPUT_FORMAT", oldFormat)
 		}
 		os.Stdout = oldStdout
 	})
-	os.Setenv("BR_OUTPUT_FORMAT", "json")
+	_ = os.Setenv("BR_OUTPUT_FORMAT", "json")
 
 	// Перенаправляем stdout для захвата JSON
 	r, w, _ := os.Pipe()
@@ -846,7 +846,7 @@ func TestExecute_JSONOutput_Structure(t *testing.T) {
 	}
 
 	err := h.Execute(context.Background(), cfg)
-	w.Close()
+	_ = w.Close()
 
 	var buf bytes.Buffer
 	buf.ReadFrom(r)

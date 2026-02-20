@@ -175,7 +175,7 @@ func (h *DbRestoreHandler) Execute(ctx context.Context, cfg *config.Config) erro
 			if writeErr := plan.WritePlanText(os.Stdout); writeErr != nil {
 				log.Warn("Не удалось вывести план операций", slog.String("error", writeErr.Error()))
 			}
-			fmt.Fprintln(os.Stdout)
+			fmt.Fprintln(os.Stdout) //nolint:errcheck // writing to stdout
 		}
 		h.verbosePlan = plan
 	}

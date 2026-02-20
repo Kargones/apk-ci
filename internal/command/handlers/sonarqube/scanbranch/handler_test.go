@@ -1014,12 +1014,12 @@ func TestExecute_JSONOutput(t *testing.T) {
 	oldFormat := os.Getenv("BR_OUTPUT_FORMAT")
 	t.Cleanup(func() {
 		if oldFormat == "" {
-			os.Unsetenv("BR_OUTPUT_FORMAT")
+			_ = os.Unsetenv("BR_OUTPUT_FORMAT")
 		} else {
-			os.Setenv("BR_OUTPUT_FORMAT", oldFormat)
+			_ = os.Setenv("BR_OUTPUT_FORMAT", oldFormat)
 		}
 	})
-	os.Setenv("BR_OUTPUT_FORMAT", "json")
+	_ = os.Setenv("BR_OUTPUT_FORMAT", "json")
 
 	sqClient := &sonarqubetest.MockClient{
 		GetAnalysesFunc: func(_ context.Context, _ string) ([]sonarqube.Analysis, error) {
@@ -1075,12 +1075,12 @@ func TestExecute_JSONOutputError(t *testing.T) {
 	oldFormat := os.Getenv("BR_OUTPUT_FORMAT")
 	t.Cleanup(func() {
 		if oldFormat == "" {
-			os.Unsetenv("BR_OUTPUT_FORMAT")
+			_ = os.Unsetenv("BR_OUTPUT_FORMAT")
 		} else {
-			os.Setenv("BR_OUTPUT_FORMAT", oldFormat)
+			_ = os.Setenv("BR_OUTPUT_FORMAT", oldFormat)
 		}
 	})
-	os.Setenv("BR_OUTPUT_FORMAT", "json")
+	_ = os.Setenv("BR_OUTPUT_FORMAT", "json")
 
 	h := &ScanBranchHandler{}
 	cfg := &config.Config{

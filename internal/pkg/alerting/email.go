@@ -261,7 +261,7 @@ func (e *EmailAlerter) sendEmail(ctx context.Context, subject, body string) erro
 	// Формируем полное сообщение с заголовками
 	msg := e.buildMessage(subject, body)
 	if _, err := w.Write([]byte(msg)); err != nil {
-		w.Close()
+		_ = w.Close()
 		return fmt.Errorf("write message failed: %w", err)
 	}
 
@@ -389,7 +389,7 @@ func (d *defaultDialer) DialContext(ctx context.Context, addr string) (SMTPClien
 
 	client, err := smtp.NewClient(conn, host)
 	if err != nil {
-		conn.Close()
+		_ = conn.Close()
 		return nil, err
 	}
 

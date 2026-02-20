@@ -57,14 +57,14 @@ func cleanDirectoryPreservingHidden(targetDir string, l *slog.Logger) error {
 			// os.RemoveAll удаляет каталог и все его содержимое
 			if err := os.RemoveAll(fullPath); err != nil {
 				errorMsg := fmt.Sprintf("ошибка при удалении каталога '%s': %v", fullPath, err)
-				fmt.Fprintln(os.Stderr, errorMsg)
+				fmt.Fprintln(os.Stderr, errorMsg) //nolint:errcheck // writing to stderr
 				encounteredErrors = append(encounteredErrors, errorMsg)
 			}
 		} else {
 			l.Debug("Удаление файла", slog.String("path", fullPath))
 			if err := os.Remove(fullPath); err != nil {
 				errorMsg := fmt.Sprintf("ошибка при удалении файла '%s': %v", fullPath, err)
-				fmt.Fprintln(os.Stderr, errorMsg)
+				fmt.Fprintln(os.Stderr, errorMsg) //nolint:errcheck // writing to stderr
 				encounteredErrors = append(encounteredErrors, errorMsg)
 			}
 		}
