@@ -13,7 +13,7 @@ func TestMemoryFileSystem_GetwdAdditional(t *testing.T) {
 		t.Errorf("Getwd failed: %v", err)
 	}
 	
-	if cwd != "/tmp/test" {
+	if cwd != "/tmp/test" { //nolint:goconst // test value
 		t.Errorf("Expected cwd '/tmp/test', got '%s'", cwd)
 	}
 }

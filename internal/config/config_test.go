@@ -214,6 +214,7 @@ func TestForceUpdateParameter(t *testing.T) {
 }
 
 func TestSonarQubeConfig(t *testing.T) {
+ //nolint:dupl // similar test structure
 	t.Run("GetDefaultSonarQubeConfig", func(t *testing.T) {
 		config := GetDefaultSonarQubeConfig()
 		if config == nil {
@@ -633,8 +634,8 @@ func TestGetDefaultConfigs(t *testing.T) {
 		}
 		if racConfig.RacPath != "/opt/1cv8/x86_64/8.3.27.1606/rac" {
 			t.Errorf("Expected RacPath = /opt/1cv8/x86_64/8.3.27.1606/rac, got %s", racConfig.RacPath)
-		}
-		if racConfig.RacServer != "localhost" {
+		} //nolint:goconst // test value
+		if racConfig.RacServer != "localhost" { //nolint:goconst // test value
 			t.Errorf("Expected RacServer = localhost, got %s", racConfig.RacServer)
 		}
 		if racConfig.RacPort != 1545 {
@@ -915,8 +916,8 @@ func TestDatabaseMethods(t *testing.T) {
 		relatedDb, err := cfg.FindRelatedDatabase("prod-db1")
 		if err != nil {
 			t.Errorf("Unexpected error: %v", err)
-		}
-		if relatedDb != "test-db1" {
+		} //nolint:goconst // test value
+		if relatedDb != "test-db1" { //nolint:goconst // test value
 			t.Errorf("Expected related database test-db1, got %s", relatedDb)
 		}
 
@@ -924,8 +925,8 @@ func TestDatabaseMethods(t *testing.T) {
 		relatedDb, err = cfg.FindRelatedDatabase("test-db1")
 		if err != nil {
 			t.Errorf("Unexpected error: %v", err)
-		}
-		if relatedDb != "prod-db1" {
+		} //nolint:goconst // test value
+		if relatedDb != "prod-db1" { //nolint:goconst // test value
 			t.Errorf("Expected related database prod-db1, got %s", relatedDb)
 		}
 
@@ -968,8 +969,8 @@ func TestDatabaseMethods(t *testing.T) {
 		server, err := cfg.GetDatabaseServer("prod-db1")
 		if err != nil {
 			t.Errorf("Unexpected error: %v", err)
-		}
-		if server != "prod-db-server1" {
+		} //nolint:goconst // test value
+		if server != "prod-db-server1" { //nolint:goconst // test value
 			t.Errorf("Expected server prod-db-server1, got %s", server)
 		}
 

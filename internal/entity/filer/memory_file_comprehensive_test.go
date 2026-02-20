@@ -355,7 +355,7 @@ func TestMemoryFile_Stat(t *testing.T) {
 		return
 	}
 	
-	if info.Name() != "test.txt" {
+	if info.Name() != "test.txt" { //nolint:goconst // test value
 		t.Errorf("Stat() name got %s, expected test.txt", info.Name())
 	}
 	
@@ -480,7 +480,7 @@ func TestMemoryFile_Clone(t *testing.T) {
 		t.Errorf("Clone Read() error = %v", err)
 	}
 	
-	if string(buf[:n]) != "test data" {
+	if string(buf[:n]) != "test data" { //nolint:goconst // test value
 		t.Errorf("Clone Read() got %s, expected 'test data'", string(buf[:n]))
 	}
 	
@@ -493,7 +493,7 @@ func TestMemoryFile_Clone(t *testing.T) {
 		t.Errorf("Original Read() error = %v", err)
 	}
 	
-	if string(buf[:n]) != "test data" {
+	if string(buf[:n]) != "test data" { //nolint:goconst // test value
 		t.Errorf("Original Read() got %s, expected 'test data'", string(buf[:n]))
 	}
 }

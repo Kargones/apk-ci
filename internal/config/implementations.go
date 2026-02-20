@@ -14,26 +14,28 @@ import (
 // без изменения кода приложения.
 type ImplementationsConfig struct {
 	// ConfigExport определяет инструмент для выгрузки конфигурации.
-	// Допустимые значения: "1cv8" (default), "ibcmd", "native"
+	// Допустимые значения: 1cv8 (default), "ibcmd", "native"
 	ConfigExport string `yaml:"config_export" env:"BR_IMPL_CONFIG_EXPORT" env-default:"1cv8"`
 
 	// DBCreate определяет инструмент для создания базы данных.
-	// Допустимые значения: "1cv8" (default), "ibcmd"
+	// Допустимые значения: 1cv8 (default), "ibcmd"
 	DBCreate string `yaml:"db_create" env:"BR_IMPL_DB_CREATE" env-default:"1cv8"`
 }
 // Validate проверяет корректность значений ImplementationsConfig.
 // Возвращает ошибку если значения не соответствуют допустимым.
+const defaultImpl1cv8 = "1cv8"
+
 func (c *ImplementationsConfig) Validate() error {
 	// Применяем defaults для пустых значений
 	if c.ConfigExport == "" {
-		c.ConfigExport = "1cv8"
+		c.ConfigExport = defaultImpl1cv8
 	}
 	if c.DBCreate == "" {
-		c.DBCreate = "1cv8"
+		c.DBCreate = defaultImpl1cv8
 	}
 
-	validConfigExport := map[string]bool{"1cv8": true, "ibcmd": true, "native": true}
-	validDBCreate := map[string]bool{"1cv8": true, "ibcmd": true}
+	validConfigExport := map[string]bool{defaultImpl1cv8: true, "ibcmd": true, "native": true}
+	validDBCreate := map[string]bool{defaultImpl1cv8: true, "ibcmd": true}
 
 	if !validConfigExport[c.ConfigExport] {
 		return fmt.Errorf("недопустимое значение ConfigExport: %q, допустимые: 1cv8, ibcmd, native", c.ConfigExport)
@@ -44,6 +46,7 @@ func (c *ImplementationsConfig) Validate() error {
 	return nil
 }
 // loadImplementationsConfig загружает конфигурацию реализаций из AppConfig, переменных окружения или устанавливает значения по умолчанию
+//nolint:dupl // similar test structure
 func loadImplementationsConfig(l *slog.Logger, cfg *Config) (*ImplementationsConfig, error) {
 	// Проверяем, есть ли конфигурация в AppConfig
 	if cfg.AppConfig != nil && (cfg.AppConfig.Implementations != ImplementationsConfig{}) {
@@ -81,7 +84,7 @@ func loadImplementationsConfig(l *slog.Logger, cfg *Config) (*ImplementationsCon
 // getDefaultImplementationsConfig возвращает конфигурацию реализаций по умолчанию
 func getDefaultImplementationsConfig() *ImplementationsConfig {
 	return &ImplementationsConfig{
-		ConfigExport: "1cv8",
-		DBCreate:     "1cv8",
+		ConfigExport: defaultImpl1cv8,
+		DBCreate:     defaultImpl1cv8,
 	}
 }

@@ -696,7 +696,7 @@ func TestAddIssueComment(t *testing.T) {
 				if r.URL.Path != expectedPath {
 					t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
 				}
-				if r.Method != "POST" {
+				if r.Method != "POST" { //nolint:goconst // test value
 					t.Errorf("Expected POST method, got %s", r.Method)
 				}
 
@@ -818,7 +818,7 @@ func TestCloseIssue(t *testing.T) {
 func TestCreatePRWithOptions_Success(t *testing.T) {
 	ctx := context.Background()
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/api/v1/repos/testowner/testrepo/pulls" && r.Method == "POST" {
+		if r.URL.Path == "/api/v1/repos/testowner/testrepo/pulls" && r.Method == "POST" { //nolint:goconst // test value
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusCreated)
 			_, _ = w.Write([]byte(`{

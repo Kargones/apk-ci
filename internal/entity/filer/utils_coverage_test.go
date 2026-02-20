@@ -256,10 +256,10 @@ func TestGetOptimalTempDir_Coverage(t *testing.T) {
 	}
 
 	// Проверяем логику выбора
-	if runtime.GOOS == "linux" {
+	if runtime.GOOS == "linux" { //nolint:goconst // test value
 		// На Linux проверяем, что выбор соответствует доступности RAM-диска
 		if IsRAMDiskAvailable() {
-			if tempDir != "/dev/shm" {
+			if tempDir != "/dev/shm" { //nolint:goconst // test value
 				t.Errorf("Expected /dev/shm when RAM disk is available on Linux, got %s", tempDir)
 			}
 		} else {
@@ -288,7 +288,7 @@ func TestIsRAMDiskAvailable_Coverage(t *testing.T) {
 	// Проверяем логику для разных ОС
 	if runtime.GOOS == "linux" {
 		// На Linux проверяем реальное состояние /dev/shm
-		info, err := os.Stat("/dev/shm")
+		info, err := os.Stat(RAMDiskPath)
 		expectedAvailable := err == nil && info.IsDir()
 
 		if available != expectedAvailable {
@@ -303,7 +303,7 @@ func TestIsRAMDiskAvailable_Coverage(t *testing.T) {
 
 	// Дополнительная проверка: если функция возвращает true, /dev/shm должна существовать
 	if available {
-		if info, err := os.Stat("/dev/shm"); err != nil || !info.IsDir() {
+		if info, err := os.Stat(RAMDiskPath); err != nil || !info.IsDir() {
 			t.Error("IsRAMDiskAvailable returned true, but /dev/shm is not accessible or not a directory")
 		}
 	}

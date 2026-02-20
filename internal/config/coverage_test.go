@@ -195,6 +195,7 @@ func TestValidateMetricsConfig(t *testing.T) {
 	}
 }
 
+//nolint:dupl // similar test structure
 func TestLoadMetricsConfig(t *testing.T) {
 	l := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelError}))
 
@@ -289,6 +290,7 @@ func TestValidateTracingConfig(t *testing.T) {
 	}
 }
 
+//nolint:dupl // similar test structure
 func TestLoadTracingConfig(t *testing.T) {
 	l := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelError}))
 
@@ -571,6 +573,7 @@ func TestLoadMenuDebugConfig_Empty(t *testing.T) {
 // loader.go - loadGitConfig
 // ============================================================
 
+//nolint:dupl // similar test structure
 func TestLoadGitConfig(t *testing.T) {
 	l := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelError}))
 
@@ -665,6 +668,7 @@ func TestLoadRacConfig(t *testing.T) {
 // loader.go - loadLoggingConfig
 // ============================================================
 
+//nolint:dupl // similar test structure
 func TestLoadLoggingConfig(t *testing.T) {
 	l := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelError}))
 
@@ -699,6 +703,7 @@ func TestLoadLoggingConfig(t *testing.T) {
 // loader.go - loadImplementationsConfig
 // ============================================================
 
+//nolint:dupl // similar test structure
 func TestLoadImplementationsConfig(t *testing.T) {
 	l := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelError}))
 

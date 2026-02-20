@@ -151,7 +151,7 @@ func TestPrometheusCollector_Labels(t *testing.T) {
 	require.NoError(t, err)
 
 	for _, m := range metrics {
-		if m.GetName() == "apk_ci_command_duration_seconds" {
+		if m.GetName() == "apk_ci_command_duration_seconds" { //nolint:goconst // test value
 			for _, metric := range m.GetMetric() {
 				labels := make(map[string]string)
 				for _, l := range metric.GetLabel() {

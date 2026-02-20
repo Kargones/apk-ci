@@ -178,7 +178,7 @@ func TestDiskFS_WriteFile(t *testing.T) {
 	}
 
 	// Тест записи в новый файл
-	filePath := "test.txt"
+	filePath := "test.txt" //nolint:goconst // test value
 	data := []byte("Hello, World!")
 	err = dfs.WriteFile(filePath, data, 0644)
 	if err != nil {

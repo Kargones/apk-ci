@@ -109,6 +109,7 @@ type GitOperator interface {
 }
 
 // ConvertConfigOperator — интерфейс для операций convert.Config (для тестируемости).
+//nolint:dupl // similar test structure
 type ConvertConfigOperator interface {
 	// Load загружает конфигурацию конвертации
 	Load(ctx context.Context, l *slog.Logger, cfg *config.Config, infobaseName string) error

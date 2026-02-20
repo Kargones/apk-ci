@@ -50,7 +50,7 @@ func TestOptions_ApplyOptions(t *testing.T) {
 		t.Error("ApplyOptions failed to apply WithDiskFS")
 	}
 	
-	if newConfig2.BasePath != "/test" {
+	if newConfig2.BasePath != "/test" { //nolint:goconst // test value
 		t.Error("ApplyOptions failed to set base path")
 	}
 	

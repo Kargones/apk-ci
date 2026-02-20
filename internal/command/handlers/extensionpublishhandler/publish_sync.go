@@ -57,6 +57,11 @@ type SyncResult struct {
 // Возвращает:
 //   - []gitea.ChangeFileOperation: список операций create с относительными путями
 //   - error: ошибка при получении содержимого или nil при успехе
+const (
+	contentTypeDir  = "dir"
+	contentTypeFile = "file"
+)
+
 func GetSourceFiles(ctx context.Context, api *gitea.API, sourceDir, branch string) ([]gitea.ChangeFileOperation, error) {
 	operations, err := getSourceFilesRecursive(ctx, api, sourceDir, "", branch)
 	if err != nil {
@@ -107,7 +112,7 @@ func getTargetFilesRecursive(ctx context.Context, api *gitea.API, currentDir, br
 
 	for _, item := range contents {
 		switch item.Type {
-		case "dir":
+		case contentTypeDir:
 			// Рекурсивный вызов для подкаталога
 			// Используем path.Join вместо filepath.Join для кросс-платформенной совместимости
 			// (Gitea API всегда ожидает Unix-пути с прямыми слешами)
@@ -121,7 +126,7 @@ func getTargetFilesRecursive(ctx context.Context, api *gitea.API, currentDir, br
 			}
 			operations = append(operations, subOps...)
 
-		case "file":
+		case contentTypeFile:
 			// Формируем операцию delete с полным путём и SHA
 			operations = append(operations, gitea.ChangeFileOperation{
 				Operation: "delete",
@@ -166,7 +171,7 @@ func getTargetFilesMapRecursive(ctx context.Context, api *gitea.API, currentDir,
 
 	for _, item := range contents {
 		switch item.Type {
-		case "dir":
+		case contentTypeDir:
 			// Рекурсивный вызов для подкаталога
 			subMap, err := getTargetFilesMapRecursive(ctx, 
 				api,
@@ -182,7 +187,7 @@ func getTargetFilesMapRecursive(ctx context.Context, api *gitea.API, currentDir,
 				result[k] = v
 			}
 
-		case "file":
+		case contentTypeFile:
 			// Вычисляем относительный путь от baseDir
 			relativePath := strings.TrimPrefix(item.Path, baseDir+"/")
 			result[relativePath] = item.SHA
@@ -393,7 +398,7 @@ func getSourceFilesRecursive(ctx context.Context, api *gitea.API, currentDir, ba
 		}
 
 		switch item.Type {
-		case "dir":
+		case contentTypeDir:
 			// Рекурсивный вызов для подкаталога
 			subOps, err := getSourceFilesRecursive(ctx, 
 				api,
@@ -406,7 +411,7 @@ func getSourceFilesRecursive(ctx context.Context, api *gitea.API, currentDir, ba
 			}
 			operations = append(operations, subOps...)
 
-		case "file":
+		case contentTypeFile:
 			// Получаем содержимое файла (GetFileContent возвращает уже декодированные байты)
 			content, err := api.GetFileContent(ctx, item.Path)
 			if err != nil {

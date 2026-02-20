@@ -450,7 +450,7 @@ func TestMigrateHandler_Execute_RealApply_NoBackup(t *testing.T) {
 func TestMigrateHandler_Execute_RealApply_WithBackup(t *testing.T) {
 	// Регистрация тестового handler уже выполнена в предыдущем тесте (глобальный registry)
 	tmpDir := t.TempDir()
-	original := "env:\n  BR_COMMAND: test-legacy-cmd\n"
+	original := "env:\n  BR_COMMAND: test-legacy-cmd\n" //nolint:goconst // test value
 	createTestWorkflow(t, tmpDir, "workflow.yml", original)
 
 	t.Setenv("BR_MIGRATE_PATH", tmpDir)

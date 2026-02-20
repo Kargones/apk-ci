@@ -464,8 +464,8 @@ func TestGitClone(t *testing.T) {
 		t.Fatalf("Не удалось создать временную директорию: %v", err)
 	}
 	defer func() {
-		if err := os.RemoveAll(tempDir); err != nil {
-			t.Logf("Failed to remove temp dir: %v", err)
+		if rmErr := os.RemoveAll(tempDir); rmErr != nil {
+			t.Logf("Failed to remove temp dir: %v", rmErr)
 		}
 	}()
 
@@ -599,8 +599,8 @@ func TestSwitchOrCreateBranch(t *testing.T) {
 			t.Fatalf("Не удалось создать временную директорию: %v", err)
 		}
 		defer func() {
-			if err := os.RemoveAll(tempDir); err != nil {
-				t.Logf("Failed to remove temp dir: %v", err)
+			if rmErr := os.RemoveAll(tempDir); rmErr != nil {
+				t.Logf("Failed to remove temp dir: %v", rmErr)
 			}
 		}()
 
@@ -629,8 +629,8 @@ func TestSyncRepoBranches(t *testing.T) {
 			t.Fatalf("Не удалось создать временную директорию: %v", err)
 		}
 		defer func() {
-			if err := os.RemoveAll(tempDir); err != nil {
-				t.Logf("Failed to remove temp dir: %v", err)
+			if rmErr := os.RemoveAll(tempDir); rmErr != nil {
+				t.Logf("Failed to remove temp dir: %v", rmErr)
 			}
 		}()
 
@@ -655,8 +655,8 @@ func TestCloneToTempDir(t *testing.T) {
 			t.Fatalf("Не удалось создать временную директорию: %v", err)
 		}
 		defer func() {
-			if err := os.RemoveAll(tempDir); err != nil {
-				t.Logf("Failed to remove temp dir: %v", err)
+			if rmErr := os.RemoveAll(tempDir); rmErr != nil {
+				t.Logf("Failed to remove temp dir: %v", rmErr)
 			}
 		}()
 
@@ -673,8 +673,8 @@ func TestCloneToTempDir(t *testing.T) {
 			t.Fatalf("Не удалось создать временную директорию: %v", err)
 		}
 		defer func() {
-			if err := os.RemoveAll(tempDir); err != nil {
-				t.Logf("Failed to remove temp dir: %v", err)
+			if rmErr := os.RemoveAll(tempDir); rmErr != nil {
+				t.Logf("Failed to remove temp dir: %v", rmErr)
 			}
 		}()
 
@@ -691,8 +691,8 @@ func TestCloneToTempDir(t *testing.T) {
 			t.Fatalf("Не удалось создать временную директорию: %v", err)
 		}
 		defer func() {
-			if err := os.RemoveAll(tempDir); err != nil {
-				t.Logf("Failed to remove temp dir: %v", err)
+			if rmErr := os.RemoveAll(tempDir); rmErr != nil {
+				t.Logf("Failed to remove temp dir: %v", rmErr)
 			}
 		}()
 
@@ -739,8 +739,8 @@ func TestValidateCommitExists(t *testing.T) {
 			t.Fatalf("Не удалось создать временную директорию: %v", err)
 		}
 		defer func() {
-			if err := os.RemoveAll(tempDir); err != nil {
-				t.Logf("Failed to remove temp dir: %v", err)
+			if rmErr := os.RemoveAll(tempDir); rmErr != nil {
+				t.Logf("Failed to remove temp dir: %v", rmErr)
 			}
 		}()
 
@@ -756,8 +756,8 @@ func TestValidateCommitExists(t *testing.T) {
 			t.Fatalf("Не удалось создать временную директорию: %v", err)
 		}
 		defer func() {
-			if err := os.RemoveAll(tempDir); err != nil {
-				t.Logf("Failed to remove temp dir: %v", err)
+			if rmErr := os.RemoveAll(tempDir); rmErr != nil {
+				t.Logf("Failed to remove temp dir: %v", rmErr)
 			}
 		}()
 
@@ -804,17 +804,17 @@ func TestGetRemoteBranches(t *testing.T) {
 	// Используем defer для правильной очистки в обратном порядке
 	defer func() {
 		// Сначала возвращаемся в исходную директорию
-		if err := os.Chdir(originalDir); err != nil {
+		if err := os.Chdir(originalDir); err != nil { //nolint:govet // shadow ok in cleanup
 			t.Logf("Failed to restore directory: %v", err)
 		}
 		// Затем удаляем временную директорию
-		if err := os.RemoveAll(tempDir); err != nil {
-			t.Logf("Failed to remove temp dir: %v", err)
+		if rmErr := os.RemoveAll(tempDir); rmErr != nil {
+			t.Logf("Failed to remove temp dir: %v", rmErr)
 		}
 	}()
 
 	// Переходим в временную директорию
-	if err := os.Chdir(tempDir); err != nil {
+	if err := os.Chdir(tempDir); err != nil { //nolint:govet // shadow ok in cleanup
 		t.Fatalf("Не удалось перейти в временную директорию: %v", err)
 	}
 
@@ -839,8 +839,8 @@ func TestCreateTrackingBranch(t *testing.T) {
 		t.Fatalf("Не удалось создать временную директорию: %v", err)
 	}
 	defer func() {
-		if err := os.RemoveAll(tempDir); err != nil {
-			t.Logf("Failed to remove temp dir: %v", err)
+		if rmErr := os.RemoveAll(tempDir); rmErr != nil {
+			t.Logf("Failed to remove temp dir: %v", rmErr)
 		}
 	}()
 
@@ -850,13 +850,13 @@ func TestCreateTrackingBranch(t *testing.T) {
 		t.Fatalf("Не удалось получить текущую директорию: %v", err)
 	}
 	defer func() {
-		if err := os.Chdir(originalDir); err != nil {
+		if err := os.Chdir(originalDir); err != nil { //nolint:govet // shadow ok in cleanup
 			t.Logf("Failed to restore directory: %v", err)
 		}
 	}()
 
 	// Переходим в временную директорию
-	if err := os.Chdir(tempDir); err != nil {
+	if err := os.Chdir(tempDir); err != nil { //nolint:govet // shadow ok in cleanup
 		t.Fatalf("Не удалось перейти в временную директорию: %v", err)
 	}
 
@@ -876,8 +876,8 @@ func TestWaitForGitSync(t *testing.T) {
 		t.Fatalf("Не удалось создать временную директорию: %v", err)
 	}
 	defer func() {
-		if err := os.RemoveAll(tempDir); err != nil {
-			t.Logf("Failed to remove temp dir: %v", err)
+		if rmErr := os.RemoveAll(tempDir); rmErr != nil {
+			t.Logf("Failed to remove temp dir: %v", rmErr)
 		}
 	}()
 
@@ -954,7 +954,6 @@ func TestGitMethodsErrorHandling(t *testing.T) {
 
 // TestGitExecuteCommandWithRetry тестирует функцию executeGitCommandWithRetry
 func TestGitExecuteCommandWithRetry(t *testing.T) {
-
 	// Создаем временную директорию
 	tempDir, err := os.MkdirTemp("", "git-retry-test-*")
 	if err != nil {
@@ -969,8 +968,8 @@ func TestGitExecuteCommandWithRetry(t *testing.T) {
 	}
 	defer os.Chdir(originalDir)
 
-	if err := os.Chdir(tempDir); err != nil {
-		t.Fatalf("Не удалось перейти в временную директорию: %v", err)
+	if err := os.Chdir(tempDir); err != nil { //nolint:govet // shadow ok
+		t.Fatalf("Не удалось перейти в временную директорию: %v", err) //nolint:govet // shadow ok in cleanup
 	}
 
 	// Тестируем команду с ошибкой
@@ -988,7 +987,6 @@ func TestGitExecuteCommandWithRetry(t *testing.T) {
 
 // TestGitWaitForGitLockRelease тестирует функцию waitForGitLockRelease
 func TestGitWaitForGitLockRelease(t *testing.T) {
-
 	// Создаем временную директорию
 	tempDir, err := os.MkdirTemp("", "git-lock-test-*")
 	if err != nil {
@@ -1058,9 +1056,9 @@ func TestGitHelperFunctions(t *testing.T) {
 	}
 	defer os.Chdir(originalDir)
 
-	if err := os.Chdir(tempDir); err != nil {
+	if err := os.Chdir(tempDir); err != nil { //nolint:govet // shadow ok
 		t.Fatalf("Не удалось перейти в временную директорию: %v", err)
-	}
+	} //nolint:govet // shadow ok in cleanup
 
 	// Тестируем getGitStatus
 	_, err = getGitStatus(ctx, tempDir)

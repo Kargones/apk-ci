@@ -277,6 +277,7 @@ func TestExecuteEpfHandler_Execute_NilConfig(t *testing.T) {
 
 // === AC-7: Execution error ===
 
+//nolint:dupl // similar test structure
 func TestExecuteEpfHandler_Execute_ExecutionError(t *testing.T) {
 	t.Setenv("BR_OUTPUT_FORMAT", "json")
 
@@ -305,6 +306,7 @@ func TestExecuteEpfHandler_Execute_ExecutionError(t *testing.T) {
 	assert.Contains(t, result.Error.Message, "ошибка запуска 1С:Enterprise")
 }
 
+//nolint:dupl // similar test structure
 func TestExecuteEpfHandler_Execute_DownloadError(t *testing.T) {
 	t.Setenv("BR_OUTPUT_FORMAT", "json")
 

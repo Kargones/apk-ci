@@ -243,6 +243,7 @@ func TestConvertHandler_Execute_NoSource(t *testing.T) {
 
 // === Error cases: нет BR_TARGET ===
 
+//nolint:dupl // similar test structure
 func TestConvertHandler_Execute_NoTarget(t *testing.T) {
 	t.Setenv("BR_OUTPUT_FORMAT", "json")
 
@@ -272,6 +273,7 @@ func TestConvertHandler_Execute_NoTarget(t *testing.T) {
 
 // === Error cases: нет BR_DIRECTION ===
 
+//nolint:dupl // similar test structure
 func TestConvertHandler_Execute_NoDirection(t *testing.T) {
 	t.Setenv("BR_OUTPUT_FORMAT", "json")
 

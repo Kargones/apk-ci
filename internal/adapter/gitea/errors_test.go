@@ -201,6 +201,7 @@ func TestNewValidationErrorWithCause(t *testing.T) {
 	}
 }
 
+//nolint:dupl // similar test structure
 func TestIsNotFoundError(t *testing.T) {
 	t.Parallel()
 
@@ -246,6 +247,7 @@ func TestIsNotFoundError(t *testing.T) {
 	}
 }
 
+//nolint:dupl // similar test structure
 func TestIsAuthError(t *testing.T) {
 	t.Parallel()
 
@@ -291,6 +293,7 @@ func TestIsAuthError(t *testing.T) {
 	}
 }
 
+//nolint:dupl // similar test structure
 func TestIsTimeoutError(t *testing.T) {
 	t.Parallel()
 
@@ -336,6 +339,7 @@ func TestIsTimeoutError(t *testing.T) {
 	}
 }
 
+//nolint:dupl // similar test structure
 func TestIsConnectionError(t *testing.T) {
 	t.Parallel()
 
@@ -381,6 +385,7 @@ func TestIsConnectionError(t *testing.T) {
 	}
 }
 
+//nolint:dupl // similar test structure
 func TestIsAPIError(t *testing.T) {
 	t.Parallel()
 

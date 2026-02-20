@@ -368,6 +368,7 @@ func TestSonarQubeEntity_GetProject_NotFound(t *testing.T) {
 }
 
 // TestSonarQubeEntity_GetProject_RequestError tests the GetProject method when makeRequest fails.
+//nolint:dupl // similar test structure
 func TestSonarQubeEntity_GetProject_RequestError(t *testing.T) {
 	// Create a test server that returns an error
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
@@ -394,6 +395,7 @@ func TestSonarQubeEntity_GetProject_RequestError(t *testing.T) {
 }
 
 // TestSonarQubeEntity_GetProject_InvalidJSON tests the GetProject method when JSON parsing fails.
+//nolint:dupl // similar test structure
 func TestSonarQubeEntity_GetProject_InvalidJSON(t *testing.T) {
 	// Create a test server that returns invalid JSON
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {

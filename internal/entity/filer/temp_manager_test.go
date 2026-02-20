@@ -769,8 +769,8 @@ func TestPathUtils_EnsureDir_FileExists(t *testing.T) {
 			t.Logf("Failed to remove temp file: %v", err)
 		}
 	}()
-	if err := tempFile.Close(); err != nil {
-		t.Fatalf("Failed to close temp file: %v", err)
+	if closeErr := tempFile.Close(); closeErr != nil {
+		t.Fatalf("Failed to close temp file: %v", closeErr)
 	}
 	
 	// Пытаемся создать директорию с именем существующего файла
@@ -788,7 +788,7 @@ func TestTempManager_CheckAvailableRAM_LinuxFields(t *testing.T) {
 	ramInfo := manager.CheckAvailableRAM()
 	
 	// Проверяем Linux-специфичные поля
-	if runtime.GOOS == "linux" {
+	if runtime.GOOS == "linux" { //nolint:goconst // test value
 		if _, exists := ramInfo["shm_exists"]; !exists {
 			t.Error("CheckAvailableRAM should include shm_exists field on Linux")
 		}

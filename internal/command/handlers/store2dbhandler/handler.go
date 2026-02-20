@@ -122,7 +122,7 @@ type ConvertLoader interface {
 	// LoadFromConfig загружает конфигурацию конвертации
 	LoadFromConfig(ctx context.Context, l *slog.Logger, cfg *config.Config) (*convert.Config, error)
 	// StoreBind выполняет привязку хранилища к базе данных
-	StoreBind(cc *convert.Config, ctx context.Context, l *slog.Logger, cfg *config.Config) error
+	StoreBind(ctx context.Context, cc *convert.Config, l *slog.Logger, cfg *config.Config) error
 }
 
 // defaultConvertLoader — реализация ConvertLoader по умолчанию
@@ -132,7 +132,7 @@ func (d *defaultConvertLoader) LoadFromConfig(ctx context.Context, l *slog.Logge
 	return convert.LoadFromConfig(ctx, l, cfg)
 }
 
-func (d *defaultConvertLoader) StoreBind(cc *convert.Config, ctx context.Context, l *slog.Logger, cfg *config.Config) error {
+func (d *defaultConvertLoader) StoreBind(ctx context.Context, cc *convert.Config, l *slog.Logger, cfg *config.Config) error {
 	return cc.StoreBind(ctx, l, cfg)
 }
 
@@ -213,7 +213,7 @@ func (h *Store2DbHandler) Execute(ctx context.Context, cfg *config.Config) error
 	// Выполнение привязки хранилища (основная конфигурация + расширения)
 	// H-2 fix: StoreBind обрабатывает main + extensions внутренне.
 	// При ошибке невозможно определить какие расширения успешны (legacy API ограничение).
-	err = loader.StoreBind(cc, ctxPtr, log, cfg)
+	err = loader.StoreBind(ctxPtr, cc, log, cfg)
 	if err != nil {
 		log.Error("Ошибка привязки хранилища", slog.String("error", err.Error()))
 		return h.writeError(format, traceID, start, "ERR_STORE_OP", err.Error())

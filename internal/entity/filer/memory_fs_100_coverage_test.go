@@ -276,7 +276,7 @@ func TestMemoryFileSystem_100Coverage(t *testing.T) {
 		if err != nil {
 			t.Errorf("ReadFile failed: %v", err)
 		}
-		if string(data) != "test data" {
+		if string(data) != "test data" { //nolint:goconst // test value
 			t.Errorf("File content mismatch")
 		}
 	})

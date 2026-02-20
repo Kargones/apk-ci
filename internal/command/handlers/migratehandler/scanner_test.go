@@ -209,7 +209,7 @@ func TestScanDirectory_SkipsNonYaml(t *testing.T) {
 	assert.Len(t, result, 2, "должны быть найдены только .yml и .yaml файлы")
 
 	// Проверяем что найдены правильные файлы
-	var names []string
+	var names []string //nolint:prealloc // test helper
 	for _, f := range result {
 		names = append(names, filepath.Base(f))
 	}

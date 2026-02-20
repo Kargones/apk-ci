@@ -19,7 +19,6 @@ import (
 //   - []Analysis: list of analyses
 //   - error: error if analysis retrieval fails
 func (s *Entity) GetAnalyses(ctx context.Context, projectKey string) ([]Analysis, error) {
-
 	// Prepare query parameters
 	params := url.Values{}
 	params.Add("project", projectKey)
@@ -53,7 +52,6 @@ func (s *Entity) GetAnalyses(ctx context.Context, projectKey string) ([]Analysis
 //   - *AnalysisStatus: analysis status
 //   - error: error if status retrieval fails
 func (s *Entity) GetAnalysisStatus(ctx context.Context, analysisID string) (*AnalysisStatus, error) {
-
 	// Prepare query parameters
 	params := url.Values{}
 	params.Add("analysisId", analysisID)
@@ -94,7 +92,6 @@ func (s *Entity) GetAnalysisStatus(ctx context.Context, analysisID string) (*Ana
 //   - []Issue: list of issues
 //   - error: error if issue retrieval fails
 func (s *Entity) GetIssues(ctx context.Context, projectKey string, params *IssueParams) ([]Issue, error) {
-
 	// Prepare query parameters
 	queryParams := url.Values{}
 	queryParams.Add("componentKeys", projectKey)
@@ -147,7 +144,6 @@ func (s *Entity) GetIssues(ctx context.Context, projectKey string, params *Issue
 //   - *QualityGateStatus: quality gate status
 //   - error: error if status retrieval fails
 func (s *Entity) GetQualityGateStatus(ctx context.Context, projectKey string) (*QualityGateStatus, error) {
-
 	// Prepare query parameters
 	params := url.Values{}
 	params.Add("projectKey", projectKey)
@@ -188,7 +184,6 @@ func (s *Entity) GetQualityGateStatus(ctx context.Context, projectKey string) (*
 //   - *Metrics: project metrics
 //   - error: error if metrics retrieval fails
 func (s *Entity) GetMetrics(ctx context.Context, projectKey string, metricKeys []string) (*Metrics, error) {
-
 	// Prepare query parameters
 	params := url.Values{}
 	params.Add("component", projectKey)
@@ -239,7 +234,6 @@ func (s *Entity) GetMetrics(ctx context.Context, projectKey string, metricKeys [
 //   - []QualityProfile: list of quality profiles
 //   - error: error if profile retrieval fails
 func (s *Entity) GetQualityProfiles(ctx context.Context, projectKey string) ([]QualityProfile, error) {
-
 	// Prepare query parameters
 	params := url.Values{}
 	params.Add("project", projectKey)
@@ -272,7 +266,6 @@ func (s *Entity) GetQualityProfiles(ctx context.Context, projectKey string) ([]Q
 //   - []QualityGate: list of quality gates
 //   - error: error if gate retrieval fails
 func (s *Entity) GetQualityGates(ctx context.Context) ([]QualityGate, error) {
-
 	// Make API request to get quality gates
 	respBody, err := s.makeRequest(ctx, "GET", "/qualitygates/list", nil)
 	if err != nil {
@@ -302,7 +295,6 @@ func (s *Entity) GetQualityGates(ctx context.Context) ([]QualityGate, error) {
 //   - []Rule: list of rules
 //   - error: error if rule retrieval fails
 func (s *Entity) GetRules(ctx context.Context, params *RuleParams) ([]Rule, error) {
-
 	// Prepare query parameters
 	queryParams := url.Values{}
 

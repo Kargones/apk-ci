@@ -74,7 +74,7 @@ func TestSearchOrgRepos_Success(t *testing.T) {
 		}
 
 		// Проверяем метод
-		if r.Method != "GET" {
+		if r.Method != "GET" { //nolint:goconst // test value
 			t.Errorf("Ожидался метод GET, получен %s", r.Method)
 		}
 

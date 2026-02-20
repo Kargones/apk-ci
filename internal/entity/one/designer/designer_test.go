@@ -11,15 +11,16 @@ import (
 	"github.com/Kargones/apk-ci/internal/util/runner"
 )
 
+//nolint:dupl // similar test structure
 func TestOneDb_Create(t *testing.T) {
 	// Создаем временную директорию для тестов
 	tmpDir, err := os.MkdirTemp("", "designer_test")
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer func() {
-		if err := os.RemoveAll(tmpDir); err != nil {
-			t.Logf("Failed to remove temp dir: %v", err)
+	defer func() { //nolint:govet // shadow ok in cleanup
+		if rmErr := os.RemoveAll(tmpDir); rmErr != nil {
+			t.Logf("Failed to remove temp dir: %v", rmErr)
 		}
 	}()
 
@@ -52,14 +53,15 @@ func TestOneDb_Create(t *testing.T) {
 	}
 }
 
+//nolint:dupl // similar test structure
 func TestOneDb_Add(t *testing.T) {
 	tmpDir, err := os.MkdirTemp("", "designer_test")
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
-	}
+	} //nolint:govet // shadow ok in cleanup
 	defer func() {
-		if err := os.RemoveAll(tmpDir); err != nil {
-			t.Logf("Failed to remove temp dir: %v", err)
+		if rmErr := os.RemoveAll(tmpDir); rmErr != nil {
+			t.Logf("Failed to remove temp dir: %v", rmErr)
 		}
 	}()
 
@@ -95,10 +97,10 @@ func TestOneDb_Load(t *testing.T) {
 	tmpDir, err := os.MkdirTemp("", "designer_test")
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
-	}
+	} //nolint:govet // shadow ok in cleanup
 	defer func() {
-		if err := os.RemoveAll(tmpDir); err != nil {
-			t.Logf("Failed to remove temp dir: %v", err)
+		if rmErr := os.RemoveAll(tmpDir); rmErr != nil {
+			t.Logf("Failed to remove temp dir: %v", rmErr)
 		}
 	}()
 
@@ -108,8 +110,8 @@ func TestOneDb_Load(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create test file: %v", err)
 	}
-	if err := file.Close(); err != nil {
-		t.Fatalf("Failed to close file: %v", err)
+	if closeErr := file.Close(); closeErr != nil {
+		t.Fatalf("Failed to close file: %v", closeErr)
 	}
 
 	ctx := context.Background()
@@ -140,14 +142,15 @@ func TestOneDb_Load(t *testing.T) {
 	}
 }
 
+//nolint:dupl // similar test structure
 func TestOneDb_UpdateCfg(t *testing.T) {
 	tmpDir, err := os.MkdirTemp("", "designer_test")
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
 	defer func() {
-		if err := os.RemoveAll(tmpDir); err != nil {
-			t.Logf("Failed to remove temp dir: %v", err)
+		if rmErr := os.RemoveAll(tmpDir); rmErr != nil {
+			t.Logf("Failed to remove temp dir: %v", rmErr)
 		}
 	}()
 
@@ -179,14 +182,15 @@ func TestOneDb_UpdateCfg(t *testing.T) {
 	}
 }
 
+//nolint:dupl // similar test structure
 func TestOneDb_Dump(t *testing.T) {
 	tmpDir, err := os.MkdirTemp("", "designer_test")
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
 	defer func() {
-		if err := os.RemoveAll(tmpDir); err != nil {
-			t.Logf("Failed to remove temp dir: %v", err)
+		if rmErr := os.RemoveAll(tmpDir); rmErr != nil {
+			t.Logf("Failed to remove temp dir: %v", rmErr)
 		}
 	}()
 
@@ -224,8 +228,8 @@ func TestGetDbName(t *testing.T) {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
 	defer func() {
-		if err := os.RemoveAll(tmpDir); err != nil {
-			t.Logf("Failed to remove temp dir: %v", err)
+		if rmErr := os.RemoveAll(tmpDir); rmErr != nil {
+			t.Logf("Failed to remove temp dir: %v", rmErr)
 		}
 	}()
 
@@ -254,8 +258,8 @@ func TestCreateTempDb(t *testing.T) {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
 	defer func() {
-		if err := os.RemoveAll(tmpDir); err != nil {
-			t.Logf("Failed to remove temp dir: %v", err)
+		if rmErr := os.RemoveAll(tmpDir); rmErr != nil {
+			t.Logf("Failed to remove temp dir: %v", rmErr)
 		}
 	}()
 
@@ -293,14 +297,15 @@ func TestCreateTempDb(t *testing.T) {
 	}
 }
 
+//nolint:dupl // similar test structure
 func TestOneDb_LoadAdd(t *testing.T) {
 	tmpDir, err := os.MkdirTemp("", "designer_test")
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
 	defer func() {
-		if err := os.RemoveAll(tmpDir); err != nil {
-			t.Logf("Failed to remove temp dir: %v", err)
+		if rmErr := os.RemoveAll(tmpDir); rmErr != nil {
+			t.Logf("Failed to remove temp dir: %v", rmErr)
 		}
 	}()
 
@@ -310,8 +315,8 @@ func TestOneDb_LoadAdd(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create test file: %v", err)
 	}
-	if err := file.Close(); err != nil {
-		t.Fatalf("Failed to close file: %v", err)
+	if closeErr := file.Close(); closeErr != nil {
+		t.Fatalf("Failed to close file: %v", closeErr)
 	}
 
 	ctx := context.Background()
@@ -342,14 +347,15 @@ func TestOneDb_LoadAdd(t *testing.T) {
 	}
 }
 
+//nolint:dupl // similar test structure
 func TestOneDb_UpdateAdd(t *testing.T) {
 	tmpDir, err := os.MkdirTemp("", "designer_test")
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
 	defer func() {
-		if err := os.RemoveAll(tmpDir); err != nil {
-			t.Logf("Failed to remove temp dir: %v", err)
+		if rmErr := os.RemoveAll(tmpDir); rmErr != nil {
+			t.Logf("Failed to remove temp dir: %v", rmErr)
 		}
 	}()
 
@@ -359,8 +365,8 @@ func TestOneDb_UpdateAdd(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create test file: %v", err)
 	}
-	if err := file.Close(); err != nil {
-		t.Fatalf("Failed to close file: %v", err)
+	if closeErr := file.Close(); closeErr != nil {
+		t.Fatalf("Failed to close file: %v", closeErr)
 	}
 
 	ctx := context.Background()
@@ -397,8 +403,8 @@ func TestOneDb_DumpAdd(t *testing.T) {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
 	defer func() {
-		if err := os.RemoveAll(tmpDir); err != nil {
-			t.Logf("Failed to remove temp dir: %v", err)
+		if rmErr := os.RemoveAll(tmpDir); rmErr != nil {
+			t.Logf("Failed to remove temp dir: %v", rmErr)
 		}
 	}()
 
@@ -436,8 +442,8 @@ func TestGetDbName_WithServerDb(t *testing.T) {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
 	defer func() {
-		if err := os.RemoveAll(tmpDir); err != nil {
-			t.Logf("Failed to remove temp dir: %v", err)
+		if rmErr := os.RemoveAll(tmpDir); rmErr != nil {
+			t.Logf("Failed to remove temp dir: %v", rmErr)
 		}
 	}()
 

@@ -312,7 +312,7 @@ func TestPathUtils_EdgeCases(t *testing.T) {
 	for i := 0; i < 1000; i++ {
 		longFilename += "a"
 	}
-	longFilename += ".txt"
+	longFilename += ".txt" //nolint:goconst // test value
 	
 	ext := utils.GetFileExtension(longFilename)
 	if ext != ".txt" {

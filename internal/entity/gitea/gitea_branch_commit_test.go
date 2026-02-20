@@ -200,12 +200,11 @@ func TestGetMainBranchCommitRange(t *testing.T) {
 						w.WriteHeader(http.StatusOK)
 						w.Write([]byte(`[{"sha":"start123","commit":{"message":"Start commit"}}]`))
 						return
-					} else {
-						// Запрос первого коммита в истории
-						w.WriteHeader(http.StatusOK)
-						w.Write([]byte(`[{"sha":"oldest123","commit":{"message":"Oldest commit"}}]`))
-						return
 					}
+					// Запрос первого коммита в истории
+					w.WriteHeader(http.StatusOK)
+					w.Write([]byte(`[{"sha":"oldest123","commit":{"message":"Oldest commit"}}]`))
+					return
 				}
 
 				w.WriteHeader(http.StatusNotFound)
@@ -303,11 +302,10 @@ func TestGetFeatureBranchCommitRange(t *testing.T) {
 						w.WriteHeader(http.StatusOK)
 						w.Write([]byte(`{"merge_base_commit":{"sha":"base123","commit":{"message":"Base commit"}},"commits":[]}`))
 						return
-					} else {
-						w.WriteHeader(http.StatusOK)
-						w.Write([]byte(`{"commits":[]}`))
-						return
 					}
+					w.WriteHeader(http.StatusOK)
+					w.Write([]byte(`{"commits":[]}`))
+					return
 				}
 
 				if requestCount >= 3 && !tt.hasMergeBase {

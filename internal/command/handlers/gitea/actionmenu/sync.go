@@ -13,7 +13,6 @@ import (
 // Возвращает: добавлено, обновлено, удалено, список операций, ошибка.
 func (h *ActionMenuHandler) syncFiles(ctx context.Context, client gitea.Client, baseBranch string,
 	currentFiles, newFiles []FileInfo, log *slog.Logger) (int, int, int, []SyncedFileInfo, error) {
-
 	log.Debug("Начало атомарной синхронизации файлов")
 
 	// Создание карт для быстрого поиска

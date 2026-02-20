@@ -174,7 +174,7 @@ func waitForGitSync(ctx context.Context, repoPath string) error {
 
 		// Проверяем, что Git репозиторий готов к работе
 		// Используем простую команду git status для проверки готовности
-		ctx, cancel := context.WithTimeout(ctx, 2*time.Minute)
+		ctx, cancel := context.WithTimeout(ctx, 2*time.Minute) //nolint:govet // intentional ctx shadow
 		// #nosec G204 - GitCommand is a constant, all arguments are hardcoded
 		cmd := exec.CommandContext(ctx, GitCommand, "status", "--porcelain")
 		cmd.Dir = repoPath

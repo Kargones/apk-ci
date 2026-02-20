@@ -570,7 +570,7 @@ func TestWebhookAlerter_PayloadFormat(t *testing.T) {
 	if capturedPayload.Infobase != alert.Infobase {
 		t.Errorf("payload.infobase = %s, want %s", capturedPayload.Infobase, alert.Infobase)
 	}
-	if capturedPayload.Severity != "CRITICAL" {
+	if capturedPayload.Severity != "CRITICAL" { //nolint:goconst // test value
 		t.Errorf("payload.severity = %s, want CRITICAL", capturedPayload.Severity)
 	}
 	if capturedPayload.Source != "apk-ci" {

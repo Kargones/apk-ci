@@ -37,7 +37,7 @@ func TestCheckAvailableRAM_Complete(t *testing.T) {
 	}
 
 	// Проверяем Linux-специфичные поля
-	if runtime.GOOS == "linux" {
+	if runtime.GOOS == "linux" { //nolint:goconst // test value
 		if _, exists := result["shm_exists"]; !exists {
 			t.Error("Expected 'shm_exists' field for Linux")
 		}
@@ -206,7 +206,7 @@ func TestGetOptimalTempDir_AllCases(t *testing.T) {
 
 	// Проверяем логику выбора
 	if IsRAMDiskAvailable() {
-		if result != "/dev/shm" {
+		if result != RAMDiskPath {
 			t.Errorf("Expected /dev/shm when RAM disk available, got %s", result)
 		}
 	} else {
@@ -227,7 +227,7 @@ func TestIsRAMDiskAvailable_AllPlatforms(t *testing.T) {
 	}
 
 	// Проверяем логику для разных платформ
-	info, err := os.Stat("/dev/shm")
+	info, err := os.Stat(RAMDiskPath)
 	expected := err == nil && info.IsDir()
 	if result != expected {
 		t.Logf("IsRAMDiskAvailable returned %v, expected %v based on /dev/shm check", result, expected)
@@ -243,7 +243,7 @@ func TestTempManager_isRAMDiskAvailable_AllCases(t *testing.T) {
 
 	// На Linux результат зависит от /dev/shm
 	if runtime.GOOS == "linux" {
-		info, err := os.Stat("/dev/shm")
+		info, err := os.Stat(RAMDiskPath)
 		expected := err == nil && info.IsDir()
 		if result != expected {
 			t.Errorf("Expected %v on Linux, got %v", expected, result)
@@ -318,7 +318,7 @@ func TestIsRAMDiskAvailable_StatError(t *testing.T) {
 	}
 	
 	// Проверяем логику: если /dev/shm не существует или не директория, должно быть false
-	info, err := os.Stat("/dev/shm")
+	info, err := os.Stat(RAMDiskPath)
 	if err != nil {
 		// Если ошибка при stat, должно быть false
 		if result {
@@ -344,7 +344,7 @@ func TestTempManager_isRAMDiskAvailable_LinuxStatError(t *testing.T) {
 	result := tm.isRAMDiskAvailable()
 	
 	// На Linux проверяем логику
-	info, err := os.Stat("/dev/shm")
+	info, err := os.Stat(RAMDiskPath)
 	if err != nil {
 		// Если ошибка при stat, должно быть false
 		if result {

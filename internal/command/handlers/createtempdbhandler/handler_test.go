@@ -305,6 +305,7 @@ func TestCreateTempDbHandler_Execute_UseAddArrayWhenExtensionsEmpty(t *testing.T
 	}
 }
 
+//nolint:dupl // similar test structure
 func TestCreateTempDbHandler_Execute_CreateDBError(t *testing.T) {
 	tmpDir := t.TempDir()
 
@@ -356,6 +357,7 @@ func TestCreateTempDbHandler_Execute_CreateDBError(t *testing.T) {
 	}
 }
 
+//nolint:dupl // similar test structure
 func TestCreateTempDbHandler_Execute_ExtensionError(t *testing.T) {
 	tmpDir := t.TempDir()
 
@@ -461,9 +463,9 @@ func TestCreateTempDbHandler_Execute_TTLMetadata(t *testing.T) {
 		t.Errorf("Execute() error = %v, want nil", err)
 	}
 
-	// Проверяем что .ttl файл создан
+	// Проверяем что .ttl файл создан //nolint:govet // shadow ok in cleanup
 	ttlPath := capturedDbPath + ".ttl"
-	if _, err := os.Stat(ttlPath); os.IsNotExist(err) {
+	if _, statErr := os.Stat(ttlPath); os.IsNotExist(statErr) {
 		t.Errorf(".ttl file was not created at %s", ttlPath)
 		return
 	}
@@ -1416,6 +1418,7 @@ func TestCreateTempDbHandler_DryRun_NoMockCalls(t *testing.T) {
 }
 
 // TestCreateTempDbHandler_DryRun_WithExtensions проверяет dry-run с расширениями.
+//nolint:dupl // similar test structure
 func TestCreateTempDbHandler_DryRun_WithExtensions(t *testing.T) {
 	tmpDir := t.TempDir()
 
@@ -1475,6 +1478,7 @@ func TestCreateTempDbHandler_DryRun_WithExtensions(t *testing.T) {
 }
 
 // TestCreateTempDbHandler_DryRun_WithTTL проверяет dry-run с TTL.
+//nolint:dupl // similar test structure
 func TestCreateTempDbHandler_DryRun_WithTTL(t *testing.T) {
 	tmpDir := t.TempDir()
 
@@ -1743,6 +1747,7 @@ func TestCreateTempDbHandler_PlanOnly_JSONOutput(t *testing.T) {
 
 // TestCreateTempDbHandler_Priority_DryRunOverPlanOnly проверяет приоритет:
 // BR_DRY_RUN > BR_PLAN_ONLY. Если оба заданы, должен сработать dry-run.
+//nolint:dupl // similar test structure
 func TestCreateTempDbHandler_Priority_DryRunOverPlanOnly(t *testing.T) {
 	tmpDir := t.TempDir()
 
@@ -1947,6 +1952,7 @@ func TestCreateTempDbHandler_Verbose_JSONOutput(t *testing.T) {
 
 // TestCreateTempDbHandler_Priority_DryRunOverVerbose проверяет приоритет dry-run над verbose.
 // AC-9: dry-run имеет высший приоритет над verbose.
+//nolint:dupl // similar test structure
 func TestCreateTempDbHandler_Priority_DryRunOverVerbose(t *testing.T) {
 	tmpDir := t.TempDir()
 
@@ -2007,6 +2013,7 @@ func TestCreateTempDbHandler_Priority_DryRunOverVerbose(t *testing.T) {
 // TestCreateTempDbHandler_Priority_PlanOnlyOverVerbose проверяет приоритет plan-only над verbose.
 // Plan-only останавливает выполнение (показывает план, не выполняет).
 // Verbose показывает план и выполняет. Plan-only имеет приоритет.
+//nolint:dupl // similar test structure
 func TestCreateTempDbHandler_Priority_PlanOnlyOverVerbose(t *testing.T) {
 	tmpDir := t.TempDir()
 

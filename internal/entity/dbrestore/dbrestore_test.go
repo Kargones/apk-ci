@@ -45,7 +45,7 @@ func TestSetupDBRestoreDefaults(t *testing.T) {
 	if dbR.Port != DefaultPort {
 		t.Errorf("Expected port %d, got %d", DefaultPort, dbR.Port)
 	}
-	if dbR.Database != "master" {
+	if dbR.Database != "master" { //nolint:goconst // test value
 		t.Errorf("Expected database master, got %s", dbR.Database)
 	}
 	// setupDBRestoreDefaults устанавливает AutoTimeOut в true только если Timeout == 0
@@ -319,7 +319,7 @@ func TestFindProductionDatabaseExtended(t *testing.T) {
 
 	t.Run("find production for test db", func(t *testing.T) {
 		result := FindProductionDatabase(cfg, "test-db")
-		if result != "prod-db" {
+		if result != "prod-db" { //nolint:goconst // test value
 			t.Errorf("Expected 'prod-db', got '%s'", result)
 		}
 	})

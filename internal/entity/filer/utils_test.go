@@ -27,7 +27,7 @@ func TestGetOptimalTempDir(t *testing.T) {
 	
 	// Проверяем логику выбора директории
 	if IsRAMDiskAvailable() {
-		if tempDir != "/dev/shm" {
+		if tempDir != RAMDiskPath {
 			t.Errorf("Expected /dev/shm when RAM disk is available, got %s", tempDir)
 		}
 	} else {
@@ -111,7 +111,7 @@ func TestIsRAMDiskAvailable(t *testing.T) {
 	t.Logf("RAM disk available: %v", result)
 	
 	// Проверяем логику функции
-	if info, err := os.Stat("/dev/shm"); err == nil {
+	if info, err := os.Stat(RAMDiskPath); err == nil {
 		// Если /dev/shm существует, проверяем, что это директория
 		expected := info.IsDir()
 		if result != expected {
@@ -287,10 +287,10 @@ func TestPathUtils_GetFileExtension_EdgeCases(t *testing.T) {
 	for i := 0; i < 1000; i++ {
 		longFilename += "a"
 	}
-	longFilename += ".txt"
+	longFilename += ".txt" //nolint:goconst // test value
 	
 	ext := pathUtils.GetFileExtension(longFilename)
-	if ext != ".txt" {
+	if ext != ".txt" { //nolint:goconst // test value
 		t.Errorf("Long filename extension: got %q, expected %q", ext, ".txt")
 	}
 	
@@ -494,7 +494,7 @@ func TestGetOptimalTempDir_Extended(t *testing.T) {
 	}
 	result := GetOptimalTempDir()
 	// Функция может возвращать /dev/shm если он доступен, что имеет приоритет
-	if result != "/custom/tmp" && result != "/dev/shm" {
+	if result != "/custom/tmp" && result != RAMDiskPath { //nolint:goconst // test value
 		t.Errorf("Expected /custom/tmp or /dev/shm, got %s", result)
 	}
 	

@@ -140,7 +140,8 @@ func (c *Client) executeCommandOnce(ctx context.Context, args ...string) (string
 
 	// Формируем полную команду
 	serverAddress := c.Server + ":" + strconv.Itoa(c.Port)
-	fullArgs := []string{serverAddress}
+	fullArgs := make([]string, 0, 1+len(args))
+	fullArgs = append(fullArgs, serverAddress)
 	fullArgs = append(fullArgs, args...)
 
 	// Валидация аргументов
