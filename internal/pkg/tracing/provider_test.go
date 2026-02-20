@@ -17,6 +17,7 @@ import (
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
 	"go.opentelemetry.io/otel/trace"
+	"go.opentelemetry.io/otel/trace/noop"
 )
 
 // ВАЖНО: Тесты в этом файле модифицируют глобальный otel.SetTracerProvider().
@@ -96,7 +97,7 @@ func TestSpanCreation_WithInMemoryExporter(t *testing.T) {
 	otel.SetTracerProvider(tp)
 	defer func() {
 		_ = tp.Shutdown(context.Background())
-		otel.SetTracerProvider(trace.NewNoopTracerProvider())
+		otel.SetTracerProvider(noop.NewTracerProvider())
 	}()
 
 	tracer := otel.Tracer("test")
@@ -134,7 +135,7 @@ func TestSpanCreation_ChildSpans(t *testing.T) {
 	otel.SetTracerProvider(tp)
 	defer func() {
 		_ = tp.Shutdown(context.Background())
-		otel.SetTracerProvider(trace.NewNoopTracerProvider())
+		otel.SetTracerProvider(noop.NewTracerProvider())
 	}()
 
 	tracer := otel.Tracer("test")
@@ -196,7 +197,7 @@ func TestShutdown_FlushesSpans(t *testing.T) {
 	// Главное — shutdown не возвращает ошибку
 
 	// Восстанавливаем nop provider
-	otel.SetTracerProvider(trace.NewNoopTracerProvider())
+	otel.SetTracerProvider(noop.NewTracerProvider())
 }
 
 // TestResourceAttributes проверяет что resource attributes устанавливаются (AC6).
@@ -269,7 +270,7 @@ func TestContextWithOTelTraceID_SpanInheritsTraceID(t *testing.T) {
 	otel.SetTracerProvider(tp)
 	defer func() {
 		_ = tp.Shutdown(context.Background())
-		otel.SetTracerProvider(trace.NewNoopTracerProvider())
+		otel.SetTracerProvider(noop.NewTracerProvider())
 	}()
 
 	traceIDHex := "abcdef1234567890abcdef1234567890"
@@ -297,7 +298,7 @@ func TestNewTracerProvider_SamplingRateFull(t *testing.T) {
 	otel.SetTracerProvider(tp)
 	defer func() {
 		_ = tp.Shutdown(context.Background())
-		otel.SetTracerProvider(trace.NewNoopTracerProvider())
+		otel.SetTracerProvider(noop.NewTracerProvider())
 	}()
 
 	tracer := otel.Tracer("test")
@@ -320,7 +321,7 @@ func TestNewTracerProvider_SamplingRateZero(t *testing.T) {
 	otel.SetTracerProvider(tp)
 	defer func() {
 		_ = tp.Shutdown(context.Background())
-		otel.SetTracerProvider(trace.NewNoopTracerProvider())
+		otel.SetTracerProvider(noop.NewTracerProvider())
 	}()
 
 	tracer := otel.Tracer("test")
@@ -343,7 +344,7 @@ func TestNewTracerProvider_SamplingRateHalf(t *testing.T) {
 	otel.SetTracerProvider(tp)
 	defer func() {
 		_ = tp.Shutdown(context.Background())
-		otel.SetTracerProvider(trace.NewNoopTracerProvider())
+		otel.SetTracerProvider(noop.NewTracerProvider())
 	}()
 
 	tracer := otel.Tracer("test")
@@ -372,7 +373,7 @@ func TestSampling_WithRemoteParentContext(t *testing.T) {
 	otel.SetTracerProvider(tp)
 	defer func() {
 		_ = tp.Shutdown(context.Background())
-		otel.SetTracerProvider(trace.NewNoopTracerProvider())
+		otel.SetTracerProvider(noop.NewTracerProvider())
 	}()
 
 	// Имитируем production flow: ContextWithOTelTraceID + создание span-а

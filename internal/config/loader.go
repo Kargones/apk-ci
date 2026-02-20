@@ -104,7 +104,7 @@ func applyInputParams(cfg *Config, inputParams *InputParams) {
 }
 
 // loadAllSubConfigs загружает все подконфигурации (app, project, secrets, db, menus и т.д.).
-func loadAllSubConfigs(l *slog.Logger, cfg *Config) {
+func loadAllSubConfigs(ctx context.Context, l *slog.Logger, cfg *Config) {
 	var err error
 
 	// Загрузка конфигурации приложения
