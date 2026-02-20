@@ -1785,8 +1785,8 @@ func TestPublishReport_EmptyResults(t *testing.T) {
 func TestReportResults_TextOutput(t *testing.T) {
 	// Убеждаемся что BR_OUTPUT_JSON не установлен
 	origJSON := os.Getenv("BR_OUTPUT_JSON")
-	defer os.Setenv("BR_OUTPUT_JSON", origJSON)
-	os.Setenv("BR_OUTPUT_JSON", "")
+	defer _ = os.Setenv("BR_OUTPUT_JSON", origJSON)
+	_ = os.Setenv("BR_OUTPUT_JSON", "")
 
 	report := &PublishReport{
 		ExtensionName: "TestExt",
@@ -1815,8 +1815,8 @@ func TestReportResults_TextOutput(t *testing.T) {
 func TestReportResults_JSONOutput(t *testing.T) {
 	// Устанавливаем BR_OUTPUT_JSON=true
 	origJSON := os.Getenv("BR_OUTPUT_JSON")
-	defer os.Setenv("BR_OUTPUT_JSON", origJSON)
-	os.Setenv("BR_OUTPUT_JSON", "true")
+	defer _ = os.Setenv("BR_OUTPUT_JSON", origJSON)
+	_ = os.Setenv("BR_OUTPUT_JSON", "true")
 
 	// Перенаправляем stdout для захвата JSON
 	oldStdout := os.Stdout
@@ -1847,7 +1847,7 @@ func TestReportResults_JSONOutput(t *testing.T) {
 	err := ReportResults(report, testLogger())
 
 	// Восстанавливаем stdout
-	w.Close()
+	_ = w.Close()
 	out, _ := io.ReadAll(r)
 	os.Stdout = oldStdout
 
@@ -1986,8 +1986,8 @@ func TestPublishResult_JSONSerialization(t *testing.T) {
 func TestReportResultsText_AllStatuses(t *testing.T) {
 	// Убеждаемся что BR_OUTPUT_JSON не установлен
 	origJSON := os.Getenv("BR_OUTPUT_JSON")
-	defer os.Setenv("BR_OUTPUT_JSON", origJSON)
-	os.Setenv("BR_OUTPUT_JSON", "")
+	defer _ = os.Setenv("BR_OUTPUT_JSON", origJSON)
+	_ = os.Setenv("BR_OUTPUT_JSON", "")
 
 	report := &PublishReport{
 		ExtensionName: "TestExt",
@@ -2025,8 +2025,8 @@ func TestReportResultsText_AllStatuses(t *testing.T) {
 // TestReportResultsText_OnlyFailed проверяет текстовый вывод отчёта только с ошибками
 func TestReportResultsText_OnlyFailed(t *testing.T) {
 	origJSON := os.Getenv("BR_OUTPUT_JSON")
-	defer os.Setenv("BR_OUTPUT_JSON", origJSON)
-	os.Setenv("BR_OUTPUT_JSON", "")
+	defer _ = os.Setenv("BR_OUTPUT_JSON", origJSON)
+	_ = os.Setenv("BR_OUTPUT_JSON", "")
 
 	report := &PublishReport{
 		ExtensionName: "TestExt",
@@ -2057,8 +2057,8 @@ func TestReportResultsText_OnlyFailed(t *testing.T) {
 // TestReportResultsText_OnlySkipped проверяет текстовый вывод отчёта только с пропущенными
 func TestReportResultsText_OnlySkipped(t *testing.T) {
 	origJSON := os.Getenv("BR_OUTPUT_JSON")
-	defer os.Setenv("BR_OUTPUT_JSON", origJSON)
-	os.Setenv("BR_OUTPUT_JSON", "")
+	defer _ = os.Setenv("BR_OUTPUT_JSON", origJSON)
+	_ = os.Setenv("BR_OUTPUT_JSON", "")
 
 	report := &PublishReport{
 		ExtensionName: "TestExt",
@@ -2429,9 +2429,9 @@ func TestExtensionPublish_SyncError(t *testing.T) {
 	}))
 	defer server.Close()
 
-	os.Setenv("GITHUB_REPOSITORY", "SourceOrg/source-repo")
-	os.Setenv("GITHUB_REF_NAME", "v1.0.0")
-	os.Setenv("BR_DRY_RUN", "")
+	_ = os.Setenv("GITHUB_REPOSITORY", "SourceOrg/source-repo")
+	_ = os.Setenv("GITHUB_REF_NAME", "v1.0.0")
+	_ = os.Setenv("BR_DRY_RUN", "")
 
 	cfg := &config.Config{
 		GiteaURL:    server.URL,
@@ -2456,9 +2456,9 @@ func TestExtensionPublish_PRCreationError(t *testing.T) {
 	origRef := os.Getenv("GITHUB_REF_NAME")
 	origDryRun := os.Getenv("BR_DRY_RUN")
 	defer func() {
-		os.Setenv("GITHUB_REPOSITORY", origRepo)
-		os.Setenv("GITHUB_REF_NAME", origRef)
-		os.Setenv("BR_DRY_RUN", origDryRun)
+		_ = os.Setenv("GITHUB_REPOSITORY", origRepo)
+		_ = os.Setenv("GITHUB_REF_NAME", origRef)
+		_ = os.Setenv("BR_DRY_RUN", origDryRun)
 	}()
 
 	// project.yaml с подпиской
@@ -2531,9 +2531,9 @@ func TestExtensionPublish_PRCreationError(t *testing.T) {
 	}))
 	defer server.Close()
 
-	os.Setenv("GITHUB_REPOSITORY", "SourceOrg/source-repo")
-	os.Setenv("GITHUB_REF_NAME", "v1.0.0")
-	os.Setenv("BR_DRY_RUN", "")
+	_ = os.Setenv("GITHUB_REPOSITORY", "SourceOrg/source-repo")
+	_ = os.Setenv("GITHUB_REF_NAME", "v1.0.0")
+	_ = os.Setenv("BR_DRY_RUN", "")
 
 	cfg := &config.Config{
 		GiteaURL:    server.URL,

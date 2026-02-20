@@ -531,7 +531,7 @@ func TestMigrateHandler_Execute_DryRunOverPlanOnly(t *testing.T) {
 	h := &MigrateHandler{}
 	err := h.Execute(context.Background(), nil)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	var buf bytes.Buffer

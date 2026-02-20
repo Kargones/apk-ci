@@ -25,7 +25,7 @@ func captureStdout(fn func()) string {
 
 	fn()
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	var buf bytes.Buffer
@@ -198,7 +198,7 @@ func TestDbRestoreHandler_Execute_AutoTimeout(t *testing.T) {
 
 	err := h.Execute(context.Background(), cfg)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	if err != nil {
@@ -256,7 +256,7 @@ func TestDbRestoreHandler_Execute_ExplicitTimeout(t *testing.T) {
 
 	err := h.Execute(context.Background(), cfg)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	if err != nil {
@@ -294,7 +294,7 @@ func TestDbRestoreHandler_Execute_JSONOutput(t *testing.T) {
 
 	err := h.Execute(context.Background(), cfg)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	var buf bytes.Buffer
@@ -343,7 +343,7 @@ func TestDbRestoreHandler_Execute_ConnectError(t *testing.T) {
 
 	err := h.Execute(context.Background(), cfg)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	if err == nil {
@@ -392,7 +392,7 @@ func TestDbRestoreHandler_Execute_MinTimeoutOnEmptyStats(t *testing.T) {
 
 	err := h.Execute(context.Background(), cfg)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	if err != nil {
@@ -443,7 +443,7 @@ func TestDbRestoreHandler_Execute_GetRestoreStatsError(t *testing.T) {
 
 	err := h.Execute(context.Background(), cfg)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	if err != nil {
@@ -498,7 +498,7 @@ func TestDbRestoreHandler_Execute_CalculatedTimeoutBelowMin(t *testing.T) {
 
 	err := h.Execute(context.Background(), cfg)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	if err != nil {
@@ -543,7 +543,7 @@ func TestDbRestoreHandler_Execute_RestoreError(t *testing.T) {
 
 	err := h.Execute(context.Background(), cfg)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	if err == nil {
@@ -833,7 +833,7 @@ func TestDbRestoreHandler_DryRun_JSONOutput(t *testing.T) {
 
 	err := h.Execute(context.Background(), cfg)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	var buf bytes.Buffer
@@ -893,7 +893,7 @@ func TestDbRestoreHandler_DryRun_NoMockCalls(t *testing.T) {
 
 	err := h.Execute(context.Background(), cfg)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	// Если mock был вызван — тест упал бы в FailOnCallMock
@@ -930,7 +930,7 @@ func TestDbRestoreHandler_DryRun_ValidationError(t *testing.T) {
 
 	err := h.Execute(context.Background(), cfg)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	// AC-6: должна быть ошибка валидации
@@ -961,7 +961,7 @@ func TestDbRestoreHandler_DryRun_PlanContainsCorrectData(t *testing.T) {
 
 	err := h.Execute(context.Background(), cfg)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	var buf bytes.Buffer
@@ -1111,7 +1111,7 @@ func TestDbRestoreHandler_PlanOnly_JSONOutput(t *testing.T) {
 
 	err := h.Execute(context.Background(), cfg)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	var buf bytes.Buffer
@@ -1234,7 +1234,7 @@ func TestDbRestoreHandler_Verbose_JSONOutput(t *testing.T) {
 
 	err := h.Execute(context.Background(), cfg)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	var buf bytes.Buffer

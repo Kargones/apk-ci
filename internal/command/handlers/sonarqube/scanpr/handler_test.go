@@ -623,12 +623,12 @@ func TestExecute_JSONOutput(t *testing.T) {
 	oldFormat := os.Getenv("BR_OUTPUT_FORMAT")
 	t.Cleanup(func() {
 		if oldFormat == "" {
-			os.Unsetenv("BR_OUTPUT_FORMAT")
+			_ = os.Unsetenv("BR_OUTPUT_FORMAT")
 		} else {
-			os.Setenv("BR_OUTPUT_FORMAT", oldFormat)
+			_ = os.Setenv("BR_OUTPUT_FORMAT", oldFormat)
 		}
 	})
-	os.Setenv("BR_OUTPUT_FORMAT", "json")
+	_ = os.Setenv("BR_OUTPUT_FORMAT", "json")
 
 	giteaClient := &giteatest.MockClient{
 		GetPRFunc: func(_ context.Context, prNumber int64) (*gitea.PRResponse, error) {

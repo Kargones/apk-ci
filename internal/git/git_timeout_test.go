@@ -19,16 +19,16 @@ func TestGitTimeoutConfiguration(t *testing.T) {
 	originalTimeout := os.Getenv("GIT_TIMEOUT")
 	defer func() {
 		if originalTimeout == "" {
-			os.Unsetenv("GIT_TIMEOUT")
+			_ = os.Unsetenv("GIT_TIMEOUT")
 		} else {
-			os.Setenv("GIT_TIMEOUT", originalTimeout)
+			_ = os.Setenv("GIT_TIMEOUT", originalTimeout)
 		}
 	}()
 
 	// Тест 1: Проверяем загрузку увеличенного таймаута (10 минут)
 	t.Run("increased_timeout_600s", func(t *testing.T) {
 		// Устанавливаем переменную окружения как в main-test.yaml
-		os.Setenv("GIT_TIMEOUT", "600s")
+		_ = os.Setenv("GIT_TIMEOUT", "600s")
 
 		// Создаем конфигурацию
 		gitConfig := &GitConfig{}
@@ -49,7 +49,7 @@ func TestGitTimeoutConfiguration(t *testing.T) {
 	// Тест 2: Проверяем значение по умолчанию
 	t.Run("default_timeout_30s", func(t *testing.T) {
 		// Убираем переменную окружения
-		os.Unsetenv("GIT_TIMEOUT")
+		_ = os.Unsetenv("GIT_TIMEOUT")
 
 		// Создаем конфигурацию по умолчанию
 		gitConfig := &GitConfig{}

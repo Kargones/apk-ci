@@ -312,8 +312,8 @@ func TestExecute_BaseMetricsError(t *testing.T) {
 func TestExecute_JSONOutput(t *testing.T) {
 	// Устанавливаем формат JSON
 	originalFormat := os.Getenv("BR_OUTPUT_FORMAT")
-	os.Setenv("BR_OUTPUT_FORMAT", "json")
-	defer os.Setenv("BR_OUTPUT_FORMAT", originalFormat)
+	_ = os.Setenv("BR_OUTPUT_FORMAT", "json")
+	defer _ = os.Setenv("BR_OUTPUT_FORMAT", originalFormat)
 
 	sqClient := &sonarqubetest.MockClient{
 		GetProjectFunc: func(_ context.Context, key string) (*sonarqube.Project, error) {

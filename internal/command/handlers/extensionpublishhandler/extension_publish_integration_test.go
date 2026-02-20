@@ -45,8 +45,8 @@ func TestIntegration_ExtensionPublish_RealGitea(t *testing.T) {
 
 	// Устанавливаем dry-run режим для безопасного тестирования
 	origDryRun := os.Getenv("BR_DRY_RUN")
-	defer os.Setenv("BR_DRY_RUN", origDryRun)
-	os.Setenv("BR_DRY_RUN", "true")
+	defer _ = os.Setenv("BR_DRY_RUN", origDryRun)
+	_ = os.Setenv("BR_DRY_RUN", "true")
 
 	cfg := &config.Config{
 		GiteaURL:    giteaURL,
@@ -185,8 +185,8 @@ func TestIntegration_PublishReport_Output(t *testing.T) {
 
 	// Тест текстового вывода
 	origJSON := os.Getenv("BR_OUTPUT_JSON")
-	defer os.Setenv("BR_OUTPUT_JSON", origJSON)
-	os.Setenv("BR_OUTPUT_JSON", "")
+	defer _ = os.Setenv("BR_OUTPUT_JSON", origJSON)
+	_ = os.Setenv("BR_OUTPUT_JSON", "")
 
 	err := ReportResults(report, l)
 	if err != nil {
@@ -194,7 +194,7 @@ func TestIntegration_PublishReport_Output(t *testing.T) {
 	}
 
 	// Тест JSON вывода
-	os.Setenv("BR_OUTPUT_JSON", "1")
+	_ = os.Setenv("BR_OUTPUT_JSON", "1")
 	err = ReportResults(report, l)
 	if err != nil {
 		t.Errorf("Ошибка JSON отчёта: %v", err)

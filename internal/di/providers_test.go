@@ -23,9 +23,9 @@ func withEnvVar(t *testing.T, key, value string) func() {
 	origValue, existed := os.LookupEnv(key)
 
 	if value == "" {
-		require.NoError(t, os.Unsetenv(key))
+		require.NoError(t, _ = os.Unsetenv(key))
 	} else {
-		require.NoError(t, os.Setenv(key, value))
+		require.NoError(t, _ = os.Setenv(key, value))
 	}
 
 	return func() {

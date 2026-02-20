@@ -69,14 +69,14 @@ func TestIsDryRun_Unset(t *testing.T) {
 	oldValue, wasSet := os.LookupEnv("BR_DRY_RUN")
 
 	// Удаляем переменную
-	os.Unsetenv("BR_DRY_RUN")
+	_ = os.Unsetenv("BR_DRY_RUN")
 
 	// Восстанавливаем после теста
 	t.Cleanup(func() {
 		if wasSet {
-			os.Setenv("BR_DRY_RUN", oldValue)
+			_ = os.Setenv("BR_DRY_RUN", oldValue)
 		} else {
-			os.Unsetenv("BR_DRY_RUN")
+			_ = os.Unsetenv("BR_DRY_RUN")
 		}
 	})
 

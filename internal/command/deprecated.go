@@ -83,7 +83,7 @@ func (b *DeprecatedBridge) Execute(ctx context.Context, cfg *config.Config) erro
 		return err
 	}
 	// Warning в stderr (не stdout!) чтобы не нарушить JSON output
-	fmt.Fprintf(os.Stderr, "WARNING: command '%s' is deprecated, use '%s' instead\n",
+	fmt.Fprintf(os.Stderr, "WARNING: command '%s' is deprecated, use '%s' instead\n", //nolint:errcheck // writing to stderr
 		b.deprecated, b.newName)
 	return b.actual.Execute(ctx, cfg)
 }

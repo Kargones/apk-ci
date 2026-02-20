@@ -59,7 +59,7 @@ func EffectiveMode() string {
 // Review #32: всегда возвращает nil — ошибка записи в stdout не должна приводить
 // к ненулевому exit code для информационного сообщения.
 func WritePlanOnlyUnsupported(w io.Writer, command string) error {
-	fmt.Fprintf(w, "Команда %s не поддерживает отображение плана операций\n", command)
+	fmt.Fprintf(w, "Команда %s не поддерживает отображение плана операций\n", command) //nolint:errcheck // best-effort output
 	return nil
 }
 

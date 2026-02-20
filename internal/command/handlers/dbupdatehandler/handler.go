@@ -217,7 +217,7 @@ func (h *DbUpdateHandler) handleDbPreviewModes(ec *dbUpdateContext, cfg *config.
 			if err := plan.WritePlanText(os.Stdout); err != nil {
 				ec.log.Warn("Не удалось вывести план операций", slog.String("error", err.Error()))
 			}
-			fmt.Fprintln(os.Stdout)
+			fmt.Fprintln(os.Stdout) //nolint:errcheck // writing to stdout
 		}
 		h.verbosePlan = plan
 	}

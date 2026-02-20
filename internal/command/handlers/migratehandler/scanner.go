@@ -240,23 +240,23 @@ func applyReplacements(path string, replacements []Replacement) error {
 	tmpPath := tmpFile.Name()
 
 	if _, writeErr := tmpFile.WriteString(newContent); writeErr != nil {
-		tmpFile.Close()
-		os.Remove(tmpPath)
+		_ = tmpFile.Close()
+		_ = os.Remove(tmpPath)
 		return fmt.Errorf("ошибка записи временного файла: %w", writeErr)
 	}
 
 	if closeErr := tmpFile.Close(); closeErr != nil {
-		os.Remove(tmpPath)
+		_ = os.Remove(tmpPath)
 		return fmt.Errorf("ошибка закрытия временного файла: %w", closeErr)
 	}
 
 	if chmodErr := os.Chmod(tmpPath, info.Mode()); chmodErr != nil {
-		os.Remove(tmpPath)
+		_ = os.Remove(tmpPath)
 		return fmt.Errorf("ошибка установки прав на временный файл: %w", chmodErr)
 	}
 
 	if renameErr := os.Rename(tmpPath, path); renameErr != nil {
-		os.Remove(tmpPath)
+		_ = os.Remove(tmpPath)
 		return fmt.Errorf("ошибка переименования временного файла: %w", renameErr)
 	}
 

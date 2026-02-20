@@ -152,8 +152,8 @@ func TestExecute_NoChanges(t *testing.T) {
 	}
 
 	// Установим BR_OUTPUT_FORMAT=json для проверки JSON вывода
-	os.Setenv("BR_OUTPUT_FORMAT", "json")
-	defer os.Unsetenv("BR_OUTPUT_FORMAT")
+	_ = os.Setenv("BR_OUTPUT_FORMAT", "json")
+	defer _ = os.Unsetenv("BR_OUTPUT_FORMAT")
 
 	captured := captureStdout(t, func() {
 		err := h.Execute(context.Background(), cfg)
@@ -213,8 +213,8 @@ func TestExecute_ForceUpdate(t *testing.T) {
 		ProjectConfig: testProjectConfig(false),
 	}
 
-	os.Setenv("BR_OUTPUT_FORMAT", "json")
-	defer os.Unsetenv("BR_OUTPUT_FORMAT")
+	_ = os.Setenv("BR_OUTPUT_FORMAT", "json")
+	defer _ = os.Unsetenv("BR_OUTPUT_FORMAT")
 
 	captured := captureStdout(t, func() {
 		err := h.Execute(context.Background(), cfg)
@@ -267,8 +267,8 @@ func TestExecute_AddFiles(t *testing.T) {
 		ProjectConfig: testProjectConfig(false),
 	}
 
-	os.Setenv("BR_OUTPUT_FORMAT", "json")
-	defer os.Unsetenv("BR_OUTPUT_FORMAT")
+	_ = os.Setenv("BR_OUTPUT_FORMAT", "json")
+	defer _ = os.Unsetenv("BR_OUTPUT_FORMAT")
 
 	captured := captureStdout(t, func() {
 		_ = h.Execute(context.Background(), cfg)
@@ -336,8 +336,8 @@ func TestExecute_UpdateFiles(t *testing.T) {
 		ProjectConfig: testProjectConfig(false),
 	}
 
-	os.Setenv("BR_OUTPUT_FORMAT", "json")
-	defer os.Unsetenv("BR_OUTPUT_FORMAT")
+	_ = os.Setenv("BR_OUTPUT_FORMAT", "json")
+	defer _ = os.Unsetenv("BR_OUTPUT_FORMAT")
 
 	captured := captureStdout(t, func() {
 		_ = h.Execute(context.Background(), cfg)
@@ -409,8 +409,8 @@ func TestExecute_DeleteFiles(t *testing.T) {
 		ProjectConfig: testProjectConfig(false),
 	}
 
-	os.Setenv("BR_OUTPUT_FORMAT", "json")
-	defer os.Unsetenv("BR_OUTPUT_FORMAT")
+	_ = os.Setenv("BR_OUTPUT_FORMAT", "json")
+	defer _ = os.Unsetenv("BR_OUTPUT_FORMAT")
 
 	captured := captureStdout(t, func() {
 		_ = h.Execute(context.Background(), cfg)
@@ -476,8 +476,8 @@ func TestExecute_MixedOperations(t *testing.T) {
 		ProjectConfig: testProjectConfig(false),
 	}
 
-	os.Setenv("BR_OUTPUT_FORMAT", "json")
-	defer os.Unsetenv("BR_OUTPUT_FORMAT")
+	_ = os.Setenv("BR_OUTPUT_FORMAT", "json")
+	defer _ = os.Unsetenv("BR_OUTPUT_FORMAT")
 
 	captured := captureStdout(t, func() {
 		_ = h.Execute(context.Background(), cfg)
@@ -531,8 +531,8 @@ func TestExecute_NoDatabases(t *testing.T) {
 		ProjectConfig: &config.ProjectConfig{}, // Пустой ProjectConfig
 	}
 
-	os.Setenv("BR_OUTPUT_FORMAT", "json")
-	defer os.Unsetenv("BR_OUTPUT_FORMAT")
+	_ = os.Setenv("BR_OUTPUT_FORMAT", "json")
+	defer _ = os.Unsetenv("BR_OUTPUT_FORMAT")
 
 	captured := captureStdout(t, func() {
 		err := h.Execute(context.Background(), cfg)
@@ -584,8 +584,8 @@ func TestExecute_JSONOutput(t *testing.T) {
 		ProjectConfig: testProjectConfig(false),
 	}
 
-	os.Setenv("BR_OUTPUT_FORMAT", "json")
-	defer os.Unsetenv("BR_OUTPUT_FORMAT")
+	_ = os.Setenv("BR_OUTPUT_FORMAT", "json")
+	defer _ = os.Unsetenv("BR_OUTPUT_FORMAT")
 
 	captured := captureStdout(t, func() {
 		_ = h.Execute(context.Background(), cfg)
@@ -672,8 +672,8 @@ func TestExecute_StateChangedFalse(t *testing.T) {
 		ProjectConfig: testProjectConfig(false),
 	}
 
-	os.Setenv("BR_OUTPUT_FORMAT", "json")
-	defer os.Unsetenv("BR_OUTPUT_FORMAT")
+	_ = os.Setenv("BR_OUTPUT_FORMAT", "json")
+	defer _ = os.Unsetenv("BR_OUTPUT_FORMAT")
 
 	captured := captureStdout(t, func() {
 		_ = h.Execute(context.Background(), cfg)
@@ -724,7 +724,7 @@ func TestTextOutput(t *testing.T) {
 	}
 
 	// Текстовый формат (по умолчанию)
-	os.Unsetenv("BR_OUTPUT_FORMAT")
+	_ = os.Unsetenv("BR_OUTPUT_FORMAT")
 
 	captured := captureStdout(t, func() {
 		_ = h.Execute(context.Background(), cfg)
@@ -858,8 +858,8 @@ func TestExecute_GetLatestCommitError(t *testing.T) {
 		ProjectConfig: testProjectConfig(false),
 	}
 
-	os.Setenv("BR_OUTPUT_FORMAT", "json")
-	defer os.Unsetenv("BR_OUTPUT_FORMAT")
+	_ = os.Setenv("BR_OUTPUT_FORMAT", "json")
+	defer _ = os.Unsetenv("BR_OUTPUT_FORMAT")
 
 	captured := captureStdout(t, func() {
 		err := h.Execute(context.Background(), cfg)
@@ -902,8 +902,8 @@ func TestExecute_SyncFilesError(t *testing.T) {
 		ProjectConfig: testProjectConfig(false),
 	}
 
-	os.Setenv("BR_OUTPUT_FORMAT", "json")
-	defer os.Unsetenv("BR_OUTPUT_FORMAT")
+	_ = os.Setenv("BR_OUTPUT_FORMAT", "json")
+	defer _ = os.Unsetenv("BR_OUTPUT_FORMAT")
 
 	captured := captureStdout(t, func() {
 		err := h.Execute(context.Background(), cfg)
@@ -957,8 +957,8 @@ func TestExecute_EmptyMenuMain(t *testing.T) {
 		ProjectConfig: testProjectConfig(false),
 	}
 
-	os.Setenv("BR_OUTPUT_FORMAT", "json")
-	defer os.Unsetenv("BR_OUTPUT_FORMAT")
+	_ = os.Setenv("BR_OUTPUT_FORMAT", "json")
+	defer _ = os.Unsetenv("BR_OUTPUT_FORMAT")
 
 	captured := captureStdout(t, func() {
 		err := h.Execute(context.Background(), cfg)
@@ -986,8 +986,8 @@ func TestExecute_EmptyMenuMain(t *testing.T) {
 func TestWriteError_JSONFormat(t *testing.T) {
 	h := &ActionMenuHandler{}
 
-	os.Setenv("BR_OUTPUT_FORMAT", "json")
-	defer os.Unsetenv("BR_OUTPUT_FORMAT")
+	_ = os.Setenv("BR_OUTPUT_FORMAT", "json")
+	defer _ = os.Unsetenv("BR_OUTPUT_FORMAT")
 
 	captured := captureStdout(t, func() {
 		err := h.writeError("json", "test-trace-id", time.Now(), "TEST.ERROR", "Test error message")

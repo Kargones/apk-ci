@@ -178,7 +178,7 @@ func TestDeprecatedAuditHandler_PlanOnly(t *testing.T) {
 	h := &DeprecatedAuditHandler{}
 	err := h.Execute(t.Context(), nil)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	var buf bytes.Buffer
@@ -252,7 +252,7 @@ func run() int {
 	h := &DeprecatedAuditHandler{}
 	err := h.Execute(t.Context(), nil)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	var buf bytes.Buffer
@@ -299,7 +299,7 @@ func run() int {
 	h := &DeprecatedAuditHandler{}
 	err := h.Execute(t.Context(), nil)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	var buf bytes.Buffer
@@ -366,7 +366,7 @@ func TestDeprecatedAuditHandler_DryRunOverPlanOnly(t *testing.T) {
 	h := &DeprecatedAuditHandler{}
 	err := h.Execute(t.Context(), nil)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	var buf bytes.Buffer

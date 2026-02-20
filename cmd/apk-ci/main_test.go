@@ -19,24 +19,24 @@ import (
 // setupMinimalValidEnv sets up a minimal valid environment for testing
 func setupMinimalValidEnv() {
 	// Set required basic environment variables
-	os.Setenv("INPUT_ACTOR", "test-actor")
-	os.Setenv("INPUT_COMMAND", "convert")
-	os.Setenv("INPUT_LOGLEVEL", "Error")                   // Use Error level to reduce noise
-	os.Setenv("INPUT_GITEAURL", "https://localhost")       // Valid URL to pass validation
-	os.Setenv("INPUT_REPOSITORY", "test/repo")             // Valid repo format
-	os.Setenv("INPUT_ACCESSTOKEN", "test-token")           // Valid token to pass validation
-	os.Setenv("INPUT_CONFIGSYSTEM", "")
-	os.Setenv("INPUT_CONFIGPROJECT", "")
-	os.Setenv("INPUT_CONFIGSECRET", "")
-	os.Setenv("INPUT_CONFIGDBDATA", "")
-	os.Setenv("INPUT_DBNAME", "test-db")
-	os.Setenv("INPUT_TERMINATESESSIONS", "false")
+	_ = os.Setenv("INPUT_ACTOR", "test-actor")
+	_ = os.Setenv("INPUT_COMMAND", "convert")
+	_ = os.Setenv("INPUT_LOGLEVEL", "Error")                   // Use Error level to reduce noise
+	_ = os.Setenv("INPUT_GITEAURL", "https://localhost")       // Valid URL to pass validation
+	_ = os.Setenv("INPUT_REPOSITORY", "test/repo")             // Valid repo format
+	_ = os.Setenv("INPUT_ACCESSTOKEN", "test-token")           // Valid token to pass validation
+	_ = os.Setenv("INPUT_CONFIGSYSTEM", "")
+	_ = os.Setenv("INPUT_CONFIGPROJECT", "")
+	_ = os.Setenv("INPUT_CONFIGSECRET", "")
+	_ = os.Setenv("INPUT_CONFIGDBDATA", "")
+	_ = os.Setenv("INPUT_DBNAME", "test-db")
+	_ = os.Setenv("INPUT_TERMINATESESSIONS", "false")
 
 	// Set working directories
-	os.Setenv("RepPath", "/tmp/test/rep")
-	os.Setenv("WorkDir", "/tmp/test")
-	os.Setenv("TmpDir", "/tmp")
-	os.Setenv("ConfigName", "config.json")
+	_ = os.Setenv("RepPath", "/tmp/test/rep")
+	_ = os.Setenv("WorkDir", "/tmp/test")
+	_ = os.Setenv("TmpDir", "/tmp")
+	_ = os.Setenv("ConfigName", "config.json")
 }
 
 // clearTestEnv clears all test environment variables
@@ -51,7 +51,7 @@ func clearTestEnv() {
 	}
 
 	for _, envVar := range envVars {
-		os.Unsetenv(envVar)
+		_ = os.Unsetenv(envVar)
 	}
 }
 
@@ -68,9 +68,9 @@ func saveEnvironment(envVars []string) map[string]string {
 func restoreEnvironment(saved map[string]string) {
 	for envVar, value := range saved {
 		if value == "" {
-			os.Unsetenv(envVar)
+			_ = os.Unsetenv(envVar)
 		} else {
-			os.Setenv(envVar, value)
+			_ = os.Setenv(envVar, value)
 		}
 	}
 }
@@ -122,31 +122,31 @@ func TestConfigLoadingWithGiteaActionParams(t *testing.T) {
 	defer restoreEnvironment(originalEnvs)
 
 	// Set up environment variables as in Gitea Action
-	os.Setenv("INPUT_GITEAURL", "https://regdv.apkholding.ru")
-	os.Setenv("INPUT_REPOSITORY", "test/toir-100")
-	os.Setenv("INPUT_ACCESSTOKEN", "test-token")
-	os.Setenv("INPUT_COMMAND", "convert")
-	os.Setenv("INPUT_LOGLEVEL", "Debug")
-	os.Setenv("INPUT_ISSUENUMBER", "1")
-	os.Setenv("INPUT_ACTOR", "test-actor")
-	os.Setenv("INPUT_DBNAME", "V8_DEV_TEST")
-	os.Setenv("INPUT_TERMINATESESSIONS", "false")
+	_ = os.Setenv("INPUT_GITEAURL", "https://regdv.apkholding.ru")
+	_ = os.Setenv("INPUT_REPOSITORY", "test/toir-100")
+	_ = os.Setenv("INPUT_ACCESSTOKEN", "test-token")
+	_ = os.Setenv("INPUT_COMMAND", "convert")
+	_ = os.Setenv("INPUT_LOGLEVEL", "Debug")
+	_ = os.Setenv("INPUT_ISSUENUMBER", "1")
+	_ = os.Setenv("INPUT_ACTOR", "test-actor")
+	_ = os.Setenv("INPUT_DBNAME", "V8_DEV_TEST")
+	_ = os.Setenv("INPUT_TERMINATESESSIONS", "false")
 
 	// Set apk-ci environment variables
-	os.Setenv("BR_ACTOR", "test-actor")
-	os.Setenv("BR_ENV", "dev")
-	os.Setenv("BR_COMMAND", "convert")
-	os.Setenv("BR_LOGLEVEL", "Debug")
-	os.Setenv("BR_ISSUE_NUMBER", "1")
-	os.Setenv("BR_INFOBASE_NAME", "V8_DEV_TEST")
-	os.Setenv("BR_ACCESS_TOKEN", "test-token")
-	os.Setenv("BR_TERMINATE_SESSIONS", "false")
+	_ = os.Setenv("BR_ACTOR", "test-actor")
+	_ = os.Setenv("BR_ENV", "dev")
+	_ = os.Setenv("BR_COMMAND", "convert")
+	_ = os.Setenv("BR_LOGLEVEL", "Debug")
+	_ = os.Setenv("BR_ISSUE_NUMBER", "1")
+	_ = os.Setenv("BR_INFOBASE_NAME", "V8_DEV_TEST")
+	_ = os.Setenv("BR_ACCESS_TOKEN", "test-token")
+	_ = os.Setenv("BR_TERMINATE_SESSIONS", "false")
 
 	// Set minimal paths for testing
-	os.Setenv("RepPath", "/tmp/test/rep")
-	os.Setenv("WorkDir", "/tmp/test")
-	os.Setenv("TmpDir", "/tmp")
-	os.Setenv("ConfigName", "config.json")
+	_ = os.Setenv("RepPath", "/tmp/test/rep")
+	_ = os.Setenv("WorkDir", "/tmp/test")
+	_ = os.Setenv("TmpDir", "/tmp")
+	_ = os.Setenv("ConfigName", "config.json")
 
 	// Verify that variables are set correctly
 	if os.Getenv("BR_COMMAND") != "convert" {
@@ -195,7 +195,7 @@ func TestConfig_MustLoad(t *testing.T) {
 			setupEnv: func() {
 				clearTestEnv()
 				setupMinimalValidEnv()
-				os.Unsetenv("INPUT_ACTOR")
+				_ = os.Unsetenv("INPUT_ACTOR")
 			},
 			expectError: true,
 			description: "should fail when actor is missing",
@@ -205,7 +205,7 @@ func TestConfig_MustLoad(t *testing.T) {
 			setupEnv: func() {
 				clearTestEnv()
 				setupMinimalValidEnv()
-				os.Unsetenv("INPUT_COMMAND")
+				_ = os.Unsetenv("INPUT_COMMAND")
 			},
 			expectError: true,
 			description: "should fail when command is missing",
@@ -328,7 +328,7 @@ env-vars:
 			if _, err := tmpFile.WriteString(tt.yamlContent); err != nil {
 				t.Fatalf("Failed to write YAML content: %v", err)
 			}
-			tmpFile.Close()
+			_ = tmpFile.Close()
 
 			// Загружаем конфигурацию из YAML и устанавливаем переменные окружения
 			err = loadYamlConfigAndSetEnv(tmpFile.Name())
@@ -468,10 +468,10 @@ func TestMain_ServiceModeValidation(t *testing.T) {
 		t.Run(fmt.Sprintf("service_mode_%s_validation", cmd), func(t *testing.T) {
 			clearTestEnv()
 			setupMinimalValidEnv()
-			os.Setenv("INPUT_COMMAND", cmd)
+			_ = os.Setenv("INPUT_COMMAND", cmd)
 
 			// Test with infobase name
-			os.Setenv("INPUT_DBNAME", "test-infobase")
+			_ = os.Setenv("INPUT_DBNAME", "test-infobase")
 
 			// Verify environment variables are set correctly without loading full config
 			if os.Getenv("INPUT_COMMAND") != cmd {
@@ -482,7 +482,7 @@ func TestMain_ServiceModeValidation(t *testing.T) {
 			}
 
 			// Test without infobase name
-			os.Unsetenv("INPUT_DBNAME")
+			_ = os.Unsetenv("INPUT_DBNAME")
 			if os.Getenv("INPUT_DBNAME") != "" {
 				t.Errorf("Expected INPUT_DBNAME to be unset")
 			}
@@ -515,7 +515,7 @@ func TestMain_EnvironmentVariableHandling(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			clearTestEnv()
 			setupMinimalValidEnv()
-			os.Setenv(tt.envVar, tt.value)
+			_ = os.Setenv(tt.envVar, tt.value)
 
 			// Verify the environment variable is set
 			actual := os.Getenv(tt.envVar)
@@ -539,7 +539,7 @@ func TestMain_LoggerInitialization(t *testing.T) {
 		t.Run(fmt.Sprintf("log_level_%s", level), func(t *testing.T) {
 			clearTestEnv()
 			setupMinimalValidEnv()
-			os.Setenv("INPUT_LOGLEVEL", level)
+			_ = os.Setenv("INPUT_LOGLEVEL", level)
 
 			// Create a logger with the specified level
 			var buf bytes.Buffer
@@ -709,14 +709,14 @@ func TestMain_WithGiteaActionParams(t *testing.T) {
 
 			// Set test environment
 			for key, value := range tt.envs {
-				os.Setenv(key, value)
+				_ = os.Setenv(key, value)
 			}
 
 			// Set additional required env vars
-			os.Setenv("RepPath", "/tmp/test/rep")
-			os.Setenv("WorkDir", "/tmp/test")
-			os.Setenv("TmpDir", "/tmp")
-			os.Setenv("ConfigName", "config.json")
+			_ = os.Setenv("RepPath", "/tmp/test/rep")
+			_ = os.Setenv("WorkDir", "/tmp/test")
+			_ = os.Setenv("TmpDir", "/tmp")
+			_ = os.Setenv("ConfigName", "config.json")
 
 			// Verify key variables are set
 			if os.Getenv("INPUT_COMMAND") == "" {
@@ -757,8 +757,8 @@ func TestMain_Integration(t *testing.T) {
 	// Test integration scenario with full environment setup
 	clearTestEnv()
 	setupMinimalValidEnv()
-	os.Setenv("INPUT_COMMAND", "convert")
-	os.Setenv("INPUT_LOGLEVEL", "Error") // Use Error level to reduce log noise
+	_ = os.Setenv("INPUT_COMMAND", "convert")
+	_ = os.Setenv("INPUT_LOGLEVEL", "Error") // Use Error level to reduce log noise
 
 	// Test that the configuration can be loaded and basic operations work
 	cfg, err := config.MustLoad()
@@ -852,7 +852,7 @@ func TestMain_ErrorHandling(t *testing.T) {
 			name: "only_actor_set",
 			setupEnv: func() {
 				clearTestEnv()
-				os.Setenv("INPUT_ACTOR", "test-actor")
+				_ = os.Setenv("INPUT_ACTOR", "test-actor")
 			},
 			expectError: true,
 		},
@@ -861,7 +861,7 @@ func TestMain_ErrorHandling(t *testing.T) {
 			setupEnv: func() {
 				clearTestEnv()
 				setupMinimalValidEnv()
-				os.Setenv("INPUT_COMMAND", "invalid-command")
+				_ = os.Setenv("INPUT_COMMAND", "invalid-command")
 			},
 			expectError: true, // In test environment, config loading will fail due to missing external services
 		},
@@ -986,7 +986,7 @@ func TestMain_DefaultCaseHandling(t *testing.T) {
 
 	clearTestEnv()
 	setupMinimalValidEnv()
-	os.Setenv("INPUT_COMMAND", "unknown-command")
+	_ = os.Setenv("INPUT_COMMAND", "unknown-command")
 
 	// We can't actually test the main function execution without causing os.Exit
 	// Instead, test that environment variables are set correctly
@@ -1090,10 +1090,10 @@ func TestMain_ServiceModeInfobaseValidation(t *testing.T) {
 		t.Run(fmt.Sprintf("service_mode_validation_%s", cmd), func(t *testing.T) {
 			clearTestEnv()
 			setupMinimalValidEnv()
-			os.Setenv("INPUT_COMMAND", cmd)
+			_ = os.Setenv("INPUT_COMMAND", cmd)
 
 			// Test with valid infobase name
-			os.Setenv("INPUT_DBNAME", "test-infobase")
+			_ = os.Setenv("INPUT_DBNAME", "test-infobase")
 
 			// Verify environment variables are set correctly without loading full config
 			if os.Getenv("INPUT_COMMAND") != cmd {
@@ -1104,7 +1104,7 @@ func TestMain_ServiceModeInfobaseValidation(t *testing.T) {
 			}
 
 			// Test without infobase name
-			os.Unsetenv("INPUT_DBNAME")
+			_ = os.Unsetenv("INPUT_DBNAME")
 			if os.Getenv("INPUT_DBNAME") != "" {
 				t.Errorf("Expected INPUT_DBNAME to be unset, got %s", os.Getenv("INPUT_DBNAME"))
 			}

@@ -216,8 +216,8 @@ func TestExecute_GiteaTeamsError(t *testing.T) {
 func TestExecute_JSONOutput(t *testing.T) {
 	// Устанавливаем формат JSON
 	originalFormat := os.Getenv("BR_OUTPUT_FORMAT")
-	os.Setenv("BR_OUTPUT_FORMAT", "json")
-	defer os.Setenv("BR_OUTPUT_FORMAT", originalFormat)
+	_ = os.Setenv("BR_OUTPUT_FORMAT", "json")
+	defer _ = os.Setenv("BR_OUTPUT_FORMAT", originalFormat)
 
 	sqClient := &sonarqubetest.MockClient{
 		GetProjectFunc: func(_ context.Context, key string) (*sonarqube.Project, error) {
@@ -516,8 +516,8 @@ func TestHandlerDescription(t *testing.T) {
 func TestExecute_JSONErrorOutput(t *testing.T) {
 	// Устанавливаем формат JSON
 	originalFormat := os.Getenv("BR_OUTPUT_FORMAT")
-	os.Setenv("BR_OUTPUT_FORMAT", "json")
-	defer os.Setenv("BR_OUTPUT_FORMAT", originalFormat)
+	_ = os.Setenv("BR_OUTPUT_FORMAT", "json")
+	defer _ = os.Setenv("BR_OUTPUT_FORMAT", originalFormat)
 
 	sqClient := &sonarqubetest.MockClient{
 		GetProjectFunc: func(_ context.Context, _ string) (*sonarqube.Project, error) {
