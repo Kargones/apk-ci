@@ -45,7 +45,7 @@ func TestIntegration_ExtensionPublish_RealGitea(t *testing.T) {
 
 	// Устанавливаем dry-run режим для безопасного тестирования
 	origDryRun := os.Getenv("BR_DRY_RUN")
-	defer _ = os.Setenv("BR_DRY_RUN", origDryRun)
+	defer os.Setenv("BR_DRY_RUN", origDryRun) //nolint:errcheck
 	_ = os.Setenv("BR_DRY_RUN", "true")
 
 	cfg := &config.Config{
@@ -187,7 +187,7 @@ func TestIntegration_PublishReport_Output(t *testing.T) {
 
 	// Тест текстового вывода
 	origJSON := os.Getenv("BR_OUTPUT_JSON")
-	defer _ = os.Setenv("BR_OUTPUT_JSON", origJSON)
+	defer os.Setenv("BR_OUTPUT_JSON", origJSON) //nolint:errcheck
 	_ = os.Setenv("BR_OUTPUT_JSON", "")
 
 	err := ReportResults(report, l)

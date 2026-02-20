@@ -79,6 +79,7 @@ func restoreEnvironment(saved map[string]string) {
 // TestMain_ContextCreation tests that context is properly created
 func TestMain_ContextCreation(t *testing.T) {
 	// This test verifies that the context creation logic works
+	ctx := context.Background()
 	if ctx == nil {
 		t.Error("Expected context to be created, got nil")
 	}

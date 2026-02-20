@@ -2,6 +2,7 @@
 package extensionpublishhandler
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -1451,7 +1452,7 @@ func TestExtensionPublish_MissingEnvVars(t *testing.T) {
 			l := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 			// Вызываем функцию
-			err := ExtensionPublish(nil, l, tt.cfg)
+			err := ExtensionPublish(context.Background(), l, tt.cfg)
 
 			// Проверяем ошибку
 			if err == nil {
@@ -1501,7 +1502,7 @@ func TestExtensionPublish_MissingConfig(t *testing.T) {
 			l := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 			// Вызываем функцию
-			err := ExtensionPublish(nil, l, tt.cfg)
+			err := ExtensionPublish(context.Background(), l, tt.cfg)
 
 			// Проверяем ошибку
 			if err == nil {
@@ -1805,7 +1806,7 @@ func TestPublishReport_EmptyResults(t *testing.T) {
 func TestReportResults_TextOutput(t *testing.T) {
 	// Убеждаемся что BR_OUTPUT_JSON не установлен
 	origJSON := os.Getenv("BR_OUTPUT_JSON")
-	defer _ = os.Setenv("BR_OUTPUT_JSON", origJSON)
+	defer os.Setenv("BR_OUTPUT_JSON", origJSON) //nolint:errcheck
 	_ = os.Setenv("BR_OUTPUT_JSON", "")
 
 	report := &PublishReport{
@@ -1835,7 +1836,7 @@ func TestReportResults_TextOutput(t *testing.T) {
 func TestReportResults_JSONOutput(t *testing.T) {
 	// Устанавливаем BR_OUTPUT_JSON=true
 	origJSON := os.Getenv("BR_OUTPUT_JSON")
-	defer _ = os.Setenv("BR_OUTPUT_JSON", origJSON)
+	defer os.Setenv("BR_OUTPUT_JSON", origJSON) //nolint:errcheck
 	_ = os.Setenv("BR_OUTPUT_JSON", "true")
 
 	// Перенаправляем stdout для захвата JSON
@@ -2006,7 +2007,7 @@ func TestPublishResult_JSONSerialization(t *testing.T) {
 func TestReportResultsText_AllStatuses(t *testing.T) {
 	// Убеждаемся что BR_OUTPUT_JSON не установлен
 	origJSON := os.Getenv("BR_OUTPUT_JSON")
-	defer _ = os.Setenv("BR_OUTPUT_JSON", origJSON)
+	defer os.Setenv("BR_OUTPUT_JSON", origJSON) //nolint:errcheck
 	_ = os.Setenv("BR_OUTPUT_JSON", "")
 
 	report := &PublishReport{
@@ -2045,7 +2046,7 @@ func TestReportResultsText_AllStatuses(t *testing.T) {
 // TestReportResultsText_OnlyFailed проверяет текстовый вывод отчёта только с ошибками
 func TestReportResultsText_OnlyFailed(t *testing.T) {
 	origJSON := os.Getenv("BR_OUTPUT_JSON")
-	defer _ = os.Setenv("BR_OUTPUT_JSON", origJSON)
+	defer os.Setenv("BR_OUTPUT_JSON", origJSON) //nolint:errcheck
 	_ = os.Setenv("BR_OUTPUT_JSON", "")
 
 	report := &PublishReport{
@@ -2077,7 +2078,7 @@ func TestReportResultsText_OnlyFailed(t *testing.T) {
 // TestReportResultsText_OnlySkipped проверяет текстовый вывод отчёта только с пропущенными
 func TestReportResultsText_OnlySkipped(t *testing.T) {
 	origJSON := os.Getenv("BR_OUTPUT_JSON")
-	defer _ = os.Setenv("BR_OUTPUT_JSON", origJSON)
+	defer os.Setenv("BR_OUTPUT_JSON", origJSON) //nolint:errcheck
 	_ = os.Setenv("BR_OUTPUT_JSON", "")
 
 	report := &PublishReport{
@@ -2160,7 +2161,7 @@ func TestExtensionPublish_DryRunMode(t *testing.T) {
 	}
 
 	// Вызываем функцию
-	err := ExtensionPublish(nil, testLogger(), cfg)
+	err := ExtensionPublish(context.Background(), testLogger(), cfg)
 
 	// В dry-run режиме не должно быть ошибки
 	if err != nil {
@@ -2206,7 +2207,7 @@ func TestExtensionPublish_NoSubscribers(t *testing.T) {
 		ReleaseTag:  "v1.0.0",
 	}
 
-	err := ExtensionPublish(nil, testLogger(), cfg)
+	err := ExtensionPublish(context.Background(), testLogger(), cfg)
 
 	// Без подписчиков не должно быть ошибки
 	if err != nil {
@@ -2231,7 +2232,7 @@ func TestExtensionPublish_ReleaseNotFound(t *testing.T) {
 		ReleaseTag:  "v999.0.0",
 	}
 
-	err := ExtensionPublish(nil, testLogger(), cfg)
+	err := ExtensionPublish(context.Background(), testLogger(), cfg)
 
 	if err == nil {
 		t.Fatal("Ожидалась ошибка при несуществующем релизе")
@@ -2329,7 +2330,7 @@ func TestExtensionPublish_FullFlow(t *testing.T) {
 		ReleaseTag:  "v1.2.3",
 	}
 
-	err := ExtensionPublish(nil, testLogger(), cfg)
+	err := ExtensionPublish(context.Background(), testLogger(), cfg)
 
 	// Успешное выполнение — без ошибки
 	if err != nil {
@@ -2385,7 +2386,7 @@ func TestExtensionPublish_WithExtDir(t *testing.T) {
 		DryRun:      true,
 	}
 
-	err := ExtensionPublish(nil, testLogger(), cfg)
+	err := ExtensionPublish(context.Background(), testLogger(), cfg)
 
 	if err != nil {
 		t.Errorf("ExtensionPublish с BR_EXT_DIR вернул ошибку: %v", err)
@@ -2462,7 +2463,7 @@ func TestExtensionPublish_SyncError(t *testing.T) {
 		AddArray:    []string{"cfe"},
 	}
 
-	err := ExtensionPublish(nil, testLogger(), cfg)
+	err := ExtensionPublish(context.Background(), testLogger(), cfg)
 
 	// Должна быть ошибка из-за проблемы синхронизации
 	if err == nil {
@@ -2564,7 +2565,7 @@ func TestExtensionPublish_PRCreationError(t *testing.T) {
 		AddArray:    []string{"cfe"},
 	}
 
-	err := ExtensionPublish(nil, testLogger(), cfg)
+	err := ExtensionPublish(context.Background(), testLogger(), cfg)
 
 	// Должна быть ошибка из-за проблемы создания PR
 	if err == nil {
