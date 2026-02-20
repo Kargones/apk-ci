@@ -2,6 +2,7 @@ package sonarqube
 
 import (
 	"log/slog"
+	"strings"
 	"os"
 	"path/filepath"
 	"testing"
@@ -260,7 +261,7 @@ func TestResourceManagerCreateTempFile(t *testing.T) {
 	}
 	
 	// Проверяем, что файл в правильной директории
-	if !filepath.HasPrefix(filePath, tempDir) {
+	if !strings.HasPrefix(filePath, tempDir) {
 		t.Errorf("Expected file to be in temp dir %s, got %s", tempDir, filePath)
 	}
 	
@@ -290,7 +291,7 @@ func TestResourceManagerCreateTempDir(t *testing.T) {
 	}
 	
 	// Проверяем, что директория в правильном месте
-	if !filepath.HasPrefix(dirPath, tempDir) {
+	if !strings.HasPrefix(dirPath, tempDir) {
 		t.Errorf("Expected directory to be in temp dir %s, got %s", tempDir, dirPath)
 	}
 	
