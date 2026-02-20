@@ -21,7 +21,6 @@ import (
 //   - *Project: created project
 //   - error: error if project creation fails
 func (s *Entity) CreateProject(ctx context.Context, owner, repo, branch string) (*Project, error) {
-
 	// Generate project key based on owner, repo, and branch
 	projectKey := fmt.Sprintf("%s_%s_%s", owner, repo, branch)
 	if s.config.ProjectPrefix != "" {
@@ -66,7 +65,6 @@ func (s *Entity) CreateProject(ctx context.Context, owner, repo, branch string) 
 //   - *Project: retrieved project
 //   - error: error if project retrieval fails
 func (s *Entity) GetProject(ctx context.Context, projectKey string) (*Project, error) {
-
 	// Prepare query parameters
 	params := url.Values{}
 	params.Add("projects", projectKey)
@@ -111,7 +109,6 @@ func (s *Entity) GetProject(ctx context.Context, projectKey string) (*Project, e
 // Returns:
 //   - error: error if project update fails
 func (s *Entity) UpdateProject(ctx context.Context, projectKey string, updates *ProjectUpdate) error {
-
 	// Prepare form data
 	formData := url.Values{}
 	formData.Set("project", projectKey)
@@ -155,7 +152,6 @@ func (s *Entity) UpdateProject(ctx context.Context, projectKey string, updates *
 // Returns:
 //   - error: error if project deletion fails
 func (s *Entity) DeleteProject(ctx context.Context, projectKey string) error {
-
 	// Prepare form data
 	formData := url.Values{}
 	formData.Set("project", projectKey)
@@ -181,7 +177,6 @@ func (s *Entity) DeleteProject(ctx context.Context, projectKey string) error {
 //   - []Project: list of projects
 //   - error: error if project listing fails
 func (s *Entity) ListProjects(ctx context.Context, owner, repo string) ([]Project, error) {
-
 	// Prepare query parameters
 	params := url.Values{}
 	searchQuery := fmt.Sprintf("%s_%s_", owner, repo)
@@ -225,7 +220,6 @@ func (s *Entity) ListProjects(ctx context.Context, owner, repo string) ([]Projec
 // Requires 'Administer' rights on the specified project.
 // API: POST api/project_tags/set (since 6.4)
 func (s *Entity) SetProjectTags(ctx context.Context, projectKey string, tags []string) error {
-
 	// Prepare form data
 	formData := url.Values{}
 	formData.Set("project", projectKey)

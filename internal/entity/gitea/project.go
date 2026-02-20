@@ -66,7 +66,8 @@ func analyzeProjectStructure(directories []string) ([]string, error) {
 	}
 
 	// Формируем результат: первый элемент - название проекта, остальные - расширения
-	result := []string{projectName}
+	result := make([]string, 0, 1+len(extensions))
+	result = append(result, projectName)
 	result = append(result, extensions...)
 
 	return result, nil

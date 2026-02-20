@@ -8,6 +8,7 @@ import (
 )
 
 // TestGetDefaultSonarQubeConfig тестирует получение конфигурации SonarQube по умолчанию
+//nolint:dupl // similar test structure
 func TestGetDefaultSonarQubeConfig(t *testing.T) {
 	config := GetDefaultSonarQubeConfig()
 
@@ -30,11 +31,11 @@ func TestGetDefaultSonarQubeConfig(t *testing.T) {
 	if config.RetryDelay != 5*time.Second {
 		t.Errorf("Expected retry delay 5s, got %v", config.RetryDelay)
 	}
-
+ //nolint:goconst // test value
 	if config.ProjectPrefix != "apk-ci" {
 		t.Errorf("Expected project prefix 'apk-ci', got '%s'", config.ProjectPrefix)
 	}
-
+ //nolint:goconst // test value
 	if config.DefaultVisibility != "private" {
 		t.Errorf("Expected default visibility 'private', got '%s'", config.DefaultVisibility)
 	}
@@ -209,7 +210,7 @@ func TestGetDefaultScannerConfig(t *testing.T) {
 	if config.Timeout != 600*time.Second {
 		t.Errorf("Expected timeout 600s, got %v", config.Timeout)
 	}
-
+ //nolint:goconst // test value
 	if config.WorkDir != "/tmp/apk-ci" {
 		t.Errorf("Expected work dir '/tmp/apk-ci', got '%s'", config.WorkDir)
 	}

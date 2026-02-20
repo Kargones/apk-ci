@@ -11,6 +11,8 @@ type Factory struct {
 }
 
 // NewFactory создает новую фабрику файловых систем.
+const defaultTmpDir = "/tmp"
+
 func NewFactory(options ...Option) (*Factory, error) {
 	config := DefaultConfig()
 	
@@ -100,7 +102,7 @@ func (f *Factory) createDiskFileSystem(config Config) (FileSystem, error) {
 func (f *Factory) createMemoryFileSystem(config Config) (FileSystem, error) {
 	root := config.BasePath
 	if root == "" {
-		root = "/tmp"
+		root = defaultTmpDir
 	}
 	
 	return NewMemoryFileSystem(root), nil

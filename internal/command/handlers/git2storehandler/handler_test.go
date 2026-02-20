@@ -62,6 +62,7 @@ func (f *mockGitFactory) CreateGit(l *slog.Logger, cfg *config.Config) (GitOpera
 }
 
 // mockConvertConfigOperator — мок для ConvertConfigOperator.
+//nolint:dupl // similar test structure
 type mockConvertConfigOperator struct {
 	loadFunc        func(ctx context.Context, l *slog.Logger, cfg *config.Config, infobaseName string) error
 	initDbFunc      func(ctx context.Context, l *slog.Logger, cfg *config.Config) error
@@ -189,8 +190,8 @@ func (m *mockTempDbCreator) CreateTempDb(ctx context.Context, l *slog.Logger, cf
 func createTestConfig(t *testing.T) *config.Config {
 	t.Helper()
 	tmpDir := t.TempDir()
-	appCfg := &config.AppConfig{}
-	appCfg.Paths.Bin1cv8 = "/opt/1cv8/1cv8"
+	appCfg := &config.AppConfig{} //nolint:goconst // test value
+	appCfg.Paths.Bin1cv8 = "/opt/1cv8/1cv8" //nolint:goconst // test value
 	return &config.Config{
 		Owner:        "test-owner",
 		Repo:         "test-repo",

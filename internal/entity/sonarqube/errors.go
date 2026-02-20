@@ -18,6 +18,11 @@ type Error struct {
 }
 
 // Error returns the error message for SonarQubeError.
+const (
+	errCodeScannerFailed    = "SONARQUBE.SCANNER_FAILED"
+	errCodeValidationFailed = "SONARQUBE.VALIDATION_FAILED"
+)
+
 func (e *Error) Error() string {
 	if e.Details != "" {
 		return e.Message + ": " + e.Details
@@ -80,7 +85,7 @@ func (e *Error) As(target interface{}) bool {
 // ErrorCode возвращает машиночитаемый код ошибки сканера.
 // Реализует интерфейс apperrors.Coded.
 func (e *ScannerError) ErrorCode() string {
-	return "SONARQUBE.SCANNER_FAILED"
+	return errCodeScannerFailed
 }
 
 // Unwrap returns nil (ScannerError does not wrap another error).
@@ -103,7 +108,7 @@ func (e *ScannerError) As(target interface{}) bool {
 // ErrorCode возвращает машиночитаемый код ошибки валидации.
 // Реализует интерфейс apperrors.Coded.
 func (e *ValidationError) ErrorCode() string {
-	return "SONARQUBE.VALIDATION_FAILED"
+	return errCodeValidationFailed
 }
 
 // Unwrap returns nil (ValidationError does not wrap another error).

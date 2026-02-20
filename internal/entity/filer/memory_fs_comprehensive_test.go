@@ -118,7 +118,7 @@ func TestMemoryFileSystem_Open(t *testing.T) {
 	if err != nil {
 		t.Errorf("Read() error = %v", err)
 	}
-	if string(data[:n]) != "test content" {
+	if string(data[:n]) != "test content" { //nolint:goconst // test value
 		t.Errorf("Read() got %s, expected 'test content'", string(data[:n]))
 	}
 	
@@ -427,7 +427,7 @@ func TestMemoryFileSystem_Stat(t *testing.T) {
 		return
 	}
 	
-	if info.Name() != "test.txt" {
+	if info.Name() != "test.txt" { //nolint:goconst // test value
 		t.Errorf("Stat() name got %s, expected test.txt", info.Name())
 	}
 	

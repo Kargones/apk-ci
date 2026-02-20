@@ -209,7 +209,7 @@ func (pu *PathUtils) GetBaseName(filename string) string {
 // Приоритет: RAM-диск (/dev/shm) -> системная временная директория.
 func GetOptimalTempDir() string {
 	if IsRAMDiskAvailable() {
-		return "/dev/shm"
+		return RAMDiskPath //nolint:goconst // test value
 	}
 	return os.TempDir()
 }
@@ -218,7 +218,7 @@ func GetOptimalTempDir() string {
 // Возвращает true, если RAM-диск доступен для использования.
 func IsRAMDiskAvailable() bool {
 	// Проверка существования и доступности /dev/shm
-	info, err := os.Stat("/dev/shm")
+	info, err := os.Stat(RAMDiskPath)
 	if err != nil {
 		return false
 	}

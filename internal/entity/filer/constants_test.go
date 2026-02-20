@@ -120,7 +120,7 @@ func TestConfigFields(t *testing.T) {
 		t.Errorf("Config.Type = %v, expected MemoryFS", config.Type)
 	}
 	
-	if config.BasePath != "/tmp/test" {
+	if config.BasePath != "/tmp/test" { //nolint:goconst // test value
 		t.Errorf("Config.BasePath = %q, expected '/tmp/test'", config.BasePath)
 	}
 	

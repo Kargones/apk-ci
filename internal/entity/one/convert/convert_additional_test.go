@@ -81,7 +81,7 @@ func TestConfig_SaveAdditional(t *testing.T) {
 	}
 
 	// Проверяем, что файл создан
-	if _, err := os.Stat(configPath); os.IsNotExist(err) {
+	if _, statErr := os.Stat(configPath); os.IsNotExist(statErr) {
 		t.Errorf("Config file was not created at %s", configPath)
 	}
 

@@ -18,6 +18,8 @@ import (
 // Возвращает:
 //   - *Commit: указатель на структуру с информацией о коммите
 //   - error: ошибка получения коммита или nil при успехе
+const branchMain = "main"
+
 func (g *API) GetLatestCommit(ctx context.Context, branch string) (*Commit, error) {
 	urlString := fmt.Sprintf("%s/api/%s/repos/%s/%s/commits?sha=%s&limit=1", g.GiteaURL, constants.APIVersion, g.Owner, g.Repo, branch)
 
@@ -216,7 +218,7 @@ func (g *API) GetCommitFiles(ctx context.Context, commitSHA string) ([]CommitFil
 //   - *BranchCommitRange: структура с первым и последним коммитом
 //   - error: ошибка получения коммитов или nil при успехе
 func (g *API) GetBranchCommitRange(ctx context.Context, branch string) (*BranchCommitRange, error) {
-	if branch == "main" || branch == "master" {
+	if branch == branchMain || branch == "master" {
 		return g.getMainBranchCommitRange(ctx, branch)
 	}
 	return g.getFeatureBranchCommitRange(ctx, branch)
@@ -260,7 +262,7 @@ func (g *API) getFeatureBranchCommitRange(ctx context.Context, branch string) (*
 	// Сравниваем с базовой веткой для получения merge base
 	baseBranch := g.BaseBranch
 	if baseBranch == "" {
-		baseBranch = "main"
+		baseBranch = branchMain
 	}
 
 	compareResult, err := g.compareBranches(ctx, baseBranch, branch)

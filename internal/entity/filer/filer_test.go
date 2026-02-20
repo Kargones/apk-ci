@@ -473,7 +473,7 @@ func TestErrorHandling(t *testing.T) {
 		t.Errorf("Ожидалась операция 'open', получено: %s", fsErr.Op)
 	}
 
-	if fsErr.Path != "/tmp/test" {
+	if fsErr.Path != "/tmp/test" { //nolint:goconst // test value
 		t.Errorf("Ожидался путь '/tmp/test', получено: %s", fsErr.Path)
 	}
 

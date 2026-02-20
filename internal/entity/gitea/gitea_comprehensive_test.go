@@ -12,6 +12,7 @@ import (
 )
 
 // TestConflictFilesPR тестирует получение файлов с конфликтами в PR
+//nolint:dupl // similar test structure
 func TestConflictFilesPR(t *testing.T) {
 	ctx := context.Background()
 	tests := []struct {
@@ -485,6 +486,7 @@ func TestGetCommitsBetween(t *testing.T) {
 }
 
 // TestGetCommitFiles тестирует получение файлов коммита
+//nolint:dupl // similar test structure
 func TestGetCommitFiles(t *testing.T) {
 	ctx := context.Background()
 	tests := []struct {

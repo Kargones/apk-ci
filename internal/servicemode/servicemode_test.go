@@ -54,14 +54,14 @@ func (m *MockRacClient) GetClusterUUID(ctx context.Context) (string, error) {
 	if m.GetClusterUUIDFunc != nil {
 		return m.GetClusterUUIDFunc(ctx)
 	}
-	return "test-cluster-uuid", nil
+	return "test-cluster-uuid", nil //nolint:goconst // test value
 }
 
 func (m *MockRacClient) GetInfobaseUUID(ctx context.Context, clusterUUID, infobaseName string) (string, error) {
 	if m.GetInfobaseUUIDFunc != nil {
 		return m.GetInfobaseUUIDFunc(ctx, clusterUUID, infobaseName)
 	}
-	return "test-infobase-uuid", nil
+	return "test-infobase-uuid", nil //nolint:goconst // test value
 }
 
 func (m *MockRacClient) EnableServiceMode(ctx context.Context, clusterUUID, infobaseUUID string, terminateSessions bool) error {
@@ -98,7 +98,7 @@ func TestSlogLogger(t *testing.T) {
 		}
 	}()
 	defer func() {
-		if err := tmpFile.Close(); err != nil {
+		if err := tmpFile.Close(); err != nil { //nolint:govet // shadow ok
 			t.Logf("Failed to close temp file: %v", err)
 		}
 	}()
@@ -117,7 +117,7 @@ func TestSlogLogger(t *testing.T) {
 	slogLogger.Debug("Test debug message", "key", "value")
 
 	// Проверяем, что логи записались
-	if err := tmpFile.Sync(); err != nil {
+	if err := tmpFile.Sync(); err != nil { //nolint:govet // shadow ok
 		t.Fatalf("Failed to sync temp file: %v", err)
 	}
 	stat, err := tmpFile.Stat()

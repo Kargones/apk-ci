@@ -35,7 +35,7 @@ func (m *mockConvertLoader) LoadFromConfig(ctx context.Context, l *slog.Logger, 
 	}, nil
 }
 
-func (m *mockConvertLoader) StoreBind(cc *convert.Config, ctx context.Context, l *slog.Logger, cfg *config.Config) error {
+func (m *mockConvertLoader) StoreBind(ctx context.Context, cc *convert.Config, l *slog.Logger, cfg *config.Config) error {
 	if m.storeBindFunc != nil {
 		return m.storeBindFunc(cc, ctx, l, cfg)
 	}
@@ -232,6 +232,7 @@ func TestStorebindHandler_Execute_NilConfig(t *testing.T) {
 
 // === AC-9: ERR_STORE_BIND ===
 
+//nolint:dupl // similar test structure
 func TestStorebindHandler_Execute_LoadConfigError(t *testing.T) {
 	t.Setenv("BR_OUTPUT_FORMAT", "json")
 
@@ -257,7 +258,9 @@ func TestStorebindHandler_Execute_LoadConfigError(t *testing.T) {
 	assert.Equal(t, "ERR_CONFIG_LOAD", result.Error.Code)
 	assert.Contains(t, result.Error.Message, "database not found in config")
 }
+//nolint:dupl // similar test structure
 
+//nolint:dupl // similar test structure
 func TestStorebindHandler_Execute_StoreBindError(t *testing.T) {
 	t.Setenv("BR_OUTPUT_FORMAT", "json")
 

@@ -32,7 +32,7 @@ func (c *racClient) GetInfobaseInfo(ctx context.Context, clusterUUID, infobaseNa
 	c.logger.Debug("Получение информации об информационной базе",
 		"cluster", clusterUUID, "infobase", infobaseName)
 
-	args := []string{"infobase", "summary", "list", "--cluster=" + clusterUUID}
+	args := []string{"infobase", "summary", "list", "--cluster=" + clusterUUID} //nolint:prealloc // dynamic append based on auth
 	args = append(args, c.clusterAuthArgs()...)
 
 	output, err := c.executeRAC(ctx, args)
@@ -56,7 +56,7 @@ func (c *racClient) GetSessions(ctx context.Context, clusterUUID, infobaseUUID s
 	c.logger.Debug("Получение списка сессий",
 		"cluster", clusterUUID, "infobase", infobaseUUID)
 
-	args := []string{"session", "list", "--cluster=" + clusterUUID, "--infobase=" + infobaseUUID}
+	args := []string{"session", "list", "--cluster=" + clusterUUID, "--infobase=" + infobaseUUID} //nolint:prealloc // dynamic append based on auth
 	args = append(args, c.clusterAuthArgs()...)
 
 	output, err := c.executeRAC(ctx, args)
@@ -82,7 +82,7 @@ func (c *racClient) GetSessions(ctx context.Context, clusterUUID, infobaseUUID s
 func (c *racClient) TerminateSession(ctx context.Context, clusterUUID, sessionID string) error {
 	c.logger.Info("Завершение сессии", "cluster", clusterUUID, "session", sessionID)
 
-	args := []string{"session", "terminate", "--cluster=" + clusterUUID, "--session=" + sessionID}
+	args := []string{"session", "terminate", "--cluster=" + clusterUUID, "--session=" + sessionID} //nolint:prealloc // dynamic append based on auth
 	args = append(args, c.clusterAuthArgs()...)
 
 	_, err := c.executeRAC(ctx, args)
@@ -143,7 +143,7 @@ func (c *racClient) EnableServiceMode(ctx context.Context, clusterUUID, infobase
 		c.logger.Debug("Регламентные задания уже заблокированы, добавлен маркер в denied-message")
 	}
 
-	args := []string{
+	args := []string{ //nolint:prealloc // dynamic append based on auth
 		"infobase", "update",
 		"--cluster=" + clusterUUID,
 		"--infobase=" + infobaseUUID,
@@ -224,7 +224,7 @@ func (c *racClient) DisableServiceMode(ctx context.Context, clusterUUID, infobas
 // getInfobaseRawStatus получает статус информационной базы без запроса сессий.
 // Используется для внутренних проверок перед изменением состояния.
 func (c *racClient) getInfobaseRawStatus(ctx context.Context, clusterUUID, infobaseUUID string) (*ServiceModeStatus, error) {
-	args := []string{"infobase", "info", "--cluster=" + clusterUUID, "--infobase=" + infobaseUUID}
+	args := []string{"infobase", "info", "--cluster=" + clusterUUID, "--infobase=" + infobaseUUID} //nolint:prealloc // dynamic append based on auth
 	args = append(args, c.clusterAuthArgs()...)
 	args = append(args, c.infobaseAuthArgs()...)
 

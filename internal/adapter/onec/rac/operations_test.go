@@ -196,7 +196,7 @@ fi
 // === Tests for EnableServiceMode ===
 
 func TestEnableServiceMode_Success(t *testing.T) {
-	output := "infobase            : test-uuid\nsessions-deny       : off\nscheduled-jobs-deny : off"
+	output := "infobase            : test-uuid\nsessions-deny       : off\nscheduled-jobs-deny : off" //nolint:goconst // test value
 	racPath, cleanup := createMockRAC(t, output)
 	defer cleanup()
 

@@ -122,6 +122,7 @@ func TestParseSubscriptionID_Invalid(t *testing.T) {
 func TestFindSubscribedRepos_Success(t *testing.T) {
 	ctx := context.Background()
 	// project.yaml содержимое для TargetOrg/TargetRepo (подписка на cfe)
+//nolint:goconst // test value
 	targetRepoProjectYAML := `subscriptions:
   - SourceOrg_source-repo_cfe
 `
@@ -134,7 +135,7 @@ func TestFindSubscribedRepos_Success(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
 		// Запрос списка организаций пользователя
-		case r.URL.Path == "/api/v1/user/orgs":
+		case r.URL.Path == "/api/v1/user/orgs": //nolint:goconst // test value
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
 			if r.URL.Query().Get("page") == "1" || r.URL.Query().Get("page") == "" {
@@ -148,7 +149,7 @@ func TestFindSubscribedRepos_Success(t *testing.T) {
 			}
 
 		// Запрос репозиториев организации TargetOrg
-		case r.URL.Path == "/api/v1/orgs/TargetOrg/repos":
+		case r.URL.Path == "/api/v1/orgs/TargetOrg/repos": //nolint:goconst // test value
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
 			if r.URL.Query().Get("page") == "1" || r.URL.Query().Get("page") == "" {
@@ -178,7 +179,7 @@ func TestFindSubscribedRepos_Success(t *testing.T) {
 			_, _ = w.Write([]byte(`[]`))
 
 		// project.yaml для TargetOrg/TargetRepo
-		case r.URL.Path == "/api/v1/repos/TargetOrg/TargetRepo/contents/project.yaml":
+		case r.URL.Path == "/api/v1/repos/TargetOrg/TargetRepo/contents/project.yaml": //nolint:goconst // test value
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
 			_, _ = w.Write([]byte(fmt.Sprintf(`{"content": "%s", "encoding": "base64"}`,
@@ -667,7 +668,7 @@ func TestGetTargetFilesToDelete_Success(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		// Получение содержимого целевого каталога
-		case "/api/v1/repos/TargetOrg/target-repo/contents/cfe/CommonExt":
+		case "/api/v1/repos/TargetOrg/target-repo/contents/cfe/CommonExt": //nolint:goconst // test value
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
 			_, _ = w.Write([]byte(`[
@@ -963,7 +964,7 @@ func TestSyncExtensionToRepo_Success(t *testing.T) {
 			_, _ = w.Write([]byte(`[]`))
 
 		// Target: Batch commit с созданием ветки
-		case r.URL.Path == "/api/v1/repos/TargetOrg/target-repo/contents" && r.Method == "POST":
+		case r.URL.Path == "/api/v1/repos/TargetOrg/target-repo/contents" && r.Method == "POST": //nolint:goconst // test value
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusCreated)
 			_, _ = w.Write([]byte(`{"commit": {"sha": "commit_sha_123"}}`))
@@ -1183,7 +1184,7 @@ func TestBuildExtensionPRTitle(t *testing.T) {
 func TestCreateExtensionPR_Success(t *testing.T) {
 	ctx := context.Background()
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/api/v1/repos/TargetOrg/target-repo/pulls" && r.Method == "POST" {
+		if r.URL.Path == "/api/v1/repos/TargetOrg/target-repo/pulls" && r.Method == "POST" { //nolint:goconst // test value
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusCreated)
 			_, _ = w.Write([]byte(`{
@@ -2110,6 +2111,7 @@ func TestReportResultsText_OnlySkipped(t *testing.T) {
 // TestExtensionPublish_DryRunMode проверяет dry-run режим команды (AC6)
 func TestExtensionPublish_DryRunMode(t *testing.T) {
 	// Создаём mock сервер
+ //nolint:dupl // similar test structure
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
 		// Запрос релиза по тегу
@@ -2340,6 +2342,7 @@ func TestExtensionPublish_FullFlow(t *testing.T) {
 
 // TestExtensionPublish_WithExtDir проверяет публикацию из конкретного каталога
 func TestExtensionPublish_WithExtDir(t *testing.T) {
+ //nolint:dupl // similar test structure
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
 		case strings.Contains(r.URL.Path, "/releases/tags/"):

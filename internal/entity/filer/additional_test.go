@@ -164,7 +164,7 @@ func TestOptions_Additional(t *testing.T) {
 		t.Errorf("Expected type %v, got %v", MemoryFS, config.Type)
 	}
 	
-	if config.BasePath != "/test" {
+	if config.BasePath != "/test" { //nolint:goconst // test value
 		t.Errorf("Expected base path '/test', got '%s'", config.BasePath)
 	}
 	

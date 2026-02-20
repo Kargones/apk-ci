@@ -41,6 +41,7 @@ type LoggingConfig struct {
 }
 // loadLoggingConfig загружает конфигурацию логирования из AppConfig, переменных окружения или устанавливает значения по умолчанию.
 // Переменные окружения BR_LOG_* переопределяют значения из AppConfig (AC4).
+//nolint:dupl // similar test structure
 func loadLoggingConfig(l *slog.Logger, cfg *Config) (*LoggingConfig, error) {
 	// Проверяем, есть ли конфигурация в AppConfig
 	if cfg.AppConfig != nil && (cfg.AppConfig.Logging != LoggingConfig{}) {

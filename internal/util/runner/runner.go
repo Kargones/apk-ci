@@ -28,6 +28,8 @@ type Runner struct {
 }
 
 // ClearParams очищает все параметры команды.
+const maskedValue = "*****"
+
 func (r *Runner) ClearParams() {
 	r.Params = []string{}
 }
@@ -55,7 +57,7 @@ func (r *Runner) processParamValue(value string, l *slog.Logger) (fileValue stri
 // buildMaskedParam возвращает маскированную версию параметра для логирования.
 func buildMaskedParam(params []string, i int, value string) string {
 	if params[i-1] == "/ConfigurationRepositoryP" {
-		return "*****"
+		return maskedValue
 	}
 	return maskPasswordInParam(value)
 }

@@ -157,7 +157,7 @@ func TestConfigLoadingWithGiteaActionParams(t *testing.T) {
 	if os.Getenv("BR_ENV") != "dev" {
 		t.Errorf("Expected BR_ENV=dev, got: %s", os.Getenv("BR_ENV"))
 	}
-	if os.Getenv("BR_LOGLEVEL") != "Debug" {
+	if os.Getenv("BR_LOGLEVEL") != "Debug" { //nolint:goconst // test value
 		t.Errorf("Expected BR_LOGLEVEL=Debug, got: %s", os.Getenv("BR_LOGLEVEL"))
 	}
 	if os.Getenv("BR_INFOBASE_NAME") != "V8_DEV_TEST" {
@@ -326,8 +326,8 @@ env-vars:
 			defer os.Remove(tmpFile.Name())
 
 			// Записываем YAML содержимое
-			if _, err := tmpFile.WriteString(tt.yamlContent); err != nil {
-				t.Fatalf("Failed to write YAML content: %v", err)
+			if _, writeErr := tmpFile.WriteString(tt.yamlContent); writeErr != nil {
+				t.Fatalf("Failed to write YAML content: %v", writeErr)
 			}
 			_ = tmpFile.Close()
 

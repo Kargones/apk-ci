@@ -361,7 +361,7 @@ func check1CErrors(line string) []string {
 
 // analyzeErrorOutput analyzes scanner output to extract specific error information.
 func (s *SonarScannerEntity) analyzeErrorOutput(output string) []string {
-	var errs []string
+	var errs []string //nolint:prealloc // unknown count
 	lines := strings.Split(output, "\n")
 
 	for _, line := range lines {

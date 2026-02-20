@@ -267,7 +267,7 @@ func TestExists(t *testing.T) {
 
 // TestTrimOut проверяет функцию обрезки вывода
 func TestTrimOut(t *testing.T) {
-	tests := []struct {
+	tests := []struct { //nolint:prealloc // test table
 		name     string
 		input    []byte
 		expected string

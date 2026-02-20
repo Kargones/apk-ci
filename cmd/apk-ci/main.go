@@ -26,7 +26,7 @@ import (
 )
 
 // recordMetrics записывает результат выполнения команды и отправляет метрики в Pushgateway.
-func recordMetrics(collector metrics.Collector, ctx context.Context, command, infobase string, start time.Time, success bool) {
+func recordMetrics(ctx context.Context, collector metrics.Collector, command, infobase string, start time.Time, success bool) {
 	collector.RecordCommandEnd(command, infobase, time.Since(start), success)
 	if pushErr := collector.Push(ctx); pushErr != nil {
 		slog.Warn("failed to push metrics", slog.String("error", pushErr.Error()))
@@ -113,7 +113,7 @@ func run() int {
 			slog.String("BR_ACTION", cfg.Command),
 			slog.String(constants.MsgErrProcessing, constants.MsgAppExit),
 		)
-		recordMetrics(metricsCollector, ctx, cfg.Command, cfg.InfobaseName, start, false)
+		recordMetrics(ctx, metricsCollector, cfg.Command, cfg.InfobaseName, start, false)
 
 		if sendErr := alerter.Send(ctx, alerting.Alert{
 			ErrorCode: "UNKNOWN_COMMAND",
@@ -136,7 +136,7 @@ func run() int {
 	execErr := handler.Execute(ctx, cfg)
 
 	// Записываем завершение и отправляем метрики
-	recordMetrics(metricsCollector, ctx, cfg.Command, cfg.InfobaseName, start, execErr == nil)
+	recordMetrics(ctx, metricsCollector, cfg.Command, cfg.InfobaseName, start, execErr == nil)
 
 	if execErr != nil {
 		l.Error("Ошибка выполнения команды",

@@ -206,6 +206,7 @@ func TestExecute_PRNotFound(t *testing.T) {
 }
 
 // TestExecute_PRClosed проверяет случай когда PR закрыт (AC: #3).
+//nolint:dupl // similar test structure
 func TestExecute_PRClosed(t *testing.T) {
 	giteaClient := &giteatest.MockClient{
 		GetPRFunc: func(_ context.Context, prNumber int64) (*gitea.PRResponse, error) {
@@ -241,6 +242,7 @@ func TestExecute_PRClosed(t *testing.T) {
 }
 
 // TestExecute_PRMerged проверяет случай когда PR уже merged.
+//nolint:dupl // similar test structure
 func TestExecute_PRMerged(t *testing.T) {
 	giteaClient := &giteatest.MockClient{
 		GetPRFunc: func(_ context.Context, prNumber int64) (*gitea.PRResponse, error) {

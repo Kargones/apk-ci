@@ -16,8 +16,8 @@ func TestConvert_MustLoad(t *testing.T) {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
 	defer func() {
-		if err := os.RemoveAll(tmpDir); err != nil {
-			t.Logf("Failed to remove temp dir: %v", err)
+		if rmErr := os.RemoveAll(tmpDir); rmErr != nil {
+			t.Logf("Failed to remove temp dir: %v", rmErr)
 		}
 	}()
 
@@ -82,8 +82,8 @@ func TestCli_Convert(t *testing.T) {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
 	defer func() {
-		if err := os.RemoveAll(tmpDir); err != nil {
-			t.Logf("Failed to remove temp dir: %v", err)
+		if rmErr := os.RemoveAll(tmpDir); rmErr != nil {
+			t.Logf("Failed to remove temp dir: %v", rmErr)
 		}
 	}()
 
@@ -165,8 +165,8 @@ func TestExists(t *testing.T) {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
 	defer func() {
-		if err := os.RemoveAll(tmpDir); err != nil {
-			t.Logf("Failed to remove temp dir: %v", err)
+		if rmErr := os.RemoveAll(tmpDir); rmErr != nil {
+			t.Logf("Failed to remove temp dir: %v", rmErr)
 		}
 	}()
 
@@ -195,8 +195,8 @@ func TestMoveDirContents(t *testing.T) {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
 	defer func() {
-		if err := os.RemoveAll(tmpDir); err != nil {
-			t.Logf("Failed to remove temp dir: %v", err)
+		if rmErr := os.RemoveAll(tmpDir); rmErr != nil {
+			t.Logf("Failed to remove temp dir: %v", rmErr)
 		}
 	}()
 
@@ -219,11 +219,11 @@ func TestMoveDirContents(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create test file: %v", err)
 	}
-	if _, err := file.WriteString("test content"); err != nil {
-		t.Fatalf("Failed to write to test file: %v", err)
+	if _, writeErr := file.WriteString("test content"); writeErr != nil {
+		t.Fatalf("Failed to write to test file: %v", writeErr)
 	}
-	if err := file.Close(); err != nil {
-		t.Fatalf("Failed to close test file: %v", err)
+	if closeErr := file.Close(); closeErr != nil {
+		t.Fatalf("Failed to close test file: %v", closeErr)
 	}
 
 	// Перемещаем содержимое
@@ -245,8 +245,8 @@ func TestCleanDirectoryPreservingHidden(t *testing.T) {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
 	defer func() {
-		if err := os.RemoveAll(tmpDir); err != nil {
-			t.Logf("Failed to remove temp dir: %v", err)
+		if rmErr := os.RemoveAll(tmpDir); rmErr != nil {
+			t.Logf("Failed to remove temp dir: %v", rmErr)
 		}
 	}()
 
@@ -258,16 +258,16 @@ func TestCleanDirectoryPreservingHidden(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create regular file: %v", err)
 	}
-	if err := file.Close(); err != nil {
-		t.Fatalf("Failed to close regular file: %v", err)
+	if closeErr := file.Close(); closeErr != nil {
+		t.Fatalf("Failed to close regular file: %v", closeErr)
 	}
 
 	file, err = os.Create(hiddenFile)
 	if err != nil {
 		t.Fatalf("Failed to create hidden file: %v", err)
 	}
-	if err := file.Close(); err != nil {
-		t.Fatalf("Failed to close hidden file: %v", err)
+	if closeErr := file.Close(); closeErr != nil {
+		t.Fatalf("Failed to close hidden file: %v", closeErr)
 	}
 
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))

@@ -365,7 +365,6 @@ func TestListAllWithAliases_ReturnsCompleteMapping(t *testing.T) {
 	assert.Equal(t, "cmd-one", result[0].DeprecatedAlias)
 	assert.Equal(t, "cmd-two", result[1].DeprecatedAlias)
 	assert.Empty(t, result[2].DeprecatedAlias, "standalone команда не должна иметь алиас")
-
 }
 
 // TestListAllWithAliases_EmptyRegistry проверяет поведение с пустым реестром.

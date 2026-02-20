@@ -106,7 +106,6 @@ func (s *Entity) authenticate(req *http.Request) error {
 // Returns:
 //   - error: error if token is invalid or validation fails
 func (s *Entity) ValidateToken(ctx context.Context) error {
-
 	// Make a simple request to validate the token
 	_, err := s.makeRequest(ctx, "GET", "/authentication/validate", nil)
 	if err != nil {
