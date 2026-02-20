@@ -2,6 +2,7 @@
 package config
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 
@@ -95,12 +96,12 @@ func (cfg *Config) LoadScannerConfigFromEnv() (*ScannerConfig, error) {
 //
 // Возвращает:
 //   - error: ошибка анализа проекта или nil при успехе
-func (cfg *Config) AnalyzeProject(l *slog.Logger, branch string) error {
+func (cfg *Config) AnalyzeProject(ctx context.Context, l *slog.Logger, branch string) error {
 	// Инициализируем Gitea API
 	g := CreateGiteaAPI(cfg)
 
 	// Анализируем проект
-	analysis, err := g.AnalyzeProject(branch)
+	analysis, err := g.AnalyzeProject(ctx, branch)
 	if err != nil {
 		l.Error("Ошибка анализа проекта",
 			slog.String("error", err.Error()),

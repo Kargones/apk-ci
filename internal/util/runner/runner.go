@@ -28,76 +28,115 @@ type Runner struct {
 }
 
 // ClearParams очищает все параметры команды.
-// Сбрасывает все настройки Runner к значениям по умолчанию,
-// подготавливая его для выполнения новой команды.
 func (r *Runner) ClearParams() {
 	r.Params = []string{}
 }
 
-// RunCommand выполняет команду и возвращает результат.
-// Запускает системную команду с заданными параметрами и возвращает
-// её вывод или ошибку выполнения.
-// Параметры:
-//   - ctx: контекст выполнения с возможным таймаутом
-//   - l: логгер для записи сообщений
-//
-// Возвращает:
-//   - []byte: вывод команды из файла
-//   - error: ошибка выполнения или nil при успехе
-func (r *Runner) RunCommand(ctx context.Context, l *slog.Logger) ([]byte, error) {
-	var err error
-	var errIn error
-	var fileOutContent []byte
-	var tFile *os.File
-	var tOut *os.File
-	var lParams []string
-	if len(r.Params) > 0 && r.Params[0] == "@" {
-		tFile, err = os.CreateTemp(r.TmpDir, "*.par")
+// processParamValue обрабатывает одно значение параметра:
+// разделяет /c-параметры, создаёт временный файл для /Out-параметров.
+func (r *Runner) processParamValue(value string, l *slog.Logger) (fileValue string, cmdParams []string, err error) {
+	if len(value) >= 2 && value[0:2] == "/c" {
+		return "", []string{"/c", value[2:]}, nil
+	}
+	if len(value) >= 4 && value[0:4] == "/Out" {
+		tOut, err := os.CreateTemp(r.TmpDir, "*.out")
 		if err != nil {
-			return nil, fmt.Errorf("failed to create temp params file: %w", err)
+			return "", nil, fmt.Errorf("failed to create temp output file: %w", err)
 		}
-		// defer os.Remove(tFile.Name())
-		// l.Debug("Params", "Params", r.Params) // Удалено: выводит пароли до маскировки
-		tParams := []string{}
-		for i, value := range r.Params {
-			if i == 0 {
-				continue
-			}
-			if r.Params[i-1] == "/ConfigurationRepositoryP" {
-				lParams = append(lParams, "*****")
-			} else {
-				// Маскируем пароль после /P в строке (например: /S server /N user /P password)
-				maskedValue := maskPasswordInParam(value)
-				lParams = append(lParams, maskedValue)
-			}
-			if len(value) >= 2 && value[0:2] == "/c" {
-				tParams = append(tParams, "/c")
-				tParams = append(tParams, value[2:])
-				continue
-			}
-			if len(value) >= 4 && value[0:4] == "/Out" {
-				tOut, err = os.CreateTemp(r.TmpDir, "*.out")
-				if err != nil {
-					return nil, fmt.Errorf("failed to create temp output file: %w", err)
-				}
-				// defer os.Remove(tOut.Name())
-				r.OutFileName = tOut.Name()
-				value = "/Out " + r.OutFileName
-				if errClose := tOut.Close(); errClose != nil {
-					l.Warn("Failed to close temp output file", "error", errClose)
-				}
-			}
-			if _, errWrite := tFile.WriteString(" " + value); errWrite != nil {
-				l.Warn("Failed to write to temp file", "error", errWrite)
-			}
+		r.OutFileName = tOut.Name()
+		if errClose := tOut.Close(); errClose != nil {
+			l.Warn("Failed to close temp output file", "error", errClose)
 		}
+		return "/Out " + r.OutFileName, nil, nil
+	}
+	return value, nil, nil
+}
 
-		r.Params = []string{"@", tFile.Name()}
-		r.Params = append(r.Params, tParams...)
-		if errClose := tFile.Close(); errClose != nil {
-			l.Warn("Failed to close temp file", "error", errClose)
+// buildMaskedParam возвращает маскированную версию параметра для логирования.
+func buildMaskedParam(params []string, i int, value string) string {
+	if params[i-1] == "/ConfigurationRepositoryP" {
+		return "*****"
+	}
+	return maskPasswordInParam(value)
+}
+
+// prepareAtParams подготавливает параметры в режиме "@":
+// создаёт временный файл с параметрами и возвращает маскированные параметры для логирования.
+func (r *Runner) prepareAtParams(l *slog.Logger) (lParams []string, err error) {
+	tFile, err := os.CreateTemp(r.TmpDir, "*.par")
+	if err != nil {
+		return nil, fmt.Errorf("failed to create temp params file: %w", err)
+	}
+
+	var tParams []string
+	for i, value := range r.Params {
+		if i == 0 {
+			continue
+		}
+		lParams = append(lParams, buildMaskedParam(r.Params, i, value))
+
+		fileValue, cmdExtra, err := r.processParamValue(value, l)
+		if err != nil {
+			return nil, err
+		}
+		if cmdExtra != nil {
+			tParams = append(tParams, cmdExtra...)
+			continue
+		}
+		if _, errWrite := tFile.WriteString(" " + fileValue); errWrite != nil {
+			l.Warn("Failed to write to temp file", "error", errWrite)
 		}
 	}
+
+	r.Params = append([]string{"@", tFile.Name()}, tParams...)
+	if errClose := tFile.Close(); errClose != nil {
+		l.Warn("Failed to close temp file", "error", errClose)
+	}
+	return lParams, nil
+}
+
+// validateParams проверяет корректность исполняемого файла и параметров.
+func (r *Runner) validateParams() error {
+	if r.RunString == "" {
+		return errors.New("executable path is empty")
+	}
+	for _, param := range r.Params {
+		if strings.Contains(param, ";") || strings.Contains(param, "&") || strings.Contains(param, "|") {
+			return fmt.Errorf("potentially unsafe parameter detected: %s", param)
+		}
+	}
+	return nil
+}
+
+// readOutputFile читает файл вывода и сохраняет результат в r.FileOut.
+func (r *Runner) readOutputFile(l *slog.Logger) []byte {
+	if !exists(r.OutFileName) {
+		return nil
+	}
+	fileOutContent, errIn := os.ReadFile(r.OutFileName)
+	if errIn != nil {
+		l.Error("Runner",
+			slog.String("Ошибка при чтении файла", errIn.Error()),
+			slog.String("Файл", r.OutFileName),
+		)
+		return nil
+	}
+	r.FileOut = fileOutContent
+	return fileOutContent
+}
+
+// RunCommand выполняет команду и возвращает результат.
+func (r *Runner) RunCommand(ctx context.Context, l *slog.Logger) ([]byte, error) {
+	var lParams []string
+
+	if len(r.Params) > 0 && r.Params[0] == "@" {
+		var err error
+		lParams, err = r.prepareAtParams(l)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	l.Info("Параметры запуска",
 		slog.String("Исполняемый файл", r.RunString),
 		slog.String("WorkDir", r.WorkDir),
@@ -105,16 +144,8 @@ func (r *Runner) RunCommand(ctx context.Context, l *slog.Logger) ([]byte, error)
 		slog.String("Передаваемые параметры", fmt.Sprint(lParams)),
 	)
 
-	// Валидация исполняемого файла
-	if r.RunString == "" {
-		return nil, errors.New("executable path is empty")
-	}
-
-	// Валидация параметров
-	for _, param := range r.Params {
-		if strings.Contains(param, ";") || strings.Contains(param, "&") || strings.Contains(param, "|") {
-			return nil, fmt.Errorf("potentially unsafe parameter detected: %s", param)
-		}
+	if err := r.validateParams(); err != nil {
+		return nil, err
 	}
 
 	// #nosec G204 - parameters are validated above
@@ -122,26 +153,16 @@ func (r *Runner) RunCommand(ctx context.Context, l *slog.Logger) ([]byte, error)
 
 	if len(r.Params) > 0 && r.Params[0] == "@" {
 		cmd.Env = appendEnviron("DISPLAY=:99", "XAUTHORITY=/tmp/.Xauth99")
-		// l.Debug("Переменные окружения", slog.String("cmd.Env", fmt.Sprint(cmd.Env)))
 	}
 	cmd.Dir = r.WorkDir
+
+	var err error
 	r.ConsoleOut, err = cmd.Output()
-	if exists(r.OutFileName) {
-		fileOutContent, errIn = os.ReadFile(r.OutFileName)
-		if errIn != nil {
-			l.Error("Runner",
-				slog.String("Ошибка при чтении файла", errIn.Error()),
-				slog.String("Файл", r.OutFileName),
-			)
-		} else {
-			r.FileOut = fileOutContent
-		}
-	}
+
+	fileOutContent := r.readOutputFile(l)
 
 	if err != nil {
-		errText := TrimOut(r.ConsoleOut)
-		errText += "\n" + string(fileOutContent)
-
+		errText := TrimOut(r.ConsoleOut) + "\n" + string(fileOutContent)
 		l.Error("Runner",
 			slog.String("Ошибка при запуске", err.Error()),
 			slog.String("Исполняемый файл", r.RunString),
@@ -149,20 +170,11 @@ func (r *Runner) RunCommand(ctx context.Context, l *slog.Logger) ([]byte, error)
 			slog.String("Параметры", fmt.Sprint(r.Params)),
 			slog.String("Ошибка при запуске", errText),
 		)
-		// DEBUG
-		// os.Exit(111)
 	}
 	l.Debug("Runner",
 		slog.String("Вывод консоли", TrimOut(r.ConsoleOut)),
 	)
-	// err = cmd.Run()
-	// if err != nil && err.Error() != "exec: already started" {
-	// 	l.Error("Неопознанная ошибка",
-	// 		slog.String("Ошибка при запуске", err.Error()),
-	// 	)
-	// } else if err != nil && err.Error() == "exec: already started" {
-	// 	err = nil
-	// }
+
 	r.Params = []string{}
 	return r.FileOut, err
 }
@@ -170,23 +182,19 @@ func (r *Runner) RunCommand(ctx context.Context, l *slog.Logger) ([]byte, error)
 func appendEnviron(kv ...string) []string {
 	env := os.Environ()
 	for _, newVar := range kv {
-		found := false
 		eqIndex := strings.Index(newVar, "=")
 		if eqIndex == -1 {
-			continue // Пропускаем некорректные переменные окружения
+			continue
 		}
 		key := newVar[:eqIndex]
-
-		// Ищем существующую переменную
+		found := false
 		for i, v := range env {
 			if strings.HasPrefix(v, key+"=") {
-				env[i] = newVar // заменяем значение
+				env[i] = newVar
 				found = true
 				break
 			}
 		}
-
-		// Если не нашли - добавляем
 		if !found {
 			env = append(env, newVar)
 		}
@@ -199,14 +207,7 @@ func exists(path string) bool {
 	return !errors.Is(err, os.ErrNotExist)
 }
 
-// TrimOut обрезает вывод команды, удаляя лишние символы.
-// Ограничивает размер вывода до максимального значения,
-// показывая начало и конец при превышении лимита.
-// Параметры:
-//   - b: байтовый массив вывода для обработки
-//
-// Возвращает:
-//   - string: обработанная строка с ограниченным размером
+// TrimOut обрезает вывод команды.
 func TrimOut(b []byte) string {
 	if len(b) < maxConsoleOut {
 		return string(b)
@@ -215,23 +216,15 @@ func TrimOut(b []byte) string {
 }
 
 // DisplayConfig отображает конфигурацию дисплея и управляет Xvfb процессами.
-// Обрабатывает настройки виртуального дисплея, включая запуск Xvfb сервера
-// и управление файлами блокировки для корректной работы графических приложений.
 func DisplayConfig(l *slog.Logger) error {
-	// Остановка существующих процессов Xvfb
-	// l.Debug("Config", slog.String("action", "Остановка существующих процессов Xvfb"))
 	// #nosec G204 - all arguments are hardcoded constants
 	killCmd := exec.Command("pkill", "-f", "Xvfb")
-	_ = killCmd.Run() // Игнорируем ошибки
+	_ = killCmd.Run()
 
-	// Очистка lock файлов
-	// l.Debug("Config", slog.String("action", "Очистка lock файлов"))
 	// #nosec G204 - all arguments are hardcoded constants
 	removeCmd := exec.Command("rm", "-f", "/tmp/.X99-lock", "/tmp/.X*-lock")
-	_ = removeCmd.Run() // Игнорируем ошибки
+	_ = removeCmd.Run()
 
-	// Запуск виртуального дисплея
-	// l.Debug("Config", slog.String("action", "Запуск виртуального дисплея :99"))
 	// #nosec G204 - all arguments are hardcoded constants
 	startCmd := exec.Command("Xvfb", ":99", "-screen", "0", "1920x1080x24", "-ac", "+extension", "GLX", "+render", "-noreset")
 	startCmd.Stdout = nil
@@ -242,12 +235,8 @@ func DisplayConfig(l *slog.Logger) error {
 	}
 
 	xvfbPID := startCmd.Process.Pid
-	// l.Debug("Config", "Xvfb запущен", slog.Int("PID", xvfbPID))
-
-	// Ожидание запуска Xvfb
 	time.Sleep(3 * time.Second)
 
-	// Проверка запуска Xvfb
 	if xvfbPID <= 0 {
 		return fmt.Errorf("некорректный PID процесса Xvfb: %d", xvfbPID)
 	}
@@ -257,10 +246,7 @@ func DisplayConfig(l *slog.Logger) error {
 	if err := checkCmd.Run(); err != nil {
 		return fmt.Errorf("xvfb не запустился (PID: %d)", xvfbPID)
 	}
-	// l.Debug("Config", "✓ Xvfb успешно запущен", slog.Int("PID", xvfbPID))
 
-	// Установка переменных окружения
-	// l.Debug("Config", slog.String("action", "Установка переменных окружения"))
 	if err := os.Setenv("DISPLAY", ":99"); err != nil {
 		return fmt.Errorf("failed to set DISPLAY=:99: %w", err)
 	}
@@ -268,38 +254,29 @@ func DisplayConfig(l *slog.Logger) error {
 		return fmt.Errorf("failed to set XAUTHORITY: %w", err)
 	}
 
-	// Создание файла авторизации X11
-	// l.Debug("Config", slog.String("action", "Создание файла авторизации X11"))
 	// #nosec G204 - all arguments are hardcoded constants
 	touchCmd := exec.Command("touch", "/tmp/.Xauth99")
 	if err := touchCmd.Run(); err != nil {
 		l.Warn("failed to create Xauth file", slog.String("error", err.Error()))
 	}
 
-	// Генерация случайного ключа для xauth
 	// #nosec G204 - all arguments are hardcoded constants
 	randCmd := exec.Command("xxd", "-l", "16", "-p", "/dev/urandom")
 	randOutput, err := randCmd.Output()
 	if err == nil {
 		randKey := strings.TrimSpace(string(randOutput))
-		// Валидация сгенерированного ключа (должен быть hex строкой длиной 32)
 		if len(randKey) == 32 {
 			// #nosec G204 - randKey is validated (32 char hex string)
 			xauthCmd := exec.Command("xauth", "add", ":99", ".", randKey)
-			_ = xauthCmd.Run() // Игнорируем ошибки
+			_ = xauthCmd.Run()
 		}
 	}
 
-	// Проверка подключения к дисплею
-	// l.Debug("Config", slog.String("action", "Проверка подключения к дисплею"))
 	// #nosec G204 - all arguments are hardcoded constants
 	testCmd := exec.Command("xdpyinfo", "-display", ":99")
 	testCmd.Stdout = nil
 	testCmd.Stderr = nil
 	if err := testCmd.Run(); err != nil {
-		// l.Debug("Config", slog.String("action", "Не удается подключиться к дисплею :99, попытка исправления"))
-
-		// Альтернативный запуск с другими параметрами
 		// #nosec G204 - all arguments are hardcoded constants
 		killCmd2 := exec.Command("pkill", "-f", "Xvfb")
 		if err := killCmd2.Run(); err != nil {
@@ -332,11 +309,7 @@ func DisplayConfig(l *slog.Logger) error {
 }
 
 // maskPasswordInParam маскирует пароль после /P в строке параметров.
-// Обрабатывает паттерны вида: /S server /N user /P password
-// Возвращает строку с замаскированным паролем: /S server /N user /P *****
 func maskPasswordInParam(value string) string {
-	// Регулярное выражение для поиска /P с последующим значением
-	// Паттерн: пробел или начало строки, /P, пробел, непробельные символы
 	re := regexp.MustCompile(`(\s/P\s)(\S+)`)
 	return re.ReplaceAllString(value, "${1}*****")
 }

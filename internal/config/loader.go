@@ -1,6 +1,7 @@
 package config
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -107,33 +108,33 @@ func loadAllSubConfigs(l *slog.Logger, cfg *Config) {
 	var err error
 
 	// Загрузка конфигурации приложения
-	if cfg.AppConfig, err = loadAppConfig(l, cfg); err != nil {
+	if cfg.AppConfig, err = loadAppConfig(ctx, l, cfg); err != nil {
 		l.Warn("ошибка загрузки конфигурации приложения", slog.String("error", err.Error()))
 		cfg.AppConfig = getDefaultAppConfig()
 	}
 
 	// Загрузка конфигурации проекта
-	if cfg.ProjectConfig, err = loadProjectConfig(l, cfg); err != nil {
+	if cfg.ProjectConfig, err = loadProjectConfig(ctx, l, cfg); err != nil {
 		l.Warn("ошибка загрузки конфигурации проекта", slog.String("error", err.Error()))
 	}
 
 	// Загрузка секретов
-	if cfg.SecretConfig, err = loadSecretConfig(l, cfg); err != nil {
+	if cfg.SecretConfig, err = loadSecretConfig(ctx, l, cfg); err != nil {
 		l.Warn("ошибка загрузки секретов", slog.String("error", err.Error()))
 	}
 
 	// Загрузка конфигурации баз данных
-	if cfg.DbConfig, err = loadDbConfig(l, cfg); err != nil {
+	if cfg.DbConfig, err = loadDbConfig(ctx, l, cfg); err != nil {
 		l.Warn("ошибка загрузки конфигурации БД", slog.String("error", err.Error()))
 	}
 
 	// Загрузка конфигурации главного меню
-	if cfg.MenuMain, err = loadMenuMainConfig(l, cfg); err != nil {
+	if cfg.MenuMain, err = loadMenuMainConfig(ctx, l, cfg); err != nil {
 		l.Warn("ошибка загрузки конфигурации главного меню", slog.String("error", err.Error()))
 	}
 
 	// Загрузка конфигурации меню отладки
-	if cfg.MenuDebug, err = loadMenuDebugConfig(l, cfg); err != nil {
+	if cfg.MenuDebug, err = loadMenuDebugConfig(ctx, l, cfg); err != nil {
 		l.Warn("ошибка загрузки конфигурации меню отладки", slog.String("error", err.Error()))
 	}
 
@@ -255,7 +256,7 @@ func finalizeConfig(l *slog.Logger, cfg *Config) error {
 		)
 	}
 
-	if err := cfg.AnalyzeProject(l, constants.BaseBranch); err != nil {
+	if err := cfg.AnalyzeProject(ctx, l, constants.BaseBranch); err != nil {
 		l.Error("Ошибка анализа проекта",
 			slog.String("Описание ошибки", err.Error()),
 		)
@@ -365,9 +366,9 @@ func getRepo(repository string) string {
 	return ""
 }
 // loadAppConfig загружает конфигурацию приложения из app.yaml
-func loadAppConfig(l *slog.Logger, cfg *Config) (*AppConfig, error) {
+func loadAppConfig(ctx context.Context, l *slog.Logger, cfg *Config) (*AppConfig, error) {
 	giteaAPI := CreateGiteaAPI(cfg)
-	data, err := giteaAPI.GetConfigData(l, cfg.ConfigSystem)
+	data, err := giteaAPI.GetConfigData(ctx, l, cfg.ConfigSystem)
 	if err != nil {
 		return nil, fmt.Errorf("ошибка получения данных app.yaml: %w", err)
 	}
@@ -385,9 +386,9 @@ func loadAppConfig(l *slog.Logger, cfg *Config) (*AppConfig, error) {
 	return &appConfig, nil
 }
 // loadProjectConfig загружает конфигурацию проекта из project.yaml
-func loadProjectConfig(l *slog.Logger, cfg *Config) (*ProjectConfig, error) {
+func loadProjectConfig(ctx context.Context, l *slog.Logger, cfg *Config) (*ProjectConfig, error) {
 	giteaAPI := CreateGiteaAPI(cfg)
-	data, err := giteaAPI.GetConfigData(l, cfg.ConfigProject)
+	data, err := giteaAPI.GetConfigData(ctx, l, cfg.ConfigProject)
 	if err != nil {
 		return nil, fmt.Errorf("ошибка получения данных project.yaml: %w", err)
 	}
@@ -400,9 +401,9 @@ func loadProjectConfig(l *slog.Logger, cfg *Config) (*ProjectConfig, error) {
 	return &projectConfig, nil
 }
 // loadSecretConfig загружает секреты из secret.yaml
-func loadSecretConfig(l *slog.Logger, cfg *Config) (*SecretConfig, error) {
+func loadSecretConfig(ctx context.Context, l *slog.Logger, cfg *Config) (*SecretConfig, error) {
 	giteaAPI := CreateGiteaAPI(cfg)
-	data, err := giteaAPI.GetConfigData(l, cfg.ConfigSecret)
+	data, err := giteaAPI.GetConfigData(ctx, l, cfg.ConfigSecret)
 	if err != nil {
 		return nil, fmt.Errorf("ошибка получения данных secret.yaml: %w", err)
 	}
@@ -415,9 +416,9 @@ func loadSecretConfig(l *slog.Logger, cfg *Config) (*SecretConfig, error) {
 	return &secretConfig, nil
 }
 // loadDbConfig загружает конфигурацию баз данных из файла, указанного в cfg.ConfigDbData
-func loadDbConfig(l *slog.Logger, cfg *Config) (map[string]*DatabaseInfo, error) {
+func loadDbConfig(ctx context.Context, l *slog.Logger, cfg *Config) (map[string]*DatabaseInfo, error) {
 	giteaAPI := CreateGiteaAPI(cfg)
-	data, err := giteaAPI.GetConfigData(l, cfg.ConfigDbData)
+	data, err := giteaAPI.GetConfigData(ctx, l, cfg.ConfigDbData)
 	if err != nil {
 		return nil, fmt.Errorf("ошибка получения данных %s: %w", cfg.ConfigDbData, err)
 	}
@@ -430,13 +431,13 @@ func loadDbConfig(l *slog.Logger, cfg *Config) (map[string]*DatabaseInfo, error)
 	return dbConfig, nil
 }
 // loadMenuMainConfig загружает конфигурацию главного меню как массив строк
-func loadMenuMainConfig(l *slog.Logger, cfg *Config) ([]string, error) {
+func loadMenuMainConfig(ctx context.Context, l *slog.Logger, cfg *Config) ([]string, error) {
 	if cfg.ConfigMenuMain == "" {
 		return nil, nil
 	}
 
 	giteaAPI := CreateGiteaAPI(cfg)
-	data, err := giteaAPI.GetConfigData(l, cfg.ConfigMenuMain)
+	data, err := giteaAPI.GetConfigData(ctx, l, cfg.ConfigMenuMain)
 	if err != nil {
 		return nil, fmt.Errorf("ошибка получения данных menu-main: %w", err)
 	}
@@ -446,13 +447,13 @@ func loadMenuMainConfig(l *slog.Logger, cfg *Config) ([]string, error) {
 	return lines, nil
 }
 // loadMenuDebugConfig загружает конфигурацию меню отладки как массив строк
-func loadMenuDebugConfig(l *slog.Logger, cfg *Config) ([]string, error) {
+func loadMenuDebugConfig(ctx context.Context, l *slog.Logger, cfg *Config) ([]string, error) {
 	if cfg.ConfigMenuDebug == "" {
 		return nil, nil
 	}
 
 	giteaAPI := CreateGiteaAPI(cfg)
-	data, err := giteaAPI.GetConfigData(l, cfg.ConfigMenuDebug)
+	data, err := giteaAPI.GetConfigData(ctx, l, cfg.ConfigMenuDebug)
 	if err != nil {
 		return nil, fmt.Errorf("ошибка получения данных menu-debug: %w", err)
 	}
