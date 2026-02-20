@@ -85,3 +85,7 @@ plantuml.jar
 *.backup
 /bin/
 /build/
+
+# Removed directories
+old/
+_bmad/
