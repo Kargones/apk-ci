@@ -169,10 +169,10 @@ type executeContext struct {
 
 // validateAndSetup validates config and sets up the execution context.
 // Returns nil executeContext and an error to return if validation fails.
-func (h *ScanBranchHandler) validateAndSetup(cfg *config.Config) (*executeContext, error) {
+func (h *ScanBranchHandler) validateAndSetup(ctx context.Context, cfg *config.Config) (*executeContext, error) {
 	ec := &executeContext{start: time.Now()}
 
-	ec.traceID = tracing.TraceIDFromContext(context.Background())
+	ec.traceID = tracing.TraceIDFromContext(ctx)
 	if ec.traceID == "" {
 		ec.traceID = tracing.GenerateTraceID()
 	}
@@ -348,7 +348,7 @@ func (h *ScanBranchHandler) scanCommits(ctx context.Context, ec *executeContext,
 
 // Execute выполняет команду nr-sq-scan-branch.
 func (h *ScanBranchHandler) Execute(ctx context.Context, cfg *config.Config) error {
-	ec, err := h.validateAndSetup(cfg)
+	ec, err := h.validateAndSetup(ctx, cfg)
 	if err != nil {
 		return err
 	}

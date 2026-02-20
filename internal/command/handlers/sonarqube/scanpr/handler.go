@@ -184,9 +184,9 @@ type prExecContext struct {
 }
 
 // validatePRConfig validates configuration and PR parameters.
-func (h *ScanPRHandler) validatePRConfig(cfg *config.Config) (*prExecContext, error) {
+func (h *ScanPRHandler) validatePRConfig(ctx context.Context, cfg *config.Config) (*prExecContext, error) {
 	ec := &prExecContext{start: time.Now()}
-	ec.traceID = tracing.TraceIDFromContext(context.Background())
+	ec.traceID = tracing.TraceIDFromContext(ctx)
 	if ec.traceID == "" {
 		ec.traceID = tracing.GenerateTraceID()
 	}
@@ -303,7 +303,7 @@ func (h *ScanPRHandler) runPRScan(ctx context.Context, ec *prExecContext, sqClie
 
 // Execute выполняет команду nr-sq-scan-pr.
 func (h *ScanPRHandler) Execute(ctx context.Context, cfg *config.Config) error {
-	ec, err := h.validatePRConfig(cfg)
+	ec, err := h.validatePRConfig(ctx, cfg)
 	if err != nil {
 		return err
 	}
