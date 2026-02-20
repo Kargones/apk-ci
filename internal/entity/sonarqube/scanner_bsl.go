@@ -118,7 +118,7 @@ func (s *SonarScannerEntity) FindAndValidateBSLFiles() ([]string, []string, erro
 
 	err := filepath.Walk(s.workDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
-			return nil
+			return err
 		}
 
 		if !info.IsDir() && (strings.HasSuffix(strings.ToLower(path), ".bsl") || strings.HasSuffix(strings.ToLower(path), ".os")) {

@@ -132,7 +132,7 @@ func formatDuration(ms int64) string {
 		secFloat := float64(ms) / 1000
 		return fmt.Sprintf("%.1fс", secFloat)
 	}
-	min := sec / 60
+	mins := sec / 60
 	secRem := sec % 60
-	return fmt.Sprintf("%dм %dс", min, secRem)
+	return fmt.Sprintf("%dм %dс", mins, secRem)
 }

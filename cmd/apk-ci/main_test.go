@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"io/ioutil"
 	"log/slog"
 	"os"
 	"testing"
@@ -390,7 +389,7 @@ func loadYamlConfigAndSetEnv(yamlPath string) error {
 	}
 
 	// Читаем файл
-	data, err := ioutil.ReadFile(yamlPath)
+	data, err := os.ReadFile(yamlPath)
 	if err != nil {
 		return fmt.Errorf("failed to read YAML file: %w", err)
 	}

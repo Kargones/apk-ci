@@ -3,7 +3,6 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"testing"
 	"time"
@@ -44,7 +43,7 @@ func TestMain_WithRealYamlFile(t *testing.T) {
 	type testEnableConfig struct {
 		TestEnable bool `yaml:"test-enable"`
 	}
-	data, err := ioutil.ReadFile(yamlPath)
+	data, err := os.ReadFile(yamlPath)
 	if err != nil {
 		t.Fatalf("Failed to read YAML file: %v", err)
 	}
