@@ -22,7 +22,7 @@ inputs:
   configSystem:
     description: 'Имя файла с системной конфигурацией'
     required: false
-    default: 'https://regdv.apkholding.ru/api/v1/repos/gitops-tools/gitops_congif/contents/app.yaml?ref=main'
+    default: 'https://git.apkholding.ru/api/v1/repos/gitops-tools/gitops_congif/contents/app.yaml?ref=main'
   configProject:
     description: 'Имя файла с конфигурацией проекта'
     required: false
@@ -30,19 +30,19 @@ inputs:
   configSecret:
     description: 'Имя файла с секретами'
     required: false
-    default: 'https://regdv.apkholding.ru/api/v1/repos/gitops-tools/gitops_congif/contents/secret.yaml?ref=main'
+    default: 'https://git.apkholding.ru/api/v1/repos/gitops-tools/gitops_congif/contents/secret.yaml?ref=main'
   configDbData:
     description: 'Имя файла с конфигурацией базы данных'
     required: false
-    default: 'https://regdv.apkholding.ru/api/v1/repos/gitops-tools/gitops_congif/contents/dbconfig.yaml?ref=main'
+    default: 'https://git.apkholding.ru/api/v1/repos/gitops-tools/gitops_congif/contents/dbconfig.yaml?ref=main'
   menuMain:
     description: 'Имя файла с конфигурацией главного меню'
     required: false
-    default: 'https://regdv.apkholding.ru/api/v1/repos/gitops-tools/gitops_congif/contents/menu_main.yaml?ref=main'
+    default: 'https://git.apkholding.ru/api/v1/repos/gitops-tools/gitops_congif/contents/menu_main.yaml?ref=main'
   menuDebug:
     description: 'Имя файла с конфигурацией меню отладки'
     required: false
-    default: 'https://regdv.apkholding.ru/api/v1/repos/gitops-tools/gitops_congif/contents/menu_debug.yaml?ref=main'
+    default: 'https://git.apkholding.ru/api/v1/repos/gitops-tools/gitops_congif/contents/menu_debug.yaml?ref=main'
   actor:
     description: 'Пользователь, который запускает действие'
     required: true
@@ -70,7 +70,7 @@ inputs:
   startEpf:
     description: 'URL внешней обработки (.epf файла) для выполнения'
     required: false
-    default: 'https://regdv.apkholding.ru/api/v1/repos/gitops-tools/gitops_congif/contents/start.epf?ref=main'
+    default: 'https://git.apkholding.ru/api/v1/repos/gitops-tools/gitops_congif/contents/start.epf?ref=main'
   branchForScan:
     description: 'Ветка для сканирования в SonarQube'
     required: false
