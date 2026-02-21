@@ -5,6 +5,7 @@ package handlers
 
 import (
 	"github.com/Kargones/apk-ci/internal/command/handlers/converthandler"
+	"github.com/Kargones/apk-ci/internal/command/handlers/convertpipelinehandler"
 	"github.com/Kargones/apk-ci/internal/command/handlers/createstoreshandler"
 	"github.com/Kargones/apk-ci/internal/command/handlers/createtempdbhandler"
 	"github.com/Kargones/apk-ci/internal/command/handlers/dbrestorehandler"
@@ -35,6 +36,9 @@ import (
 // Returns an error if any handler registration fails.
 func RegisterAll() error {
 	if err := converthandler.RegisterCmd(); err != nil {
+		return err
+	}
+	if err := convertpipelinehandler.RegisterCmd(); err != nil {
 		return err
 	}
 	if err := createstoreshandler.RegisterCmd(); err != nil {

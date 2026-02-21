@@ -12,7 +12,7 @@ import (
 	"github.com/Kargones/apk-ci/internal/command/handlers"
 )
 
-// allNRCommands — полный список NR-команд и help (24 шт.: 23 NR + help).
+// allNRCommands — полный список NR-команд и help (25 шт.: 24 NR + help).
 // Каждый элемент: {константа из constants.go, ожидаемое строковое значение}.
 func init() {
 	if err := handlers.RegisterAll(); err != nil {
@@ -47,6 +47,7 @@ var allNRCommands = []struct {
 	{constants.ActNRMigrate, "nr-migrate"},
 	{constants.ActNRDeprecatedAudit, "nr-deprecated-audit"},
 	{constants.ActNRExtensionPublish, "nr-extension-publish"},
+	{constants.ActNRConvertPipeline, "nr-convert-pipeline"},
 	{constants.ActHelp, "help"},
 }
 
@@ -182,6 +183,7 @@ var noLegacyCommands = map[string]bool{
 	constants.ActNRMigrate:                 true,
 	constants.ActNRDeprecatedAudit:         true,
 	constants.ActHelp:                      true,
+	constants.ActNRConvertPipeline:         true,
 }
 
 // TestRegistry_AllNRCommandsHaveDeprecatedAlias проверяет что все NR-команды
@@ -236,7 +238,7 @@ func TestListAllWithAliases_MatchesDeprecatedAliases(t *testing.T) {
 }
 
 // TestSmoke_TotalCommandCount проверяет общее количество зарегистрированных команд.
-// 23 основных (22 NR + help) + 18 deprecated = 41.
+// 24 основных (23 NR + help) + 19 deprecated = 43.
 func TestSmoke_TotalCommandCount(t *testing.T) {
 	all := command.All()
 	names := command.Names()

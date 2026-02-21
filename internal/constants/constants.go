@@ -148,6 +148,9 @@ const (
 
 	// ActNRExtensionPublish - действие публикации расширения 1C (NR-команда)
 	ActNRExtensionPublish = "nr-extension-publish"
+
+	// ActNRConvertPipeline - действие пайплайна конвертации (NR-команда)
+	ActNRConvertPipeline = "nr-convert-pipeline"
 )
 
 // Константы переменных окружения
