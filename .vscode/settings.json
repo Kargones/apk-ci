@@ -21,5 +21,6 @@
         "connectionId": "http-sq-apkholding-ru-9000",
         "projectKey": "benadis-runner"
     },
-    "remote.autoForwardPortsFallback": 0
+    "remote.autoForwardPortsFallback": 0,
+    "git.scanRepositories": []
 }
