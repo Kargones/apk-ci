@@ -3,6 +3,7 @@ package convertpipelinehandler
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"os"
 	"testing"
 
@@ -11,11 +12,11 @@ import (
 	"github.com/Kargones/apk-ci/internal/constants"
 )
 
-// mockExecutor реализует StageExecutor для тестов.
+// mockExecutor для тестов.
 type mockExecutor struct {
-	calls    []string
-	failAt   string
-	failErr  error
+	calls   []string
+	failAt  string
+	failErr error
 }
 
 func (m *mockExecutor) ExecuteStage(_ context.Context, stageName string, _ *config.Config) error {
@@ -64,116 +65,164 @@ func TestParseSkipStages(t *testing.T) {
 	}
 }
 
-func TestStageToCommand(t *testing.T) {
+func TestStageToCode(t *testing.T) {
 	tests := []struct {
 		stage string
 		want  string
 	}{
-		{StageConvert, constants.ActNRConvert},
-		{StageGit2Store, constants.ActNRGit2store},
-		{StageExtensionPublish, constants.ActNRExtensionPublish},
-		{"unknown", "unknown"},
+		{StageConvert, "CONVERT"},
+		{StageGit2Store, "GIT2STORE"},
+		{StageExtensionPublish, "EXTENSION_PUBLISH"},
+		{"unknown", "UNKNOWN"},
 	}
 	for _, tc := range tests {
-		if got := stageToCommand(tc.stage); got != tc.want {
-			t.Errorf("stageToCommand(%q) = %q, want %q", tc.stage, got, tc.want)
+		if got := stageToCode(tc.stage); got != tc.want {
+			t.Errorf("stageToCode(%q) = %q, want %q", tc.stage, got, tc.want)
 		}
 	}
 }
 
-func TestExecuteAllStagesSuccess(t *testing.T) {
-	mock := &mockExecutor{}
-	h := &ConvertPipelineHandler{executor: mock}
+// --- Pipeline execution tests ---
 
-	cfg := &config.Config{
-		AddArray: []string{"ext1"},
-	}
-
-	// Убедимся что output не ломается
+func setupEnv(t *testing.T) {
+	t.Helper()
 	os.Setenv("BR_OUTPUT_FORMAT", "text")
-	defer os.Unsetenv("BR_OUTPUT_FORMAT")
 	os.Unsetenv("BR_PIPELINE_SKIP_STAGES")
-
-	err := h.Execute(context.Background(), cfg)
-	if err != nil {
-		t.Fatalf("expected no error, got: %v", err)
-	}
-
-	if len(mock.calls) != 3 {
-		t.Errorf("expected 3 stage calls, got %d: %v", len(mock.calls), mock.calls)
-	}
+	os.Unsetenv("BR_PIPELINE_TIMEOUT")
+	t.Cleanup(func() {
+		os.Unsetenv("BR_OUTPUT_FORMAT")
+		os.Unsetenv("BR_PIPELINE_SKIP_STAGES")
+		os.Unsetenv("BR_PIPELINE_TIMEOUT")
+	})
 }
 
-func TestExecuteSkipExtensionPublish(t *testing.T) {
+func TestExecuteAllStages(t *testing.T) {
+	setupEnv(t)
 	mock := &mockExecutor{}
 	h := &ConvertPipelineHandler{executor: mock}
 	cfg := &config.Config{AddArray: []string{"ext1"}}
 
-	os.Setenv("BR_OUTPUT_FORMAT", "text")
-	os.Setenv("BR_PIPELINE_SKIP_STAGES", "extension-publish")
-	defer os.Unsetenv("BR_OUTPUT_FORMAT")
-	defer os.Unsetenv("BR_PIPELINE_SKIP_STAGES")
-
 	err := h.Execute(context.Background(), cfg)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-
-	if len(mock.calls) != 2 {
-		t.Errorf("expected 2 calls (convert, git2store), got %d: %v", len(mock.calls), mock.calls)
+	if len(mock.calls) != 3 {
+		t.Errorf("expected 3 calls, got %d: %v", len(mock.calls), mock.calls)
+	}
+	// Порядок: convert → git2store → extension-publish
+	expected := []string{StageConvert, StageGit2Store, StageExtensionPublish}
+	for i, e := range expected {
+		if i < len(mock.calls) && mock.calls[i] != e {
+			t.Errorf("call[%d] = %q, want %q", i, mock.calls[i], e)
+		}
 	}
 }
 
-func TestExecuteNoExtensionsSkipsPublish(t *testing.T) {
+func TestExecuteSkipByEnv(t *testing.T) {
+	setupEnv(t)
+	os.Setenv("BR_PIPELINE_SKIP_STAGES", "extension-publish")
 	mock := &mockExecutor{}
 	h := &ConvertPipelineHandler{executor: mock}
-	cfg := &config.Config{AddArray: nil}
-
-	os.Setenv("BR_OUTPUT_FORMAT", "text")
-	defer os.Unsetenv("BR_OUTPUT_FORMAT")
-	os.Unsetenv("BR_PIPELINE_SKIP_STAGES")
+	cfg := &config.Config{AddArray: []string{"ext1"}}
 
 	err := h.Execute(context.Background(), cfg)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-
-	// Should only run convert + git2store
 	if len(mock.calls) != 2 {
 		t.Errorf("expected 2 calls, got %d: %v", len(mock.calls), mock.calls)
 	}
 }
 
-func TestExecuteStageFailure(t *testing.T) {
-	mock := &mockExecutor{
-		failAt:  StageGit2Store,
-		failErr: fmt.Errorf("git2store failed"),
+func TestExecuteNoExtensionsSkipsPublish(t *testing.T) {
+	setupEnv(t)
+	mock := &mockExecutor{}
+	h := &ConvertPipelineHandler{executor: mock}
+	cfg := &config.Config{AddArray: nil}
+
+	err := h.Execute(context.Background(), cfg)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
 	}
+	// extension-publish skipped by ShouldRun
+	if len(mock.calls) != 2 {
+		t.Errorf("expected 2 calls (convert+git2store), got %d: %v", len(mock.calls), mock.calls)
+	}
+}
+
+func TestExecuteStageFailStopsPipeline(t *testing.T) {
+	setupEnv(t)
+	mock := &mockExecutor{failAt: StageGit2Store, failErr: fmt.Errorf("store error")}
 	h := &ConvertPipelineHandler{executor: mock}
 	cfg := &config.Config{AddArray: []string{"ext1"}}
 
-	os.Setenv("BR_OUTPUT_FORMAT", "text")
-	defer os.Unsetenv("BR_OUTPUT_FORMAT")
-	os.Unsetenv("BR_PIPELINE_SKIP_STAGES")
-
 	err := h.Execute(context.Background(), cfg)
 	if err == nil {
-		t.Fatal("expected error from git2store stage")
+		t.Fatal("expected error")
+	}
+	// convert called + git2store called (failed), extension-publish NOT called
+	if len(mock.calls) != 2 {
+		t.Errorf("expected 2 calls, got %d: %v", len(mock.calls), mock.calls)
+	}
+}
+
+func TestPipelineContextPassthrough(t *testing.T) {
+	// Тест: AfterRun сохраняет данные из env в PipelineContext
+	pctx := &PipelineContext{Cfg: &config.Config{}}
+
+	// Подменяем getenv
+	origGetenv := getenv
+	defer func() { getenv = origGetenv }()
+	getenv = func(key string) string {
+		switch key {
+		case "BR_SOURCE":
+			return "/src"
+		case "BR_TARGET":
+			return "/out/xml"
+		case "BR_DIRECTION":
+			return "edt2xml"
+		}
+		return ""
 	}
 
-	// Only convert should have been called before failure
-	if len(mock.calls) != 2 {
-		t.Errorf("expected 2 calls (convert + git2store), got %d: %v", len(mock.calls), mock.calls)
+	stages := buildStages()
+	log := slog.Default()
+
+	// AfterRun convert сохраняет результат
+	stages[0].AfterRun(pctx, log)
+	if pctx.Convert == nil {
+		t.Fatal("Convert result should not be nil after AfterRun")
+	}
+	if pctx.Convert.TargetPath != "/out/xml" {
+		t.Errorf("expected /out/xml, got %s", pctx.Convert.TargetPath)
+	}
+	if pctx.Convert.Direction != "edt2xml" {
+		t.Errorf("expected edt2xml, got %s", pctx.Convert.Direction)
+	}
+
+	// BeforeRun git2store может прочитать результат convert
+	stages[1].BeforeRun(pctx, log) // не должен паниковать
+}
+
+func TestPipelineContextData(t *testing.T) {
+	// Проверяем buildContextData
+	pctx := &PipelineContext{}
+	if cd := buildContextData(pctx); cd != nil {
+		t.Error("empty context should return nil")
+	}
+
+	pctx.Convert = &ConvertStageResult{TargetPath: "/out"}
+	cd := buildContextData(pctx)
+	if cd == nil {
+		t.Fatal("expected non-nil context data")
+	}
+	if cd.Convert.TargetPath != "/out" {
+		t.Errorf("expected /out, got %s", cd.Convert.TargetPath)
 	}
 }
 
 func TestRegisterCmd(t *testing.T) {
-	// Clear registry for isolated test
-	command.Register(nil) // will fail, that's fine — we just need to verify RegisterCmd works
-	
-	// RegisterCmd should work (may fail if already registered in this test process)
 	_ = RegisterCmd()
-	
 	h, ok := command.Get(constants.ActNRConvertPipeline)
 	if !ok {
 		t.Fatal("handler not found after RegisterCmd")

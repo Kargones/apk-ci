@@ -1,6 +1,3 @@
-// Package convertpipelinehandler реализует NR-команду nr-convert-pipeline,
-// объединяющую nr-convert → nr-git2store → nr-extension-publish
-// в единый пайплайн с автоматической передачей параметров между этапами.
 package convertpipelinehandler
 
 import (
@@ -37,53 +34,42 @@ const (
 // defaultPipelineTimeout — таймаут для всего пайплайна (3 часа).
 const defaultPipelineTimeout = 3 * time.Hour
 
-// allStages содержит все этапы пайплайна в порядке выполнения.
-var allStages = []string{
-	StageConvert,
-	StageGit2Store,
-	StageExtensionPublish,
-}
-
-// StageResult — результат выполнения одного этапа пайплайна.
-type StageResult struct {
-	Name       string `json:"name"`
-	Success    bool   `json:"success"`
-	DurationMs int64  `json:"duration_ms"`
-	Skipped    bool   `json:"skipped,omitempty"`
-	Error      string `json:"error,omitempty"`
-}
-
-// PipelineData содержит данные ответа пайплайна.
+// PipelineData — результат всего пайплайна для JSON/text вывода.
 type PipelineData struct {
-	StateChanged    bool          `json:"state_changed"`
-	StagesCompleted []StageResult `json:"stages_completed"`
-	StageCurrent    string        `json:"stage_current"`
-	DurationMs      int64         `json:"duration_ms"`
-	// Параметры, переданные между этапами
-	ConvertTargetPath string `json:"convert_target_path,omitempty"`
+	StateChanged bool                  `json:"state_changed"`
+	Stages       []StageOutcome        `json:"stages"`
+	Context      *PipelineContextData  `json:"context,omitempty"`
+	DurationMs   int64                 `json:"duration_ms"`
 }
 
-// writeText выводит результат в человекочитаемом формате.
+// PipelineContextData — сериализуемое представление PipelineContext.
+// Содержит результаты каждого этапа, доступные для диагностики.
+type PipelineContextData struct {
+	Convert    *ConvertStageResult    `json:"convert,omitempty"`
+	Git2Store  *Git2StoreStageResult  `json:"git2store,omitempty"`
+	ExtPublish *ExtPublishStageResult `json:"extension_publish,omitempty"`
+}
+
+// writeText выводит результат пайплайна в человекочитаемом формате.
 func (d *PipelineData) writeText(w io.Writer) error {
 	status := "успешно"
 	if !d.StateChanged {
-		status = "без изменений"
+		status = "ошибка"
 	}
-	if _, err := fmt.Fprintf(w, "Pipeline: %s\n\n", status); err != nil {
+	if _, err := fmt.Fprintf(w, "Pipeline: %s\n\nЭтапы:\n", status); err != nil {
 		return err
 	}
-	if _, err := fmt.Fprintf(w, "Этапы:\n"); err != nil {
-		return err
-	}
-	for _, s := range d.StagesCompleted {
+	for _, s := range d.Stages {
 		icon := "✓"
-		if !s.Success && !s.Skipped {
-			icon = "✗"
-		}
 		if s.Skipped {
 			icon = "⊘"
+		} else if !s.Success {
+			icon = "✗"
 		}
 		line := fmt.Sprintf("  %s %s (%d мс)", icon, s.Name, s.DurationMs)
+		if s.SkipReason != "" {
+			line += fmt.Sprintf(" [%s]", s.SkipReason)
+		}
 		if s.Error != "" {
 			line += fmt.Sprintf(" — %s", s.Error)
 		}
@@ -91,6 +77,34 @@ func (d *PipelineData) writeText(w io.Writer) error {
 			return err
 		}
 	}
+
+	// Вывод переданных данных между этапами
+	if d.Context != nil {
+		if _, err := fmt.Fprintf(w, "\nДанные между этапами:\n"); err != nil {
+			return err
+		}
+		if c := d.Context.Convert; c != nil {
+			if _, err := fmt.Fprintf(w, "  convert.target_path: %s\n", c.TargetPath); err != nil {
+				return err
+			}
+			if _, err := fmt.Fprintf(w, "  convert.direction:   %s\n", c.Direction); err != nil {
+				return err
+			}
+		}
+		if g := d.Context.Git2Store; g != nil {
+			if g.BackupPath != "" {
+				if _, err := fmt.Fprintf(w, "  git2store.backup:    %s\n", g.BackupPath); err != nil {
+					return err
+				}
+			}
+		}
+		if e := d.Context.ExtPublish; e != nil {
+			if _, err := fmt.Fprintf(w, "  extensions:          %v\n", e.ExtensionsPublished); err != nil {
+				return err
+			}
+		}
+	}
+
 	if _, err := fmt.Fprintf(w, "\nОбщее время: %d мс\n", d.DurationMs); err != nil {
 		return err
 	}
@@ -117,19 +131,17 @@ func (h *ConvertPipelineHandler) Description() string {
 	return "Pipeline: конвертация EDT→XML → Git→хранилище → публикация расширений"
 }
 
-// Execute выполняет пайплайн nr-convert → nr-git2store → nr-extension-publish.
+// Execute выполняет пайплайн из атомарных этапов с передачей результатов.
 //
-// Передача параметров между этапами:
-//   - convert: BR_TARGET → устанавливается как BR_SOURCE для git2store (через env)
-//   - git2store: использует config.Config (Owner, Repo, AddArray)
-//   - extension-publish: запускается если cfg.AddArray не пустой
+// Каждый этап:
+//  1. Проверяет условие запуска (ShouldRun)
+//  2. Получает данные от предыдущих этапов через PipelineContext (BeforeRun)
+//  3. Выполняет NR-команду атомарно
+//  4. Сохраняет результат в PipelineContext (AfterRun)
 //
 // Переменные окружения:
-//   - BR_PIPELINE_SKIP_STAGES: через запятую список этапов для пропуска
-//     (например, "extension-publish" если публикация не нужна)
+//   - BR_PIPELINE_SKIP_STAGES: этапы для пропуска (через запятую)
 //   - BR_PIPELINE_TIMEOUT: таймаут всего пайплайна (default: 3h)
-//   - Все переменные nr-convert (BR_SOURCE, BR_TARGET, BR_DIRECTION)
-//   - Все переменные nr-git2store (BR_INFOBASE_NAME, ...)
 func (h *ConvertPipelineHandler) Execute(ctx context.Context, cfg *config.Config) error {
 	start := time.Now()
 
@@ -138,9 +150,8 @@ func (h *ConvertPipelineHandler) Execute(ctx context.Context, cfg *config.Config
 		traceID = tracing.GenerateTraceID()
 	}
 
-	format := os.Getenv("BR_OUTPUT_FORMAT")
+	format := getenv("BR_OUTPUT_FORMAT")
 
-	// Plan-only mode
 	if !dryrun.IsDryRun() && dryrun.IsPlanOnly() {
 		return dryrun.WritePlanOnlyUnsupported(os.Stdout, constants.ActNRConvertPipeline)
 	}
@@ -152,167 +163,90 @@ func (h *ConvertPipelineHandler) Execute(ctx context.Context, cfg *config.Config
 
 	// Таймаут пайплайна
 	timeout := defaultPipelineTimeout
-	if envTimeout := os.Getenv("BR_PIPELINE_TIMEOUT"); envTimeout != "" {
+	if envTimeout := getenv("BR_PIPELINE_TIMEOUT"); envTimeout != "" {
 		if parsed, err := time.ParseDuration(envTimeout); err == nil {
 			timeout = parsed
 		} else {
 			log.Warn("Невалидный BR_PIPELINE_TIMEOUT, используется default",
-				slog.String("value", envTimeout),
-				slog.String("default", defaultPipelineTimeout.String()))
+				slog.String("value", envTimeout))
 		}
 	}
 
 	pipelineCtx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	// Определяем пропускаемые этапы
-	skipStages := parseSkipStages(os.Getenv("BR_PIPELINE_SKIP_STAGES"))
+	// Skip-список
+	skipStages := parseSkipStages(getenv("BR_PIPELINE_SKIP_STAGES"))
+
+	// Pipeline context — аккумулятор данных между этапами
+	pctx := &PipelineContext{Cfg: cfg}
 
 	data := &PipelineData{
-		StagesCompleted: make([]StageResult, 0, len(allStages)),
+		Stages: make([]StageOutcome, 0, 3),
 	}
 
 	log.Info("Запуск pipeline",
 		slog.Duration("timeout", timeout),
 		slog.Any("skip_stages", skipStages))
 
-	// === Stage 1: nr-convert ===
-	if !skipStages[StageConvert] {
-		if err := h.runStage(pipelineCtx, log, cfg, data, StageConvert, format, traceID, start); err != nil {
-			return err
-		}
-		// Передача параметров: BR_TARGET от convert → используется далее
-		// git2store уже читает свои параметры из config/env, но мы фиксируем
-		// что конвертация прошла и XML готов
-		convertTarget := os.Getenv("BR_TARGET")
-		if convertTarget != "" {
-			data.ConvertTargetPath = convertTarget
-			log.Info("Convert output path сохранён для следующих этапов",
-				slog.String("path", convertTarget))
-		}
-	} else {
-		data.StagesCompleted = append(data.StagesCompleted, StageResult{
-			Name: StageConvert, Skipped: true, Success: true,
-		})
-		log.Info("Этап пропущен", slog.String("stage", StageConvert))
-	}
-
-	// === Stage 2: nr-git2store ===
-	if !skipStages[StageGit2Store] {
-		if err := h.runStage(pipelineCtx, log, cfg, data, StageGit2Store, format, traceID, start); err != nil {
-			return err
-		}
-	} else {
-		data.StagesCompleted = append(data.StagesCompleted, StageResult{
-			Name: StageGit2Store, Skipped: true, Success: true,
-		})
-		log.Info("Этап пропущен", slog.String("stage", StageGit2Store))
-	}
-
-	// === Stage 3: nr-extension-publish (только если есть расширения) ===
-	if !skipStages[StageExtensionPublish] {
-		if cfg != nil && len(cfg.AddArray) > 0 {
-			if err := h.runStage(pipelineCtx, log, cfg, data, StageExtensionPublish, format, traceID, start); err != nil {
-				return err
+	// Выполняем этапы последовательно
+	stages := buildStages()
+	for _, stage := range stages {
+		// Проверка skip
+		if skipStages[stage.Name] {
+			outcome := StageOutcome{
+				Name:       stage.Name,
+				Skipped:    true,
+				Success:    true,
+				SkipReason: "пропущен через BR_PIPELINE_SKIP_STAGES",
 			}
-		} else {
-			data.StagesCompleted = append(data.StagesCompleted, StageResult{
-				Name: StageExtensionPublish, Skipped: true, Success: true,
-			})
-			log.Info("extension-publish пропущен: нет расширений в AddArray")
+			data.Stages = append(data.Stages, outcome)
+			log.Info("Этап пропущен (skip list)", slog.String("stage", stage.Name))
+			continue
 		}
-	} else {
-		data.StagesCompleted = append(data.StagesCompleted, StageResult{
-			Name: StageExtensionPublish, Skipped: true, Success: true,
-		})
-		log.Info("Этап пропущен", slog.String("stage", StageExtensionPublish))
+
+		outcome, err := executeStage(pipelineCtx, stage, pctx, log, h.executor)
+		data.Stages = append(data.Stages, outcome)
+
+		if err != nil {
+			// Этап провалился — останавливаем пайплайн
+			data.Context = buildContextData(pctx)
+			return h.writeError(format, traceID, start, data,
+				fmt.Sprintf("PIPELINE.%s_FAILED", stageToCode(stage.Name)),
+				fmt.Sprintf("Этап %s: %s", stage.Name, err.Error()))
+		}
 	}
 
-	// Результат
+	// Успех
 	data.DurationMs = time.Since(start).Milliseconds()
 	data.StateChanged = true
-	data.StageCurrent = "completed"
+	data.Context = buildContextData(pctx)
 
 	log.Info("Pipeline завершён успешно",
-		slog.Int("stages", len(data.StagesCompleted)),
+		slog.Int("stages_total", len(data.Stages)),
 		slog.Int64("duration_ms", data.DurationMs))
 
 	return h.writeSuccess(format, traceID, data)
 }
 
-// runStage выполняет один этап пайплайна через command registry.
-func (h *ConvertPipelineHandler) runStage(
-	ctx context.Context, log *slog.Logger, cfg *config.Config,
-	data *PipelineData, stageName, format, traceID string, pipelineStart time.Time,
-) error {
-	stageStart := time.Now()
-	data.StageCurrent = stageName
-
-	log.Info("Начало этапа", slog.String("stage", stageName))
-
-	// Маппинг stage → command name
-	cmdName := stageToCommand(stageName)
-
-	var execErr error
-	if h.executor != nil {
-		execErr = h.executor.ExecuteStage(ctx, stageName, cfg)
-	} else {
-		handler, ok := command.Get(cmdName)
-		if !ok {
-			execErr = fmt.Errorf("команда %s не зарегистрирована", cmdName)
-		} else {
-			execErr = handler.Execute(ctx, cfg)
-		}
+// buildContextData конвертирует PipelineContext в сериализуемую форму.
+func buildContextData(pctx *PipelineContext) *PipelineContextData {
+	if pctx == nil {
+		return nil
 	}
-
-	durationMs := time.Since(stageStart).Milliseconds()
-
-	if execErr != nil {
-		log.Error("Этап завершился с ошибкой",
-			slog.String("stage", stageName),
-			slog.Int64("duration_ms", durationMs),
-			slog.String("error", execErr.Error()))
-
-		data.StagesCompleted = append(data.StagesCompleted, StageResult{
-			Name:       stageName,
-			Success:    false,
-			DurationMs: durationMs,
-			Error:      execErr.Error(),
-		})
-
-		return h.writeError(format, traceID, pipelineStart, data,
-			fmt.Sprintf("PIPELINE.STAGE_%s_FAILED", stageToCode(stageName)),
-			fmt.Sprintf("Этап %s завершился с ошибкой: %s", stageName, execErr.Error()))
+	cd := &PipelineContextData{
+		Convert:    pctx.Convert,
+		Git2Store:  pctx.Git2Store,
+		ExtPublish: pctx.ExtPublish,
 	}
-
-	log.Info("Этап завершён успешно",
-		slog.String("stage", stageName),
-		slog.Int64("duration_ms", durationMs))
-
-	data.StagesCompleted = append(data.StagesCompleted, StageResult{
-		Name:       stageName,
-		Success:    true,
-		DurationMs: durationMs,
-	})
-
-	return nil
+	// Не выводим пустой контекст
+	if cd.Convert == nil && cd.Git2Store == nil && cd.ExtPublish == nil {
+		return nil
+	}
+	return cd
 }
 
-// stageToCommand возвращает имя команды для этапа пайплайна.
-func stageToCommand(stage string) string {
-	switch stage {
-	case StageConvert:
-		return constants.ActNRConvert
-	case StageGit2Store:
-		return constants.ActNRGit2store
-	case StageExtensionPublish:
-		return constants.ActNRExtensionPublish
-	default:
-		return stage
-	}
-}
-
-// stageToCode возвращает код ошибки для этапа (UPPER_SNAKE_CASE).
+// stageToCode возвращает код ошибки этапа (UPPER_SNAKE_CASE).
 func stageToCode(stage string) string {
 	switch stage {
 	case StageConvert:
@@ -326,29 +260,18 @@ func stageToCode(stage string) string {
 	}
 }
 
-// parseSkipStages парсит BR_PIPELINE_SKIP_STAGES (через запятую) в map.
+// parseSkipStages парсит BR_PIPELINE_SKIP_STAGES в map.
 func parseSkipStages(env string) map[string]bool {
 	result := make(map[string]bool)
 	if env == "" {
 		return result
 	}
-	for _, s := range splitAndTrim(env) {
-		if s != "" {
-			result[s] = true
-		}
-	}
-	return result
-}
-
-// splitAndTrim разделяет строку по запятым и обрезает пробелы.
-func splitAndTrim(s string) []string {
-	var result []string
 	start := 0
-	for i := 0; i <= len(s); i++ {
-		if i == len(s) || s[i] == ',' {
-			part := trimSpace(s[start:i])
-			if part != "" {
-				result = append(result, part)
+	for i := 0; i <= len(env); i++ {
+		if i == len(env) || env[i] == ',' {
+			s := trimSpace(env[start:i])
+			if s != "" {
+				result[s] = true
 			}
 			start = i + 1
 		}
@@ -356,7 +279,7 @@ func splitAndTrim(s string) []string {
 	return result
 }
 
-// trimSpace убирает пробелы с начала и конца строки (без strings import).
+// trimSpace убирает пробелы с начала и конца строки.
 func trimSpace(s string) string {
 	start := 0
 	for start < len(s) && (s[start] == ' ' || s[start] == '\t') {
@@ -374,7 +297,6 @@ func (h *ConvertPipelineHandler) writeSuccess(format, traceID string, data *Pipe
 	if format != output.FormatJSON {
 		return data.writeText(os.Stdout)
 	}
-
 	result := &output.Result{
 		Status:  output.StatusSuccess,
 		Command: constants.ActNRConvertPipeline,
@@ -385,9 +307,7 @@ func (h *ConvertPipelineHandler) writeSuccess(format, traceID string, data *Pipe
 			APIVersion: constants.APIVersion,
 		},
 	}
-
-	writer := output.NewWriter(format)
-	return writer.Write(os.Stdout, result)
+	return output.NewWriter(format).Write(os.Stdout, result)
 }
 
 // writeError выводит ошибку пайплайна с информацией о пройденных этапах.
@@ -395,11 +315,7 @@ func (h *ConvertPipelineHandler) writeError(format, traceID string, start time.T
 	data.DurationMs = time.Since(start).Milliseconds()
 
 	if format != output.FormatJSON {
-		// Текстовый вывод: показываем пройденные этапы + ошибку
-		if writeErr := data.writeText(os.Stdout); writeErr != nil {
-			slog.Default().Error("Не удалось вывести текстовый результат",
-				slog.String("error", writeErr.Error()))
-		}
+		_ = data.writeText(os.Stdout) //nolint:errcheck
 		return fmt.Errorf("%s: %s", code, message)
 	}
 
@@ -418,11 +334,9 @@ func (h *ConvertPipelineHandler) writeError(format, traceID string, start time.T
 		},
 	}
 
-	writer := output.NewWriter(format)
-	if writeErr := writer.Write(os.Stdout, result); writeErr != nil {
+	if writeErr := output.NewWriter(format).Write(os.Stdout, result); writeErr != nil {
 		slog.Default().Error("Не удалось записать JSON-ответ",
 			slog.String("error", writeErr.Error()))
 	}
-
 	return fmt.Errorf("%s: %s", code, message)
 }
