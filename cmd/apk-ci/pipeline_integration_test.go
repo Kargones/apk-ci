@@ -5,8 +5,8 @@
 //
 //   uses: gitops-tools/apk-ci-bin@v0.0.4
 //   with:
-//     command: "nr-convert-pipeline" / "nr-convert" / "nr-git2store" / "nr-extension-publish"
-//     giteaURL / repository / accessToken / logLevel / actor
+//     giteaURL / repository / accessToken / command / logLevel / actor
+//     + default inputs from action.yaml (configSystem, configProject, etc.)
 //
 // Запуск:
 //   GITEA_TOKEN=... go test -tags=integration ./cmd/apk-ci/ \
@@ -60,24 +60,58 @@ func skipWithoutToken(t *testing.T) string {
 	return token
 }
 
-func baseEnv(token string) map[string]string {
+// actionEnv возвращает полный набор INPUT_* переменных,
+// эквивалентный тому что Gitea Actions устанавливает из action.yaml with: + defaults.
+//
+// Соответствие с action.yaml defaults:
+//   configSystem  → https://git.apkholding.ru/api/v1/repos/gitops-tools/gitops_congif/contents/app.yaml?ref=main
+//   configProject → project.yaml (из текущего репозитория)
+//   configSecret  → https://git.apkholding.ru/api/v1/repos/gitops-tools/gitops_congif/contents/secret.yaml?ref=main
+//   configDbData  → https://git.apkholding.ru/api/v1/repos/gitops-tools/gitops_congif/contents/dbconfig.yaml?ref=main
+//   menuMain      → https://git.apkholding.ru/api/v1/repos/gitops-tools/gitops_congif/contents/menu_main.yaml?ref=main
+//   menuDebug     → https://git.apkholding.ru/api/v1/repos/gitops-tools/gitops_congif/contents/menu_debug.yaml?ref=main
+//   startEpf      → https://git.apkholding.ru/api/v1/repos/gitops-tools/gitops_congif/contents/start.epf?ref=main
+func actionEnv(token, cmd string) map[string]string {
+	giteaURL := envOr("GITEA_URL", "https://git.apkholding.ru")
+	repo := envOr("GITEA_REPO", "test/TOIR3")
+	actor := envOr("GITEA_ACTOR", "xor")
+	ref := envOr("GITEA_REF_NAME", "v18")
+
+	configBase := giteaURL + "/api/v1/repos/gitops-tools/gitops_congif/contents"
+
 	return map[string]string{
-		"INPUT_GITEAURL":    envOr("GITEA_URL", "https://git.apkholding.ru"),
-		"INPUT_REPOSITORY":  envOr("GITEA_REPO", "test/TOIR3"),
+		// Обязательные параметры из workflow with:
+		"INPUT_GITEAURL":    giteaURL,
+		"INPUT_REPOSITORY":  repo,
 		"INPUT_ACCESSTOKEN": token,
+		"INPUT_COMMAND":     cmd,
 		"INPUT_LOGLEVEL":    "Debug",
-		"INPUT_ACTOR":       envOr("GITEA_ACTOR", "xor"),
-		"GITHUB_REF_NAME":   envOr("GITEA_REF_NAME", "v18"),
+		"INPUT_ACTOR":       actor,
+
+		// Defaults из action.yaml — конфигурационные файлы
+		"INPUT_CONFIGSYSTEM":  configBase + "/app.yaml?ref=main",
+		"INPUT_CONFIGPROJECT": "project.yaml",
+		"INPUT_CONFIGSECRET":  configBase + "/secret.yaml?ref=main",
+		"INPUT_CONFIGDBDATA":  configBase + "/dbconfig.yaml?ref=main",
+		"INPUT_MENUMAIN":      configBase + "/menu_main.yaml?ref=main",
+		"INPUT_MENUDEBUG":     configBase + "/menu_debug.yaml?ref=main",
+		"INPUT_STARTEPF":      configBase + "/start.epf?ref=main",
+
+		// Defaults из action.yaml — прочие
+		"INPUT_TERMINATESESSIONS": "true",
+		"INPUT_FORCE_UPDATE":      "false",
+
+		// GitHub/Gitea контекст
+		"GITHUB_REF_NAME":   ref,
+		"GITHUB_SERVER_URL": giteaURL,
 		"BR_OUTPUT_FORMAT":  "text",
 	}
 }
 
-// TestIntegration_Pipeline_ConfigLoad — быстрый smoke: загрузка конфига из Gitea.
+// TestIntegration_Pipeline_ConfigLoad — загрузка конфига из Gitea с полным набором INPUT_*.
 func TestIntegration_Pipeline_ConfigLoad(t *testing.T) {
 	token := skipWithoutToken(t)
-	env := baseEnv(token)
-	env["INPUT_COMMAND"] = constants.ActNRConvertPipeline
-	setTestEnv(t, env)
+	setTestEnv(t, actionEnv(token, constants.ActNRConvertPipeline))
 
 	if err := handlers.RegisterAll(); err != nil {
 		t.Logf("RegisterAll: %v", err)
@@ -88,6 +122,7 @@ func TestIntegration_Pipeline_ConfigLoad(t *testing.T) {
 		t.Fatalf("config.MustLoad: %v", err)
 	}
 
+	// Проверяем базовые поля
 	if cfg.Owner == "" {
 		t.Error("Owner пустой")
 	}
@@ -101,20 +136,49 @@ func TestIntegration_Pipeline_ConfigLoad(t *testing.T) {
 	t.Logf("✓ Owner=%s Repo=%s Project=%s Extensions=%v",
 		cfg.Owner, cfg.Repo, cfg.ProjectName, cfg.AddArray)
 
-	if cfg.AppConfig != nil {
-		t.Logf("  Bin1cv8=%s EdtCli=%s", cfg.AppConfig.Paths.Bin1cv8, cfg.AppConfig.Paths.EdtCli)
+	// Проверяем что AppConfig загружен из gitops_congif/app.yaml
+	if cfg.AppConfig == nil {
+		t.Error("AppConfig nil — app.yaml не загружен из gitops_congif")
+	} else {
+		t.Logf("  AppConfig: Bin1cv8=%s EdtCli=%s", cfg.AppConfig.Paths.Bin1cv8, cfg.AppConfig.Paths.EdtCli)
 	}
-	if cfg.ProjectConfig != nil {
-		t.Logf("  StoreDb=%s", cfg.ProjectConfig.StoreDb)
+
+	// Проверяем ProjectConfig (из project.yaml текущего репозитория)
+	if cfg.ProjectConfig == nil {
+		t.Error("ProjectConfig nil — project.yaml не загружен")
+	} else {
+		t.Logf("  ProjectConfig: StoreDb=%s Debug=%v", cfg.ProjectConfig.StoreDb, cfg.ProjectConfig.Debug)
+	}
+
+	// Проверяем SecretConfig
+	if cfg.SecretConfig == nil {
+		t.Log("  SecretConfig nil (может быть ожидаемо без доступа к gitops_congif)")
+	} else {
+		t.Log("  SecretConfig: загружен")
+	}
+
+	// Проверяем DbConfig
+	if cfg.DbConfig == nil {
+		t.Log("  DbConfig nil")
+	} else {
+		t.Logf("  DbConfig: %d баз", len(cfg.DbConfig))
+	}
+
+	// Проверяем AnalyzeProject
+	if cfg.ProjectName == "" {
+		t.Error("ProjectName пустой — AnalyzeProject не отработал")
+	}
+	if len(cfg.AddArray) > 0 {
+		t.Logf("  → extension-publish будет выполнен (расширения: %v)", cfg.AddArray)
+	} else {
+		t.Log("  → extension-publish будет пропущен (нет расширений)")
 	}
 }
 
 // TestIntegration_Pipeline_FullRun — полный запуск nr-convert-pipeline.
 func TestIntegration_Pipeline_FullRun(t *testing.T) {
 	token := skipWithoutToken(t)
-	env := baseEnv(token)
-	env["INPUT_COMMAND"] = constants.ActNRConvertPipeline
-	setTestEnv(t, env)
+	setTestEnv(t, actionEnv(token, constants.ActNRConvertPipeline))
 
 	if err := handlers.RegisterAll(); err != nil {
 		t.Logf("RegisterAll: %v", err)
@@ -126,6 +190,9 @@ func TestIntegration_Pipeline_FullRun(t *testing.T) {
 	}
 	slog.SetDefault(cfg.Logger)
 
+	t.Logf("Config: Owner=%s Repo=%s Project=%s Ext=%v AppConfig=%v",
+		cfg.Owner, cfg.Repo, cfg.ProjectName, cfg.AddArray, cfg.AppConfig != nil)
+
 	handler, ok := command.Get(constants.ActNRConvertPipeline)
 	if !ok {
 		t.Fatalf("Команда %s не зарегистрирована", constants.ActNRConvertPipeline)
@@ -136,7 +203,7 @@ func TestIntegration_Pipeline_FullRun(t *testing.T) {
 	t.Logf("Duration: %v", time.Since(start))
 
 	if execErr != nil {
-		t.Logf("Pipeline error (ожидаемо без 1C): %v", execErr)
+		t.Logf("Pipeline error (ожидаемо без 1C на dev-container): %v", execErr)
 	} else {
 		t.Log("✓ Pipeline completed successfully")
 	}
@@ -162,9 +229,7 @@ func TestIntegration_Pipeline_StagesIndividually(t *testing.T) {
 
 	for _, step := range steps {
 		t.Run(step.name, func(t *testing.T) {
-			env := baseEnv(token)
-			env["INPUT_COMMAND"] = step.command
-			setTestEnv(t, env)
+			setTestEnv(t, actionEnv(token, step.command))
 
 			cfg, err := config.MustLoad(context.Background())
 			if err != nil {
@@ -172,8 +237,8 @@ func TestIntegration_Pipeline_StagesIndividually(t *testing.T) {
 			}
 			slog.SetDefault(cfg.Logger)
 
-			t.Logf("[%s] Owner=%s Repo=%s Project=%s",
-				step.command, cfg.Owner, cfg.Repo, cfg.ProjectName)
+			t.Logf("[%s] Owner=%s Repo=%s Project=%s AppConfig=%v",
+				step.command, cfg.Owner, cfg.Repo, cfg.ProjectName, cfg.AppConfig != nil)
 
 			handler, ok := command.Get(step.command)
 			if !ok {
