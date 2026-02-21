@@ -83,16 +83,16 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - name: 'Run benadis-runner'
+    - name: 'Run apk-ci'
       run: |
         if [ "${{ inputs.debug_port }}" != "0" ]; then
           if [ "${{ inputs.wait }}" = "false" ]; then
-            dlv --listen=:${{ inputs.debug_port }} --headless=true --api-version=2 --accept-multiclient --continue exec ${{ github.action_path }}/benadis-runner
+            dlv --listen=:${{ inputs.debug_port }} --headless=true --api-version=2 --accept-multiclient --continue exec ${{ github.action_path }}/apk-ci
           else
-            dlv --listen=:${{ inputs.debug_port }} --headless=true --api-version=2 --accept-multiclient exec ${{ github.action_path }}/benadis-runner
+            dlv --listen=:${{ inputs.debug_port }} --headless=true --api-version=2 --accept-multiclient exec ${{ github.action_path }}/apk-ci
           fi
         else
-          ${{ github.action_path }}/benadis-runner
+          ${{ github.action_path }}/apk-ci
         fi
       shell: bash
       env:
