@@ -14,7 +14,9 @@
       "Bash(chown:*)",
       "Bash(chmod:*)",
       "Bash(go build:*)",
-      "Bash(su - xor -c \"ls -la /root/r/ && touch /root/r/test_write && rm /root/r/test_write && echo ''Запись работает!''\")"
+      "Bash(su - xor -c \"ls -la /root/r/ && touch /root/r/test_write && rm /root/r/test_write && echo ''Запись работает!''\")",
+      "Bash(echo task не установлен:*)",
+      "Bash(task:*)"
     ],
     "deny": [],
     "ask": []
