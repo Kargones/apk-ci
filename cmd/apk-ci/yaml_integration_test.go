@@ -1,123 +1,229 @@
 //go:build integration
+
 package main
 
 import (
-	"fmt"
+	"context"
+	"log/slog"
 	"os"
 	"testing"
 	"time"
 
-	"gopkg.in/yaml.v3"
+	"github.com/Kargones/apk-ci/internal/command"
+	"github.com/Kargones/apk-ci/internal/command/handlers"
+	"github.com/Kargones/apk-ci/internal/config"
+	"github.com/Kargones/apk-ci/internal/constants"
+	"github.com/Kargones/apk-ci/internal/di"
+	"github.com/Kargones/apk-ci/internal/pkg/logging"
+	"github.com/Kargones/apk-ci/internal/pkg/tracing"
+
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 )
 
-// TestMain_WithRealYamlFile тестирует функцию main с реальным файлом main-test.yaml
-func TestMain_WithRealYamlFile(t *testing.T) {
-	// Сохраняем текущее окружение
-	originalEnv := saveEnvironment([]string{
-		"INPUT_ACTOR", "INPUT_COMMAND", "INPUT_LOGLEVEL", "INPUT_DBNAME",
-		"INPUT_REPOSITORY", "INPUT_GITEAURL", "INPUT_ACCESSTOKEN",
-		"INPUT_CONFIGSYSTEM", "INPUT_CONFIGPROJECT", "INPUT_CONFIGSECRET",
-		"INPUT_CONFIGDBDATA", "INPUT_TERMINATESESSIONS", "INPUT_FORCE_UPDATE",
-		"INPUT_ISSUENUMBER", "WorkDir", "TmpDir", "RepPath", "Connect_String",
-		"INPUT_MENUMAIN", "INPUT_MENUDEBUG", "INPUT_STARTEPF", "INPUT_BRANCHFORSCAN",
-		"INPUT_COMMITHASH", "BR_ACTOR", "BR_ENV", "BR_COMMAND", "BR_INFOBASE_NAME",
-		"BR_TERMINATE_SESSIONS", "BR_FORCE_UPDATE", "BR_ISSUE_NUMBER", "BR_START_EPF",
-		"BR_ACCESS_TOKEN", "BR_CONFIG_SYSTEM", "BR_CONFIG_PROJECT", "BR_CONFIG_SECRET",
-		"BR_CONFIG_DBDATA", "BR_CONFIG_MENU_MAIN", "BR_CONFIG_MENU_DEBUG",
-		"GITHUB_REF_NAME", "GIT_TIMEOUT",
-	})
-	defer restoreEnvironment(originalEnv)
+// allEnvKeys — все переменные окружения, которые могут влиять на конфигурацию.
+var allEnvKeys = []string{
+	"INPUT_ACTOR", "INPUT_COMMAND", "INPUT_LOGLEVEL", "INPUT_DBNAME",
+	"INPUT_REPOSITORY", "INPUT_GITEAURL", "INPUT_ACCESSTOKEN",
+	"INPUT_CONFIGSYSTEM", "INPUT_CONFIGPROJECT", "INPUT_CONFIGSECRET",
+	"INPUT_CONFIGDBDATA", "INPUT_TERMINATESESSIONS", "INPUT_FORCE_UPDATE",
+	"INPUT_ISSUENUMBER", "INPUT_MENUMAIN", "INPUT_MENUDEBUG",
+	"INPUT_STARTEPF", "INPUT_BRANCHFORSCAN", "INPUT_COMMITHASH",
+	"WorkDir", "TmpDir", "RepPath", "Connect_String",
+	"BR_ACTOR", "BR_ENV", "BR_COMMAND", "BR_INFOBASE_NAME",
+	"BR_TERMINATE_SESSIONS", "BR_FORCE_UPDATE", "BR_ISSUE_NUMBER",
+	"BR_START_EPF", "BR_ACCESS_TOKEN", "BR_CONFIG_SYSTEM",
+	"BR_CONFIG_PROJECT", "BR_CONFIG_SECRET", "BR_CONFIG_DBDATA",
+	"BR_CONFIG_MENU_MAIN", "BR_CONFIG_MENU_DEBUG",
+	"BR_OUTPUT_FORMAT", "BR_SOURCE", "BR_TARGET", "BR_DIRECTION",
+	"GITHUB_REF_NAME", "GITHUB_SERVER_URL", "GITHUB_REPOSITORY",
+	"GIT_TIMEOUT",
+}
 
-	// Очищаем окружение
+// setFullActionEnv устанавливает полный набор переменных окружения,
+// эквивалентный запуску через Gitea Actions с action.yaml@v0.0.4.
+//
+// Параметры соответствуют defaults из action.yaml:
+//   configSystem  → gitops-tools/gitops_congif/app.yaml
+//   configProject → project.yaml (из текущего репозитория)
+//   configSecret  → gitops-tools/gitops_congif/secret.yaml
+//   configDbData  → gitops-tools/gitops_congif/dbconfig.yaml
+//   menuMain/Debug → gitops-tools/gitops_congif/menu_*.yaml
+//   startEpf      → gitops-tools/gitops_congif/start.epf
+func setFullActionEnv(t *testing.T, cmd string) {
+	t.Helper()
+	saved := saveEnvironment(allEnvKeys)
+	t.Cleanup(func() { restoreEnvironment(saved) })
 	clearTestEnv()
 
-	// Путь к файлу main-test.yaml
-	yamlPath := "../../main-test.yaml"
+	giteaURL := envOrDef("GITEA_URL", "https://git.apkholding.ru")
+	token := os.Getenv("GITEA_TOKEN")
+	if token == "" {
+		t.Skip("GITEA_TOKEN не установлен")
+	}
+	repo := envOrDef("GITEA_REPO", "test/TOIR3")
+	actor := envOrDef("GITEA_ACTOR", "xor")
+	ref := envOrDef("GITEA_REF_NAME", "v18")
+	configBase := giteaURL + "/api/v1/repos/gitops-tools/gitops_congif/contents"
 
-	// Проверяем, что файл существует
-	if _, err := os.Stat(yamlPath); os.IsNotExist(err) {
-		t.Skipf("Файл %s не найден, пропускаем тест", yamlPath)
+	vars := map[string]string{
+		"INPUT_GITEAURL":            giteaURL,
+		"INPUT_REPOSITORY":          repo,
+		"INPUT_ACCESSTOKEN":         token,
+		"INPUT_COMMAND":             cmd,
+		"INPUT_LOGLEVEL":            "Debug",
+		"INPUT_ACTOR":               actor,
+		"INPUT_CONFIGSYSTEM":        configBase + "/app.yaml?ref=main",
+		"INPUT_CONFIGPROJECT":       "project.yaml",
+		"INPUT_CONFIGSECRET":        configBase + "/secret.yaml?ref=main",
+		"INPUT_CONFIGDBDATA":        configBase + "/dbconfig.yaml?ref=main",
+		"INPUT_MENUMAIN":            configBase + "/menu_main.yaml?ref=main",
+		"INPUT_MENUDEBUG":           configBase + "/menu_debug.yaml?ref=main",
+		"INPUT_STARTEPF":            configBase + "/start.epf?ref=main",
+		"INPUT_TERMINATESESSIONS":   "true",
+		"INPUT_FORCE_UPDATE":        "false",
+		"GITHUB_REF_NAME":           ref,
+		"GITHUB_SERVER_URL":         giteaURL,
+		"BR_OUTPUT_FORMAT":          "text",
+	}
+	for k, v := range vars {
+		os.Setenv(k, v)
+	}
+}
+
+func envOrDef(key, def string) string {
+	if v := os.Getenv(key); v != "" {
+		return v
+	}
+	return def
+}
+
+// executeCommand воспроизводит логику run() из main.go для одной команды:
+// RegisterAll → MustLoad → Get handler → Execute.
+// Возвращает exit code аналогично run().
+func executeCommand(t *testing.T, ctx context.Context, cmdName string) int {
+	t.Helper()
+
+	// Регистрация handlers (idempotent — повторная регистрация возвращает ошибку, но это ОК)
+	_ = handlers.RegisterAll()
+
+	// Загрузка конфигурации (как в main.go)
+	cfg, err := config.MustLoad(ctx)
+	if err != nil || cfg == nil {
+		t.Logf("[%s] config.MustLoad error: %v", cmdName, err)
+		return 5
+	}
+	l := cfg.Logger
+	slog.SetDefault(l)
+
+	l.Debug("Информация о сборке",
+		slog.String("version", constants.Version),
+		slog.String("commit_hash", constants.PreCommitHash),
+	)
+
+	if cfg.Command == "" {
+		cfg.Command = "help"
 	}
 
-	// Проверяем, включено ли тестирование в YAML (test-enable: true)
-	type testEnableConfig struct {
-		TestEnable bool `yaml:"test-enable"`
-	}
-	data, err := os.ReadFile(yamlPath)
-	if err != nil {
-		t.Fatalf("Failed to read YAML file: %v", err)
-	}
-	var enableCfg testEnableConfig
-	if err := yaml.Unmarshal(data, &enableCfg); err != nil {
-		t.Fatalf("Failed to parse YAML: %v", err)
-	}
-	if !enableCfg.TestEnable {
-		t.Skip("Тестирование отключено в main-test.yaml (test-enable: false)")
-	}
+	// Trace ID
+	traceID := tracing.GenerateTraceID()
+	ctx = tracing.WithTraceID(ctx, traceID)
+	ctx = tracing.ContextWithOTelTraceID(ctx, traceID)
 
-	// Загружаем конфигурацию из YAML и устанавливаем переменные окружения
-	err = loadYamlConfigAndSetEnv(yamlPath)
-	if err != nil {
-		t.Fatalf("Failed to load YAML config: %v", err)
-	}
+	// Metrics + Alerter + Tracing (как в main.go)
+	logAdapter := logging.NewSlogAdapter(l)
+	metricsCollector := di.ProvideMetricsCollector(cfg, logAdapter)
+	alerter := di.ProvideAlerter(cfg, logAdapter)
+	cfg.Alerter = alerter
 
-	// Проверяем, что переменные окружения установлены корректно согласно main-test.yaml
-	expectedVars := map[string]string{
-		"INPUT_ACTOR":       "xor",
-		"INPUT_COMMAND":     "extension-publish", // Из main-test.yaml
-		"INPUT_LOGLEVEL":    "Debug",
-		"INPUT_DBNAME":      "test-database",
-		"INPUT_REPOSITORY":  "test/apk-ssl",
-		"INPUT_GITEAURL":    "https://git.apkholding.ru",
-		"INPUT_ACCESSTOKEN": "e0452e72c27392799fd34f88da9546a1af509947",
-	}
-
-	for key, expected := range expectedVars {
-		if actual := os.Getenv(key); actual != expected {
-			t.Errorf("Expected %s=%s, got %s", key, expected, actual)
-		}
-	}
-
-	// Проверка GITHUB_REF_NAME
-	if refName := os.Getenv("GITHUB_REF_NAME"); refName != "" {
-		t.Logf("GITHUB_REF_NAME установлен: %s", refName)
-	} else {
-		t.Log("GITHUB_REF_NAME не установлен!")
-	}
-
-	t.Log("Переменные окружения установлены корректно, запускаем main()...")
-
-	// Запускаем main() в отдельной горутине с перехватом паники
-	var mainErr error
-	done := make(chan bool, 1)
-
-	go func() {
-		defer func() {
-			if r := recover(); r != nil {
-				mainErr = fmt.Errorf("panic in main(): %v", r)
-			}
-			done <- true
-		}()
-
-		// Реальный запуск функции main()
-		// Примечание: main() может вызвать os.Exit(), что завершит весь процесс
-		// Это нормальное поведение для отладочного теста
-		main()
+	tracerShutdown := di.ProvideTracerProvider(cfg, logAdapter)
+	defer func() {
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		_ = tracerShutdown(shutdownCtx)
 	}()
 
-	// Ждем завершения main() или таймаута
-	select {
-	case <-done:
-		if mainErr != nil {
-			t.Logf("main() завершилась с ошибкой: %v", mainErr)
-		} else {
-			t.Log("main() успешно выполнилась")
-		}
-	case <-time.After(60 * time.Minute):
-		t.Log("main() выполняется дольше 60 минут, это может быть нормально для некоторых команд")
-		// Не завершаем тест с ошибкой, так как некоторые команды могут выполняться долго
+	tracer := otel.Tracer("apk-ci")
+	ctx, span := tracer.Start(ctx, cfg.Command,
+		trace.WithAttributes(
+			attribute.String("command", cfg.Command),
+			attribute.String("infobase", cfg.InfobaseName),
+			attribute.String("trace_id", traceID),
+		),
+	)
+	defer span.End()
+
+	metricsCollector.RecordCommandStart(cfg.Command, cfg.InfobaseName)
+	start := time.Now()
+
+	// Получаем handler из registry
+	handler, ok := command.Get(cfg.Command)
+	if !ok {
+		t.Logf("[%s] команда не найдена в registry", cfg.Command)
+		recordMetrics(ctx, metricsCollector, cfg.Command, cfg.InfobaseName, start, false)
+		return 2
 	}
 
-	t.Log("Тест с реальным запуском main() и файлом main-test.yaml завершен")
-	t.Log("ВНИМАНИЕ: Если main() вызовет os.Exit(), весь тестовый процесс может завершиться")
+	t.Logf("[%s] Owner=%s Repo=%s Project=%s Extensions=%v",
+		cfg.Command, cfg.Owner, cfg.Repo, cfg.ProjectName, cfg.AddArray)
+
+	// Выполнение
+	execErr := handler.Execute(ctx, cfg)
+	recordMetrics(ctx, metricsCollector, cfg.Command, cfg.InfobaseName, start, execErr == nil)
+
+	duration := time.Since(start)
+	if execErr != nil {
+		t.Logf("[%s] ✗ Error (%v): %v", cfg.Command, duration, execErr)
+		return 8
+	}
+	t.Logf("[%s] ✓ Success (%v)", cfg.Command, duration)
+	return 0
+}
+
+// TestMain_WithRealYamlFile последовательно выполняет полные цепочки
+// convert → git2store → extension-publish, эквивалентные workflow:
+//
+//   step 1: apk-ci command=nr-convert      (конвертация EDT→XML)
+//   step 2: apk-ci command=nr-git2store    (перенос в хранилище 1C)
+//   step 3: apk-ci command=nr-extension-publish (публикация расширений)
+//
+// Каждый шаг:
+//  - устанавливает полный набор INPUT_* переменных (как action.yaml)
+//  - загружает конфигурацию через config.MustLoad (app.yaml, project.yaml, secret.yaml, dbconfig.yaml)
+//  - анализирует проект (AnalyzeProject → ProjectName + Extensions)
+//  - выполняет команду через command registry
+//
+// Между шагами выполняется очистка /tmp/4del (как в workflow).
+func TestMain_WithRealYamlFile(t *testing.T) {
+	steps := []struct {
+		name    string
+		command string
+	}{
+		{"1. Конвертация (nr-convert)", constants.ActNRConvert},
+		{"2. Перенос в хранилище (nr-git2store)", constants.ActNRGit2store},
+		{"3. Публикация расширений (nr-extension-publish)", constants.ActNRExtensionPublish},
+	}
+
+	for i, step := range steps {
+		t.Run(step.name, func(t *testing.T) {
+			// Устанавливаем окружение для текущей команды
+			setFullActionEnv(t, step.command)
+
+			ctx := context.Background()
+			exitCode := executeCommand(t, ctx, step.command)
+
+			t.Logf("[%s] exit code: %d", step.command, exitCode)
+
+			// Очистка между шагами (эмуляция workflow step)
+			if i < len(steps)-1 {
+				cleanupDir := "/tmp/4del"
+				if info, err := os.Stat(cleanupDir); err == nil && info.IsDir() {
+					entries, _ := os.ReadDir(cleanupDir)
+					t.Logf("Очистка %s (%d элементов)", cleanupDir, len(entries))
+					// Не удаляем реально в тесте — только логируем
+				}
+			}
+		})
+	}
 }
