@@ -343,8 +343,9 @@ func getSlog(actor string, logLevel string) *slog.Logger {
 		Level:     programLevel,
 		ReplaceAttr: func(_ []string, a slog.Attr) slog.Attr {
 			if a.Key == slog.SourceKey {
-				s := a.Value.Any().(*slog.Source)
-				s.File = path.Base(s.File)
+				if s, ok := a.Value.Any().(*slog.Source); ok {
+					s.File = path.Base(s.File)
+				}
 			}
 			return a
 		},

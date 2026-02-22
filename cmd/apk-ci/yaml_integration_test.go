@@ -83,6 +83,7 @@ func setFullActionEnv(t *testing.T, cmd string) {
 		"INPUT_STARTEPF":            configBase + "/start.epf?ref=main",
 		"INPUT_TERMINATESESSIONS":   "true",
 		"INPUT_FORCE_UPDATE":        "false",
+		"INPUT_DBNAME":              envOrDef("BR_INFOBASE_NAME", ""),
 		"GITHUB_REF_NAME":           ref,
 		"GITHUB_SERVER_URL":         giteaURL,
 		"BR_OUTPUT_FORMAT":          "text",
@@ -214,6 +215,10 @@ func TestMain_WithRealYamlFile(t *testing.T) {
 			exitCode := executeCommand(t, ctx, step.command)
 
 			t.Logf("[%s] exit code: %d", step.command, exitCode)
+
+			if exitCode != 0 {
+				t.Fatalf("[%s] завершился с кодом %d — прерываем цепочку", step.command, exitCode)
+			}
 
 			// Очистка между шагами (эмуляция workflow step)
 			if i < len(steps)-1 {
